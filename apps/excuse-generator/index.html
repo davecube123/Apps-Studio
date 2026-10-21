@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Excuse Generator</title>
+  <style>
+    :root { --bg: #fff4d6; --fg: #2b2118; --accent: #ff5e5b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem;
+           font-family: Georgia, serif; background: var(--bg); color: var(--fg); }
+    main { max-width: 640px; text-align: center; }
+    h1 { font-family: system-ui, sans-serif; font-size: 1rem; letter-spacing: .2em;
+         text-transform: uppercase; opacity: .6; }
+    #excuse { font-size: clamp(1.4rem, 4vw, 2.2rem); line-height: 1.35; min-height: 6em;
+              display: flex; align-items: center; justify-content: center; }
+    button { font: 600 1rem system-ui, sans-serif; padding: .8rem 1.6rem; border: 0;
+             border-radius: 999px; background: var(--accent); color: #fff; cursor: pointer;
+             margin: .25rem; }
+    button.secondary { background: transparent; color: var(--fg); border: 2px solid var(--fg); }
+    button:active { transform: scale(.96); }
+    a { color: inherit; font-family: system-ui, sans-serif; font-size: .85rem; }
+    #believability { font-family: system-ui, sans-serif; font-size: .85rem; opacity: .7; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Excuse Generator</h1>
+    <div id="excuse">Press the button. Accept no responsibility.</div>
+    <p id="believability"></p>
+    <button id="go">Give me an excuse</button>
+    <button id="copy" class="secondary">Copy</button>
+    <p><a href="../../">← back to the studio</a></p>
+  </main>
+  <script>
+    const openers = [
+      "I'm so sorry, but", "Unfortunately,", "You won't believe this, but",
+      "In my defense,", "Long story short,", "As my lawyer advised me to say,",
+    ];
+    const culprits = [
+      "my neighbor's parrot", "a rogue Roomba", "Mercury, which is in retrograde again,",
+      "a very persuasive pigeon", "my smart fridge", "a time traveler (probably me)",
+      "the group chat", "a raccoon with a vendetta", "my horoscope",
+      "an unexpected software update", "my cat, acting on behalf of a larger organization,",
+    ];
+    const actions = [
+      "hid my keys inside", "filed a formal complaint about", "accidentally subscribed me to",
+      "replaced everything I own with", "challenged me to a duel over", "ate",
+      "emotionally manipulated me into reorganizing", "livestreamed",
+    ];
+    const objects = [
+      "a loaf of sourdough", "my entire calendar", "a decorative gourd",
+      "the Wi-Fi router", "three left shoes", "a strongly worded letter",
+      "my only pair of socks", "a haunted spreadsheet", "the concept of Tuesday",
+    ];
+    const endings = [
+      "so I had to deal with that first.", "and I've been in negotiations ever since.",
+      "and honestly I'm still processing it.", "which, legally, I can't discuss further.",
+      "so it's really nobody's fault. Except theirs.", "and that's all I'm prepared to say.",
+    ];
+
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const excuseEl = document.getElementById("excuse");
+    const ratingEl = document.getElementById("believability");
+
+    function generate() {
+      excuseEl.textContent =
+        `${pick(openers)} ${pick(culprits)} ${pick(actions)} ${pick(objects)}, ${pick(endings)}`;
+      const score = Math.floor(Math.random() * 101);
+      ratingEl.textContent = `Believability: ${score}% ${score > 80 ? "🔥" : score < 20 ? "💀" : "🤷"}`;
+    }
+
+    document.getElementById("go").addEventListener("click", generate);
+    document.getElementById("copy").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(excuseEl.textContent); } catch {}
+    });
+  </script>
+</body>
+</html>
