@@ -45,3 +45,4 @@ python3 -m http.server 8000
 | App | What it does |
 | --- | --- |
 | [Excuse Generator](apps/excuse-generator/) | Produces a fresh, highly specific excuse for whatever you didn't do. |
+| [Tao Reader](apps/tao-reader/) | Load an EPUB (built for *The Tao of Leadership*) and read it chapter by chapter, draw random verses, switch to French, and listen. |

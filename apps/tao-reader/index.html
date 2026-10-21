@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tao Reader</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f3ea; --surface: #fffdf8; --fg: #2a2620; --muted: #7a7266;
+      --line: #e4dccd; --accent: #8a5a2b; --accent-fg: #fff; --hl: #f3e2c2;
+      --shadow: 0 10px 40px rgba(60, 40, 10, .15);
+      --font-size: 20px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="sepia"]) {
+        --bg: #15140f; --surface: #1e1c17; --fg: #e9e3d6; --muted: #9b9384;
+        --line: #343028; --accent: #d9a46a; --accent-fg: #1a1408; --hl: #3a3020;
+        --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #15140f; --surface: #1e1c17; --fg: #e9e3d6; --muted: #9b9384;
+      --line: #343028; --accent: #d9a46a; --accent-fg: #1a1408; --hl: #3a3020;
+      --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+    }
+    :root[data-theme="sepia"] {
+      --bg: #efe2c6; --surface: #f6ebd3; --fg: #3b2f1e; --muted: #806a4c;
+      --line: #dcc9a3; --accent: #7a4b1e; --hl: #e6cf9f;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    .hidden { display: none !important; }
+
+    /* ---------- Welcome / loader ---------- */
+    #welcome { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; }
+    .welcome-card { max-width: 480px; text-align: center; }
+    .welcome-card h1 { font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; font-size: 2.4rem; margin: .2em 0; }
+    .welcome-card p { color: var(--muted); line-height: 1.5; }
+    .yin { font-size: 3rem; }
+    #drop {
+      margin: 24px 0; padding: 32px 16px; border: 2px dashed var(--line); border-radius: 16px;
+      background: var(--surface); transition: border-color .15s, transform .15s;
+    }
+    #drop.over { border-color: var(--accent); transform: scale(1.02); }
+    .btn {
+      border: 0; border-radius: 999px; padding: 10px 20px; background: var(--accent); color: var(--accent-fg);
+      font-weight: 600;
+    }
+    .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+    .small { font-size: .82rem; color: var(--muted); }
+    a { color: var(--accent); }
+
+    /* ---------- Reader shell ---------- */
+    #reader { display: flex; flex-direction: column; height: 100%; }
+    header {
+      display: flex; align-items: center; gap: 4px; padding: 8px 12px;
+      padding-top: max(8px, env(safe-area-inset-top));
+      border-bottom: 1px solid var(--line); background: var(--bg); position: relative; z-index: 2;
+    }
+    .icon-btn {
+      background: transparent; border: 0; border-radius: 10px; width: 40px; height: 40px;
+      display: inline-grid; place-items: center; font-size: 1.15rem; flex: none;
+    }
+    .icon-btn:hover { background: var(--line); }
+    .icon-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+    .book-title { flex: 1; min-width: 0; font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: none; }
+    .seg button { border: 0; background: transparent; padding: 6px 10px; font-size: .78rem; font-weight: 600; }
+    .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+    #progress { height: 3px; background: var(--line); }
+    #progress div { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+
+    #scroller { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    article { max-width: 680px; margin: 0 auto; padding: 40px 16px 80px; }
+    .chap-num { font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); text-align: center; }
+    article h2 {
+      font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; text-align: center;
+      font-size: calc(var(--font-size) * 1.6); margin: .3em 0 1.2em; line-height: 1.2;
+    }
+    article h2 .fr { display: block; font-size: .6em; color: var(--muted); font-style: italic; margin-top: .3em; }
+    .para {
+      font-family: Georgia, "Iowan Old Style", serif; font-size: var(--font-size); line-height: 1.65;
+      margin: 0 0 1em; padding: 4px 8px; margin-left: -8px; margin-right: -8px; border-radius: 8px;
+      transition: background .2s;
+    }
+    .para.speaking { background: var(--hl); }
+    .para .fr { display: block; color: var(--muted); font-style: italic; margin-top: .35em; }
+    .mode-fr .para .en, .mode-fr h2 .en { display: none; }
+    .mode-fr .para .fr, .mode-fr h2 .fr { color: var(--fg); font-style: normal; margin-top: 0; font-size: 1em; }
+    .mode-fr h2 .fr { font-size: 1em; }
+    .mode-en .fr { display: none; }
+    .fr.pending { opacity: .5; }
+
+    footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line); background: var(--bg);
+    }
+    .nav-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 10px 16px; font-weight: 600; min-width: 96px; }
+    .nav-btn:disabled { opacity: .35; cursor: default; }
+    #counter { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    /* ---------- Audio bar ---------- */
+    #audiobar {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line);
+      background: var(--surface); font-size: .85rem;
+    }
+    #audiobar .grow { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #audiobar select { max-width: 90px; }
+
+    /* ---------- Drawer + modals ---------- */
+    .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 10; animation: fade .15s; }
+    @keyframes fade { from { opacity: 0; } }
+    #drawer {
+      position: fixed; top: 0; bottom: 0; left: 0; width: min(340px, 88vw); background: var(--surface);
+      z-index: 11; display: flex; flex-direction: column; box-shadow: var(--shadow); animation: slide .2s;
+    }
+    @keyframes slide { from { transform: translateX(-100%); } }
+    #drawer .top { padding: 16px; border-bottom: 1px solid var(--line); }
+    #drawer input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); font: inherit; }
+    #toc { list-style: none; margin: 0; padding: 8px; overflow-y: auto; flex: 1; }
+    #toc button { width: 100%; text-align: left; background: transparent; border: 0; padding: 10px 12px; border-radius: 10px; display: flex; gap: 10px; }
+    #toc button:hover { background: var(--bg); }
+    #toc button.current { background: var(--hl); }
+    #toc .n { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+
+    .modal {
+      position: fixed; z-index: 11; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto;
+      background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 28px 24px; animation: pop .18s;
+    }
+    @keyframes pop { from { transform: translate(-50%, -46%); opacity: 0; } }
+    .modal h3 { margin: 0 0 16px; font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); text-align: center; }
+    blockquote.verse {
+      margin: 0; font-family: Georgia, serif; font-size: 1.3rem; line-height: 1.55; text-align: center;
+    }
+    blockquote.verse .fr { display: block; margin-top: .8em; color: var(--muted); font-style: italic; font-size: .9em; }
+    .verse-src { text-align: center; color: var(--muted); margin: 16px 0 20px; font-size: .9rem; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .settings label { display: block; margin: 14px 0 6px; font-size: .85rem; font-weight: 600; }
+    .settings select, .settings input[type="email"] { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; }
+    .settings input[type="range"] { width: 100%; }
+    #toast {
+      position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 20;
+      background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: .85rem;
+      max-width: calc(100vw - 32px); text-align: center; transition: opacity .2s; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Welcome -->
+<section id="welcome" class="hidden">
+  <div class="welcome-card">
+    <div class="yin">☯</div>
+    <h1>Tao Reader</h1>
+    <p>A calm, chapter-by-chapter reader with random verses, French translation and read-aloud.</p>
+    <div id="drop">
+      <p style="margin-top:0">Drop your <strong>.epub</strong> here</p>
+      <button class="btn" id="pick">Choose a book</button>
+      <input type="file" id="file" accept=".epub,application/epub+zip" hidden>
+    </div>
+    <p class="small">The book never leaves your device. It's parsed in your browser and remembered locally so you only load it once.</p>
+    <p class="small"><a href="../../">← back to the studio</a></p>
+  </div>
+</section>
+
+<!-- Reader -->
+<section id="reader" class="hidden">
+  <header>
+    <button class="icon-btn" id="btn-toc" title="Chapters (C)" aria-label="Chapters">☰</button>
+    <div class="book-title" id="book-title"></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button data-mode="en" aria-pressed="true">EN</button>
+      <button data-mode="both" aria-pressed="false">EN+FR</button>
+      <button data-mode="fr" aria-pressed="false">FR</button>
+    </div>
+    <button class="icon-btn" id="btn-random" title="Random verse (R)" aria-label="Random verse">🎲</button>
+    <button class="icon-btn" id="btn-audio" title="Read aloud (Space)" aria-label="Read aloud" aria-pressed="false">🔊</button>
+    <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">Aa</button>
+  </header>
+  <div id="progress"><div></div></div>
+  <div id="scroller"><article id="article"></article></div>
+  <div id="audiobar" class="hidden">
+    <button class="icon-btn" id="a-play" aria-label="Pause">⏸</button>
+    <button class="icon-btn" id="a-stop" aria-label="Stop">⏹</button>
+    <span class="grow" id="a-status">Reading…</span>
+    <select id="a-rate" aria-label="Speed">
+      <option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1×</option>
+      <option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="1.5">1.5×</option>
+    </select>
+  </div>
+  <footer>
+    <button class="nav-btn" id="prev">← Previous</button>
+    <span id="counter"></span>
+    <button class="nav-btn" id="next">Next →</button>
+  </footer>
+</section>
+
+<!-- Drawer -->
+<div id="drawer-wrap" class="hidden">
+  <div class="scrim" data-close></div>
+  <nav id="drawer" aria-label="Chapters">
+    <div class="top"><input id="toc-search" type="search" placeholder="Search chapters…" autocomplete="off"></div>
+    <ul id="toc"></ul>
+  </nav>
+</div>
+
+<!-- Random verse -->
+<div id="verse-wrap" class="hidden">
+  <div class="scrim" data-close></div>
+  <div class="modal" role="dialog" aria-label="Random verse">
+    <h3>A verse for you</h3>
+    <blockquote class="verse" id="verse-text"></blockquote>
+    <div class="verse-src" id="verse-src"></div>
+    <div class="row">
+      <button class="btn" id="v-again">🎲 Another</button>
+      <button class="btn ghost" id="v-listen">🔊 Listen</button>
+      <button class="btn ghost" id="v-copy">Copy</button>
+      <button class="btn ghost" id="v-go">Open chapter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settings-wrap" class="hidden">
+  <div class="scrim" data-close></div>
+  <div class="modal settings" role="dialog" aria-label="Settings">
+    <h3>Settings</h3>
+    <label for="s-size">Text size</label>
+    <input type="range" id="s-size" min="15" max="30" step="1">
+    <label for="s-theme">Theme</label>
+    <select id="s-theme">
+      <option value="auto">Match system</option><option value="light">Light</option>
+      <option value="sepia">Sepia</option><option value="dark">Dark</option>
+    </select>
+    <label for="s-voice-en">English voice</label>
+    <select id="s-voice-en"></select>
+    <label for="s-voice-fr">French voice</label>
+    <select id="s-voice-fr"></select>
+    <label for="s-email">Online translation email (optional)</label>
+    <input type="email" id="s-email" placeholder="you@example.com">
+    <p class="small" style="margin:6px 0 0">Only used if your browser lacks a built-in translator. The free MyMemory service raises its daily limit from ~5,000 to ~50,000 characters when you give it an email.</p>
+    <div class="row" style="margin-top:24px">
+      <button class="btn ghost" id="s-forget">Load a different book</button>
+      <button class="btn" data-close>Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="opacity:0"></div>
+
+<script>
+/* ============================================================
+   Storage helpers (IndexedDB for the book + translations,
+   localStorage for small preferences). All wrapped in try/catch.
+   ============================================================ */
+const DB_NAME = "tao-reader", STORE = "kv";
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function dbGet(key) {
+  try {
+    const db = await idb();
+    return await new Promise((res, rej) => {
+      const r = db.transaction(STORE).objectStore(STORE).get(key);
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+  } catch { return undefined; }
+}
+async function dbSet(key, val) {
+  try {
+    const db = await idb();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put(val, key);
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  } catch {}
+}
+async function dbDel(key) {
+  try {
+    const db = await idb();
+    await new Promise(res => { const tx = db.transaction(STORE, "readwrite"); tx.objectStore(STORE).delete(key); tx.oncomplete = res; tx.onerror = res; });
+  } catch {}
+}
+const prefs = {
+  get(k, d) { try { const v = localStorage.getItem("tao:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("tao:" + k, JSON.stringify(v)); } catch {} },
+};
+
+const $ = s => document.querySelector(s);
+let toastTimer;
+function toast(msg, ms = 2200) {
+  const t = $("#toast"); t.textContent = msg; t.style.opacity = 1;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.opacity = 0, ms);
+}
+
+/* ============================================================
+   EPUB parsing
+   ============================================================ */
+const BLOCKS = "p,h1,h2,h3,h4,h5,h6,li,blockquote,dd";
+const clean = s => s.replace(/\s+/g, " ").trim();
+
+async function parseEpub(file) {
+  const zip = await JSZip.loadAsync(file);
+  const readText = p => { const f = zip.file(p); if (!f) throw new Error("Missing " + p); return f.async("text"); };
+  const xml = s => new DOMParser().parseFromString(s, "application/xml");
+
+  const container = xml(await readText("META-INF/container.xml"));
+  const opfPath = container.querySelector("rootfile").getAttribute("full-path");
+  const opf = xml(await readText(opfPath));
+  const resolve = href => decodeURIComponent(new URL(href, "http://x/" + opfPath).pathname.slice(1));
+
+  const title = clean(opf.getElementsByTagNameNS("*", "title")[0]?.textContent || file.name.replace(/\.epub$/i, ""));
+  const manifest = {};
+  for (const it of opf.getElementsByTagNameNS("*", "item")) manifest[it.getAttribute("id")] = it.getAttribute("href");
+  const spine = [...opf.getElementsByTagNameNS("*", "itemref")].map(r => manifest[r.getAttribute("idref")]).filter(Boolean);
+
+  // Pull paragraphs out of each spine document.
+  const docs = [];
+  for (const href of spine) {
+    let html; try { html = await readText(resolve(href)); } catch { continue; }
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
+    let paras = els.map(el => clean(el.textContent)).filter(Boolean);
+    if (!paras.length) paras = (doc.body.innerText || doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean);
+    docs.push(paras);
+  }
+
+  // Drop running headers/footers: lines that repeat across many documents.
+  const freq = new Map();
+  for (const d of docs) for (const p of new Set(d)) freq.set(p, (freq.get(p) || 0) + 1);
+  const limit = Math.max(3, docs.length * 0.25);
+  const bodies = docs.map(d => d.filter(p => freq.get(p) < limit)).filter(d => d.length);
+
+  // Prefer numbered chapters ("1. Title"), the shape of most Tao Te Ching editions.
+  const numbered = /^(\d{1,3})[.):]\s+(.{1,90})$/;
+  let chapters = bodies.filter(d => numbered.test(d[0]) && d.length > 1).map(d => {
+    const [, n, t] = d[0].match(numbered);
+    return { n: +n, title: t, paras: d.slice(1) };
+  });
+  if (chapters.length < 5) {
+    chapters = bodies.filter(d => d.length > 1 || d[0].length > 200).map((d, i) => {
+      const short = d[0].length <= 90 && d.length > 1;
+      return { n: i + 1, title: short ? d[0] : `Section ${i + 1}`, paras: short ? d.slice(1) : d };
+    });
+  }
+  if (!chapters.length) throw new Error("No readable chapters found in this EPUB.");
+  return { id: `${title}::${chapters.length}`, title, chapters };
+}
+
+/* ============================================================
+   Translation: on-device browser translator first, MyMemory as fallback
+   ============================================================ */
+let frCache = {};          // english text -> french text, persisted per book
+let translatorPromise = null;
+
+async function onDeviceTranslator() {
+  if (!("Translator" in self)) return null;
+  try {
+    const opts = { sourceLanguage: "en", targetLanguage: "fr" };
+    const a = await Translator.availability(opts);
+    if (a === "unavailable") return null;
+    if (a !== "available") toast("Downloading French language pack…", 4000);
+    return await Translator.create({
+      ...opts,
+      monitor(m) { m.addEventListener("downloadprogress", e => toast(`French pack: ${Math.round(e.loaded * 100)}%`)); },
+    });
+  } catch { return null; }
+}
+
+function chunk(text, max = 450) {
+  if (text.length <= max) return [text];
+  const out = []; let cur = "";
+  for (const s of text.match(/[^.!?;:]+[.!?;:]*\s*/g) || [text]) {
+    if ((cur + s).length > max && cur) { out.push(cur); cur = ""; }
+    cur += s;
+    while (cur.length > max) { out.push(cur.slice(0, max)); cur = cur.slice(max); }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+const decode = s => { const t = document.createElement("textarea"); t.innerHTML = s; return t.value; };
+
+async function myMemory(text) {
+  const email = prefs.get("email", "");
+  const parts = [];
+  for (const c of chunk(text)) {
+    const url = `https://api.mymemory.translated.net/get?langpair=en|fr&q=${encodeURIComponent(c)}` + (email ? `&de=${encodeURIComponent(email)}` : "");
+    const r = await fetch(url);
+    const j = await r.json();
+    if (j.responseStatus != 200 && j.responseStatus !== "200") throw new Error(j.responseDetails || "Translation service error");
+    parts.push(decode(j.responseData.translatedText));
+  }
+  return parts.join(" ");
+}
+
+let backend = null; // { name, fn }
+async function getBackend() {
+  if (backend) return backend;
+  translatorPromise ||= onDeviceTranslator();
+  const t = await translatorPromise;
+  if (t) return backend = { name: "on-device", fn: s => t.translate(s) };
+  if (!prefs.get("onlineOk", false)) {
+    const ok = confirm("Your browser doesn't have a built-in translator.\n\nUse the free MyMemory online service instead? The text you translate will be sent to it.\n\n(Tip: recent Chrome and Edge translate on your device.)");
+    if (!ok) throw new Error("cancelled");
+    prefs.set("onlineOk", true);
+  }
+  return backend = { name: "online", fn: myMemory };
+}
+
+let saveTimer;
+async function translate(text) {
+  if (frCache[text]) return frCache[text];
+  const b = await getBackend();
+  const fr = await b.fn(text);
+  frCache[text] = fr;
+  clearTimeout(saveTimer); saveTimer = setTimeout(() => dbSet("fr:" + book.id, frCache), 800);
+  return fr;
+}
+
+/* ============================================================
+   Reader state + rendering
+   ============================================================ */
+let book = null, idx = 0;
+let mode = prefs.get("mode", "en");   // en | both | fr
+let renderToken = 0;
+
+function show(id) {
+  for (const s of ["#welcome", "#reader"]) $(s).classList.toggle("hidden", s !== id);
+}
+
+async function openBook(b) {
+  book = b;
+  frCache = (await dbGet("fr:" + b.id)) || {};
+  document.title = b.title;
+  $("#book-title").textContent = b.title;
+  const saved = prefs.get("pos:" + b.id, 0);
+  idx = Math.min(Math.max(0, saved), b.chapters.length - 1);
+  buildToc();
+  setMode(mode, false);
+  show("#reader");
+  render();
+}
+
+function render() {
+  stopSpeaking();
+  const c = book.chapters[idx];
+  const art = $("#article");
+  art.className = "mode-" + mode;
+  art.innerHTML = "";
+  const num = document.createElement("div"); num.className = "chap-num"; num.textContent = `Chapter ${c.n}`;
+  const h = document.createElement("h2");
+  h.innerHTML = `<span class="en"></span><span class="fr"></span>`;
+  h.querySelector(".en").textContent = c.title;
+  art.append(num, h);
+  for (const p of c.paras) {
+    const el = document.createElement("p"); el.className = "para";
+    el.innerHTML = `<span class="en"></span><span class="fr"></span>`;
+    el.querySelector(".en").textContent = p;
+    art.appendChild(el);
+  }
+  $("#scroller").scrollTop = 0;
+  $("#counter").textContent = `${idx + 1} / ${book.chapters.length}`;
+  $("#prev").disabled = idx === 0;
+  $("#next").disabled = idx === book.chapters.length - 1;
+  $("#progress div").style.width = `${((idx + 1) / book.chapters.length) * 100}%`;
+  for (const b of document.querySelectorAll("#toc button")) b.classList.toggle("current", +b.dataset.i === idx);
+  prefs.set("pos:" + book.id, idx);
+  if (mode !== "en") fillFrench();
+}
+
+async function fillFrench() {
+  const token = ++renderToken;
+  const c = book.chapters[idx];
+  const slots = [...$("#article").querySelectorAll(".fr")];
+  const texts = [c.title, ...c.paras];
+  slots.forEach((s, i) => { if (!s.textContent) { s.textContent = frCache[texts[i]] || "…"; s.classList.toggle("pending", !frCache[texts[i]]); } });
+  try {
+    for (let i = 0; i < texts.length; i++) {
+      if (token !== renderToken) return;
+      if (frCache[texts[i]]) continue;
+      const fr = await translate(texts[i]);
+      if (token !== renderToken) return;
+      slots[i].textContent = fr; slots[i].classList.remove("pending");
+    }
+  } catch (e) {
+    if (token !== renderToken) return;
+    if (e.message === "cancelled") { setMode("en"); return; }
+    toast("Translation failed: " + e.message, 4000);
+  }
+}
+
+function setMode(m, rerender = true) {
+  mode = m; prefs.set("mode", m);
+  for (const b of document.querySelectorAll(".seg button")) b.setAttribute("aria-pressed", b.dataset.mode === m);
+  if (!rerender) return;
+  $("#article").className = "mode-" + m;
+  if (m !== "en") fillFrench();
+}
+
+function go(delta) {
+  const n = idx + delta;
+  if (!book || n < 0 || n >= book.chapters.length) return;
+  idx = n; render();
+}
+function goTo(i) { idx = i; render(); }
+
+/* ---------- Table of contents ---------- */
+function buildToc() {
+  const ul = $("#toc"); ul.innerHTML = "";
+  book.chapters.forEach((c, i) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button"); b.dataset.i = i;
+    b.innerHTML = `<span class="n"></span><span class="t"></span>`;
+    b.querySelector(".n").textContent = c.n; b.querySelector(".t").textContent = c.title;
+    b.onclick = () => { closeAll(); goTo(i); };
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+$("#toc-search").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll("#toc li").forEach((li, i) => {
+    const c = book.chapters[i];
+    li.classList.toggle("hidden", !!q && !(`${c.n} ${c.title} ${c.paras.join(" ")}`.toLowerCase().includes(q)));
+  });
+});
+
+/* ---------- Overlays ---------- */
+function openOverlay(id) { closeAll(); $(id).classList.remove("hidden"); }
+function closeAll() { for (const id of ["#drawer-wrap", "#verse-wrap", "#settings-wrap"]) $(id).classList.add("hidden"); }
+document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeAll(); });
+const anyOverlay = () => ["#drawer-wrap", "#verse-wrap", "#settings-wrap"].some(id => !$(id).classList.contains("hidden"));
+
+/* ============================================================
+   Random verse
+   ============================================================ */
+let verse = null;
+async function drawVerse() {
+  const pool = [];
+  book.chapters.forEach((c, ci) => c.paras.forEach(p => { if (p.length >= 40 && p.length <= 600) pool.push({ ci, p }); }));
+  if (!pool.length) book.chapters.forEach((c, ci) => c.paras.forEach(p => pool.push({ ci, p })));
+  let pick;
+  do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && verse && pick.p === verse.p);
+  verse = pick;
+  const c = book.chapters[pick.ci];
+  const q = $("#verse-text");
+  q.innerHTML = `<span class="en"></span>`;
+  q.querySelector(".en").textContent = `“${pick.p}”`;
+  $("#verse-src").textContent = `— ${c.n}. ${c.title}`;
+  openOverlay("#verse-wrap");
+  if (mode !== "en") {
+    const fr = document.createElement("span"); fr.className = "fr"; fr.textContent = frCache[pick.p] || "…";
+    q.appendChild(fr);
+    if (mode === "fr") q.querySelector(".en").style.display = "none";
+    try { const t = await translate(pick.p); if (verse === pick) fr.textContent = mode === "fr" ? `“${t}”` : t; } catch {}
+    if (mode === "fr" && fr.textContent === "…") q.querySelector(".en").style.display = "";
+  }
+}
+$("#btn-random").onclick = drawVerse;
+$("#v-again").onclick = drawVerse;
+$("#v-go").onclick = () => { closeAll(); goTo(verse.ci); };
+$("#v-copy").onclick = async () => {
+  const c = book.chapters[verse.ci];
+  const txt = `${mode === "fr" && frCache[verse.p] ? frCache[verse.p] : verse.p}\n— ${book.title}, ${c.n}. ${c.title}`;
+  try { await navigator.clipboard.writeText(txt); toast("Copied"); } catch { toast("Couldn't copy"); }
+};
+$("#v-listen").onclick = () => {
+  const lang = mode === "fr" && frCache[verse.p] ? "fr" : "en";
+  speakQueue([{ text: lang === "fr" ? frCache[verse.p] : verse.p, lang }], null);
+};
+
+/* ============================================================
+   Audio (Web Speech API)
+   ============================================================ */
+const synth = window.speechSynthesis;
+let voices = [];
+let speakSession = 0, paused = false, playing = false;
+
+function rankVoice(v) {
+  return (/natural|neural|premium|enhanced|google|siri/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 0.5);
+}
+function loadVoices() {
+  if (!synth) return;
+  voices = synth.getVoices();
+  for (const lang of ["en", "fr"]) {
+    const sel = $("#s-voice-" + lang);
+    const list = voices.filter(v => v.lang.toLowerCase().startsWith(lang)).sort((a, b) => rankVoice(b) - rankVoice(a));
+    const saved = prefs.get("voice-" + lang, "");
+    sel.innerHTML = "";
+    if (!list.length) sel.innerHTML = `<option value="">No ${lang === "en" ? "English" : "French"} voice installed</option>`;
+    for (const v of list) {
+      const o = document.createElement("option"); o.value = v.name; o.textContent = `${v.name} (${v.lang})`;
+      if (v.name === saved) o.selected = true;
+      sel.appendChild(o);
+    }
+  }
+}
+if (synth) { loadVoices(); synth.addEventListener?.("voiceschanged", loadVoices); }
+function voiceFor(lang) {
+  const name = $("#s-voice-" + lang).value;
+  return voices.find(v => v.name === name) || voices.find(v => v.lang.toLowerCase().startsWith(lang));
+}
+
+function setAudioUi(on) {
+  playing = on;
+  $("#audiobar").classList.toggle("hidden", !on);
+  $("#btn-audio").setAttribute("aria-pressed", on);
+  $("#a-play").textContent = "⏸"; paused = false;
+}
+
+// items: [{ text, lang, el? }]; onDone: called when the queue finishes naturally
+function speakQueue(items, onDone) {
+  if (!synth) { toast("Read-aloud isn't supported in this browser"); return; }
+  synth.cancel();
+  const session = ++speakSession;
+  setAudioUi(true);
+  let i = 0;
+  const next = () => {
+    if (session !== speakSession) return;
+    document.querySelectorAll(".para.speaking").forEach(e => e.classList.remove("speaking"));
+    if (i >= items.length) { setAudioUi(false); onDone?.(); return; }
+    const it = items[i++];
+    const u = new SpeechSynthesisUtterance(it.text);
+    u.lang = it.lang === "fr" ? "fr-FR" : "en-US";
+    const v = voiceFor(it.lang); if (v) u.voice = v;
+    u.rate = +$("#a-rate").value;
+    u.onend = next;
+    u.onerror = e => { if (e.error !== "interrupted" && e.error !== "canceled") next(); };
+    if (it.el) { it.el.classList.add("speaking"); it.el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    $("#a-status").textContent = `${book ? `Ch. ${book.chapters[idx].n} · ` : ""}${i} of ${items.length}${it.lang === "fr" ? " · FR" : ""}`;
+    synth.speak(u);
+  };
+  next();
+}
+
+async function readChapter() {
+  const els = [...$("#article").querySelectorAll("h2, .para")];
+  const c = book.chapters[idx];
+  const texts = [c.title, ...c.paras];
+  let items = [];
+  if (mode !== "en") {
+    toast("Preparing French audio…");
+    try { for (const t of texts) await translate(t); } catch (e) { if (mode === "fr") { toast("Translation unavailable, reading English"); } }
+  }
+  texts.forEach((t, i) => {
+    const el = els[i], fr = frCache[t];
+    if (mode !== "fr" || !fr) items.push({ text: t, lang: "en", el });
+    if (mode !== "en" && fr) items.push({ text: fr, lang: "fr", el });
+  });
+  // Keep going into the next chapter, like an audiobook.
+  speakQueue(items, () => { if (idx < book.chapters.length - 1) { go(1); readChapter(); } });
+}
+
+function stopSpeaking() { speakSession++; synth?.cancel(); setAudioUi(false); document.querySelectorAll(".para.speaking").forEach(e => e.classList.remove("speaking")); }
+function togglePause() {
+  if (!playing) return;
+  if (paused) { synth.resume(); paused = false; $("#a-play").textContent = "⏸"; }
+  else { synth.pause(); paused = true; $("#a-play").textContent = "▶"; }
+}
+$("#btn-audio").onclick = () => playing ? stopSpeaking() : readChapter();
+$("#a-play").onclick = togglePause;
+$("#a-stop").onclick = stopSpeaking;
+$("#a-rate").value = String(prefs.get("rate", 1));
+$("#a-rate").onchange = e => prefs.set("rate", +e.target.value);
+
+/* ============================================================
+   Settings
+   ============================================================ */
+function applyLook() {
+  const size = prefs.get("size", 20), theme = prefs.get("theme", "auto");
+  document.documentElement.style.setProperty("--font-size", size + "px");
+  if (theme === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", theme);
+  $("#s-size").value = size; $("#s-theme").value = theme;
+}
+$("#s-size").oninput = e => { prefs.set("size", +e.target.value); applyLook(); };
+$("#s-theme").onchange = e => { prefs.set("theme", e.target.value); applyLook(); };
+$("#s-voice-en").onchange = e => prefs.set("voice-en", e.target.value);
+$("#s-voice-fr").onchange = e => prefs.set("voice-fr", e.target.value);
+$("#s-email").value = prefs.get("email", "");
+$("#s-email").onchange = e => prefs.set("email", e.target.value.trim());
+$("#s-forget").onclick = async () => {
+  stopSpeaking(); closeAll();
+  await dbDel("book");
+  book = null; document.title = "Tao Reader";
+  show("#welcome");
+};
+$("#btn-settings").onclick = () => openOverlay("#settings-wrap");
+$("#btn-toc").onclick = () => {
+  openOverlay("#drawer-wrap");
+  document.querySelector("#toc button.current")?.scrollIntoView({ block: "center" });
+};
+applyLook();
+
+/* ============================================================
+   Navigation: buttons, keyboard, swipe
+   ============================================================ */
+$("#prev").onclick = () => go(-1);
+$("#next").onclick = () => go(1);
+for (const b of document.querySelectorAll(".seg button")) b.onclick = () => setMode(b.dataset.mode);
+
+document.addEventListener("keydown", e => {
+  if (!book || e.target.matches("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "Escape") return closeAll();
+  if (anyOverlay()) { if (e.key.toLowerCase() === "r" && !$("#verse-wrap").classList.contains("hidden")) drawVerse(); return; }
+  if (e.key === "ArrowRight") go(1);
+  else if (e.key === "ArrowLeft") go(-1);
+  else if (e.key.toLowerCase() === "r") drawVerse();
+  else if (e.key.toLowerCase() === "c") $("#btn-toc").click();
+  else if (e.key === " ") { e.preventDefault(); playing ? togglePause() : readChapter(); }
+  else return;
+});
+
+let touch = null;
+$("#scroller").addEventListener("touchstart", e => { const t = e.touches[0]; touch = { x: t.clientX, y: t.clientY }; }, { passive: true });
+$("#scroller").addEventListener("touchend", e => {
+  if (!touch) return;
+  const t = e.changedTouches[0], dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+  if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(dx < 0 ? 1 : -1);
+  touch = null;
+}, { passive: true });
+
+/* ============================================================
+   Loading a book
+   ============================================================ */
+async function loadFile(file) {
+  if (!file) return;
+  toast("Opening " + file.name + "…", 6000);
+  try {
+    const b = await parseEpub(file);
+    await dbSet("book", b);
+    toast(`${b.chapters.length} chapters loaded`);
+    openBook(b);
+  } catch (e) {
+    console.error(e);
+    toast("Couldn't read that file: " + e.message, 5000);
+  }
+}
+$("#pick").onclick = () => $("#file").click();
+$("#file").onchange = e => loadFile(e.target.files[0]);
+const drop = $("#drop");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); loadFile(e.dataTransfer.files[0]); });
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => { e.preventDefault(); if (!book) loadFile(e.dataTransfer.files[0]); });
+
+(async () => {
+  const saved = await dbGet("book");
+  if (saved?.chapters?.length) openBook(saved); else show("#welcome");
+})();
+</script>
+</body>
+</html>
