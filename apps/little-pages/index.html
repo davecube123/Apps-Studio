@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ee">
+  <meta name="description" content="A reader for your own books that helps you build a daily reading habit.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Little Pages">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Little Pages</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f3ee; --surface: #fffdfa; --ink: #1d1a17; --ink-2: #4d463f; --muted: #8c847a;
+      --hairline: rgba(29, 26, 23, .08); --fill: rgba(29, 26, 23, .045);
+      --glass: rgba(255, 253, 250, .7); --glass-edge: rgba(255, 255, 255, .8);
+      --accent: #e0612f; --accent-2: #b5345c; --accent-ink: #fff; --accent-soft: rgba(224, 97, 47, .12);
+      --good: #2f8f6b;
+      --shadow: 0 1px 1px rgba(0,0,0,.03), 0 8px 24px -8px rgba(60, 30, 10, .16);
+      --font-size: 19px;
+      --ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --read: "Newsreader", "Iowan Old Style", Georgia, serif;
+      --display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+      --tabbar: 76px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="sepia"]) {
+        --bg: #100e0c; --surface: #1b1815; --ink: #efe9e1; --ink-2: #c9c1b6; --muted: #8f877c;
+        --hairline: rgba(255, 255, 255, .08); --fill: rgba(255, 255, 255, .05);
+        --glass: rgba(30, 27, 24, .72); --glass-edge: rgba(255, 255, 255, .08);
+        --accent: #f27a45; --accent-2: #e0507c; --accent-ink: #160c06; --accent-soft: rgba(242, 122, 69, .14);
+        --good: #5cc79c; --shadow: 0 8px 28px -8px rgba(0, 0, 0, .6);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #100e0c; --surface: #1b1815; --ink: #efe9e1; --ink-2: #c9c1b6; --muted: #8f877c;
+      --hairline: rgba(255, 255, 255, .08); --fill: rgba(255, 255, 255, .05);
+      --glass: rgba(30, 27, 24, .72); --glass-edge: rgba(255, 255, 255, .08);
+      --accent: #f27a45; --accent-2: #e0507c; --accent-ink: #160c06; --accent-soft: rgba(242, 122, 69, .14);
+      --good: #5cc79c; --shadow: 0 8px 28px -8px rgba(0, 0, 0, .6);
+    }
+    :root[data-theme="sepia"] {
+      --bg: #f1e6d2; --surface: #f8efdf; --ink: #3a2d1d; --ink-2: #5d4a33; --muted: #8e7a5d;
+      --hairline: rgba(58, 45, 29, .1); --fill: rgba(58, 45, 29, .05); --glass: rgba(248, 239, 223, .75);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--ui); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+    input, textarea, select { font: inherit; color: inherit; }
+    .hidden { display: none !important; }
+    svg.i { width: 20px; height: 20px; flex: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
+    .glass { background: var(--glass); border: 1px solid var(--glass-edge); backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5); box-shadow: var(--shadow); }
+
+    /* ---------- App shell ---------- */
+    .view { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(16px + env(safe-area-inset-top)) 16px calc(var(--tabbar) + 32px + env(safe-area-inset-bottom)); }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 8px 0 20px; }
+    .topline h1 { font-family: var(--display); font-weight: 400; font-size: 2.4rem; line-height: 1.02; margin: 0; letter-spacing: -.01em; }
+    .topline .sub { color: var(--muted); font-size: .85rem; margin-top: 6px; }
+    .round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none; transition: transform .15s var(--ease); }
+    .round:active { transform: scale(.92); }
+    .tabbar {
+      position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom));
+      display: flex; gap: 4px; padding: 6px; border-radius: 999px;
+    }
+    .tabbar button { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; padding: 8px 0 6px; border-radius: 999px; font-size: .7rem; font-weight: 600; color: var(--muted); transition: background .2s, color .2s; }
+    .tabbar button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+
+    .card { background: var(--surface); border-radius: 24px; padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--hairline); }
+    .card-label { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .card-label button { color: var(--accent); letter-spacing: 0; text-transform: none; font-size: .82rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 999px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: .95rem; transition: transform .15s var(--ease); }
+    .btn:active { transform: scale(.97); }
+    .btn.accent { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 8px 20px -8px rgba(224, 97, 47, .6); }
+    .btn.soft { background: var(--fill); color: var(--ink); }
+    .btn.small { height: 38px; padding: 0 16px; font-size: .85rem; }
+    .btn.block { width: 100%; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .muted { color: var(--muted); }
+    .small { font-size: .82rem; }
+
+    /* Today: goal ring + streak */
+    .hero { display: flex; align-items: center; gap: 20px; }
+    .ring { position: relative; width: 132px; height: 132px; flex: none; }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring .track { stroke: var(--fill); }
+    .ring .bar { stroke: url(#ringGrad); transition: stroke-dashoffset 1s var(--ease); }
+    .ring .center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+    .ring .big { font-family: var(--display); font-size: 2.6rem; line-height: .9; }
+    .ring .unit { font-size: .72rem; color: var(--muted); font-weight: 500; }
+    .ring.done .bar { stroke: var(--good); }
+    .streak { flex: 1; min-width: 0; }
+    .streak .num { font-family: var(--display); font-size: 2.2rem; line-height: 1; display: flex; align-items: center; gap: 6px; }
+    .streak .num svg { width: 26px; height: 26px; color: var(--accent); }
+    .streak p { margin: 6px 0 0; font-size: .85rem; color: var(--ink-2); line-height: 1.4; }
+    .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 18px; }
+    .week div { text-align: center; font-size: .68rem; color: var(--muted); font-weight: 600; }
+    .week span { display: block; margin: 6px auto 0; width: 28px; height: 28px; border-radius: 50%; border: 2px dashed var(--hairline); }
+    .week .some span { border: 2px solid var(--accent); background: var(--accent-soft); }
+    .week .goal span { border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .week .miss span { border-style: solid; border-color: var(--fill); background: var(--fill); }
+    .week .today { color: var(--ink); }
+
+    .banner { border-radius: 24px; padding: 18px 20px; margin-bottom: 14px; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); position: relative; }
+    .banner h3 { margin: 0 0 4px; font-family: var(--display); font-weight: 400; font-size: 1.5rem; }
+    .banner p { margin: 0 0 12px; font-size: .88rem; line-height: 1.45; opacity: .92; }
+    .banner .x { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+    .banner .x svg { width: 14px; height: 14px; }
+    .banner .btn { background: #fff; color: #1d1a17; height: 40px; font-size: .85rem; }
+
+    .continue { display: flex; gap: 16px; }
+    .cover { width: 84px; aspect-ratio: 2 / 3; border-radius: 6px 10px 10px 6px; flex: none; overflow: hidden; position: relative; box-shadow: 0 6px 16px -6px rgba(0,0,0,.35), inset 3px 0 0 rgba(0,0,0,.12); background-size: cover; background-position: center; }
+    .cover.gen { display: flex; flex-direction: column; justify-content: space-between; padding: 10% 9%; color: #fff; }
+    .cover.gen b { font-family: var(--display); font-weight: 400; font-size: .78rem; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+    .cover.gen small { font-size: .5rem; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .continue .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .continue h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.45rem; line-height: 1.1; }
+    .continue .chap { color: var(--muted); font-size: .82rem; margin: 4px 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; }
+    .progress div { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+    .continue .left { font-size: .8rem; color: var(--ink-2); margin-top: 8px; }
+    .continue .actions { display: flex; gap: 8px; margin-top: 16px; }
+
+    .plan { font-family: var(--display); font-size: 1.45rem; line-height: 1.25; margin: 0 0 14px; }
+    .plan em { color: var(--accent); font-style: italic; }
+    .journey .bar { height: 10px; border-radius: 5px; background: var(--fill); overflow: hidden; margin: 10px 0 8px; }
+    .journey .bar div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 5px; }
+    .journey .big { font-family: var(--display); font-size: 1.8rem; }
+    .echo { font-family: var(--read); font-size: 1.05rem; line-height: 1.5; margin: 0; font-style: italic; }
+
+    .empty { text-align: center; padding: 28px 12px; }
+    .empty h3 { font-family: var(--display); font-weight: 400; font-size: 1.7rem; margin: 10px 0 6px; }
+    .empty p { color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
+    .empty .icon { width: 56px; height: 56px; border-radius: 18px; margin: 0 auto; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+
+    /* Library */
+    .seg { display: inline-flex; padding: 4px; border-radius: 999px; gap: 2px; background: var(--fill); margin-bottom: 18px; }
+    .seg button { height: 36px; padding: 0 14px; border-radius: 999px; font-size: .82rem; font-weight: 600; color: var(--muted); }
+    .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 22px 16px; }
+    .book { text-align: left; display: flex; flex-direction: column; gap: 8px; }
+    .book .cover { width: 100%; }
+    .book b { font-size: .82rem; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .book small { font-size: .72rem; color: var(--muted); }
+    .book .progress { height: 4px; }
+
+    /* Stats */
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .tile { background: var(--surface); border-radius: 20px; padding: 16px; border: 1px solid var(--hairline); box-shadow: var(--shadow); }
+    .tile .v { font-family: var(--display); font-size: 2rem; line-height: 1; }
+    .tile .l { font-size: .75rem; color: var(--muted); margin-top: 6px; font-weight: 500; }
+    .bars { display: flex; align-items: flex-end; gap: 10px; height: 140px; position: relative; padding-top: 10px; }
+    .bars .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+    .bars .b { width: 100%; max-width: 32px; border-radius: 8px; background: var(--fill); min-height: 4px; }
+    .bars .b.on { background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+    .bars .col span { font-size: .68rem; color: var(--muted); font-weight: 600; }
+    .bars .goal { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--muted); opacity: .5; }
+    .heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 4px; overflow-x: auto; }
+    .heat i { width: 14px; height: 14px; border-radius: 4px; background: var(--fill); }
+    .heat i.l1 { background: rgba(224, 97, 47, .3); } .heat i.l2 { background: rgba(224, 97, 47, .55); }
+    .heat i.l3 { background: var(--accent); } .heat i.l4 { background: var(--accent-2); }
+    .heat i.future { background: transparent; }
+    .legend { display: flex; gap: 4px; align-items: center; justify-content: flex-end; font-size: .7rem; color: var(--muted); margin-top: 10px; }
+    .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .note { padding: 12px 0; }
+    .note + .note { border-top: 1px solid var(--hairline); }
+    .note p { margin: 0 0 4px; font-family: var(--read); font-size: 1rem; line-height: 1.5; }
+    .note small { color: var(--muted); font-size: .75rem; }
+    .link { color: var(--accent); font-weight: 600; font-size: .9rem; }
+
+    /* ---------- Reader ---------- */
+    #reader { position: fixed; inset: 0; z-index: 10; background: var(--bg); display: flex; flex-direction: column; animation: rise .35s var(--ease); }
+    @keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+    .r-top { position: absolute; z-index: 2; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; display: flex; align-items: center; gap: 8px; pointer-events: none; }
+    .r-top > * { pointer-events: auto; }
+    .r-title { flex: 1; min-width: 0; text-align: center; font-size: .78rem; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+    .r-fade { position: absolute; z-index: 1; top: 0; left: 0; right: 0; height: calc(70px + env(safe-area-inset-top)); pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); -webkit-mask-image: linear-gradient(#000 45%, transparent); mask-image: linear-gradient(#000 45%, transparent); }
+    #r-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #r-article { max-width: 660px; margin: 0 auto; padding: calc(84px + env(safe-area-inset-top)) 22px 170px; }
+    #r-article h2 { font-family: var(--display); font-weight: 400; font-size: clamp(1.9rem, 7vw, 2.6rem); line-height: 1.1; margin: 0 0 6px; }
+    .r-chapno { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .r-chapmeta { font-size: .82rem; color: var(--muted); margin-bottom: 34px; }
+    #r-article p.t { font-family: var(--read); font-size: var(--font-size); line-height: 1.7; margin: 0 0 1em; white-space: pre-line; font-optical-sizing: auto; }
+    .r-end { margin-top: 40px; text-align: center; }
+    .r-end .btn { margin: 6px; }
+    .recap { position: absolute; z-index: 3; left: 12px; right: 12px; top: calc(66px + env(safe-area-inset-top)); max-width: 560px; margin: 0 auto; border-radius: 20px; padding: 14px 16px; animation: drop .4s var(--ease); }
+    @keyframes drop { from { transform: translateY(-10px); opacity: 0; } }
+    .recap small { display: block; font-size: .7rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .recap p { margin: 0; font-family: var(--read); font-size: .95rem; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .r-bottom { position: absolute; z-index: 2; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom)); width: min(460px, calc(100% - 24px)); border-radius: 22px; padding: 10px 10px 10px 14px; display: flex; align-items: center; gap: 12px; }
+    .mini-ring { width: 40px; height: 40px; flex: none; position: relative; }
+    .mini-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .mini-ring .track { stroke: var(--fill); } .mini-ring .bar { stroke: url(#ringGrad); transition: stroke-dashoffset .6s var(--ease); }
+    .mini-ring.done .bar { stroke: var(--good); }
+    .mini-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: .68rem; font-weight: 700; }
+    .r-info { flex: 1; min-width: 0; }
+    .r-info b { display: block; font-size: .82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .r-info .progress { height: 4px; margin-top: 6px; }
+    .r-bottom .round { width: 40px; height: 40px; background: var(--fill); }
+    .r-bottom .round:disabled { opacity: .3; }
+
+    /* ---------- Sheets, onboarding, toast ---------- */
+    .scrim { position: fixed; inset: 0; z-index: 30; background: rgba(12, 10, 8, .32); animation: fade .2s; }
+    @keyframes fade { from { opacity: 0; } }
+    .sheet { position: fixed; z-index: 31; left: 0; right: 0; bottom: 0; max-height: 90vh; display: flex; flex-direction: column; background: var(--surface); border-radius: 28px 28px 0 0; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -12px 40px -12px rgba(0,0,0,.25); animation: up .32s var(--ease); }
+    @keyframes up { from { transform: translateY(100%); } }
+    @media (min-width: 760px) { .sheet { left: 50%; bottom: auto; top: 50%; transform: translate(-50%, -50%); width: 480px; max-height: 86vh; border-radius: 28px; animation: pop .25s var(--ease); } @keyframes pop { from { opacity: 0; transform: translate(-50%, -46%); } } }
+    .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--hairline); margin: 8px auto 0; flex: none; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 6px; flex: none; }
+    .sheet-head h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.8rem; }
+    .sheet-head .round { width: 36px; height: 36px; background: var(--fill); }
+    .sheet-head .round svg { width: 16px; height: 16px; }
+    .sheet-body { overflow-y: auto; padding: 6px 20px 24px; }
+    .field { margin: 16px 0; }
+    .field > label, .field > .lab { display: block; font-size: .8rem; font-weight: 600; margin-bottom: 8px; }
+    .field input[type=text], .field input[type=time], .field textarea, .field select { width: 100%; border: 1px solid var(--hairline); background: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: .95rem; outline: none; }
+    .field textarea { min-height: 96px; resize: vertical; font-family: var(--read); font-size: 1rem; line-height: 1.5; }
+    .hint { font-size: .78rem; color: var(--muted); line-height: 1.45; margin: 6px 2px 0; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 9px 14px; border-radius: 999px; background: var(--fill); font-size: .85rem; font-weight: 500; transition: background .15s; }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+    .list-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 4px; text-align: left; font-weight: 500; }
+    .list-btn + .list-btn { border-top: 1px solid var(--hairline); }
+    .list-btn .grow { flex: 1; }
+    .list-btn.danger { color: #d0453a; }
+    .toc button { display: flex; width: 100%; gap: 12px; padding: 12px 6px; text-align: left; border-radius: 12px; }
+    .toc button.cur { background: var(--accent-soft); }
+    .toc .n { color: var(--muted); min-width: 2.2ch; text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+    .science h4 { margin: 18px 0 4px; font-size: .95rem; }
+    .science p { margin: 0; font-size: .86rem; color: var(--ink-2); line-height: 1.5; }
+    .science cite { display: block; margin-top: 4px; font-size: .75rem; color: var(--muted); font-style: normal; }
+    .done-hero { text-align: center; padding: 6px 0 2px; }
+    .done-hero .v { font-family: var(--display); font-size: 3rem; line-height: 1; }
+    .done-stats { display: flex; justify-content: center; gap: 22px; margin: 10px 0 4px; font-size: .85rem; color: var(--ink-2); }
+
+    #onboard { position: fixed; inset: 0; z-index: 40; background: var(--bg); overflow-y: auto; padding: calc(28px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom)); }
+    #onboard .wrap { max-width: 460px; }
+    .steps { display: flex; gap: 6px; margin-bottom: 28px; }
+    .steps i { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); }
+    .steps i.on { background: var(--accent); }
+    #onboard h2 { font-family: var(--display); font-weight: 400; font-size: 2.4rem; line-height: 1.05; margin: 0 0 10px; }
+    #onboard .lede { color: var(--ink-2); line-height: 1.5; margin: 0 0 22px; }
+    .goal-opts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .goal-opts button { padding: 16px 0; border-radius: 16px; background: var(--fill); display: flex; flex-direction: column; align-items: center; }
+    .goal-opts b { font-family: var(--display); font-size: 1.7rem; font-weight: 400; line-height: 1; }
+    .goal-opts small { font-size: .7rem; color: var(--muted); }
+    .goal-opts button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+    .goal-opts button[aria-pressed="true"] small { color: inherit; opacity: .7; }
+    .ob-foot { display: flex; gap: 10px; margin-top: 28px; }
+    .ob-foot .btn { flex: 1; }
+    .preview { margin-top: 18px; padding: 16px 18px; border-radius: 18px; background: var(--accent-soft); font-family: var(--display); font-size: 1.3rem; line-height: 1.3; }
+
+    #toast { position: fixed; z-index: 50; left: 50%; bottom: calc(var(--tabbar) + 28px + env(safe-area-inset-bottom)); transform: translate(-50%, 10px); padding: 11px 18px; border-radius: 999px; font-size: .85rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s var(--ease); max-width: calc(100vw - 32px); text-align: center; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .burst { position: fixed; z-index: 49; pointer-events: none; width: 8px; height: 8px; border-radius: 2px; animation: burst 1.1s var(--ease) forwards; }
+    @keyframes burst { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .burst { display: none; } }
+  </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0612f"/><stop offset="1" stop-color="#b5345c"/></linearGradient></defs></svg>
+<input type="file" id="file" accept=".epub,application/epub+zip,.pdf,application/pdf,.txt,text/plain,.md,text/markdown" multiple hidden>
+
+<!-- Today -->
+<main id="view-today" class="view" role="tabpanel"><div class="wrap" id="today"></div></main>
+<!-- Library -->
+<main id="view-library" class="view hidden" role="tabpanel"><div class="wrap" id="library"></div></main>
+<!-- Progress -->
+<main id="view-stats" class="view hidden" role="tabpanel"><div class="wrap" id="stats"></div></main>
+
+<nav class="tabbar glass" role="tablist" aria-label="Sections">
+  <button role="tab" data-tab="today" aria-selected="true"><i data-icon="sun"></i>Today</button>
+  <button role="tab" data-tab="library" aria-selected="false"><i data-icon="books"></i>Library</button>
+  <button role="tab" data-tab="stats" aria-selected="false"><i data-icon="chart"></i>Progress</button>
+</nav>
+
+<!-- Reader -->
+<section id="reader" class="hidden" aria-label="Reader">
+  <div class="r-fade"></div>
+  <div class="r-top">
+    <button class="round glass" id="r-close" aria-label="Close book"><i data-icon="chevDown"></i></button>
+    <div class="r-title" id="r-title"></div>
+    <button class="round glass" id="r-toc" aria-label="Chapters"><i data-icon="list"></i></button>
+    <button class="round glass" id="r-look" aria-label="Text settings"><i data-icon="type"></i></button>
+  </div>
+  <div id="r-scroll"><article id="r-article"></article></div>
+  <div class="r-bottom glass">
+    <div class="mini-ring" id="r-ring"><svg viewBox="0 0 44 44"><circle class="track" cx="22" cy="22" r="18" fill="none" stroke-width="5"/><circle class="bar" cx="22" cy="22" r="18" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="113.1"/></svg><b id="r-ring-txt">0</b></div>
+    <div class="r-info"><b id="r-left"></b><div class="progress"><div id="r-chprog"></div></div></div>
+    <button class="round" id="r-prev" aria-label="Previous chapter"><i data-icon="chevL"></i></button>
+    <button class="round" id="r-next" aria-label="Next chapter"><i data-icon="chevR"></i></button>
+  </div>
+</section>
+
+<div id="sheet-root"></div>
+<div id="onboard" class="hidden"></div>
+<div id="toast" class="glass" role="status"></div>
+
+<script>
+/* ============================================================
+   Icons
+   ============================================================ */
+const ICONS = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
+  books: '<path d="M4 4.5h4v15H4zM10 4.5h4v15h-4z"/><path d="M15.6 5.2l3.8-1 3 14.5-3.8 1z" transform="translate(-1.6 .3)"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  flame: '<path d="M12 22c4 0 7-2.8 7-6.8 0-3.6-2.4-5.8-4-8.2-.5 2-1.6 3-3 3.4.4-3.3-1-6.4-3.5-8.4.3 3.6-1.7 5.6-3.3 7.6A8.6 8.6 0 0 0 5 15.2C5 19.2 8 22 12 22z" fill="currentColor" stroke="none"/>',
+  chevDown: '<path d="M6 9l6 6 6-6"/>',
+  chevL: '<path d="M15 18l-6-6 6-6"/>', chevR: '<path d="M9 18l6-6-6-6"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/>',
+  type: '<path d="M4 7V5h11v2M9.5 5v14M7.5 19h4M14 13v-1.5h7V13M17.5 11.5V19M16 19h3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  book: '<path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5h-5A1.5 1.5 0 0 1 3 16z"/><path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H15a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5h5A1.5 1.5 0 0 0 21 16z"/>',
+  spark: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+};
+const svg = n => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+const paintIcons = (root = document) => root.querySelectorAll("i[data-icon]").forEach(i => i.outerHTML = svg(i.dataset.icon));
+paintIcons();
+
+/* ============================================================
+   Helpers + storage
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const clean = s => s.replace(/\s+/g, " ").trim();
+const wc = s => (s.match(/\S+/g) || []).length;
+const pad = n => String(n).padStart(2, "0");
+const dkey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const todayKey = () => dkey(new Date());
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const fmtMin = m => m < 60 ? `${Math.round(m)} min` : `${Math.floor(m / 60)} h ${Math.round(m % 60)} min`;
+
+let toastTimer;
+function toast(msg, ms = 2400) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), ms);
+}
+
+const DB = "little-pages", STORE = "kv";
+const idb = () => new Promise((res, rej) => {
+  const r = indexedDB.open(DB, 1);
+  r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+});
+async function dbGet(k) {
+  try { const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction(STORE).objectStore(STORE).get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+  catch { return undefined; }
+}
+async function dbSet(k, v) {
+  try { const db = await idb(); await new Promise((res, rej) => { const tx = db.transaction(STORE, "readwrite"); tx.objectStore(STORE).put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  catch (e) { console.error(e); toast("Couldn't save. Is storage full?"); }
+}
+async function dbDel(k) {
+  try { const db = await idb(); await new Promise(res => { const tx = db.transaction(STORE, "readwrite"); tx.objectStore(STORE).delete(k); tx.oncomplete = res; tx.onerror = res; }); } catch {}
+}
+
+/* App state. Books' text lives under "content:<id>"; everything else is small and kept in memory. */
+const DEFAULTS = {
+  goal: 10, theme: "auto", size: 19, onboarded: false,
+  plan: { anchor: "After dinner", time: "20:30", place: "", bundle: "" },
+  freshSeen: "", firstDay: "",
+};
+let settings = { ...DEFAULTS };
+let library = [];          // [{ id, title, author, cover, words, chapters: [{title, words}], status, pos:{ch,p}, addedAt, lastReadAt, finishedAt }]
+let days = {};             // { "YYYY-MM-DD": { sec, words } }
+let notes = [];            // [{ id, bookId, title, chapter, text, date }]
+const saveSettings = () => dbSet("settings", settings);
+const saveLibrary = () => dbSet("library", library);
+const saveDays = () => dbSet("days", days);
+const saveNotes = () => dbSet("notes", notes);
+
+/* ============================================================
+   Habit maths
+   ============================================================ */
+const SHOWED_UP_SEC = 60;                              // one real minute counts as showing up (tiny habits)
+const dayMin = k => (days[k]?.sec || 0) / 60;
+const showedUp = k => (days[k]?.sec || 0) >= SHOWED_UP_SEC;
+const goalMet = k => dayMin(k) >= settings.goal;
+
+// "Never miss twice": one missed day is forgiven, two in a row end the streak.
+function streakInfo() {
+  let d = new Date(), count = 0, miss = 0, restUsed = false;
+  const first = settings.firstDay ? new Date(settings.firstDay + "T00:00") : new Date();
+  const readToday = showedUp(dkey(d));
+  if (!readToday) d = addDays(d, -1);
+  while (d >= addDays(first, -1)) {
+    if (showedUp(dkey(d))) { count++; miss = 0; }
+    else { miss++; if (miss >= 2) break; if (count === 0) restUsed = true; }
+    d = addDays(d, -1);
+  }
+  // restUsed: yesterday was missed, so today matters.
+  return { count, readToday, restUsed: !readToday && restUsed && count > 0 };
+}
+function bestStreak() {
+  const ks = Object.keys(days).filter(showedUp).sort();
+  if (!ks.length) return 0;
+  let best = 0, cur = 0, miss = 0;
+  for (let d = new Date(ks[0] + "T00:00"); d <= new Date(); d = addDays(d, 1)) {
+    if (showedUp(dkey(d))) { cur++; miss = 0; best = Math.max(best, cur); }
+    else if (++miss >= 2) cur = 0;
+  }
+  return best;
+}
+const daysRead = () => Object.keys(days).filter(showedUp).length;
+function wpm() {
+  let w = 0, s = 0;
+  for (const k of Object.keys(days)) { if ((days[k].words || 0) > 0) { w += days[k].words; s += days[k].sec; } }
+  const v = s > 300 ? w / (s / 60) : 0;
+  return v >= 80 && v <= 700 ? v : 230;
+}
+function bookProgress(b) {
+  let before = 0;
+  for (let i = 0; i < b.pos.ch; i++) before += b.chapters[i].words;
+  const ch = b.chapters[b.pos.ch];
+  const within = ch && ch.words ? (ch.paraWords || []).slice(0, b.pos.p).reduce((a, x) => a + x, 0) : 0;
+  const done = Math.min(b.words, before + within);
+  return { pct: b.words ? done / b.words : 0, leftMin: Math.max(0, (b.words - done) / wpm()) };
+}
+
+/* ============================================================
+   Parsing: EPUB, PDF, TXT/Markdown
+   ============================================================ */
+const BLOCKS = "p,h1,h2,h3,h4,h5,h6,li,blockquote,dd,pre";
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = src;
+    s.onload = res; s.onerror = () => rej(new Error("couldn't load a reader component (are you online?)"));
+    document.head.appendChild(s);
+  });
+}
+let jszipP, pdfP;
+const needJSZip = () => window.JSZip ? Promise.resolve() : (jszipP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js").catch(e => { jszipP = null; throw e; }));
+const needPdf = () => window.pdfjsLib ? Promise.resolve() : (pdfP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js").then(() => {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}).catch(e => { pdfP = null; throw e; }));
+
+async function shrinkImage(blob, width = 360) {
+  try {
+    const img = await createImageBitmap(blob);
+    const c = document.createElement("canvas");
+    c.width = width; c.height = Math.round(img.height * width / img.width);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", .82);
+  } catch { return null; }
+}
+
+async function parseEpub(file) {
+  await needJSZip();
+  const zip = await JSZip.loadAsync(file);
+  const text = p => { const f = zip.file(p); if (!f) throw new Error("missing " + p); return f.async("text"); };
+  const xml = s => new DOMParser().parseFromString(s, "application/xml");
+  const opfPath = xml(await text("META-INF/container.xml")).querySelector("rootfile").getAttribute("full-path");
+  const opf = xml(await text(opfPath));
+  const resolve = href => decodeURIComponent(new URL(href, "http://x/" + opfPath).pathname.slice(1));
+  const meta = n => clean(opf.getElementsByTagNameNS("*", n)[0]?.textContent || "");
+  const items = {};
+  for (const it of opf.getElementsByTagNameNS("*", "item")) items[it.getAttribute("id")] = { href: it.getAttribute("href"), props: it.getAttribute("properties") || "", type: it.getAttribute("media-type") || "" };
+
+  // Cover: EPUB 3 "cover-image" property, or the EPUB 2 <meta name="cover">.
+  let cover = null;
+  const coverId = Object.keys(items).find(id => items[id].props.includes("cover-image"))
+    || [...opf.getElementsByTagNameNS("*", "meta")].find(m => m.getAttribute("name") === "cover")?.getAttribute("content");
+  if (coverId && items[coverId] && items[coverId].type.startsWith("image")) {
+    const f = zip.file(resolve(items[coverId].href));
+    if (f) cover = await shrinkImage(await f.async("blob"));
+  }
+
+  const spine = [...opf.getElementsByTagNameNS("*", "itemref")].map(r => items[r.getAttribute("idref")]?.href).filter(Boolean);
+  const docs = [];
+  for (const href of spine) {
+    let html; try { html = await text(resolve(href)); } catch { continue; }
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
+    let paras = els.map(el => clean(el.textContent)).filter(Boolean);
+    if (!paras.length) paras = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean);
+    const h = doc.body.querySelector("h1,h2,h3");
+    docs.push({ paras, heading: h ? clean(h.textContent) : "" });
+  }
+  // Running headers repeat across many documents: drop them.
+  const freq = new Map();
+  for (const d of docs) for (const p of new Set(d.paras)) freq.set(p, (freq.get(p) || 0) + 1);
+  const limit = Math.max(3, docs.length * .25);
+  const chapters = [];
+  for (const d of docs) {
+    let paras = d.paras.filter(p => freq.get(p) < limit);
+    if (wc(paras.join(" ")) < 25) continue;   // covers, blank pages, image-only pages
+    let title = d.heading && d.heading.length <= 120 ? d.heading : "";
+    if (title && paras[0] === title) paras = paras.slice(1);
+    else if (!title && paras[0].length <= 80 && paras.length > 1) { title = paras[0]; paras = paras.slice(1); }
+    chapters.push({ title: title || `Section ${chapters.length + 1}`, paras });
+  }
+  return { title: meta("title") || file.name.replace(/\.epub$/i, ""), author: meta("creator"), cover, chapters };
+}
+
+async function parsePdf(file) {
+  await needPdf();
+  const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const info = (await pdf.getMetadata().catch(() => null))?.info || {};
+  const pages = [];
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n);
+    const tc = await page.getTextContent();
+    // Rebuild lines, then join lines into paragraphs when a line runs to the margin.
+    const lines = []; let cur = "";
+    for (const it of tc.items) { cur += it.str; if (it.hasEOL) { lines.push(cur.trim()); cur = ""; } else if (!/\s$/.test(it.str)) cur += ""; }
+    if (cur.trim()) lines.push(cur.trim());
+    const avg = lines.reduce((a, l) => a + l.length, 0) / (lines.length || 1);
+    const paras = []; let buf = "";
+    for (const l of lines) {
+      if (!l) { if (buf) { paras.push(buf); buf = ""; } continue; }
+      buf = buf ? (buf.endsWith("-") ? buf.slice(0, -1) + l : buf + " " + l) : l;
+      if (l.length < avg * .72 && /[.!?:"”’)]$/.test(l)) { paras.push(buf); buf = ""; }
+    }
+    if (buf) paras.push(buf);
+    pages.push(paras.filter(p => !/^\d{1,4}$/.test(p)));   // drop bare page numbers
+  }
+  const chapters = [];
+  const per = pdf.numPages > 40 ? 10 : 5;
+  for (let i = 0; i < pages.length; i += per) {
+    const paras = pages.slice(i, i + per).flat();
+    if (wc(paras.join(" ")) < 10) continue;
+    chapters.push({ title: `Pages ${i + 1}–${Math.min(i + per, pages.length)}`, paras });
+  }
+  if (!chapters.length) throw new Error("this PDF has no selectable text (it may be scanned images)");
+  return { title: clean(info.Title || "") || file.name.replace(/\.pdf$/i, ""), author: clean(info.Author || ""), cover: null, chapters };
+}
+
+async function parseText(file) {
+  const raw = (await file.text()).replace(/\r/g, "");
+  const blocks = /\n\s*\n/.test(raw) ? raw.split(/\n\s*\n/) : raw.split("\n");
+  const heading = /^(#{1,2}\s+.+|(chapter|part|book|prologue|epilogue)\b.{0,80})$/i;
+  const chapters = []; let cur = null;
+  for (let b of blocks) {
+    b = b.trim(); if (!b) continue;
+    const firstLine = b.split("\n")[0].trim();
+    if (heading.test(firstLine)) {
+      cur = { title: firstLine.replace(/^#+\s*/, ""), paras: [] }; chapters.push(cur);
+      const rest = b.split("\n").slice(1).join(" ").trim(); if (rest) cur.paras.push(clean(rest));
+    } else {
+      if (!cur) { cur = { title: "Beginning", paras: [] }; chapters.push(cur); }
+      cur.paras.push(clean(b.replace(/^#+\s*/, "")));
+    }
+  }
+  let out = chapters.filter(c => c.paras.length);
+  // No headings: split into ~3,000-word parts so progress and "time left" stay meaningful.
+  if (out.length <= 1) {
+    const all = out[0]?.paras || []; out = []; let part = null, w = 0;
+    for (const p of all) { if (!part || w > 3000) { part = { title: `Part ${out.length + 1}`, paras: [] }; out.push(part); w = 0; } part.paras.push(p); w += wc(p); }
+  }
+  if (!out.length) throw new Error("the file is empty");
+  return { title: file.name.replace(/\.(txt|md|markdown)$/i, ""), author: "", cover: null, chapters: out };
+}
+
+function firstRealChapter(chapters) {
+  const start = /^(chapter\s*(1|one|i)\b|1[.:)\s]|one\b|part\s*(1|one|i)\b|prologue|introduction|foreword|preface)/i;
+  const i = chapters.findIndex(c => start.test(c.title.trim()));
+  return i > 0 && i < chapters.length * .3 ? i : 0;   // only skip a little front matter, never half the book
+}
+
+async function importFiles(files) {
+  const list = [...files];
+  if (!list.length) return;
+  let added = 0;
+  for (const f of list) {
+    toast(`Opening ${f.name}…`, 20000);
+    try {
+      const n = f.name.toLowerCase();
+      const parsed = n.endsWith(".epub") ? await parseEpub(f) : n.endsWith(".pdf") ? await parsePdf(f) : await parseText(f);
+      const chapters = parsed.chapters.map(c => ({ title: c.title, paras: c.paras }));
+      const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const meta = {
+        id, title: parsed.title, author: parsed.author, cover: parsed.cover,
+        chapters: chapters.map(c => { const pw = c.paras.map(wc); return { title: c.title, words: pw.reduce((a, x) => a + x, 0), paraWords: pw }; }),
+        status: library.some(b => b.status === "reading") ? "want" : "reading",
+        pos: { ch: firstRealChapter(chapters), p: 0 }, addedAt: Date.now(), lastReadAt: 0, finishedAt: 0,
+      };
+      meta.words = meta.chapters.reduce((a, c) => a + c.words, 0);
+      await dbSet("content:" + id, chapters);
+      library.push(meta); added++;
+    } catch (e) {
+      console.error(e);
+      toast(`Couldn't open ${f.name}: ${e.message}`, 5000);
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  await saveLibrary();
+  if (added) toast(added === 1 ? "Book added" : `${added} books added`);
+  renderAll();
+}
+$("#file").onchange = e => { importFiles(e.target.files); e.target.value = ""; };
+const pickFiles = () => $("#file").click();
+
+/* ============================================================
+   Covers
+   ============================================================ */
+function hashHue(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+function coverHTML(b) {
+  if (b.cover) return `<div class="cover" style="background-image:url('${b.cover}')" role="img" aria-label="${esc(b.title)}"></div>`;
+  const h = hashHue(b.title);
+  return `<div class="cover gen" style="background:linear-gradient(150deg,hsl(${h} 55% 42%),hsl(${(h + 40) % 360} 60% 28%))"><b>${esc(b.title)}</b><small>${esc(b.author)}</small></div>`;
+}
+
+/* ============================================================
+   Today
+   ============================================================ */
+const RING = 2 * Math.PI * 56;
+function greeting() { const h = new Date().getHours(); return h < 5 ? "Still up?" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
+const currentBook = () => library.filter(b => b.status === "reading").sort((a, b) => (b.lastReadAt || b.addedAt) - (a.lastReadAt || a.addedAt))[0];
+
+function freshStart() {
+  const now = new Date(), k = todayKey();
+  if (settings.freshSeen === k || !settings.onboarded) return null;
+  const s = streakInfo();
+  const lastRead = Object.keys(days).filter(showedUp).sort().pop();
+  if (lastRead && !s.readToday && s.count === 0)
+    return { title: "Welcome back", text: "Every day is a fresh page. Breaks happen to every reader, and what counts is starting again. Even one page today restarts the habit." };
+  if (now.getDate() === 1) return { title: "A new month", text: "New months are natural fresh starts. A good moment to recommit to your reading plan." };
+  if (now.getDay() === 1) return { title: "Fresh week", text: "Mondays are a natural fresh start. Look over your plan and begin the week with a few pages." };
+  return null;
+}
+
+function renderToday() {
+  const k = todayKey(), min = dayMin(k), goal = settings.goal, s = streakInfo();
+  const pct = Math.min(1, min / goal);
+  const book = currentBook();
+  const fs = freshStart();
+  const read = daysRead();
+  const monday = addDays(new Date(), -((new Date().getDay() + 6) % 7));
+  const weekHTML = [..."MTWTFSS"].map((l, i) => {
+    const d = addDays(monday, i), dk = dkey(d);
+    const cls = goalMet(dk) ? "goal" : showedUp(dk) ? "some" : dk < k && settings.firstDay && dk >= settings.firstDay ? "miss" : "";
+    return `<div class="${cls} ${dk === k ? "today" : ""}">${l}<span></span></div>`;
+  }).join("");
+  const streakText = s.restUsed
+    ? "You missed yesterday, and that's fine: one rest day doesn't break a habit. Read today to keep it going."
+    : s.readToday ? (goalMet(k) ? "Goal reached today. Anything more is a bonus." : "You showed up today. That's what builds the habit.")
+    : s.count ? "Read a little today to keep your streak." : "Read for a minute today to start a streak.";
+  const note = notes.length ? notes[Math.floor((Date.now() / 864e5) % notes.length)] : null;
+  const p = settings.plan;
+
+  let continueHTML;
+  if (book) {
+    const pr = bookProgress(book), ch = book.chapters[book.pos.ch];
+    continueHTML = `<div class="card"><div class="card-label">Continue reading</div>
+      <div class="continue">${coverHTML(book)}<div class="meta">
+        <h3>${esc(book.title)}</h3><div class="chap">${esc(ch?.title || "")}</div>
+        <div class="progress"><div style="width:${(pr.pct * 100).toFixed(1)}%"></div></div>
+        <div class="left">${Math.round(pr.pct * 100)}% · about ${fmtMin(pr.leftMin)} left</div>
+      </div></div>
+      <div class="actions"><button class="btn accent" style="flex:1" data-read="${book.id}">${svg("book")} Continue</button>
+      <button class="btn soft" data-read="${book.id}" data-one="1">Just one page</button></div></div>`;
+  } else {
+    continueHTML = `<div class="card empty"><div class="icon">${svg("books")}</div>
+      <h3>Add a book to begin</h3><p>Pick an EPUB, PDF or text file from your device. It stays on this device.</p>
+      <button class="btn accent" data-act="import">${svg("plus")} Choose books</button></div>`;
+  }
+
+  $("#today").innerHTML = `
+    <div class="topline"><div><h1>${greeting()}</h1><div class="sub">${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</div></div>
+      <button class="round glass" data-act="settings" aria-label="Settings">${svg("gear")}</button></div>
+    ${fs ? `<div class="banner"><button class="x" data-act="fresh-x" aria-label="Dismiss">${svg("x")}</button><h3>${fs.title}</h3><p>${fs.text}</p><button class="btn" data-act="plan">Review my plan</button></div>` : ""}
+    <div class="card">
+      <div class="hero">
+        <div class="ring ${pct >= 1 ? "done" : ""}"><svg viewBox="0 0 128 128"><circle class="track" cx="64" cy="64" r="56" fill="none" stroke-width="12"/><circle class="bar" cx="64" cy="64" r="56" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="${RING}" stroke-dashoffset="${RING * (1 - pct)}"/></svg>
+          <div class="center"><div><div class="big">${Math.floor(min)}</div><div class="unit">of ${goal} min</div></div></div></div>
+        <div class="streak"><div class="num">${svg("flame")}${s.count}</div><div class="small muted">day streak</div><p>${streakText}</p></div>
+      </div>
+      <div class="week">${weekHTML}</div>
+    </div>
+    ${continueHTML}
+    <div class="card"><div class="card-label">My reading plan <button data-act="plan">Edit</button></div>
+      <p class="plan">${esc(p.anchor)}, I'll read for <em>${goal} minutes</em>${p.place ? ` ${esc(p.place)}` : ""}${p.bundle ? `, ${esc(p.bundle)}` : ""}.</p>
+      <button class="btn soft small" data-act="ics">${svg("calendar")} Add a daily reminder${p.time ? ` at ${esc(p.time)}` : ""}</button></div>
+    <div class="card journey"><div class="card-label">Habit journey <button data-act="science">Why 66?</button></div>
+      <div class="row" style="justify-content:space-between"><span class="big">Day ${Math.min(read, 66)}<span class="muted" style="font-size:1rem"> of 66</span></span><span class="small muted">${read >= 66 ? "It's part of you now 🎉" : `${66 - read} reading days to go`}</span></div>
+      <div class="bar"><div style="width:${Math.min(100, read / 66 * 100)}%"></div></div>
+      <div class="small muted">On average, a new daily habit takes about 66 days to feel automatic. Missed days slow it down only a little.</div></div>
+    ${note ? `<div class="card"><div class="card-label">From your notes</div><p class="echo">“${esc(note.text)}”</p><div class="small muted" style="margin-top:8px">${esc(note.title)} · ${esc(note.chapter)}</div></div>` : ""}`;
+}
+
+/* ============================================================
+   Library
+   ============================================================ */
+let shelf = "reading";
+function renderLibrary() {
+  const shelves = [["reading", "Reading"], ["want", "Want to read"], ["done", "Finished"]];
+  const books = library.filter(b => b.status === shelf).sort((a, b) => (b.lastReadAt || b.addedAt) - (a.lastReadAt || a.addedAt));
+  const emptyText = { reading: "Books you're reading show up here.", want: "Books waiting for their turn.", done: "Finished books land here. Every one counts." }[shelf];
+  $("#library").innerHTML = `
+    <div class="topline"><div><h1>Library</h1><div class="sub">${plural(library.length, "book")} on this device</div></div>
+      <button class="round glass" data-act="import" aria-label="Add books">${svg("plus")}</button></div>
+    <div class="seg">${shelves.map(([k, l]) => `<button data-shelf="${k}" aria-pressed="${k === shelf}">${l} <span class="muted">${library.filter(b => b.status === k).length}</span></button>`).join("")}</div>
+    ${books.length ? `<div class="shelf">${books.map(b => {
+      const pr = bookProgress(b);
+      return `<button class="book" data-book="${b.id}">${coverHTML(b)}<b>${esc(b.title)}</b>
+        ${b.status === "reading" ? `<div class="progress"><div style="width:${pr.pct * 100}%"></div></div><small>${Math.round(pr.pct * 100)}% · ${fmtMin(pr.leftMin)} left</small>` : `<small>${esc(b.author || (b.status === "done" ? "Finished" : "Not started"))}</small>`}</button>`;
+    }).join("")}</div>` : `<div class="card empty"><div class="icon">${svg("books")}</div><h3>Nothing here yet</h3><p>${emptyText}</p>${shelf !== "done" ? `<button class="btn accent" data-act="import">${svg("plus")} Choose books</button>` : ""}</div>`}
+    <p class="hint" style="text-align:center;margin-top:24px">EPUB, PDF (with selectable text), TXT and Markdown. Books stay on this device.</p>`;
+}
+
+function bookSheet(id) {
+  const b = library.find(x => x.id === id); if (!b) return;
+  const pr = bookProgress(b);
+  const moves = [["reading", "Move to Reading"], ["want", "Move to Want to read"], ["done", "Mark as finished"]].filter(([k]) => k !== b.status);
+  const bookNotes = notes.filter(n => n.bookId === id);
+  openSheet(b.title, body => {
+    body.innerHTML = `<div class="continue" style="margin:6px 0 18px">${coverHTML(b)}<div class="meta">
+        <div class="muted small">${esc(b.author || "Unknown author")}</div>
+        <div class="small" style="margin:6px 0 10px">${plural(b.chapters.length, "chapter")} · ${fmtMin(b.words / wpm())} at your pace</div>
+        <div class="progress"><div style="width:${pr.pct * 100}%"></div></div><div class="left">${Math.round(pr.pct * 100)}% read</div></div></div>
+      <button class="btn accent block" data-read="${b.id}">${svg("book")} ${pr.pct > 0 ? "Continue" : "Start reading"}</button>
+      <div style="margin-top:10px">${moves.map(([k, l]) => `<button class="list-btn" data-move="${k}">${l}</button>`).join("")}
+      <button class="list-btn" data-move="drop">Not for me right now <span class="grow"></span><span class="small muted">it's okay to quit</span></button>
+      <button class="list-btn danger" data-move="delete">Remove from device</button></div>
+      ${bookNotes.length ? `<div class="card-label" style="margin-top:18px">Your notes</div>${bookNotes.map(n => `<div class="note"><p>${esc(n.text)}</p><small>${esc(n.chapter)} · ${n.date}</small></div>`).join("")}` : ""}`;
+    body.onclick = async e => {
+      const m = e.target.closest("[data-move]")?.dataset.move; if (!m) return;
+      if (m === "delete") {
+        if (!confirm(`Remove “${b.title}” from this device? Your reading history stays.`)) return;
+        library = library.filter(x => x.id !== id); await dbDel("content:" + id);
+      } else if (m === "drop") {
+        b.status = "want"; toast("Moved to Want to read. Life's too short for books you don't enjoy.", 3500);
+      } else {
+        b.status = m; if (m === "done") { b.finishedAt = Date.now(); celebrate(); toast("Finished! 🎉 Another one on your shelf."); }
+      }
+      await saveLibrary(); closeSheet(); renderAll();
+    };
+  });
+}
+
+/* ============================================================
+   Progress (stats)
+   ============================================================ */
+function renderStats() {
+  const k = todayKey(), goal = settings.goal;
+  const last7 = [...Array(7)].map((_, i) => addDays(new Date(), i - 6));
+  const weekMin = last7.reduce((a, d) => a + dayMin(dkey(d)), 0);
+  const totalWords = Object.values(days).reduce((a, d) => a + (d.words || 0), 0);
+  const maxBar = Math.max(goal * 1.5, ...last7.map(d => dayMin(dkey(d))));
+  const finished = library.filter(b => b.status === "done").length;
+  // 18-week heatmap, columns are weeks starting Monday.
+  const weeks = 18, start = addDays(new Date(), -((new Date().getDay() + 6) % 7) - (weeks - 1) * 7);
+  let heat = "";
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(start, i), dk = dkey(d), m = dayMin(dk);
+    const lvl = dk > k ? "future" : m <= 0 ? "" : m < goal / 2 ? "l1" : m < goal ? "l2" : m < goal * 2 ? "l3" : "l4";
+    heat += `<i class="${lvl}" title="${dk}: ${Math.round(m)} min"></i>`;
+  }
+  $("#stats").innerHTML = `
+    <div class="topline"><div><h1>Progress</h1><div class="sub">What you track, you improve</div></div></div>
+    <div class="tiles">
+      <div class="tile"><div class="v">${Math.round(weekMin)}</div><div class="l">minutes this week</div></div>
+      <div class="tile"><div class="v">${Math.round(totalWords / 250)}</div><div class="l">pages read in total</div></div>
+      <div class="tile"><div class="v">${bestStreak()}</div><div class="l">best streak (days)</div></div>
+      <div class="tile"><div class="v">${finished}</div><div class="l">${finished === 1 ? "book" : "books"} finished</div></div>
+    </div>
+    <div class="card"><div class="card-label">Last 7 days <span>goal ${goal} min</span></div>
+      <div class="bars"><div class="goal" style="bottom:${22 + (goal / maxBar) * 108}px"></div>${last7.map(d => {
+        const m = dayMin(dkey(d));
+        return `<div class="col"><div class="b ${m >= goal ? "on" : ""}" style="height:${Math.max(4, (m / maxBar) * 108)}px" title="${Math.round(m)} min"></div><span>${d.toLocaleDateString(undefined, { weekday: "narrow" })}</span></div>`;
+      }).join("")}</div></div>
+    <div class="card"><div class="card-label">Reading days</div><div class="heat">${heat}</div>
+      <div class="legend">Less <i style="background:var(--fill)"></i><i style="background:rgba(224,97,47,.3)"></i><i style="background:rgba(224,97,47,.55)"></i><i style="background:var(--accent)"></i><i style="background:var(--accent-2)"></i> More</div></div>
+    <div class="card"><div class="card-label">Your pace</div><div class="row" style="align-items:baseline;gap:8px"><span class="v" style="font-family:var(--display);font-size:2rem">${Math.round(wpm())}</span><span class="muted small">words per minute${Object.values(days).some(d => d.words) ? "" : " (estimate until you've read a bit)"}</span></div>
+      <p class="hint">Used to estimate time left in chapters and books. Knowing a chapter ends in 6 minutes makes it easier to start.</p></div>
+    <div class="card"><div class="card-label">Your notes <span>${notes.length}</span></div>
+      ${notes.length ? notes.slice().reverse().slice(0, 30).map(n => `<div class="note"><p>${esc(n.text)}</p><small>${esc(n.title)} · ${esc(n.chapter)} · ${n.date}</small></div>`).join("") : `<p class="muted small" style="margin:0">After a reading session you'll be asked for one idea worth remembering. Recalling what you read is one of the most reliable ways to keep it.</p>`}</div>
+    <p style="text-align:center"><button class="link" data-act="science">The science behind Little Pages</button></p>`;
+}
+
+/* ============================================================
+   Reader + session tracking
+   ============================================================ */
+let R = null;   // { book, content, ch, session: { sec, words, start }, seen:Set, lastActive, goalHitShown }
+let tickTimer = null;
+
+async function openBook(id, onePage = false) {
+  const book = library.find(b => b.id === id); if (!book) return;
+  const content = await dbGet("content:" + id);
+  if (!content) { toast("This book's text is missing. Try adding it again."); return; }
+  if (book.status === "want") book.status = "reading";
+  closeSheet();
+  if (!settings.firstDay) { settings.firstDay = todayKey(); saveSettings(); }
+  const resumeAfter = Date.now() - (book.lastReadAt || 0) > 30 * 60e3 && (book.pos.ch > 0 || book.pos.p > 0);
+  R = { book, content, ch: book.pos.ch, session: { sec: 0, words: 0 }, seen: new Set(), lastActive: Date.now(), goalHitShown: goalMet(todayKey()) };
+  $("#reader").classList.remove("hidden");
+  $("#r-title").textContent = book.title;
+  renderChapter(book.pos.p, resumeAfter);
+  clearInterval(tickTimer); tickTimer = setInterval(tick, 1000);
+  if (onePage) toast("Just one page. Stop whenever you like.", 3000);
+}
+
+function renderChapter(startPara = 0, showRecap = false) {
+  const { book, content } = R, ch = content[R.ch];
+  const art = $("#r-article");
+  R.seen = new Set();
+  art.innerHTML = `<div class="r-chapno">Chapter ${R.ch + 1} of ${content.length}</div><h2></h2>
+    <div class="r-chapmeta">${fmtMin(book.chapters[R.ch].words / wpm())} at your pace</div>`;
+  art.querySelector("h2").textContent = ch.title;
+  const frag = document.createDocumentFragment();
+  ch.paras.forEach((p, i) => { const el = document.createElement("p"); el.className = "t"; el.dataset.i = i; el.textContent = p; frag.appendChild(el); });
+  art.appendChild(frag);
+  const last = R.ch === content.length - 1;
+  const end = document.createElement("div"); end.className = "r-end";
+  end.innerHTML = last
+    ? `<p class="muted">You've reached the end of the book.</p><button class="btn accent" id="r-finish">${svg("check")} Mark as finished</button>`
+    : `<p class="muted small">Up next</p><button class="btn soft" id="r-endnext">${esc(content[R.ch + 1].title)} ${svg("chevR")}</button>`;
+  art.appendChild(end);
+  $("#r-prev").disabled = R.ch === 0;
+  $("#r-next").disabled = last;
+  observe();
+  const sc = $("#r-scroll");
+  requestAnimationFrame(() => {
+    const target = art.querySelector(`p.t[data-i="${startPara}"]`);
+    sc.scrollTop = startPara > 0 && target ? target.offsetTop - 90 : 0;
+    updateReaderBar();
+  });
+  document.querySelector(".recap")?.remove();
+  if (showRecap && startPara > 0) {
+    const prev = ch.paras[startPara - 1];
+    const card = document.createElement("div"); card.className = "recap glass";
+    card.innerHTML = `<small>Where you left off</small><p></p>`;
+    card.querySelector("p").textContent = prev;
+    $("#reader").appendChild(card);
+    card.onclick = () => card.remove();
+    setTimeout(() => card.remove(), 9000);
+  }
+}
+
+// Today's minutes including the part of the running session not yet saved.
+const liveMin = () => dayMin(todayKey()) + (R ? (R.session.sec - (R.session.savedSec || 0)) / 60 : 0);
+
+// Count a paragraph as read once it scrolls up past the top of the screen.
+let io;
+function observe() {
+  io?.disconnect();
+  io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const i = +e.target.dataset.i;
+      if (!e.isIntersecting && e.boundingClientRect.bottom < (e.rootBounds?.top ?? 0) + 70 && !R.seen.has(i)) {
+        R.seen.add(i); R.session.words += R.book.chapters[R.ch].paraWords[i] || 0;
+      }
+    }
+  }, { root: $("#r-scroll"), threshold: 0 });
+  document.querySelectorAll("#r-article p.t").forEach(p => io.observe(p));
+}
+function countVisibleAsRead() {
+  const top = $("#r-scroll").getBoundingClientRect();
+  document.querySelectorAll("#r-article p.t").forEach(p => {
+    const r = p.getBoundingClientRect(), i = +p.dataset.i;
+    if (r.top < top.bottom && !R.seen.has(i)) { R.seen.add(i); R.session.words += R.book.chapters[R.ch].paraWords[i] || 0; }
+  });
+}
+
+function topPara() {
+  const sc = $("#r-scroll"), y = sc.getBoundingClientRect().top + 90;
+  let best = 0;
+  for (const p of document.querySelectorAll("#r-article p.t")) { if (p.getBoundingClientRect().top <= y) best = +p.dataset.i; else break; }
+  return best;
+}
+
+function updateReaderBar() {
+  if (!R) return;
+  const p = topPara(), cw = R.book.chapters[R.ch];
+  const done = cw.paraWords.slice(0, p).reduce((a, x) => a + x, 0);
+  const left = Math.max(0, (cw.words - done) / wpm());
+  $("#r-left").textContent = left < 1 ? "Under a minute left in chapter" : `${Math.ceil(left)} min left in chapter`;
+  $("#r-chprog").style.width = (cw.words ? done / cw.words * 100 : 0) + "%";
+  const min = liveMin(), pct = Math.min(1, min / settings.goal);
+  $("#r-ring .bar").setAttribute("stroke-dashoffset", 113.1 * (1 - pct));
+  $("#r-ring").classList.toggle("done", pct >= 1);
+  $("#r-ring-txt").textContent = Math.floor(min);
+  R.book.pos = { ch: R.ch, p };
+}
+let scrollRaf;
+$("#r-scroll").addEventListener("scroll", () => {
+  if (!R) return;
+  R.lastActive = Date.now();
+  cancelAnimationFrame(scrollRaf); scrollRaf = requestAnimationFrame(updateReaderBar);
+}, { passive: true });
+for (const ev of ["pointerdown", "keydown", "touchstart", "wheel"]) document.addEventListener(ev, () => { if (R) R.lastActive = Date.now(); }, { passive: true });
+
+// Only count time while the reader is visible and you've interacted within the last 3 minutes.
+function tick() {
+  if (!R || document.hidden || Date.now() - R.lastActive > 180e3) return;
+  R.session.sec++;
+  if (R.session.sec % 15 === 0) commitSession(false);
+  if (R.session.sec % 5 === 0) updateReaderBar();
+  if (!R.goalHitShown && liveMin() >= settings.goal) {
+    R.goalHitShown = true; celebrate();
+    toast(`Daily goal reached 🎉 Keep going only if you're enjoying it.`, 4200);
+  }
+}
+
+// Fold the running session into today's totals (idempotent: tracks what's already been added).
+function commitSession(final) {
+  if (!R) return;
+  const k = todayKey(), d = days[k] ||= { sec: 0, words: 0 };
+  const addSec = R.session.sec - (R.session.savedSec || 0), addWords = R.session.words - (R.session.savedWords || 0);
+  d.sec += addSec; d.words += addWords;
+  R.session.savedSec = R.session.sec; R.session.savedWords = R.session.words;
+  R.book.lastReadAt = Date.now();
+  saveDays(); saveLibrary();
+  if (final) renderAll();
+}
+
+function gotoChapter(n) {
+  if (!R || n < 0 || n >= R.content.length) return;
+  if (n > R.ch) countVisibleAsRead();
+  R.ch = n; renderChapter(0);
+}
+$("#r-prev").onclick = () => gotoChapter(R.ch - 1);
+$("#r-next").onclick = () => gotoChapter(R.ch + 1);
+$("#r-article").addEventListener("click", async e => {
+  if (e.target.closest("#r-endnext")) gotoChapter(R.ch + 1);
+  if (e.target.closest("#r-finish")) {
+    countVisibleAsRead();
+    R.book.status = "done"; R.book.finishedAt = Date.now();
+    celebrate(); toast("Finished! 🎉 Another one on your shelf.", 3500);
+    closeReader();
+  }
+});
+$("#r-toc").onclick = () => openSheet("Chapters", body => {
+  body.innerHTML = `<div class="toc">${R.content.map((c, i) => `<button class="${i === R.ch ? "cur" : ""}" data-ch="${i}"><span class="n">${i + 1}</span><span>${esc(c.title)}</span></button>`).join("")}</div>`;
+  body.onclick = e => { const b = e.target.closest("[data-ch]"); if (b) { closeSheet(); gotoChapter(+b.dataset.ch); } };
+  setTimeout(() => body.querySelector(".cur")?.scrollIntoView({ block: "center" }), 50);
+});
+$("#r-look").onclick = () => openSheet("Text", body => {
+  body.innerHTML = lookControls();
+  bindLook(body);
+});
+
+function closeReader() {
+  if (!R) return;
+  clearInterval(tickTimer);
+  updateReaderBar();
+  commitSession(true);
+  const s = R.session, book = R.book, chTitle = R.content[R.ch].title;
+  R = null; io?.disconnect();
+  document.querySelector(".recap")?.remove();
+  $("#reader").classList.add("hidden");
+  if (s.sec >= 120) sessionDone(s, book, chTitle);
+}
+$("#r-close").onclick = closeReader;
+document.addEventListener("visibilitychange", () => { if (document.hidden && R) commitSession(false); });
+window.addEventListener("pagehide", () => { if (R) commitSession(false); });
+
+// Session wrap-up: celebrate the minutes, then one-line retrieval practice.
+function sessionDone(s, book, chTitle) {
+  const st = streakInfo();
+  openSheet("Nice reading", body => {
+    body.innerHTML = `<div class="done-hero"><div class="v">${Math.round(s.sec / 60)} min</div>
+      <div class="done-stats"><span>≈ ${Math.max(1, Math.round(s.words / 250))} ${s.words > 375 ? "pages" : "page"}</span><span>${svg("flame")} ${st.count} day streak</span></div></div>
+      <div class="field"><label for="note">One idea worth remembering? <span class="muted">(optional)</span></label>
+      <textarea id="note" placeholder="In your own words…"></textarea>
+      <p class="hint">Recalling what you just read, in your own words, makes it far more likely to stick.</p></div>
+      <div class="row"><button class="btn soft" style="flex:1" data-close>Skip</button><button class="btn accent" style="flex:1" id="note-save">Save note</button></div>`;
+    body.querySelector("#note-save").onclick = () => {
+      const text = body.querySelector("#note").value.trim();
+      if (text) { notes.push({ id: Date.now().toString(36), bookId: book.id, title: book.title, chapter: chTitle, text, date: todayKey() }); saveNotes(); toast("Saved to your notes"); }
+      closeSheet(); renderAll();
+    };
+  });
+}
+
+/* ============================================================
+   Sheets
+   ============================================================ */
+function openSheet(title, build) {
+  closeSheet();
+  const root = $("#sheet-root");
+  root.innerHTML = `<div class="scrim" data-close></div><div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="grab"></div>
+    <div class="sheet-head"><h3></h3><button class="round" data-close aria-label="Close">${svg("x")}</button></div><div class="sheet-body"></div></div>`;
+  root.querySelector("h3").textContent = title;
+  build(root.querySelector(".sheet-body"));
+}
+function closeSheet() { $("#sheet-root").innerHTML = ""; }
+document.addEventListener("click", e => { if (e.target.closest("#sheet-root [data-close]")) closeSheet(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { if ($("#sheet-root").innerHTML) closeSheet(); else if (R) closeReader(); }
+  if (R && !$("#sheet-root").innerHTML && !e.target.matches("input,textarea")) {
+    if (e.key === "ArrowRight") gotoChapter(R.ch + 1);
+    if (e.key === "ArrowLeft") gotoChapter(R.ch - 1);
+  }
+});
+
+/* ---------- Plan (implementation intention) ---------- */
+const ANCHORS = ["After my morning coffee", "On my commute", "After lunch", "After dinner", "In bed before sleep"];
+function planFields() {
+  const p = settings.plan, custom = !ANCHORS.includes(p.anchor);
+  return `<div class="field"><div class="lab">When? Tie it to something you already do</div>
+      <div class="chips" id="anchors">${ANCHORS.map(a => `<button class="chip" aria-pressed="${a === p.anchor}">${a}</button>`).join("")}<button class="chip" data-custom aria-pressed="${custom}">Other…</button></div>
+      <input type="text" id="anchor-custom" class="${custom ? "" : "hidden"}" style="margin-top:10px" placeholder="e.g. When I sit on the train" value="${custom ? esc(p.anchor) : ""}"></div>
+    <div class="field"><label for="plan-place">Where? <span class="muted">(optional)</span></label><input type="text" id="plan-place" placeholder="e.g. on the sofa" value="${esc(p.place)}"></div>
+    <div class="field"><label for="plan-bundle">Make it a treat <span class="muted">(optional)</span></label><input type="text" id="plan-bundle" placeholder="e.g. with a cup of tea" value="${esc(p.bundle)}">
+      <p class="hint">Pairing reading with something you enjoy makes you look forward to it.</p></div>
+    <div class="field"><label for="plan-time">Usual time <span class="muted">(for a calendar reminder)</span></label><input type="time" id="plan-time" value="${esc(p.time)}"></div>`;
+}
+function bindPlan(root) {
+  root.querySelector("#anchors").onclick = e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    root.querySelectorAll("#anchors .chip").forEach(c => c.setAttribute("aria-pressed", c === b));
+    root.querySelector("#anchor-custom").classList.toggle("hidden", !b.dataset.custom);
+    if (b.dataset.custom) root.querySelector("#anchor-custom").focus();
+    root.dispatchEvent(new Event("input"));
+  };
+}
+function readPlan(root) {
+  const on = root.querySelector("#anchors .chip[aria-pressed=true]");
+  const anchor = on?.dataset.custom ? (root.querySelector("#anchor-custom").value.trim() || "Every day") : on?.textContent || settings.plan.anchor;
+  return { anchor, place: root.querySelector("#plan-place").value.trim(), bundle: root.querySelector("#plan-bundle").value.trim(), time: root.querySelector("#plan-time").value };
+}
+function goalOpts(cur) {
+  return `<div class="goal-opts" id="goals">${[5, 10, 15, 20, 30].map(m => `<button data-goal="${m}" aria-pressed="${m === cur}"><b>${m}</b><small>min</small></button>`).join("")}</div>`;
+}
+function planSheet() {
+  openSheet("Reading plan", body => {
+    body.innerHTML = `<div class="field"><div class="lab">Daily goal</div>${goalOpts(settings.goal)}<p class="hint">Start smaller than you think. You can always read more, and an easy goal you hit every day builds the habit faster.</p></div>
+      ${planFields()}<button class="btn accent block" id="plan-save">Save plan</button>`;
+    bindPlan(body);
+    body.querySelector("#goals").onclick = e => { const b = e.target.closest("[data-goal]"); if (!b) return; body.querySelectorAll("#goals button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+    body.querySelector("#plan-save").onclick = () => {
+      settings.goal = +body.querySelector("#goals [aria-pressed=true]").dataset.goal;
+      settings.plan = readPlan(body); settings.freshSeen = todayKey();
+      saveSettings(); closeSheet(); renderAll(); toast("Plan saved");
+    };
+  });
+}
+
+// A recurring calendar event gives real phone reminders without a server.
+function downloadIcs() {
+  const p = settings.plan, [hh, mm] = (p.time || "20:30").split(":");
+  const d = new Date(); const date = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const desc = `${p.anchor}, read for ${settings.goal} minutes${p.place ? " " + p.place : ""}${p.bundle ? ", " + p.bundle : ""}.`;
+  const icsEsc = s => s.replace(/[\\;,]/g, m => "\\" + m);
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Little Pages//EN", "BEGIN:VEVENT",
+    `UID:little-pages-${date}@local`, `DTSTAMP:${stamp}`, `DTSTART:${date}T${hh}${mm}00`, `DURATION:PT${settings.goal}M`,
+    "RRULE:FREQ=DAILY", "SUMMARY:📖 Reading time", `DESCRIPTION:${icsEsc(desc)}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Time for a few pages", "TRIGGER:PT0M", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  a.download = "reading-time.ics"; document.body.appendChild(a); a.click(); a.remove();
+  toast("Open the downloaded file to add it to your calendar", 3500);
+}
+
+/* ---------- Settings + look ---------- */
+function lookControls() {
+  return `<div class="field"><div class="lab">Theme</div><div class="chips" id="themes">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="chip" data-theme="${k}" aria-pressed="${settings.theme === k}">${l}</button>`).join("")}</div></div>
+    <div class="field"><label for="size">Text size</label><input type="range" id="size" min="15" max="28" value="${settings.size}" style="width:100%;accent-color:var(--accent)"></div>`;
+}
+function bindLook(root) {
+  root.querySelector("#themes").onclick = e => { const b = e.target.closest("[data-theme]"); if (!b) return; settings.theme = b.dataset.theme; saveSettings(); applyLook(); root.querySelectorAll("#themes .chip").forEach(c => c.setAttribute("aria-pressed", c === b)); };
+  root.querySelector("#size").oninput = e => { settings.size = +e.target.value; saveSettings(); applyLook(); };
+}
+function applyLook() {
+  document.documentElement.style.setProperty("--font-size", settings.size + "px");
+  if (settings.theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", settings.theme);
+  requestAnimationFrame(() => document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
+}
+function settingsSheet() {
+  openSheet("Settings", body => {
+    body.innerHTML = `${lookControls()}
+      <button class="list-btn" data-s="plan">${svg("calendar")} Reading plan & goal<span class="grow"></span><span class="muted small">${settings.goal} min</span></button>
+      <button class="list-btn" data-s="science">${svg("spark")} The science behind Little Pages</button>
+      <button class="list-btn" data-s="export">Back up reading history</button>
+      <button class="list-btn" data-s="import">Restore a backup</button>
+      ${installEvent ? `<button class="list-btn" data-s="install">Install app</button>` : ""}
+      ${isIOS && !standalone ? `<p class="hint">To install on iPhone: tap Share, then “Add to Home Screen”.</p>` : ""}
+      <p class="hint">Everything (books, notes, history) stays on this device. Backups include history, notes and settings, not the books themselves.</p>`;
+    bindLook(body);
+    body.onclick = async e => {
+      const s = e.target.closest("[data-s]")?.dataset.s; if (!s) return;
+      if (s === "plan") planSheet();
+      if (s === "science") scienceSheet();
+      if (s === "install") { installEvent.prompt(); await installEvent.userChoice; installEvent = null; closeSheet(); }
+      if (s === "export") {
+        const data = JSON.stringify({ format: "little-pages-backup", version: 1, settings, days, notes, library: library.map(({ cover, ...b }) => b) });
+        const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+        a.download = `little-pages-backup-${todayKey()}.json`; document.body.appendChild(a); a.click(); a.remove();
+      }
+      if (s === "import") {
+        const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json,application/json";
+        inp.onchange = async () => {
+          try {
+            const d = JSON.parse(await inp.files[0].text());
+            if (d.format !== "little-pages-backup") throw new Error("not a Little Pages backup");
+            settings = { ...DEFAULTS, ...d.settings }; days = { ...d.days, ...days };
+            for (const k of Object.keys(d.days)) days[k] = { sec: Math.max(d.days[k].sec, days[k]?.sec || 0), words: Math.max(d.days[k].words || 0, days[k]?.words || 0) };
+            const ids = new Set(notes.map(n => n.id)); notes.push(...(d.notes || []).filter(n => !ids.has(n.id)));
+            await Promise.all([saveSettings(), saveDays(), saveNotes()]);
+            applyLook(); closeSheet(); renderAll(); toast("Backup restored");
+          } catch (err) { toast("Couldn't restore: " + err.message, 4000); }
+        };
+        inp.click();
+      }
+    };
+  });
+}
+
+function scienceSheet() {
+  const items = [
+    ["A plan for when and where", "Deciding in advance “after X, I will read” roughly doubles follow-through compared with good intentions alone. That's why your plan is tied to something you already do.", "Gollwitzer & Sheeran (2006), meta-analysis of 94 studies on implementation intentions."],
+    ["Start tiny", "A goal small enough to do on a bad day keeps the habit alive. “Just one page” lowers the barrier to starting, and starting is the hard part.", "Fogg (2019), Tiny Habits."],
+    ["66 days, and missing one is fine", "In a study of everyday habits, automaticity took a median of 66 days to plateau, and missing a single day did not meaningfully set people back. Hence the habit journey and a streak that forgives one rest day.", "Lally, van Jaarsveld, Potts & Wardle (2010), European Journal of Social Psychology."],
+    ["No all-or-nothing", "When people “break” a strict rule they often give up entirely (the “what-the-hell” effect). A forgiving streak avoids that trap.", "Polivy & Herman (1985) on rule-breaking and disinhibition."],
+    ["Seeing the finish line", "People speed up as a goal gets closer. Your daily ring and “X min left in chapter” make the finish line visible and the next step feel small.", "Kivetz, Urminsky & Zheng (2006), the goal-gradient effect."],
+    ["Tracking progress", "Monitoring progress toward a goal reliably improves the odds of reaching it, especially when the progress is recorded.", "Harkin et al. (2016), Psychological Bulletin, meta-analysis of 138 studies."],
+    ["Fresh starts", "New weeks, new months and comebacks feel like a clean slate, and people are more likely to act on goals then. You'll get a nudge on those days.", "Dai, Milkman & Riis (2014), the fresh-start effect."],
+    ["Make it a treat", "Pairing a “should” with a “want” (like reading with a favourite drink) increases how often people do it.", "Milkman, Minson & Volpp (2014), temptation bundling."],
+    ["Recall to remember", "Retrieving what you've learned, even briefly, improves long-term memory more than re-reading. Hence the one-line note after each session.", "Roediger & Karpicke (2006), the testing effect."],
+    ["Your choice, always", "Habits stick when they feel freely chosen. You set the goal and the plan, and you can drop a book you don't enjoy without guilt.", "Deci & Ryan, self-determination theory (2000)."],
+  ];
+  openSheet("Why it works", body => {
+    body.innerHTML = `<div class="science">${items.map(([h, p, c]) => `<h4>${h}</h4><p>${p}</p><cite>${c}</cite>`).join("")}</div>`;
+  });
+}
+
+/* ============================================================
+   Onboarding
+   ============================================================ */
+function onboarding(step = 0) {
+  const ob = $("#onboard"); ob.classList.remove("hidden");
+  const steps = `<div class="steps">${[0, 1, 2].map(i => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>`;
+  if (step === 0) {
+    ob.innerHTML = `<div class="wrap">${steps}<h2>How long would you like to read each day?</h2>
+      <p class="lede">Pick something that feels almost too easy. Showing up every day matters more than reading a lot.</p>
+      ${goalOpts(settings.goal)}
+      <div class="ob-foot"><button class="btn accent" id="ob-next">Continue</button></div></div>`;
+    ob.querySelector("#goals").onclick = e => { const b = e.target.closest("[data-goal]"); if (!b) return; ob.querySelectorAll("#goals button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+    ob.querySelector("#ob-next").onclick = () => { settings.goal = +ob.querySelector("#goals [aria-pressed=true]").dataset.goal; onboarding(1); };
+  } else if (step === 1) {
+    ob.innerHTML = `<div class="wrap">${steps}<h2>When and where will you read?</h2>
+      <p class="lede">Linking reading to something you already do each day turns “someday” into a plan.</p>
+      ${planFields()}<div class="preview" id="preview"></div>
+      <div class="ob-foot"><button class="btn soft" id="ob-back">Back</button><button class="btn accent" id="ob-next">Continue</button></div></div>`;
+    bindPlan(ob);
+    const prev = () => { const p = readPlan(ob); ob.querySelector("#preview").innerHTML = `${esc(p.anchor)}, I'll read for <em style="color:var(--accent)">${settings.goal} minutes</em>${p.place ? " " + esc(p.place) : ""}${p.bundle ? ", " + esc(p.bundle) : ""}.`; };
+    ob.addEventListener("input", prev); prev();
+    ob.querySelector("#ob-back").onclick = () => onboarding(0);
+    ob.querySelector("#ob-next").onclick = () => { settings.plan = readPlan(ob); onboarding(2); };
+  } else {
+    ob.innerHTML = `<div class="wrap">${steps}<h2>Add your first book</h2>
+      <p class="lede">Choose an EPUB, PDF or text file from your device. Books stay private on this device.</p>
+      <div class="ob-foot" style="flex-direction:column"><button class="btn accent" id="ob-import">${svg("plus")} Choose books</button>
+      <button class="btn soft" id="ob-skip">I'll add one later</button></div>
+      <p class="hint" style="margin-top:22px;text-align:center">Tip: add a daily reminder from your plan on the Today screen.</p></div>`;
+    const finish = () => { settings.onboarded = true; settings.freshSeen = todayKey(); saveSettings(); ob.classList.add("hidden"); renderAll(); };
+    ob.querySelector("#ob-import").onclick = () => { finish(); pickFiles(); };
+    ob.querySelector("#ob-skip").onclick = finish;
+  }
+}
+
+/* ============================================================
+   Celebration
+   ============================================================ */
+function celebrate() {
+  const colors = ["#e0612f", "#b5345c", "#f2b14b", "#2f8f6b"];
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement("i"); p.className = "burst";
+    const a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 140;
+    p.style.cssText = `left:50%;top:40%;background:${colors[i % 4]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d + 60}px;--r:${Math.random() * 540}deg`;
+    document.body.appendChild(p); setTimeout(() => p.remove(), 1200);
+  }
+  navigator.vibrate?.(30);
+}
+
+/* ============================================================
+   Tabs + global clicks
+   ============================================================ */
+let tab = "today";
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll(".tabbar button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  for (const v of ["today", "library", "stats"]) $("#view-" + v).classList.toggle("hidden", v !== t);
+  renderAll();
+}
+document.querySelector(".tabbar").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); };
+function renderAll() { if (tab === "today") renderToday(); if (tab === "library") renderLibrary(); if (tab === "stats") renderStats(); }
+
+document.addEventListener("click", e => {
+  const read = e.target.closest("[data-read]");
+  if (read) return openBook(read.dataset.read, !!read.dataset.one);
+  const bk = e.target.closest("[data-book]"); if (bk) return bookSheet(bk.dataset.book);
+  const sh = e.target.closest("[data-shelf]"); if (sh) { shelf = sh.dataset.shelf; return renderLibrary(); }
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if (act === "import") pickFiles();
+  if (act === "settings") settingsSheet();
+  if (act === "plan") planSheet();
+  if (act === "science") scienceSheet();
+  if (act === "ics") downloadIcs();
+  if (act === "fresh-x") { settings.freshSeen = todayKey(); saveSettings(); renderToday(); }
+});
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.files.length) importFiles(e.dataTransfer.files); });
+
+/* ============================================================
+   PWA: install + offline
+   ============================================================ */
+let installEvent = null;
+const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; });
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// Ask the browser not to evict books under storage pressure.
+navigator.storage?.persist?.().catch(() => {});
+
+// Re-render when the day rolls over or the app comes back to the foreground.
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !R) renderAll(); });
+
+(async () => {
+  const [s, l, d, n] = await Promise.all([dbGet("settings"), dbGet("library"), dbGet("days"), dbGet("notes")]);
+  settings = { ...DEFAULTS, ...(s || {}), plan: { ...DEFAULTS.plan, ...(s?.plan || {}) } };
+  library = l || []; days = d || {}; notes = n || [];
+  applyLook();
+  renderAll();
+  if (!settings.onboarded) onboarding(0);
+})();
+</script>
+</body>
+</html>
