@@ -3,261 +3,466 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5f1">
   <title>Tao Reader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
+    @property --hue { syntax: "<number>"; inherits: true; initial-value: 160; }
+
     :root {
-      --bg: #f7f3ea; --surface: #fffdf8; --fg: #2a2620; --muted: #7a7266;
-      --line: #e4dccd; --accent: #8a5a2b; --accent-fg: #fff; --hl: #f3e2c2;
-      --shadow: 0 10px 40px rgba(60, 40, 10, .15);
+      --hue: 160;
+      --bg: #f6f5f1; --ink: #1b1a17; --ink-2: #4a463f; --muted: #8b857a;
+      --hairline: rgba(27, 26, 23, .08);
+      --glass: rgba(255, 255, 255, .58); --glass-strong: rgba(255, 255, 255, .82);
+      --glass-edge: rgba(255, 255, 255, .75);
+      --accent: hsl(var(--hue) 55% 34%); --accent-ink: #fff;
+      --accent-soft: hsl(var(--hue) 55% 34% / .1);
+      --orb-a: .38; --orb-b: .26;
+      --shadow: 0 1px 1px rgba(0,0,0,.03), 0 8px 24px -6px rgba(30, 25, 10, .14), 0 24px 48px -12px rgba(30, 25, 10, .12);
       --font-size: 20px;
+      --ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --read: "Newsreader", "Iowan Old Style", Georgia, serif;
+      --display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+      transition: --hue 1.2s var(--ease);
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]):not([data-theme="sepia"]) {
-        --bg: #15140f; --surface: #1e1c17; --fg: #e9e3d6; --muted: #9b9384;
-        --line: #343028; --accent: #d9a46a; --accent-fg: #1a1408; --hl: #3a3020;
-        --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+        --bg: #0c0d0c; --ink: #eceae4; --ink-2: #c4c0b6; --muted: #8a867d;
+        --hairline: rgba(255, 255, 255, .08);
+        --glass: rgba(30, 32, 31, .55); --glass-strong: rgba(36, 38, 37, .86);
+        --glass-edge: rgba(255, 255, 255, .09);
+        --accent: hsl(var(--hue) 60% 68%); --accent-ink: #0c0d0c;
+        --accent-soft: hsl(var(--hue) 60% 68% / .12);
+        --orb-a: .2; --orb-b: .14;
+        --shadow: 0 8px 32px -8px rgba(0, 0, 0, .6);
       }
     }
     :root[data-theme="dark"] {
-      --bg: #15140f; --surface: #1e1c17; --fg: #e9e3d6; --muted: #9b9384;
-      --line: #343028; --accent: #d9a46a; --accent-fg: #1a1408; --hl: #3a3020;
-      --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+      --bg: #0c0d0c; --ink: #eceae4; --ink-2: #c4c0b6; --muted: #8a867d;
+      --hairline: rgba(255, 255, 255, .08);
+      --glass: rgba(30, 32, 31, .55); --glass-strong: rgba(36, 38, 37, .86);
+      --glass-edge: rgba(255, 255, 255, .09);
+      --accent: hsl(var(--hue) 60% 68%); --accent-ink: #0c0d0c;
+      --accent-soft: hsl(var(--hue) 60% 68% / .12);
+      --orb-a: .2; --orb-b: .14;
+      --shadow: 0 8px 32px -8px rgba(0, 0, 0, .6);
     }
     :root[data-theme="sepia"] {
-      --bg: #efe2c6; --surface: #f6ebd3; --fg: #3b2f1e; --muted: #806a4c;
-      --line: #dcc9a3; --accent: #7a4b1e; --hl: #e6cf9f;
+      --bg: #f1e7d3; --ink: #3a2e1f; --ink-2: #5b4a34; --muted: #8f7a5c;
+      --hairline: rgba(58, 46, 31, .1);
+      --glass: rgba(250, 242, 226, .6); --glass-strong: rgba(250, 242, 226, .88);
+      --orb-a: .22; --orb-b: .16;
     }
+
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; }
     body {
-      background: var(--bg); color: var(--fg);
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      -webkit-tap-highlight-color: transparent;
+      background: var(--bg); color: var(--ink); font-family: var(--ui);
+      -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
     }
-    button { font: inherit; color: inherit; cursor: pointer; }
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
     .hidden { display: none !important; }
+    svg.i { width: 20px; height: 20px; flex: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
 
-    /* ---------- Welcome / loader ---------- */
-    #welcome { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; }
-    .welcome-card { max-width: 480px; text-align: center; }
-    .welcome-card h1 { font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; font-size: 2.4rem; margin: .2em 0; }
-    .welcome-card p { color: var(--muted); line-height: 1.5; }
-    .yin { font-size: 3rem; }
-    #drop {
-      margin: 24px 0; padding: 32px 16px; border: 2px dashed var(--line); border-radius: 16px;
-      background: var(--surface); transition: border-color .15s, transform .15s;
+    /* Ambient colour field that shifts with each chapter */
+    .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .ambient::before, .ambient::after {
+      content: ""; position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(90px);
     }
-    #drop.over { border-color: var(--accent); transform: scale(1.02); }
+    .ambient::before { top: -35vmax; left: -20vmax; background: hsl(var(--hue) 75% 62% / var(--orb-a)); }
+    .ambient::after { bottom: -40vmax; right: -25vmax; background: hsl(calc(var(--hue) + 55) 80% 64% / var(--orb-b)); }
+
+    .glass {
+      background: var(--glass); border: 1px solid var(--glass-edge);
+      backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      box-shadow: var(--shadow);
+    }
+
+    /* ---------- Welcome ---------- */
+    #welcome { position: relative; z-index: 1; height: 100%; overflow-y: auto; display: grid; place-items: center; padding: 32px 16px; }
+    .hero { width: 100%; max-width: 440px; text-align: center; }
+    .mark {
+      width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 20px; display: grid; place-items: center;
+      background: linear-gradient(145deg, hsl(var(--hue) 55% 40%), hsl(calc(var(--hue) + 50) 60% 45%));
+      color: #fff; box-shadow: 0 12px 32px -8px hsl(var(--hue) 60% 30% / .5);
+    }
+    .mark svg { width: 34px; height: 34px; }
+    .hero h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 12vw, 4.2rem); line-height: 1; margin: 0; letter-spacing: -.01em; }
+    .hero h1 em { color: var(--accent); }
+    .hero .lede { color: var(--ink-2); font-size: 1.02rem; line-height: 1.55; margin: 14px auto 28px; max-width: 34ch; }
+    #drop { border-radius: 28px; padding: 28px 20px; transition: transform .25s var(--ease), border-color .2s; }
+    #drop.over { transform: scale(1.02); border-color: var(--accent); }
+    .drop-icon { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+    #drop p { margin: 0 0 16px; color: var(--ink-2); }
     .btn {
-      border: 0; border-radius: 999px; padding: 10px 20px; background: var(--accent); color: var(--accent-fg);
-      font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 22px;
+      border-radius: 999px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: .95rem;
+      transition: transform .15s var(--ease), opacity .15s;
     }
-    .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
-    .small { font-size: .82rem; color: var(--muted); }
-    a { color: var(--accent); }
+    .btn:active { transform: scale(.96); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0 16px; }
+    .chip { font-size: .8rem; font-weight: 500; padding: 7px 12px; border-radius: 999px; color: var(--ink-2); }
+    .fine { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+    .fine a { color: inherit; }
 
-    /* ---------- Reader shell ---------- */
-    #reader { display: flex; flex-direction: column; height: 100%; }
-    header {
-      display: flex; align-items: center; gap: 4px; padding: 8px 12px;
-      padding-top: max(8px, env(safe-area-inset-top));
-      border-bottom: 1px solid var(--line); background: var(--bg); position: relative; z-index: 2;
-    }
-    .icon-btn {
-      background: transparent; border: 0; border-radius: 10px; width: 40px; height: 40px;
-      display: inline-grid; place-items: center; font-size: 1.15rem; flex: none;
-    }
-    .icon-btn:hover { background: var(--line); }
-    .icon-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
-    .book-title { flex: 1; min-width: 0; font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: none; }
-    .seg button { border: 0; background: transparent; padding: 6px 10px; font-size: .78rem; font-weight: 600; }
-    .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
-    #progress { height: 3px; background: var(--line); }
-    #progress div { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+    /* ---------- Reader ---------- */
+    #reader { position: relative; z-index: 1; height: 100%; }
+    #scroller { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+    .topfade { position: fixed; z-index: 4; top: 0; left: 0; right: 0; height: calc(84px + env(safe-area-inset-top)); pointer-events: none;
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      -webkit-mask-image: linear-gradient(#000 45%, transparent); mask-image: linear-gradient(#000 45%, transparent); }
+    #readbar { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--accent); z-index: 6; transition: width .1s linear; }
 
-    #scroller { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    article { max-width: 680px; margin: 0 auto; padding: 40px 16px 80px; }
-    .chap-num { font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); text-align: center; }
-    article h2 {
-      font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; text-align: center;
-      font-size: calc(var(--font-size) * 1.6); margin: .3em 0 1.2em; line-height: 1.2;
+    .topbar {
+      position: fixed; z-index: 5; top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; pointer-events: none;
     }
-    article h2 .fr { display: block; font-size: .6em; color: var(--muted); font-style: italic; margin-top: .3em; }
+    .topbar > * { pointer-events: auto; }
+    .round {
+      width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
+      transition: transform .15s var(--ease);
+    }
+    .round:active { transform: scale(.92); }
+    .seg { display: inline-flex; padding: 4px; border-radius: 999px; gap: 2px; position: relative; }
+    .seg button {
+      height: 36px; padding: 0 14px; border-radius: 999px; font-size: .8rem; font-weight: 600; color: var(--muted);
+      transition: background .25s var(--ease), color .25s;
+    }
+    .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+    article { max-width: 640px; margin: 0 auto; padding: calc(96px + env(safe-area-inset-top)) 20px calc(190px + env(safe-area-inset-bottom)); }
+    .eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .numeral {
+      font-family: var(--display); font-size: clamp(6rem, 26vw, 9.5rem); line-height: .85; margin: 8px 0 4px; letter-spacing: -.03em;
+      background: linear-gradient(135deg, hsl(var(--hue) 60% 42%), hsl(calc(var(--hue) + 55) 70% 58%));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    article h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2.2rem, 8vw, 3rem); line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+    article h2 .fr { display: block; font-style: italic; color: var(--muted); font-size: .62em; margin-top: 8px; }
+    .meta { display: flex; gap: 6px; align-items: center; margin: 18px 0 36px; font-size: .82rem; color: var(--muted); }
+    .meta .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
     .para {
-      font-family: Georgia, "Iowan Old Style", serif; font-size: var(--font-size); line-height: 1.65;
-      margin: 0 0 1em; padding: 4px 8px; margin-left: -8px; margin-right: -8px; border-radius: 8px;
-      transition: background .2s;
+      font-family: var(--read); font-size: var(--font-size); line-height: 1.7; color: var(--ink);
+      margin: 0 -12px 1.1em; padding: 6px 12px; border-radius: 14px; transition: background .3s var(--ease);
+      font-optical-sizing: auto;
     }
-    .para.speaking { background: var(--hl); }
-    .para .fr { display: block; color: var(--muted); font-style: italic; margin-top: .35em; }
-    .mode-fr .para .en, .mode-fr h2 .en { display: none; }
-    .mode-fr .para .fr, .mode-fr h2 .fr { color: var(--fg); font-style: normal; margin-top: 0; font-size: 1em; }
-    .mode-fr h2 .fr { font-size: 1em; }
+    .para.speaking { background: var(--accent-soft); }
+    .para .fr {
+      display: block; margin-top: .55em; padding-left: 14px; border-left: 2px solid var(--accent);
+      color: var(--ink-2); font-size: .93em;
+    }
+    .mode-fr .en { display: none; }
+    .mode-fr .para .fr { margin-top: 0; padding-left: 0; border: 0; color: var(--ink); font-size: 1em; }
+    .mode-fr h2 .fr { font-style: normal; color: var(--ink); font-size: 1em; margin: 0; }
     .mode-en .fr { display: none; }
-    .fr.pending { opacity: .5; }
-
-    footer {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom));
-      border-top: 1px solid var(--line); background: var(--bg);
+    .fr.pending { opacity: .45; }
+    .endnav { display: flex; gap: 12px; margin-top: 48px; }
+    .endnav button {
+      flex: 1; text-align: left; padding: 16px 18px; border-radius: 20px; min-width: 0;
+      transition: transform .15s var(--ease);
     }
-    .nav-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 10px 16px; font-weight: 600; min-width: 96px; }
-    .nav-btn:disabled { opacity: .35; cursor: default; }
-    #counter { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .endnav button:active { transform: scale(.98); }
+    .endnav button:last-child { text-align: right; }
+    .endnav small { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .endnav span { font-family: var(--display); font-size: 1.25rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ---------- Audio bar ---------- */
-    #audiobar {
-      display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line);
-      background: var(--surface); font-size: .85rem;
+    /* Floating dock */
+    .dock-wrap {
+      position: fixed; z-index: 5; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; padding: 0 12px;
     }
-    #audiobar .grow { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #audiobar select { max-width: 90px; }
+    .dock-wrap > * { pointer-events: auto; }
+    .dock { display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px; }
+    .dock .round { width: 48px; height: 48px; }
+    .dock .round:disabled { opacity: .3; cursor: default; }
+    .dock .play {
+      width: 58px; height: 58px; background: var(--accent); color: var(--accent-ink); margin: 0 4px;
+      box-shadow: 0 8px 20px -6px hsl(var(--hue) 60% 35% / .55);
+    }
+    .dock .play svg { width: 24px; height: 24px; }
+    .count { font-size: .78rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 52px; text-align: center; }
 
-    /* ---------- Drawer + modals ---------- */
-    .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 10; animation: fade .15s; }
+    #nowplaying {
+      display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px;
+      width: min(420px, 100%); position: relative; overflow: hidden; animation: rise .3s var(--ease);
+    }
+    @keyframes rise { from { transform: translateY(12px); opacity: 0; } }
+    #np-progress { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--accent); width: 0; transition: width .4s var(--ease); }
+    .eq { display: flex; gap: 2px; align-items: flex-end; height: 14px; color: var(--accent); }
+    .eq span { width: 3px; border-radius: 2px; background: currentColor; animation: eq 1s ease-in-out infinite; }
+    .eq span:nth-child(2) { animation-delay: -.3s; } .eq span:nth-child(3) { animation-delay: -.6s; }
+    @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+    .paused .eq span { animation-play-state: paused; }
+    #np-status { flex: 1; min-width: 0; font-size: .82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #np-rate {
+      height: 32px; padding: 0 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+      font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    }
+    #np-stop { width: 36px; height: 36px; }
+
+    /* ---------- Sheets ---------- */
+    .scrim { position: fixed; inset: 0; z-index: 20; background: rgba(10, 10, 8, .28); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); animation: fade .25s var(--ease); }
     @keyframes fade { from { opacity: 0; } }
-    #drawer {
-      position: fixed; top: 0; bottom: 0; left: 0; width: min(340px, 88vw); background: var(--surface);
-      z-index: 11; display: flex; flex-direction: column; box-shadow: var(--shadow); animation: slide .2s;
+    .sheet {
+      position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; max-height: 88vh; display: flex; flex-direction: column;
+      background: var(--glass-strong); border-radius: 28px 28px 0 0; padding-bottom: env(safe-area-inset-bottom);
+      backdrop-filter: blur(30px) saturate(1.6); -webkit-backdrop-filter: blur(30px) saturate(1.6);
+      box-shadow: 0 -12px 48px -12px rgba(0,0,0,.25); animation: up .35s var(--ease);
     }
-    @keyframes slide { from { transform: translateX(-100%); } }
-    #drawer .top { padding: 16px; border-bottom: 1px solid var(--line); }
-    #drawer input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); font: inherit; }
-    #toc { list-style: none; margin: 0; padding: 8px; overflow-y: auto; flex: 1; }
-    #toc button { width: 100%; text-align: left; background: transparent; border: 0; padding: 10px 12px; border-radius: 10px; display: flex; gap: 10px; }
-    #toc button:hover { background: var(--bg); }
-    #toc button.current { background: var(--hl); }
-    #toc .n { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+    @keyframes up { from { transform: translateY(100%); } }
+    .grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--hairline); margin: 8px auto 0; flex: none; }
+    @media (min-width: 820px) {
+      .sheet { left: auto; top: 16px; right: 16px; bottom: 16px; width: 400px; max-height: none; border-radius: 28px; animation: side .35s var(--ease); }
+      @keyframes side { from { transform: translateX(110%); } }
+      .grabber { display: none; }
+    }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px; flex: none; }
+    .sheet-head h3 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; margin: 0; }
+    .sheet-head .round { width: 36px; height: 36px; background: var(--hairline); }
+    .sheet-head .round svg { width: 16px; height: 16px; }
+    .sheet-body { overflow-y: auto; padding: 4px 12px 20px; flex: 1; }
 
-    .modal {
-      position: fixed; z-index: 11; left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto;
-      background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 28px 24px; animation: pop .18s;
+    .search { display: flex; align-items: center; gap: 8px; margin: 4px 8px 12px; padding: 0 14px; height: 44px; border-radius: 14px; background: var(--hairline); color: var(--muted); }
+    .search input { flex: 1; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: .95rem; outline: none; min-width: 0; }
+    .toc-progress { margin: 0 8px 12px; font-size: .8rem; color: var(--muted); }
+    .toc-progress .bar { height: 4px; border-radius: 2px; background: var(--hairline); margin-top: 8px; overflow: hidden; }
+    .toc-progress .bar div { height: 100%; background: var(--accent); border-radius: 2px; }
+    #toc { list-style: none; margin: 0; padding: 0; }
+    #toc button {
+      width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; padding: 10px 10px; border-radius: 14px;
+      transition: background .15s;
     }
-    @keyframes pop { from { transform: translate(-50%, -46%); opacity: 0; } }
-    .modal h3 { margin: 0 0 16px; font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); text-align: center; }
-    blockquote.verse {
-      margin: 0; font-family: Georgia, serif; font-size: 1.3rem; line-height: 1.55; text-align: center;
+    #toc button:hover { background: var(--hairline); }
+    #toc .n {
+      width: 36px; height: 36px; flex: none; border-radius: 12px; display: grid; place-items: center;
+      font-size: .82rem; font-weight: 600; font-variant-numeric: tabular-nums; background: var(--hairline); color: var(--ink-2);
     }
-    blockquote.verse .fr { display: block; margin-top: .8em; color: var(--muted); font-style: italic; font-size: .9em; }
-    .verse-src { text-align: center; color: var(--muted); margin: 16px 0 20px; font-size: .9rem; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .settings label { display: block; margin: 14px 0 6px; font-size: .85rem; font-weight: 600; }
-    .settings select, .settings input[type="email"] { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; }
-    .settings input[type="range"] { width: 100%; }
+    #toc .t { flex: 1; min-width: 0; font-size: .95rem; font-weight: 500; }
+    #toc .seen { color: var(--accent); opacity: 0; }
+    #toc .visited .seen { opacity: 1; }
+    #toc .current { background: var(--accent-soft); }
+    #toc .current .n { background: var(--accent); color: var(--accent-ink); }
+
+    .group { margin: 8px 8px 20px; }
+    .group-label { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 4px 8px; }
+    .card { border-radius: 18px; background: var(--hairline); padding: 4px 16px; }
+    .card .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
+    .card .row + .row { border-top: 1px solid var(--hairline); }
+    .card label { font-size: .92rem; font-weight: 500; flex: none; }
+    .card select, .card input[type="email"] {
+      flex: 1; min-width: 0; max-width: 62%; border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: .9rem; text-align: right; outline: none;
+      text-overflow: ellipsis;
+    }
+    .themes { display: flex; gap: 10px; justify-content: space-between; padding: 12px 0; }
+    .themes button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .75rem; font-weight: 500; color: var(--muted); }
+    .swatch { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--hairline); box-shadow: inset 0 0 0 3px var(--bg); }
+    .themes [aria-pressed="true"] { color: var(--ink); }
+    .themes [aria-pressed="true"] .swatch { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .size-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; font-family: var(--read); }
+    .size-row input { flex: 1; accent-color: var(--accent); }
+    .hint { font-size: .78rem; color: var(--muted); margin: 8px 4px 0; line-height: 1.45; }
+    .danger { width: 100%; height: 52px; border-radius: 18px; background: var(--hairline); color: #d2463a; font-weight: 600; }
+
+    /* ---------- Verse story card ---------- */
+    #verse-wrap { position: fixed; inset: 0; z-index: 22; display: grid; place-items: center; padding: 20px 16px; }
+    #verse-wrap .scrim { background: rgba(8, 8, 6, .55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .story { position: relative; z-index: 23; width: min(420px, 100%); display: flex; flex-direction: column; gap: 18px; animation: pop .4s var(--ease); }
+    @keyframes pop { from { transform: scale(.94) translateY(10px); opacity: 0; } }
+    .story-card {
+      --vh: 160; position: relative; overflow: hidden; border-radius: 32px; padding: 32px 28px; min-height: min(520px, 62vh);
+      display: flex; flex-direction: column; justify-content: space-between; color: #fbf9f4;
+      background:
+        radial-gradient(120% 80% at 0% 0%, hsl(var(--vh) 70% 45% / .9), transparent 60%),
+        radial-gradient(100% 80% at 100% 100%, hsl(calc(var(--vh) + 60) 75% 50% / .8), transparent 60%),
+        hsl(calc(var(--vh) + 20) 45% 14%);
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,.6);
+    }
+    .story-card .eyebrow { color: rgba(255,255,255,.7); display: flex; justify-content: space-between; align-items: center; }
+    .story-card .close { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; color: #fff; }
+    .story-card .close svg { width: 16px; height: 16px; }
+    .quote { font-family: var(--display); font-size: 2rem; line-height: 1.18; margin: 28px 0; letter-spacing: -.005em; }
+    .quote.long { font-size: 1.5rem; } .quote.xlong { font-size: 1.22rem; line-height: 1.3; }
+    .quote .fr { display: block; margin-top: 18px; font-style: italic; font-size: .72em; color: rgba(255,255,255,.72); }
+    .story-src { font-size: .85rem; font-weight: 500; color: rgba(255,255,255,.75); }
+    .story-src b { display: block; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .story-actions { display: flex; justify-content: center; gap: 18px; }
+    .story-actions button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .74rem; font-weight: 500; color: rgba(255,255,255,.85); }
+    .story-actions .round { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.14); color: #fff; width: 52px; height: 52px; }
+    .story-actions .primary .round { background: #fff; color: #111; }
+
     #toast {
-      position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 20;
-      background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: .85rem;
-      max-width: calc(100vw - 32px); text-align: center; transition: opacity .2s; pointer-events: none;
+      position: fixed; z-index: 40; left: 50%; top: max(70px, calc(env(safe-area-inset-top) + 64px)); transform: translate(-50%, -8px);
+      padding: 10px 18px; border-radius: 999px; font-size: .85rem; font-weight: 500; opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s var(--ease); max-width: calc(100vw - 32px); text-align: center;
     }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 380px) { .seg button { padding: 0 10px; } .count { min-width: 40px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <!-- Welcome -->
 <section id="welcome" class="hidden">
-  <div class="welcome-card">
-    <div class="yin">☯</div>
-    <h1>Tao Reader</h1>
-    <p>A calm, chapter-by-chapter reader with random verses, French translation and read-aloud.</p>
-    <div id="drop">
-      <p style="margin-top:0">Drop your <strong>.epub</strong> here</p>
+  <div class="hero">
+    <div class="mark"><i data-icon="yin"></i></div>
+    <h1><em>Tao</em> Reader</h1>
+    <p class="lede">A quiet place to read, listen and reflect, one chapter at a time.</p>
+    <div id="drop" class="glass">
+      <div class="drop-icon"><i data-icon="upload"></i></div>
+      <p>Drop your <strong>EPUB</strong> here</p>
       <button class="btn" id="pick">Choose a book</button>
       <input type="file" id="file" accept=".epub,application/epub+zip" hidden>
     </div>
-    <p class="small">The book never leaves your device. It's parsed in your browser and remembered locally so you only load it once.</p>
-    <p class="small"><a href="../../">← back to the studio</a></p>
+    <div class="chips">
+      <span class="chip glass">Chapters</span><span class="chip glass">Random verse</span>
+      <span class="chip glass">Français</span><span class="chip glass">Read aloud</span>
+    </div>
+    <p class="fine">Your book stays on this device. It's opened in your browser and remembered here, so you only add it once.<br><a href="../../">Back to the studio</a></p>
   </div>
 </section>
 
 <!-- Reader -->
 <section id="reader" class="hidden">
-  <header>
-    <button class="icon-btn" id="btn-toc" title="Chapters (C)" aria-label="Chapters">☰</button>
-    <div class="book-title" id="book-title"></div>
-    <div class="seg" role="group" aria-label="Language">
+  <div class="topfade"></div>
+  <div id="readbar"></div>
+  <div class="topbar">
+    <button class="round glass" id="btn-toc" title="Contents (C)" aria-label="Contents"><i data-icon="list"></i></button>
+    <div class="seg glass" role="group" aria-label="Language">
       <button data-mode="en" aria-pressed="true">EN</button>
-      <button data-mode="both" aria-pressed="false">EN+FR</button>
+      <button data-mode="both" aria-pressed="false">EN · FR</button>
       <button data-mode="fr" aria-pressed="false">FR</button>
     </div>
-    <button class="icon-btn" id="btn-random" title="Random verse (R)" aria-label="Random verse">🎲</button>
-    <button class="icon-btn" id="btn-audio" title="Read aloud (Space)" aria-label="Read aloud" aria-pressed="false">🔊</button>
-    <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">Aa</button>
-  </header>
-  <div id="progress"><div></div></div>
-  <div id="scroller"><article id="article"></article></div>
-  <div id="audiobar" class="hidden">
-    <button class="icon-btn" id="a-play" aria-label="Pause">⏸</button>
-    <button class="icon-btn" id="a-stop" aria-label="Stop">⏹</button>
-    <span class="grow" id="a-status">Reading…</span>
-    <select id="a-rate" aria-label="Speed">
-      <option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1×</option>
-      <option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="1.5">1.5×</option>
-    </select>
+    <button class="round glass" id="btn-settings" title="Settings" aria-label="Settings"><i data-icon="sliders"></i></button>
   </div>
-  <footer>
-    <button class="nav-btn" id="prev">← Previous</button>
-    <span id="counter"></span>
-    <button class="nav-btn" id="next">Next →</button>
-  </footer>
+
+  <div id="scroller"><article id="article"></article></div>
+
+  <div class="dock-wrap">
+    <div id="nowplaying" class="glass hidden">
+      <div class="eq" aria-hidden="true"><span></span><span></span><span></span></div>
+      <span id="np-status">Reading</span>
+      <button id="np-rate" aria-label="Playback speed">1×</button>
+      <button class="round" id="np-stop" aria-label="Stop"><i data-icon="x"></i></button>
+      <div id="np-progress"></div>
+    </div>
+    <nav class="dock glass" aria-label="Reader controls">
+      <button class="round" id="prev" title="Previous (←)" aria-label="Previous chapter"><i data-icon="chevL"></i></button>
+      <span class="count" id="counter"></span>
+      <button class="round play" id="btn-audio" title="Listen (Space)" aria-label="Listen"><i data-icon="play"></i></button>
+      <button class="round" id="btn-random" title="Random verse (R)" aria-label="Random verse"><i data-icon="sparkles"></i></button>
+      <button class="round" id="next" title="Next (→)" aria-label="Next chapter"><i data-icon="chevR"></i></button>
+    </nav>
+  </div>
 </section>
 
-<!-- Drawer -->
+<!-- Contents sheet -->
 <div id="drawer-wrap" class="hidden">
   <div class="scrim" data-close></div>
-  <nav id="drawer" aria-label="Chapters">
-    <div class="top"><input id="toc-search" type="search" placeholder="Search chapters…" autocomplete="off"></div>
-    <ul id="toc"></ul>
-  </nav>
-</div>
-
-<!-- Random verse -->
-<div id="verse-wrap" class="hidden">
-  <div class="scrim" data-close></div>
-  <div class="modal" role="dialog" aria-label="Random verse">
-    <h3>A verse for you</h3>
-    <blockquote class="verse" id="verse-text"></blockquote>
-    <div class="verse-src" id="verse-src"></div>
-    <div class="row">
-      <button class="btn" id="v-again">🎲 Another</button>
-      <button class="btn ghost" id="v-listen">🔊 Listen</button>
-      <button class="btn ghost" id="v-copy">Copy</button>
-      <button class="btn ghost" id="v-go">Open chapter</button>
+  <div class="sheet" role="dialog" aria-label="Contents">
+    <div class="grabber"></div>
+    <div class="sheet-head"><h3>Contents</h3><button class="round" data-close aria-label="Close"><i data-icon="x"></i></button></div>
+    <div class="sheet-body">
+      <div class="search"><i data-icon="search"></i><input id="toc-search" type="search" placeholder="Search chapters and text" autocomplete="off"></div>
+      <div class="toc-progress"><span id="toc-stat"></span><div class="bar"><div id="toc-bar"></div></div></div>
+      <ul id="toc"></ul>
     </div>
   </div>
 </div>
 
-<!-- Settings -->
+<!-- Settings sheet -->
 <div id="settings-wrap" class="hidden">
   <div class="scrim" data-close></div>
-  <div class="modal settings" role="dialog" aria-label="Settings">
-    <h3>Settings</h3>
-    <label for="s-size">Text size</label>
-    <input type="range" id="s-size" min="15" max="30" step="1">
-    <label for="s-theme">Theme</label>
-    <select id="s-theme">
-      <option value="auto">Match system</option><option value="light">Light</option>
-      <option value="sepia">Sepia</option><option value="dark">Dark</option>
-    </select>
-    <label for="s-voice-en">English voice</label>
-    <select id="s-voice-en"></select>
-    <label for="s-voice-fr">French voice</label>
-    <select id="s-voice-fr"></select>
-    <label for="s-email">Online translation email (optional)</label>
-    <input type="email" id="s-email" placeholder="you@example.com">
-    <p class="small" style="margin:6px 0 0">Only used if your browser lacks a built-in translator. The free MyMemory service raises its daily limit from ~5,000 to ~50,000 characters when you give it an email.</p>
-    <div class="row" style="margin-top:24px">
-      <button class="btn ghost" id="s-forget">Load a different book</button>
-      <button class="btn" data-close>Done</button>
+  <div class="sheet" role="dialog" aria-label="Settings">
+    <div class="grabber"></div>
+    <div class="sheet-head"><h3>Settings</h3><button class="round" data-close aria-label="Close"><i data-icon="x"></i></button></div>
+    <div class="sheet-body">
+      <div class="group">
+        <div class="group-label">Appearance</div>
+        <div class="card">
+          <div class="themes" id="s-theme">
+            <button data-theme-opt="auto"><span class="swatch" style="background:linear-gradient(135deg,#f6f5f1 50%,#0c0d0c 50%)"></span>Auto</button>
+            <button data-theme-opt="light"><span class="swatch" style="background:#f6f5f1"></span>Light</button>
+            <button data-theme-opt="sepia"><span class="swatch" style="background:#f1e7d3"></span>Sepia</button>
+            <button data-theme-opt="dark"><span class="swatch" style="background:#0c0d0c"></span>Dark</button>
+          </div>
+          <div class="row size-row"><span style="font-size:14px">A</span><input type="range" id="s-size" min="15" max="30" step="1" aria-label="Text size"><span style="font-size:24px">A</span></div>
+        </div>
+      </div>
+      <div class="group">
+        <div class="group-label">Voices</div>
+        <div class="card">
+          <div class="row"><label for="s-voice-en">English</label><select id="s-voice-en"></select></div>
+          <div class="row"><label for="s-voice-fr">Français</label><select id="s-voice-fr"></select></div>
+        </div>
+      </div>
+      <div class="group">
+        <div class="group-label">Translation</div>
+        <div class="card">
+          <div class="row"><label for="s-email">Email</label><input type="email" id="s-email" placeholder="Optional"></div>
+        </div>
+        <p class="hint">Only used if your browser has no built-in translator. The free MyMemory service raises its daily limit from about 5,000 to 50,000 characters when given an email.</p>
+      </div>
+      <div class="group"><button class="danger" id="s-forget">Open a different book</button></div>
     </div>
   </div>
 </div>
 
-<div id="toast" style="opacity:0"></div>
+<!-- Random verse story -->
+<div id="verse-wrap" class="hidden">
+  <div class="scrim" data-close></div>
+  <div class="story" role="dialog" aria-label="Random verse">
+    <div class="story-card" id="story-card">
+      <div class="eyebrow"><span>A verse for you</span><button class="close" data-close aria-label="Close"><i data-icon="x"></i></button></div>
+      <div class="quote" id="verse-text"></div>
+      <div class="story-src" id="verse-src"></div>
+    </div>
+    <div class="story-actions">
+      <button class="primary" id="v-again"><span class="round"><i data-icon="sparkles"></i></span>Another</button>
+      <button id="v-listen"><span class="round"><i data-icon="volume"></i></span>Listen</button>
+      <button id="v-copy"><span class="round"><i data-icon="copy"></i></span>Copy</button>
+      <button id="v-share"><span class="round"><i data-icon="share"></i></span>Share</button>
+      <button id="v-go"><span class="round"><i data-icon="book"></i></span>Read</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="glass" role="status"></div>
 
 <script>
+/* ============================================================
+   Icons (inline SVG, stroke style)
+   ============================================================ */
+const ICONS = {
+  list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/>',
+  sliders: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+  chevL: '<path d="M15 18l-6-6 6-6"/>',
+  chevR: '<path d="M9 18l6-6-6-6"/>',
+  play: '<path d="M8 5.8v12.4a1 1 0 0 0 1.5.86l10-6.2a1 1 0 0 0 0-1.72l-10-6.2A1 1 0 0 0 8 5.8z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/>',
+  sparkles: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  volume: '<path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/>',
+  share: '<path d="M12 3v12M8 7l4-4 4 4M5 12v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12"/>',
+  book: '<path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5h-5A1.5 1.5 0 0 1 3 16z"/><path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H15a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5h5A1.5 1.5 0 0 0 21 16z"/>',
+  upload: '<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M4 15v3.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V15"/>',
+  yin: '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9" /><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor"/>',
+};
+const svg = name => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+function paintIcons(root = document) { root.querySelectorAll("i[data-icon]").forEach(i => i.outerHTML = svg(i.dataset.icon)); }
+paintIcons();
+
 /* ============================================================
    Storage helpers (IndexedDB for the book + translations,
    localStorage for small preferences). All wrapped in try/catch.
@@ -304,8 +509,8 @@ const prefs = {
 const $ = s => document.querySelector(s);
 let toastTimer;
 function toast(msg, ms = 2200) {
-  const t = $("#toast"); t.textContent = msg; t.style.opacity = 1;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.opacity = 0, ms);
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), ms);
 }
 
 /* ============================================================
@@ -438,6 +643,8 @@ async function translate(text) {
 let book = null, idx = 0;
 let mode = prefs.get("mode", "en");   // en | both | fr
 let renderToken = 0;
+let visited = new Set();
+const hueFor = n => (150 + n * 47) % 360;
 
 function show(id) {
   for (const s of ["#welcome", "#reader"]) $(s).classList.toggle("hidden", s !== id);
@@ -446,39 +653,65 @@ function show(id) {
 async function openBook(b) {
   book = b;
   frCache = (await dbGet("fr:" + b.id)) || {};
+  visited = new Set(prefs.get("seen:" + b.id, []));
   document.title = b.title;
-  $("#book-title").textContent = b.title;
   const saved = prefs.get("pos:" + b.id, 0);
   idx = Math.min(Math.max(0, saved), b.chapters.length - 1);
   buildToc();
   setMode(mode, false);
   show("#reader");
-  render();
+  render(0);
 }
 
-function render() {
+function render(dir = 0) {
   stopSpeaking();
   const c = book.chapters[idx];
+  document.documentElement.style.setProperty("--hue", hueFor(c.n));
   const art = $("#article");
   art.className = "mode-" + mode;
   art.innerHTML = "";
-  const num = document.createElement("div"); num.className = "chap-num"; num.textContent = `Chapter ${c.n}`;
-  const h = document.createElement("h2");
-  h.innerHTML = `<span class="en"></span><span class="fr"></span>`;
-  h.querySelector(".en").textContent = c.title;
-  art.append(num, h);
+
+  const words = c.paras.join(" ").split(/\s+/).length;
+  const head = document.createElement("header");
+  head.innerHTML = `<div class="eyebrow"></div><div class="numeral"></div><h2><span class="en"></span><span class="fr"></span></h2>
+    <div class="meta"><span>${Math.max(1, Math.round(words / 220))} min read</span><span class="dot"></span><span>${c.paras.length} passages</span></div>`;
+  head.querySelector(".eyebrow").textContent = book.title.split(":")[0];
+  head.querySelector(".numeral").textContent = c.n;
+  head.querySelector("h2 .en").textContent = c.title;
+  art.appendChild(head);
   for (const p of c.paras) {
     const el = document.createElement("p"); el.className = "para";
     el.innerHTML = `<span class="en"></span><span class="fr"></span>`;
     el.querySelector(".en").textContent = p;
     art.appendChild(el);
   }
-  $("#scroller").scrollTop = 0;
+
+  // "Up next" cards at the end of the chapter.
+  const end = document.createElement("div"); end.className = "endnav";
+  const card = (i, label) => {
+    const b = document.createElement("button"); b.className = "glass";
+    b.innerHTML = `<small>${label}</small><span></span>`;
+    b.querySelector("span").textContent = `${book.chapters[i].n}. ${book.chapters[i].title}`;
+    b.onclick = () => goTo(i, i > idx ? 1 : -1);
+    return b;
+  };
+  if (idx > 0) end.appendChild(card(idx - 1, "Previous"));
+  if (idx < book.chapters.length - 1) end.appendChild(card(idx + 1, "Up next"));
+  art.appendChild(end);
+
+  const sc = $("#scroller");
+  sc.style.scrollBehavior = "auto"; sc.scrollTop = 0; sc.style.scrollBehavior = "";
+  if (dir) art.animate(
+    [{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }],
+    { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)" });
+
   $("#counter").textContent = `${idx + 1} / ${book.chapters.length}`;
   $("#prev").disabled = idx === 0;
   $("#next").disabled = idx === book.chapters.length - 1;
-  $("#progress div").style.width = `${((idx + 1) / book.chapters.length) * 100}%`;
-  for (const b of document.querySelectorAll("#toc button")) b.classList.toggle("current", +b.dataset.i === idx);
+  onScroll();
+
+  visited.add(idx); prefs.set("seen:" + book.id, [...visited]);
+  updateToc();
   prefs.set("pos:" + book.id, idx);
   if (mode !== "en") fillFrench();
 }
@@ -515,21 +748,39 @@ function setMode(m, rerender = true) {
 function go(delta) {
   const n = idx + delta;
   if (!book || n < 0 || n >= book.chapters.length) return;
-  idx = n; render();
+  idx = n; render(delta);
 }
-function goTo(i) { idx = i; render(); }
+function goTo(i, dir = 0) { idx = i; render(dir); }
 
-/* ---------- Table of contents ---------- */
+// Reading progress bar at the top of the screen.
+function onScroll() {
+  const sc = $("#scroller");
+  const max = sc.scrollHeight - sc.clientHeight;
+  $("#readbar").style.width = (max > 0 ? Math.min(1, sc.scrollTop / max) * 100 : 100) + "%";
+}
+$("#scroller").addEventListener("scroll", onScroll, { passive: true });
+
+/* ---------- Contents ---------- */
 function buildToc() {
   const ul = $("#toc"); ul.innerHTML = "";
   book.chapters.forEach((c, i) => {
     const li = document.createElement("li");
     const b = document.createElement("button"); b.dataset.i = i;
-    b.innerHTML = `<span class="n"></span><span class="t"></span>`;
+    b.innerHTML = `<span class="n"></span><span class="t"></span><span class="seen">${svg("check")}</span>`;
     b.querySelector(".n").textContent = c.n; b.querySelector(".t").textContent = c.title;
-    b.onclick = () => { closeAll(); goTo(i); };
+    b.onclick = () => { closeAll(); goTo(i, i > idx ? 1 : -1); };
     li.appendChild(b); ul.appendChild(li);
   });
+}
+function updateToc() {
+  for (const b of document.querySelectorAll("#toc button")) {
+    const i = +b.dataset.i;
+    b.classList.toggle("current", i === idx);
+    b.classList.toggle("visited", visited.has(i) && i !== idx);
+  }
+  const pct = Math.round((visited.size / book.chapters.length) * 100);
+  $("#toc-stat").textContent = `${visited.size} of ${book.chapters.length} chapters read · ${pct}%`;
+  $("#toc-bar").style.width = pct + "%";
 }
 $("#toc-search").addEventListener("input", e => {
   const q = e.target.value.toLowerCase();
@@ -540,10 +791,11 @@ $("#toc-search").addEventListener("input", e => {
 });
 
 /* ---------- Overlays ---------- */
+const OVERLAYS = ["#drawer-wrap", "#verse-wrap", "#settings-wrap"];
 function openOverlay(id) { closeAll(); $(id).classList.remove("hidden"); }
-function closeAll() { for (const id of ["#drawer-wrap", "#verse-wrap", "#settings-wrap"]) $(id).classList.add("hidden"); }
+function closeAll() { for (const id of OVERLAYS) $(id).classList.add("hidden"); }
 document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeAll(); });
-const anyOverlay = () => ["#drawer-wrap", "#verse-wrap", "#settings-wrap"].some(id => !$(id).classList.contains("hidden"));
+const anyOverlay = () => OVERLAYS.some(id => !$(id).classList.contains("hidden"));
 
 /* ============================================================
    Random verse
@@ -551,17 +803,22 @@ const anyOverlay = () => ["#drawer-wrap", "#verse-wrap", "#settings-wrap"].some(
 let verse = null;
 async function drawVerse() {
   const pool = [];
-  book.chapters.forEach((c, ci) => c.paras.forEach(p => { if (p.length >= 40 && p.length <= 600) pool.push({ ci, p }); }));
+  book.chapters.forEach((c, ci) => c.paras.forEach(p => { if (p.length >= 40 && p.length <= 600 && !/^\d+[.)]\s/.test(p)) pool.push({ ci, p }); }));
   if (!pool.length) book.chapters.forEach((c, ci) => c.paras.forEach(p => pool.push({ ci, p })));
   let pick;
   do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && verse && pick.p === verse.p);
   verse = pick;
   const c = book.chapters[pick.ci];
+  $("#story-card").style.setProperty("--vh", hueFor(c.n));
   const q = $("#verse-text");
+  q.className = "quote" + (pick.p.length > 320 ? " xlong" : pick.p.length > 170 ? " long" : "");
   q.innerHTML = `<span class="en"></span>`;
   q.querySelector(".en").textContent = `“${pick.p}”`;
-  $("#verse-src").textContent = `— ${c.n}. ${c.title}`;
-  openOverlay("#verse-wrap");
+  $("#verse-src").innerHTML = `<b></b><span></span>`;
+  $("#verse-src b").textContent = `${c.n}. ${c.title}`;
+  $("#verse-src span").textContent = book.title.split(":")[0];
+  if ($("#verse-wrap").classList.contains("hidden")) openOverlay("#verse-wrap");
+  else $("#story-card").animate([{ opacity: .3, transform: "scale(.98)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
   if (mode !== "en") {
     const fr = document.createElement("span"); fr.className = "fr"; fr.textContent = frCache[pick.p] || "…";
     q.appendChild(fr);
@@ -570,13 +827,19 @@ async function drawVerse() {
     if (mode === "fr" && fr.textContent === "…") q.querySelector(".en").style.display = "";
   }
 }
+function verseText() {
+  const c = book.chapters[verse.ci];
+  return `${mode === "fr" && frCache[verse.p] ? frCache[verse.p] : verse.p}\n— ${book.title}, ${c.n}. ${c.title}`;
+}
 $("#btn-random").onclick = drawVerse;
 $("#v-again").onclick = drawVerse;
-$("#v-go").onclick = () => { closeAll(); goTo(verse.ci); };
+$("#v-go").onclick = () => { closeAll(); goTo(verse.ci, verse.ci > idx ? 1 : -1); };
 $("#v-copy").onclick = async () => {
-  const c = book.chapters[verse.ci];
-  const txt = `${mode === "fr" && frCache[verse.p] ? frCache[verse.p] : verse.p}\n— ${book.title}, ${c.n}. ${c.title}`;
-  try { await navigator.clipboard.writeText(txt); toast("Copied"); } catch { toast("Couldn't copy"); }
+  try { await navigator.clipboard.writeText(verseText()); toast("Copied to clipboard"); } catch { toast("Couldn't copy"); }
+};
+$("#v-share").onclick = async () => {
+  if (navigator.share) { try { await navigator.share({ text: verseText() }); } catch {} }
+  else $("#v-copy").click();
 };
 $("#v-listen").onclick = () => {
   const lang = mode === "fr" && frCache[verse.p] ? "fr" : "en";
@@ -587,11 +850,13 @@ $("#v-listen").onclick = () => {
    Audio (Web Speech API)
    ============================================================ */
 const synth = window.speechSynthesis;
+const RATES = [0.8, 0.9, 1, 1.15, 1.3, 1.5];
+let rate = prefs.get("rate", 1);
 let voices = [];
 let speakSession = 0, paused = false, playing = false;
 
 function rankVoice(v) {
-  return (/natural|neural|premium|enhanced|google|siri/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 0.5);
+  return /natural|neural|premium|enhanced|google|siri/i.test(v.name) ? 2 : 0;
 }
 function loadVoices() {
   if (!synth) return;
@@ -601,9 +866,9 @@ function loadVoices() {
     const list = voices.filter(v => v.lang.toLowerCase().startsWith(lang)).sort((a, b) => rankVoice(b) - rankVoice(a));
     const saved = prefs.get("voice-" + lang, "");
     sel.innerHTML = "";
-    if (!list.length) sel.innerHTML = `<option value="">No ${lang === "en" ? "English" : "French"} voice installed</option>`;
+    if (!list.length) sel.innerHTML = `<option value="">None installed</option>`;
     for (const v of list) {
-      const o = document.createElement("option"); o.value = v.name; o.textContent = `${v.name} (${v.lang})`;
+      const o = document.createElement("option"); o.value = v.name; o.textContent = v.name;
       if (v.name === saved) o.selected = true;
       sel.appendChild(o);
     }
@@ -615,12 +880,21 @@ function voiceFor(lang) {
   return voices.find(v => v.name === name) || voices.find(v => v.lang.toLowerCase().startsWith(lang));
 }
 
-function setAudioUi(on) {
-  playing = on;
-  $("#audiobar").classList.toggle("hidden", !on);
-  $("#btn-audio").setAttribute("aria-pressed", on);
-  $("#a-play").textContent = "⏸"; paused = false;
+function setPlayIcon(name, label) {
+  const b = $("#btn-audio"); b.innerHTML = svg(name); b.setAttribute("aria-label", label);
 }
+function setAudioUi(on) {
+  playing = on; paused = false;
+  $("#nowplaying").classList.toggle("hidden", !on);
+  $("#nowplaying").classList.remove("paused");
+  setPlayIcon(on ? "pause" : "play", on ? "Pause" : "Listen");
+}
+$("#np-rate").textContent = rate + "×";
+$("#np-rate").onclick = () => {
+  rate = RATES[(RATES.indexOf(rate) + 1) % RATES.length] || 1;
+  prefs.set("rate", rate); $("#np-rate").textContent = rate + "×";
+  toast(`Speed ${rate}× from the next passage`);
+};
 
 // items: [{ text, lang, el? }]; onDone: called when the queue finishes naturally
 function speakQueue(items, onDone) {
@@ -637,11 +911,13 @@ function speakQueue(items, onDone) {
     const u = new SpeechSynthesisUtterance(it.text);
     u.lang = it.lang === "fr" ? "fr-FR" : "en-US";
     const v = voiceFor(it.lang); if (v) u.voice = v;
-    u.rate = +$("#a-rate").value;
+    u.rate = rate;
     u.onend = next;
     u.onerror = e => { if (e.error !== "interrupted" && e.error !== "canceled") next(); };
     if (it.el) { it.el.classList.add("speaking"); it.el.scrollIntoView({ block: "center", behavior: "smooth" }); }
-    $("#a-status").textContent = `${book ? `Ch. ${book.chapters[idx].n} · ` : ""}${i} of ${items.length}${it.lang === "fr" ? " · FR" : ""}`;
+    const c = book?.chapters[idx];
+    $("#np-status").textContent = it.el && c ? `${c.n}. ${c.title}${it.lang === "fr" ? " · FR" : ""}` : "Verse";
+    $("#np-progress").style.width = `${(i / items.length) * 100}%`;
     synth.speak(u);
   };
   next();
@@ -651,10 +927,10 @@ async function readChapter() {
   const els = [...$("#article").querySelectorAll("h2, .para")];
   const c = book.chapters[idx];
   const texts = [c.title, ...c.paras];
-  let items = [];
+  const items = [];
   if (mode !== "en") {
     toast("Preparing French audio…");
-    try { for (const t of texts) await translate(t); } catch (e) { if (mode === "fr") { toast("Translation unavailable, reading English"); } }
+    try { for (const t of texts) await translate(t); } catch { if (mode === "fr") toast("Translation unavailable, reading English"); }
   }
   texts.forEach((t, i) => {
     const el = els[i], fr = frCache[t];
@@ -668,14 +944,12 @@ async function readChapter() {
 function stopSpeaking() { speakSession++; synth?.cancel(); setAudioUi(false); document.querySelectorAll(".para.speaking").forEach(e => e.classList.remove("speaking")); }
 function togglePause() {
   if (!playing) return;
-  if (paused) { synth.resume(); paused = false; $("#a-play").textContent = "⏸"; }
-  else { synth.pause(); paused = true; $("#a-play").textContent = "▶"; }
+  if (paused) { synth.resume(); paused = false; setPlayIcon("pause", "Pause"); }
+  else { synth.pause(); paused = true; setPlayIcon("play", "Resume"); }
+  $("#nowplaying").classList.toggle("paused", paused);
 }
-$("#btn-audio").onclick = () => playing ? stopSpeaking() : readChapter();
-$("#a-play").onclick = togglePause;
-$("#a-stop").onclick = stopSpeaking;
-$("#a-rate").value = String(prefs.get("rate", 1));
-$("#a-rate").onchange = e => prefs.set("rate", +e.target.value);
+$("#btn-audio").onclick = () => playing ? togglePause() : readChapter();
+$("#np-stop").onclick = stopSpeaking;
 
 /* ============================================================
    Settings
@@ -685,10 +959,12 @@ function applyLook() {
   document.documentElement.style.setProperty("--font-size", size + "px");
   if (theme === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", theme);
-  $("#s-size").value = size; $("#s-theme").value = theme;
+  $("#s-size").value = size;
+  for (const b of document.querySelectorAll("[data-theme-opt]")) b.setAttribute("aria-pressed", b.dataset.themeOpt === theme);
+  requestAnimationFrame(() => document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
 }
 $("#s-size").oninput = e => { prefs.set("size", +e.target.value); applyLook(); };
-$("#s-theme").onchange = e => { prefs.set("theme", e.target.value); applyLook(); };
+for (const b of document.querySelectorAll("[data-theme-opt]")) b.onclick = () => { prefs.set("theme", b.dataset.themeOpt); applyLook(); };
 $("#s-voice-en").onchange = e => prefs.set("voice-en", e.target.value);
 $("#s-voice-fr").onchange = e => prefs.set("voice-fr", e.target.value);
 $("#s-email").value = prefs.get("email", "");
@@ -697,6 +973,7 @@ $("#s-forget").onclick = async () => {
   stopSpeaking(); closeAll();
   await dbDel("book");
   book = null; document.title = "Tao Reader";
+  document.documentElement.style.setProperty("--hue", 160);
   show("#welcome");
 };
 $("#btn-settings").onclick = () => openOverlay("#settings-wrap");
@@ -722,7 +999,6 @@ document.addEventListener("keydown", e => {
   else if (e.key.toLowerCase() === "r") drawVerse();
   else if (e.key.toLowerCase() === "c") $("#btn-toc").click();
   else if (e.key === " ") { e.preventDefault(); playing ? togglePause() : readChapter(); }
-  else return;
 });
 
 let touch = null;
@@ -743,7 +1019,7 @@ async function loadFile(file) {
   try {
     const b = await parseEpub(file);
     await dbSet("book", b);
-    toast(`${b.chapters.length} chapters loaded`);
+    toast(`${b.chapters.length} chapters ready`);
     openBook(b);
   } catch (e) {
     console.error(e);
