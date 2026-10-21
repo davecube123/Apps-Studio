@@ -303,7 +303,7 @@
 
 <!-- Reader -->
 <section id="reader">
-  <input type="file" id="file" accept=".epub,application/epub+zip" hidden>
+  <input type="file" id="file" accept=".epub,application/epub+zip,.json,application/json" hidden>
   <div class="topfade"></div>
   <div id="readbar"></div>
   <div class="topbar">
@@ -1017,21 +1017,49 @@ function loadJSZip() {
   });
 }
 
+// Personal book files (book + its French) let you translate on a computer and carry the result to a phone.
+const BOOK_FORMAT = "tao-reader-book";
+
 async function loadFile(file) {
   if (!file) return;
   toast("Opening " + file.name + "…", 6000);
   try {
-    await loadJSZip();
-    const b = await parseEpub(file);
+    let b, fr = null;
+    if (/\.json$/i.test(file.name) || file.type === "application/json") {
+      const data = JSON.parse(await file.text());
+      if (data.format !== BOOK_FORMAT || !data.book?.chapters?.length) throw new Error("not a Tao Reader book file");
+      b = data.book; fr = data.fr || {};
+    } else {
+      await loadJSZip();
+      b = await parseEpub(file);
+    }
     await dbSet("book", b);
+    if (fr) await dbSet("fr:" + b.id, fr);
     imported = b;
     closeAll();
     toast(`${b.chapters.length} chapters ready`);
-    openBook(b);
+    await openBook(b);
+    const texts = b.chapters.flatMap(c => [c.title, ...c.paras]);
+    if (!fr && confirm("Translate this book to French now, so French works offline?\n\nTip: on a computer with Chrome or Edge this is fast and stays on your device. Then use Settings → Library → Export to carry it to your phone.")) {
+      saveFrenchOffline();
+    } else if (fr && texts.some(t => !frCache[t])) {
+      toast("Some passages have no French yet. Use Save French for offline.", 4000);
+    }
   } catch (e) {
     console.error(e);
     toast("Couldn't read that file: " + e.message, 5000);
   }
+}
+
+function exportBook() {
+  const data = { format: BOOK_FORMAT, version: 1, book: imported, fr: frCache };
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (imported.title.split(":")[0].trim().replace(/[^\w\- ]+/g, "") || "book") + ".taobook.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast("Exported. Keep this file private; it contains your book.", 4000);
 }
 $("#file").onchange = e => { loadFile(e.target.files[0]); e.target.value = ""; };
 document.addEventListener("dragover", e => e.preventDefault());
@@ -1078,6 +1106,7 @@ function renderLibrary() {
     const cacheIsThisBook = book && book.id === imported.id;
     row(imported, `Imported · ${imported.chapters.length} chapters` + (cacheIsThisBook ? ` · French ${Math.round(have / texts.length * 100)}%` : ""));
     if (cacheIsThisBook && have < texts.length) action("Save French for offline", saveFrenchOffline);
+    if (cacheIsThisBook) action("Export book + French to another device", exportBook);
     action("Remove imported book", async () => {
       await dbDel("book"); await dbDel("fr:" + imported.id);
       imported = null;
@@ -1085,7 +1114,7 @@ function renderLibrary() {
       toast("Removed");
     }, "del");
   } else {
-    action("Import an EPUB…", () => $("#file").click());
+    action("Import an EPUB or book file…", () => $("#file").click());
   }
 }
 

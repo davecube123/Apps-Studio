@@ -8,3 +8,5 @@ __pycache__/
 
 # Books are loaded at runtime, never committed
 *.epub
+# Personal book exports from Tao Reader
+*.taobook.json
