@@ -185,6 +185,10 @@
     .lopt.on { border-color: transparent; background: var(--ink); color: var(--paper); box-shadow: var(--e1); }
     .lopt.on small { color: color-mix(in srgb, var(--paper) 70%, transparent); }
     .lopt.on svg [stroke] { stroke: var(--seal); }
+    #inkpad { display: block; width: 100%; max-width: 440px; margin: 0 auto; aspect-ratio: 1000 / 1150; touch-action: none; cursor: crosshair;
+              border-radius: 16px; background: color-mix(in srgb, var(--paper) 55%, var(--card)); box-shadow: inset 0 1px 3px rgba(60,40,10,.08); user-select: none; -webkit-user-select: none; }
+    .inkfig { display: block; color: var(--ink); overflow: visible; margin: 0 auto; }
+    .inkfig.anim > * { animation: fade .5s var(--ease) both; animation-delay: calc(var(--i) * 140ms); }
 
     /* Book grid */
     .grid64 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
@@ -565,6 +569,7 @@
       if (html != null) {
         $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
         document.querySelectorAll("#main textarea").forEach(autogrow);
+        mountInkPad();
       }
       document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
       $("#fab").classList.toggle("hide", hash !== "#/readings");
@@ -579,6 +584,7 @@
   addEventListener("hashchange", () => document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.startViewTransition(route) : route());
   function onScroll() { $("#topbar").classList.toggle("on", scrollY > 70 && !!$("#topbar").textContent); }
   addEventListener("scroll", onScroll, { passive: true });
+  let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => $("#inkpad") && mountInkPad(), 150); });
   // A light tap of haptic feedback on Android, like native apps.
   const haptic = (ms = 8) => { if (db.settings.haptics !== false && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} };
   const rerender = () => { const y = scrollY; route(); scrollTo(0, y); };
@@ -640,8 +646,8 @@
 
   /* ---------- New reading: build the hexagram ---------- */
   function viewNew() {
-    db.draft ||= { lines: [null, null, null, null, null, null], q: "", sit: "", method: "" };
-    const d = db.draft, next = d.lines.findIndex(v => v == null), ready = next === -1;
+    db.draft ||= { lines: [null, null, null, null, null, null], q: "", sit: "", method: "", mode: "draw", ink: [] };
+    const d = db.draft, drawMode = (d.mode || "draw") === "draw", next = d.lines.findIndex(v => v == null), ready = next === -1;
     const n = ready ? BY_BITS[bitsOf(d.lines)] : null;
     const opt = (i, v, nm) => `<button class="lopt ${d.lines[i] === v ? "on" : ""}" data-act="setline" data-i="${i}" data-v="${v}">${hexLine(v)}${v}<small>${nm}</small></button>`;
     const rows = [5, 4, 3, 2, 1, 0].map(i => `<div class="lrow ${i === next ? "next" : ""}"><span class="lbl">${i + 1}</span><div class="opts">
@@ -655,8 +661,14 @@
         <div class="field"><label>What's alive in my life right now</label><textarea rows="2" data-bind="draft:sit" placeholder="The situation, the feelings, what I hope and fear…">${esc(d.sit)}</textarea></div>
         <div class="field"><label>How I'm producing it</label><input type="text" data-bind="draft:method" value="${esc(d.method)}" placeholder="Coins, yarrow, dice, numbers from the moment, a walk…"></div>
       </div>
-      <div class="sechead"><h3>Build it from the bottom up</h3></div>
-      <p class="small muted">Lines are written from line 1 at the bottom to line 6 at the top. 6 and 9 are moving lines that change into their opposite.</p>
+      <div class="sechead between"><h3>${drawMode ? "Draw it from the bottom up" : "Build it from the bottom up"}</h3></div>
+      <div class="seg" style="margin:4px 0 10px"><button class="${drawMode ? "on" : ""}" data-act="buildmode" data-m="draw">Draw by hand</button><button class="${drawMode ? "" : "on"}" data-act="buildmode" data-m="tap">Tap the lines</button></div>
+      ${drawMode ? `<p class="small muted">As each line comes to you, by coins, stalks or any way of your own, draw it with your finger: <b>one unbroken stroke</b> for yang, <b>two strokes with a gap</b> for yin. If a line is moving, make any mark beside it in the right margin. Go slowly; the ink follows your hand.</p>
+      <div class="card" style="margin-top:10px">
+        <canvas id="inkpad" aria-label="Drawing pad for six lines"></canvas>
+        <div class="row between" style="margin-top:12px"><div id="inkread" class="grow">${inkReadout(d.lines, ready ? n : null, readInk(d.ink || []).map((r, i) => r.state === "unclear" ? i + 1 : 0).filter(Boolean))}</div>
+          <div class="row" style="gap:6px"><button class="btn sm" data-act="inkundo" aria-label="Undo last stroke">Undo</button><button class="btn sm ghost" data-act="inkclear">Clear</button></div></div>
+      </div>` : `<p class="small muted">Lines are written from line 1 at the bottom to line 6 at the top. 6 and 9 are moving lines that change into their opposite.</p>
       <div class="card" style="margin-top:10px">
         <div class="builder"><div>${rows}</div>
           <div class="center" style="width:110px">${hexSVG(d.lines, { w: 70, cls: "ink" })}
@@ -678,7 +690,7 @@
           </div>
           <p class="small muted">Coins: each moving line 1 in 8. Yarrow: old yang 3/16, old yin 1/16, so yin rarely moves.</p>
         </details>
-      </div>
+      </div>`}
       <button class="btn seal block" style="margin-top:20px" data-act="begin" ${ready ? "" : "disabled"}>Meet the hexagram →</button>`;
   }
   function hexLine(v) {
@@ -690,6 +702,99 @@
     const r = crypto.getRandomValues(new Uint32Array(3));
     if (m === "coins") return [...r].reduce((a, x) => a + (x % 2 ? 3 : 2), 0);
     const x = r[0] % 16; return x < 1 ? 6 : x < 4 ? 9 : x < 9 ? 7 : 8; // old yin 1/16, old yang 3/16, yang 5/16, yin 7/16
+  }
+
+  /* ---------- Drawing the hexagram by hand ----------
+     Coordinates are normalised to a 1000 × 1150 pad: lines are drawn in the left zone,
+     moving lines are marked in the right margin. The app only reads the strokes to know
+     which hexagram was drawn; the drawing itself is kept as it is. */
+  const PAD_W = 1000, PAD_H = 1150, ZONE = 770, ROW_H = PAD_H / 6, MIN_W = 16, MAX_W = 46;
+  const strokeBox = s => { const xs = s.p.map(p => p[0]), ys = s.p.map(p => p[1]); return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), my: ys.slice().sort((a, b) => a - b)[ys.length >> 1] }; };
+  const rowOf = y => Math.max(0, Math.min(5, Math.floor((PAD_H - y) / ROW_H)));
+  function readInk(strokes) {
+    const rows = [0, 1, 2, 3, 4, 5].map(() => ({ spans: [], moving: false, any: false }));
+    for (const s of strokes) {
+      const b = strokeBox(s), r = rows[rowOf(b.my)]; r.any = true;
+      if (s.z) r.moving = true;
+      else if (b.x1 - b.x0 > (b.y1 - b.y0) * 1.2) r.spans.push([b.x0, b.x1]);
+    }
+    return rows.map(r => {
+      if (!r.spans.length) return { state: r.any ? "unclear" : null, moving: r.moving };
+      const sp = r.spans.sort((a, b) => a[0] - b[0]), merged = [sp[0].slice()];
+      for (const [a, b] of sp.slice(1)) { const m = merged[merged.length - 1]; if (a <= m[1] + 14) m[1] = Math.max(m[1], b); else merged.push([a, b]); }
+      const cover = merged.reduce((t, [a, b]) => t + b - a, 0), extent = merged[merged.length - 1][1] - merged[0][0];
+      if (extent < ZONE * 0.55) return { state: merged.length > 1 ? "unclear" : null, moving: r.moving }; // a half-drawn yin waits for its second stroke
+      const gap = merged.slice(1).reduce((g, m, i) => Math.max(g, m[0] - merged[i][1]), 0);
+      return { state: merged.length > 1 && gap > 40 && cover > extent * 0.4 ? "yin" : "yang", moving: r.moving };
+    });
+  }
+  const inkLines = rows => rows.map(r => r.state === "yang" ? (r.moving ? 9 : 7) : r.state === "yin" ? (r.moving ? 6 : 8) : null);
+  // Rendered cropped to the ink itself, at a given height, so a hand-drawn figure sits like a printed one.
+  function inkSVG(ink, h = 96, cls = "") {
+    const pts = ink.flatMap(s => s.p), pad = 40;
+    const x0 = Math.min(...pts.map(p => p[0] - p[2])) - pad, x1 = Math.max(...pts.map(p => p[0] + p[2])) + pad;
+    const y0 = Math.min(0, ...pts.map(p => p[1] - p[2])), y1 = Math.max(PAD_H, ...pts.map(p => p[1] + p[2]));
+    const w = Math.round(h * (x1 - x0) / (y1 - y0));
+    return `<svg class="inkfig ${cls}" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" width="${w}" height="${h}" aria-hidden="true">${ink.map((s, i) => {
+      const col = s.z ? "var(--seal)" : "currentColor";
+      if (s.p.length < 2) return `<circle cx="${s.p[0][0]}" cy="${s.p[0][1]}" r="${s.p[0][2] / 2}" fill="${col}" style="--i:${i}"/>`;
+      return `<g stroke="${col}" stroke-linecap="round" style="--i:${i}">${s.p.slice(1).map((p, j) => { const q = s.p[j]; return `<line x1="${q[0]}" y1="${q[1]}" x2="${p[0]}" y2="${p[1]}" stroke-width="${(q[2] + p[2]) / 2}"/>`; }).join("")}</g>`;
+    }).join("")}</svg>`;
+  }
+  function mountInkPad() {
+    const cv = $("#inkpad"); if (!cv) return;
+    const d = db.draft; d.ink ||= [];
+    const rect = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1, S = rect.width / PAD_W * dpr;
+    cv.width = Math.round(rect.width * dpr); cv.height = Math.round(rect.width * PAD_H / PAD_W * dpr);
+    const ctx = cv.getContext("2d"), css = getComputedStyle(document.documentElement);
+    const C = { ink: css.getPropertyValue("--ink").trim(), seal: css.getPropertyValue("--seal").trim(), guide: css.getPropertyValue("--line2").trim(), muted: css.getPropertyValue("--muted").trim(), soft: css.getPropertyValue("--seal-soft").trim() };
+    const seg = (q, p, z) => { ctx.strokeStyle = z ? C.seal : C.ink; ctx.lineWidth = (q[2] + p[2]) / 2 * S; ctx.beginPath(); ctx.moveTo(q[0] * S, q[1] * S); ctx.lineTo(p[0] * S, p[1] * S); ctx.stroke(); };
+    const dot = (p, z) => { ctx.fillStyle = z ? C.seal : C.ink; ctx.beginPath(); ctx.arc(p[0] * S, p[1] * S, p[2] / 2 * S, 0, 7); ctx.fill(); };
+    function paint() {
+      ctx.clearRect(0, 0, cv.width, cv.height); ctx.lineCap = "round";
+      const rows = readInk(d.ink), next = rows.findIndex(r => !r.state);
+      if (next >= 0) { ctx.fillStyle = C.soft; ctx.fillRect(0, (PAD_H - (next + 1) * ROW_H) * S, ZONE * S, ROW_H * S); }
+      ctx.setLineDash([6 * dpr, 8 * dpr]); ctx.lineWidth = 1 * dpr; ctx.strokeStyle = C.guide;
+      for (let i = 0; i < 6; i++) { const y = (PAD_H - (i + 0.5) * ROW_H) * S; ctx.beginPath(); ctx.moveTo(60 * S, y); ctx.lineTo((ZONE - 40) * S, y); ctx.stroke(); }
+      ctx.setLineDash([2 * dpr, 6 * dpr]); ctx.beginPath(); ctx.moveTo(ZONE * S, 20 * S); ctx.lineTo(ZONE * S, (PAD_H - 20) * S); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.muted; ctx.font = `600 ${11 * dpr}px ${css.getPropertyValue("--sans")}`; ctx.textAlign = "center";
+      for (let i = 0; i < 6; i++) ctx.fillText(String(i + 1), 26 * S, (PAD_H - (i + 0.5) * ROW_H) * S + 4 * dpr);
+      for (const s of d.ink) s.p.length < 2 ? dot(s.p[0], s.z) : s.p.slice(1).forEach((p, j) => seg(s.p[j], p, s.z));
+    }
+    let cur = null, last = null;
+    const at = e => { const r = cv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * PAD_W), Math.round((e.clientY - r.top) / r.width * PAD_W)]; };
+    cv.onpointerdown = e => {
+      e.preventDefault(); cv.setPointerCapture(e.pointerId);
+      const [x, y] = at(e); cur = { z: x > ZONE ? 1 : 0, p: [[x, y, Math.round((MIN_W + MAX_W) / 2)]] }; last = { x, y, t: e.timeStamp };
+      d.ink.push(cur); dot(cur.p[0], cur.z);
+    };
+    cv.onpointermove = e => {
+      if (!cur) return;
+      for (const ev of (e.getCoalescedEvents ? e.getCoalescedEvents() : [e])) {
+        const [x, y] = at(ev), dist = Math.hypot(x - last.x, y - last.y); if (dist < 4) continue;
+        const speed = dist / Math.max(1, ev.timeStamp - last.t); // pad units per ms
+        const target = ev.pointerType === "pen" && ev.pressure > 0 ? MIN_W + (MAX_W - MIN_W) * ev.pressure : MAX_W - (MAX_W - MIN_W) * Math.min(1, speed / 3);
+        const q = cur.p[cur.p.length - 1], w = Math.round(q[2] * 0.75 + target * 0.25), p = [x, y, w];
+        cur.p.push(p); seg(q, p, cur.z); last = { x, y, t: ev.timeStamp };
+      }
+    };
+    cv.onpointerup = cv.onpointercancel = () => { if (!cur) return; cur = null; haptic(5); paint(); inkChanged(); };
+    cv.repaint = paint; paint();
+  }
+  function inkChanged() {
+    const d = db.draft, rows = readInk(d.ink); d.lines = inkLines(rows); save();
+    const done = d.lines.every(v => v != null), n = done ? BY_BITS[bitsOf(d.lines)] : null;
+    const unclear = rows.map((r, i) => r.state === "unclear" ? i + 1 : 0).filter(Boolean);
+    const box = $("#inkread"); if (box) box.innerHTML = inkReadout(d.lines, n, unclear);
+    const btn = $("[data-act=begin]"); if (btn) btn.disabled = !done;
+    if (done && !d.announced) { d.announced = true; haptic([10, 50, 18]); }
+    if (!done) d.announced = false;
+  }
+  function inkReadout(lines, n, unclear) {
+    const drawn = lines.filter(v => v != null).length;
+    return `<div class="row" style="gap:14px">${hexSVG(lines, { w: 34 })}<div class="grow small">
+      ${n ? `<div class="num">${n}</div><div class="serif" style="font-size:17px">${hx(n).name}</div>` : `<div class="muted">${drawn ? `${drawn} of 6 lines read` : "Begin with line 1, at the bottom."}</div>`}
+      ${unclear.length ? `<div style="color:var(--seal)">Line ${unclear.join(", ")}: draw across the guide, left to right.</div>` : ""}</div></div>`;
   }
 
   /* ---------- A reading ---------- */
@@ -719,7 +824,7 @@
       <textarea class="serif title" style="font-size:28px;line-height:1.22;letter-spacing:-.015em;margin-top:4px" rows="1" data-bind="r:${id}:q" placeholder="My question">${esc(r.q)}</textarea>
       <div class="card" style="margin-top:12px">
         <div class="row" style="justify-content:center;gap:22px">
-          <a href="#/book/${n}" class="center" style="text-decoration:none">${hexSVG(r.lines, { w: 78, cls: "ink anim" })}<div class="num" style="margin-top:10px">${n}</div><div class="serif">${h.name}</div><div class="small muted cjk">${h.zh} ${h.py}</div></a>
+          <a href="#/book/${n}" class="center" style="text-decoration:none">${r.ink ? inkSVG(r.ink, 118, "anim") : hexSVG(r.lines, { w: 78, cls: "ink anim" })}<div class="num" style="margin-top:10px">${n}</div><div class="serif">${h.name}</div><div class="small muted cjk">${h.zh} ${h.py}</div></a>
           ${m ? `<div class="arrow">→</div><a href="#/book/${m}" class="center" style="text-decoration:none;opacity:.8">${hexSVG(linesOf(m), { w: 60, mark: false, cls: "ink" })}<div class="num" style="margin-top:10px">${m}</div><div class="serif">${hm.name}</div><div class="small muted cjk">${hm.zh} ${hm.py}</div></a>` : ""}
         </div>
         <p class="small muted center" style="margin-top:14px">${triPair(h)} · ${h.kw}</p>
@@ -792,7 +897,7 @@
         const n = BY_BITS[bitsOf(r.lines)], mv = r.lines.some(moving);
         const m = mv ? BY_BITS[r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("")] : null;
         const back = r.back && r.back.at ? "looked back" : r.backAt && r.backAt <= Date.now() ? "<b style='color:var(--seal)'>look back now</b>" : "";
-        return `<a class="card tap ritem" href="#/r/${r.id}">${hexSVG(r.lines, { w: 34 })}<div class="grow">
+        return `<a class="card tap ritem" href="#/r/${r.id}">${r.ink ? inkSVG(r.ink, 44) : hexSVG(r.lines, { w: 34 })}<div class="grow">
           <div class="eyebrow">${dstr(r.at)}${back ? " · " + back : ""}</div>
           <div class="serif" style="font-size:18px;margin-top:2px">${esc(r.q || "Untitled question")}</div>
           <div class="small muted">${n} ${hx(n).name}${m ? ` → ${m} ${hx(m).name}` : ""}</div></div></a>`;
@@ -1147,23 +1252,27 @@
     const el = e.target.closest("[data-act]"); if (!el) return;
     if (el.tagName === "BUTTON" || el.dataset.act === "buildtap") haptic();
     const a = el.dataset.act, d = el.dataset;
-    if (a === "setline") { db.draft.lines[+d.i] = +d.v; save(); rerender(); }
-    else if (a === "clearlines") { db.draft.lines = [null, null, null, null, null, null]; save(); rerender(); }
+    if (a === "setline") { db.draft.lines[+d.i] = +d.v; db.draft.ink = []; save(); rerender(); }
+    else if (a === "clearlines") { db.draft.lines = [null, null, null, null, null, null]; db.draft.ink = []; save(); rerender(); }
+    else if (a === "buildmode") { db.draft.mode = d.m; if (d.m === "draw") db.draft.lines = inkLines(readInk(db.draft.ink || [])); save(); rerender(); }
+    else if (a === "inkundo") { db.draft.ink.pop(); $("#inkpad").repaint(); inkChanged(); }
+    else if (a === "inkclear") { if (!db.draft.ink.length || confirm("Clear the whole drawing?")) { db.draft.ink = []; $("#inkpad").repaint(); inkChanged(); } }
     else if (a === "numcode") {
       const v = ($("#numcode").value.match(/[6-9]/g) || []);
       if (v.length !== 6) return toast("Six digits, each 6, 7, 8 or 9");
-      db.draft.lines = v.map(Number); save(); rerender();
+      db.draft.lines = v.map(Number); db.draft.ink = []; save(); rerender();
     } else if (a === "hexnum") {
       const k = parseInt($("#hexnum").value, 10); if (!(k >= 1 && k <= 64)) return toast("A number from 1 to 64");
-      db.draft.lines = [...hx(k).bits].map(b => b === "1" ? 7 : 8); save(); rerender(); toast("Tap 6 or 9 on any line that moves");
+      db.draft.lines = [...hx(k).bits].map(b => b === "1" ? 7 : 8); db.draft.ink = []; save(); rerender(); toast("Tap 6 or 9 on any line that moves");
     } else if (a === "cast") {
-      db.draft.lines = [null, null, null, null, null, null]; rerender();
+      db.draft.lines = [null, null, null, null, null, null]; db.draft.ink = []; rerender();
       for (let i = 0; i < 6; i++) { await new Promise(r => setTimeout(r, 380)); db.draft.lines[i] = randLine(d.m); rerender(); }
       if (!db.draft.method) db.draft.method = d.m === "coins" ? "Three coins (app)" : "Yarrow odds (app)";
       save(); rerender();
     } else if (a === "begin") {
       const dr = db.draft; if (dr.lines.some(v => v == null)) return;
       const r = { id: uid(), at: Date.now(), q: dr.q, sit: dr.sit, method: dr.method, lines: dr.lines, rel: {}, back: {} };
+      if (dr.mode !== "tap" && dr.ink && dr.ink.length) r.ink = dr.ink;
       db.readings.push(r); db.draft = null; markDay(); save(true); location.hash = "#/r/" + r.id;
     } else if (a === "alllines") { viewOpen.has(d.id) ? viewOpen.delete(d.id) : viewOpen.add(d.id); rerender(); }
     else if (a === "backin") { const r = getReading(d.id); r.backDays = +d.d; r.backAt = today0() + (+d.d) * DAY; save(); rerender(); }
