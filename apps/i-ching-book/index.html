@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5efe3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#13110e" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="My I Ching">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>My I Ching</title>
+  <style>
+    :root {
+      --paper: #f5efe3; --paper2: #efe7d8; --card: #fffcf6; --ink: #1e1a15; --ink2: #5a5247;
+      --muted: #9a8f7f; --line: #e3d9c7; --seal: #a8322d; --seal-soft: rgba(168,50,45,.09);
+      --gold: #9c7633; --shadow: 0 1px 2px rgba(60,40,10,.05), 0 8px 24px rgba(60,40,10,.06);
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --cjk: "Songti SC", "Noto Serif CJK TC", "Noto Serif TC", "PMingLiU", "SimSun", serif;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #13110e; --paper2: #1b1814; --card: #1d1a16; --ink: #ece4d4; --ink2: #bdb2a0;
+        --muted: #81776a; --line: #2f2a24; --seal: #d4644f; --seal-soft: rgba(212,100,79,.12);
+        --gold: #c9a45c; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #13110e; --paper2: #1b1814; --card: #1d1a16; --ink: #ece4d4; --ink2: #bdb2a0;
+      --muted: #81776a; --line: #2f2a24; --seal: #d4644f; --seal-soft: rgba(212,100,79,.12);
+      --gold: #c9a45c; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--paper); }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px;
+           line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    main { max-width: 680px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 110px); }
+    a { color: inherit; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; margin: 0; }
+    h1 { font-size: 34px; line-height: 1.15; }
+    h2 { font-size: 24px; line-height: 1.2; }
+    h3 { font-size: 19px; }
+    p { margin: .4em 0; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+    .eyebrow { font: 600 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .serif { font-family: var(--serif); }
+    .cjk { font-family: var(--cjk); }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { justify-content: space-between; }
+    .wrap { flex-wrap: wrap; }
+    .grow { flex: 1; min-width: 0; }
+    .stack > * + * { margin-top: 14px; }
+    .center { text-align: center; }
+    .hide { display: none !important; }
+    .view { animation: fade .35s ease both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* Cards & buttons */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); }
+    .card.flat { box-shadow: none; }
+    .card.tap { cursor: pointer; display: block; text-decoration: none; transition: transform .15s; }
+    .card.tap:active { transform: scale(.985); }
+    .btn { appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
+           padding: 10px 18px; font: 500 15px var(--sans); cursor: pointer; text-decoration: none; display: inline-flex;
+           align-items: center; justify-content: center; gap: 8px; transition: transform .12s, background .2s; }
+    .btn:active { transform: scale(.97); }
+    .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .btn.seal { background: var(--seal); color: #fff; border-color: var(--seal); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); padding: 8px 10px; }
+    .btn.block { width: 100%; padding: 15px; font-size: 16px; }
+    .btn.sm { padding: 6px 12px; font-size: 13px; }
+    .btn:disabled { opacity: .35; pointer-events: none; }
+    .chip { border: 1px solid var(--line); background: transparent; color: var(--ink2); border-radius: 999px; padding: 6px 12px;
+            font: 500 13px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .seg { display: inline-flex; background: var(--paper2); border-radius: 999px; padding: 3px; gap: 2px; }
+    .seg button { border: 0; background: transparent; color: var(--ink2); border-radius: 999px; padding: 7px 14px; font: 500 13px var(--sans); cursor: pointer; }
+    .seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .link { color: var(--seal); text-decoration: none; cursor: pointer; background: none; border: 0; font: inherit; padding: 0; }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); text-decoration: none; font-size: 15px; margin-bottom: 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
+
+    /* Writing surfaces */
+    .field { padding: 14px 0 6px; }
+    .field + .field { border-top: 1px solid var(--line); }
+    .field label, .flabel { display: block; font: 600 11px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink2); }
+    .hint { font-size: 13px; color: var(--muted); margin: 3px 0 2px; }
+    textarea, input[type=text], input[type=search] {
+      width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink);
+      font: 18px/1.65 var(--serif); padding: 6px 0; min-height: 44px; }
+    input[type=text], input[type=search] { min-height: 0; }
+    textarea::placeholder, input::placeholder { color: var(--muted); opacity: .75; font-style: italic; }
+    .boxed { background: var(--paper2); border-radius: 12px; padding: 10px 14px; }
+    .bookmark { display: inline-flex; gap: 6px; align-items: center; font: 600 10px var(--sans); letter-spacing: .1em;
+                text-transform: uppercase; color: var(--gold); }
+    .bookmark::before { content: ""; width: 7px; height: 10px; background: var(--gold); clip-path: polygon(0 0,100% 0,100% 100%,50% 75%,0 100%); }
+    .drafts { margin-top: 6px; }
+    .draft { border-left: 2px solid var(--line); padding: 4px 0 4px 12px; margin: 8px 0; font: 15px/1.55 var(--serif); color: var(--ink2); white-space: pre-wrap; }
+
+    /* Hexagram figures */
+    .hex { display: block; overflow: visible; }
+    .hex .ln { fill: currentColor; }
+    .hex .ln-empty { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .hex .mk { stroke: var(--seal); fill: none; }
+    .hex.ink g { filter: url(#ink); }
+    .hex.anim .ln { transform-box: fill-box; transform-origin: center; animation: draw .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 110ms); }
+    @keyframes draw { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
+    .hexhead { display: flex; gap: 22px; align-items: center; position: relative; }
+    .hexhead .glyph { position: absolute; right: -6px; top: -18px; font-family: var(--cjk); font-size: 120px; line-height: 1;
+                      color: var(--seal); opacity: .07; pointer-events: none; user-select: none; }
+    .num { font: 600 12px var(--sans); letter-spacing: .1em; color: var(--seal); }
+    .seal-dot { display: inline-block; width: 8px; height: 8px; background: var(--seal); border-radius: 2px; transform: rotate(45deg); margin-right: 6px; vertical-align: middle; }
+
+    /* Navigation */
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center;
+               padding: 8px 12px calc(env(safe-area-inset-bottom) + 8px); background: color-mix(in srgb, var(--paper) 82%, transparent);
+               backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); border-top: 1px solid var(--line); }
+    nav.tabs .inner { display: flex; width: 100%; max-width: 520px; justify-content: space-around; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none;
+                 color: var(--muted); font: 500 11px var(--sans); padding: 4px 0; }
+    nav.tabs a svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+    nav.tabs a.on { color: var(--ink); }
+    nav.tabs a.on svg { stroke: var(--seal); }
+    .fab { position: fixed; right: max(18px, calc(50% - 322px)); bottom: calc(env(safe-area-inset-bottom) + 82px); z-index: 21;
+           width: 58px; height: 58px; border-radius: 50%; background: var(--seal); color: #fff; border: 0; font-size: 30px; line-height: 1;
+           box-shadow: 0 6px 20px rgba(168,50,45,.35); cursor: pointer; display: grid; place-items: center; text-decoration: none; }
+
+    /* Line builder */
+    .builder { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+    .lrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+    .lrow .lbl { width: 46px; font: 600 11px var(--sans); color: var(--muted); letter-spacing: .06em; }
+    .lrow .opts { display: flex; gap: 6px; flex: 1; }
+    .lopt { flex: 1; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 7px 2px 5px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--ink); font: 600 12px var(--sans); }
+    .lopt small { font-weight: 400; font-size: 10px; color: var(--muted); }
+    .lopt.on { border-color: var(--seal); background: var(--seal-soft); }
+    .lrow.next .lbl { color: var(--seal); }
+
+    /* Book grid */
+    .grid64 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (min-width: 520px) { .grid64 { grid-template-columns: repeat(6, 1fr); } }
+    .cell { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px 10px; text-align: center;
+            text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+    .cell .n { font: 600 10px var(--sans); color: var(--muted); letter-spacing: .06em; }
+    .cell .nm { font: 13px/1.2 var(--serif); color: var(--ink2); min-height: 2.4em; display: flex; align-items: center; }
+    .cell .bar { width: 70%; height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+    .cell .bar i { display: block; height: 100%; background: var(--seal); }
+    .cell.done { border-color: color-mix(in srgb, var(--seal) 45%, var(--line)); }
+    .map { display: grid; grid-template-columns: 34px repeat(8, 1fr); gap: 4px; font-size: 11px; }
+    .map .h { display: grid; place-items: center; color: var(--muted); font-size: 20px; }
+    .map .h small { display: block; font-size: 9px; }
+    .map a { background: var(--card); border: 1px solid var(--line); border-radius: 8px; aspect-ratio: 1; display: grid; place-items: center;
+             text-decoration: none; color: var(--ink2); font-weight: 600; position: relative; overflow: hidden; }
+    .map a i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--seal); }
+
+    /* Misc */
+    .ring { --p: 0; width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(var(--seal) calc(var(--p) * 1%), var(--line) 0);
+            display: grid; place-items: center; flex: none; }
+    .ring span { width: 52px; height: 52px; border-radius: 50%; background: var(--card); display: grid; place-items: center; font: 600 14px var(--sans); }
+    .stat { font: 500 26px var(--serif); }
+    .list > * + * { margin-top: 10px; }
+    .ritem, .card.tap.ritem { display: flex; gap: 14px; align-items: center; text-decoration: none; }
+    .quote { font: italic 19px/1.55 var(--serif); }
+    .tabsline { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin: 22px 0 6px; }
+    .tabsline a { text-decoration: none; padding: 10px 0; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tabsline a.on { color: var(--ink); border-color: var(--seal); }
+    table.lines { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.lines td, table.lines th { padding: 8px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    table.lines th { font: 600 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .tri { display: flex; gap: 14px; align-items: center; }
+    .tri .sym { font-size: 44px; line-height: 1; }
+    .flash { min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
+    .grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 92px); transform: translateX(-50%); background: var(--ink);
+             color: var(--paper); padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 50; animation: fade .25s both; }
+    .science dt { font-family: var(--serif); font-size: 18px; margin-top: 18px; }
+    .science dd { margin: 4px 0 0; color: var(--ink2); }
+    .science cite { display: block; font-style: normal; font-size: 12px; color: var(--muted); margin-top: 4px; }
+    details > summary { cursor: pointer; list-style: none; color: var(--ink2); }
+    details > summary::-webkit-details-marker { display: none; }
+    .stepn { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--seal);
+             color: var(--seal); font: 600 12px var(--sans); margin-right: 8px; flex: none; }
+    .sechead { display: flex; align-items: center; margin: 30px 0 4px; }
+    .arrow { font-size: 22px; color: var(--muted); }
+
+    /* Print: a typeset book */
+    #printbook { display: none; }
+    body.printing #printbook { display: block; }
+    body.printing main, body.printing nav.tabs, body.printing .fab { display: none !important; }
+    #printbook .bar { position: sticky; top: 0; background: var(--paper); padding: 12px 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--line); z-index: 5; }
+    #printbook article { max-width: 620px; margin: 0 auto; padding: 0 22px; font-family: var(--serif); }
+    .pb-title { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 18px; }
+    .pb-title h1 { font-size: 44px; }
+    .pb-ch { padding: 56px 0 24px; }
+    .pb-ch h2 { font-size: 30px; margin-top: 10px; }
+    .pb-ch h4 { font: 600 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--seal); margin: 26px 0 6px; }
+    .pb-ch p { font-size: 17px; line-height: 1.7; white-space: pre-wrap; margin: 0; }
+    .pb-toc { columns: 2; font-size: 14px; padding: 40px 0; }
+    .pb-toc div { break-inside: avoid; padding: 2px 0; }
+    @media print {
+      @page { margin: 22mm 20mm; }
+      :root { --paper: #fff; --card: #fff; --ink: #111; --ink2: #333; --muted: #777; --line: #ddd; }
+      #printbook .bar { display: none; }
+      .pb-title, .pb-toc, .pb-ch, .pb-pre { break-before: page; }
+      .pb-title { min-height: 85vh; break-before: auto; }
+      .pb-ch { padding-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="ink" x="-5%" y="-20%" width="110%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="1.3"/>
+    </filter>
+  </svg>
+
+  <main id="main"></main>
+  <div id="printbook"></div>
+
+  <nav class="tabs" id="tabs">
+    <div class="inner">
+      <a href="#/" data-tab="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</a>
+      <a href="#/readings" data-tab="readings"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Readings</a>
+      <a href="#/book" data-tab="book"><svg viewBox="0 0 24 24"><path d="M4 5c3-1.5 5.5-1.5 8 0v15c-2.5-1.5-5-1.5-8 0zM20 5c-3-1.5-5.5-1.5-8 0v15c2.5-1.5 5-1.5 8 0z"/></svg>My Book</a>
+      <a href="#/practice" data-tab="practice"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 10h6M13 10h6M5 14h14M5 18h6M13 18h6"/></svg>Practice</a>
+    </div>
+  </nav>
+  <a class="fab hide" id="fab" href="#/new" aria-label="New reading">+</a>
+
+  <script>
+  "use strict";
+  /* ============================================================
+     Structure of the I Ching. Trigram attributes follow the
+     traditional Shuogua (public domain). Keywords and questions
+     are original to this app; the texts are yours to write.
+     ============================================================ */
+  const TRI = {
+    qian: { bits: "111", sym: "☰", zh: "乾", py: "Qián", img: "Heaven", q: "strong, creative", fam: "Father", body: "Head", ani: "Horse", dir: "Northwest" },
+    dui:  { bits: "110", sym: "☱", zh: "兌", py: "Duì",  img: "Lake", q: "joyful, open", fam: "Youngest daughter", body: "Mouth", ani: "Sheep", dir: "West" },
+    li:   { bits: "101", sym: "☲", zh: "離", py: "Lí",   img: "Fire", q: "clinging, clear, bright", fam: "Middle daughter", body: "Eye", ani: "Pheasant", dir: "South" },
+    zhen: { bits: "100", sym: "☳", zh: "震", py: "Zhèn", img: "Thunder", q: "arousing, moving", fam: "Eldest son", body: "Foot", ani: "Dragon", dir: "East" },
+    xun:  { bits: "011", sym: "☴", zh: "巽", py: "Xùn",  img: "Wind", q: "gentle, penetrating", fam: "Eldest daughter", body: "Thighs", ani: "Rooster", dir: "Southeast" },
+    kan:  { bits: "010", sym: "☵", zh: "坎", py: "Kǎn",  img: "Water", q: "flowing, deep, dangerous", fam: "Middle son", body: "Ear", ani: "Pig", dir: "North" },
+    gen:  { bits: "001", sym: "☶", zh: "艮", py: "Gèn",  img: "Mountain", q: "still, resting", fam: "Youngest son", body: "Hand", ani: "Dog", dir: "Northeast" },
+    kun:  { bits: "000", sym: "☷", zh: "坤", py: "Kūn",  img: "Earth", q: "receptive, yielding", fam: "Mother", body: "Belly", ani: "Cow", dir: "Southwest" },
+  };
+  const TRI_ORDER = ["qian", "dui", "li", "zhen", "xun", "kan", "gen", "kun"];
+
+  // [upper, lower, chinese, pinyin, name, keywords, question]
+  const RAW = [
+    ["qian","qian","乾","Qián","The Creative","strength · initiative · steady effort","Where is my strength asking to be used steadily, rather than forced?"],
+    ["kun","kun","坤","Kūn","The Receptive","yielding · devotion · receptivity","What would it mean to follow well here, and let something grow through me?"],
+    ["kan","zhen","屯","Zhūn","Difficult Beginnings","birth pangs · perseverance · gathering helpers","What is struggling to be born, and who could help me with it?"],
+    ["gen","kan","蒙","Méng","Youthful Folly","inexperience · learning · the student's mind","Where do I need a teacher, and am I asking sincerely?"],
+    ["kan","qian","需","Xū","Waiting","patience · nourishment · trust in timing","What can I nourish while I wait, instead of pushing?"],
+    ["qian","kan","訟","Sòng","Conflict","dispute · stopping halfway · fairness","What is my part in this conflict, and where should I stop before it escalates?"],
+    ["kun","kan","師","Shī","The Army","discipline · organisation · leadership","What inner forces need organising, and who is leading them?"],
+    ["kan","kun","比","Bǐ","Holding Together","union · belonging · choosing allegiance","Who or what am I truly joined to?"],
+    ["xun","qian","小畜","Xiǎo Chù","Small Taming","gentle restraint · small steps · patience","What small, gentle influence can I have while the larger thing isn't yet possible?"],
+    ["qian","dui","履","Lǚ","Treading","conduct · care · courtesy in danger","How do I move carefully and courteously through something delicate?"],
+    ["kun","qian","泰","Tài","Peace","harmony · flow · flourishing","What is flowing well right now, and how do I tend it without clinging?"],
+    ["qian","kun","否","Pǐ","Standstill","stagnation · disconnection · integrity","When things are blocked, how do I keep my integrity intact?"],
+    ["qian","li","同人","Tóng Rén","Fellowship","community · shared purpose · openness","Where can I find common ground beyond my own circle?"],
+    ["li","qian","大有","Dà Yǒu","Great Possession","abundance · clarity · generosity","How do I hold what I've been given with humility and generosity?"],
+    ["kun","gen","謙","Qiān","Modesty","humility · balance · levelling","Where would being quieter, smaller or more balanced serve better?"],
+    ["zhen","kun","豫","Yù","Enthusiasm","readiness · inspiration · moving others","What genuinely moves me, and how do I prepare before acting on it?"],
+    ["dui","zhen","隨","Suí","Following","adapting · responsiveness · rest","What deserves my following, and what am I following out of habit?"],
+    ["gen","xun","蠱","Gǔ","Repairing the Spoiled","repair · inherited patterns · renewal","What inherited pattern needs mending, and where do I begin?"],
+    ["kun","dui","臨","Lín","Approach","advance · growth · care for what comes","What is approaching, and how do I meet it before its season turns?"],
+    ["xun","kun","觀","Guān","Contemplation","viewing · being seen · perspective","What do I see when I step back? What do others see in me?"],
+    ["li","zhen","噬嗑","Shì Kè","Biting Through","decisiveness · justice · removing obstacles","What obstacle needs to be bitten through, clearly and fairly?"],
+    ["gen","li","賁","Bì","Grace","beauty · form · adornment","Where does form serve substance, and where does it hide it?"],
+    ["gen","kun","剝","Bō","Splitting Apart","decay · letting go · stillness","What is falling away, and how can I rest rather than resist?"],
+    ["kun","zhen","復","Fù","Return","turning point · renewal · coming back","What am I returning to? What small first step brings me back?"],
+    ["qian","zhen","無妄","Wú Wàng","Innocence","spontaneity · sincerity · the unexpected","Am I acting from sincerity, or from calculation?"],
+    ["gen","qian","大畜","Dà Chù","Great Taming","restraint · accumulation · cultivation","What strength am I storing up, and what daily practice holds it?"],
+    ["gen","zhen","頤","Yí","Nourishment","what we feed and are fed · care · words","What am I feeding myself — in body, words and attention?"],
+    ["dui","xun","大過","Dà Guò","Great Exceeding","pressure · the sagging beam · exceptional times","What is overloaded, and what exceptional step does this moment ask for?"],
+    ["kan","kan","坎","Kǎn","The Abyss (Water)","danger · flowing through · sincerity in hardship","How can I flow through this difficulty like water, without losing myself?"],
+    ["li","li","離","Lí","The Clinging (Fire)","clarity · dependence · illumination","What do I depend on in order to shine? What clarity is available now?"],
+    ["dui","gen","咸","Xián","Influence","attraction · mutual response · courtship","What am I drawn to, and how do I stay open and receptive in it?"],
+    ["zhen","xun","恆","Héng","Duration","endurance · constancy · steadiness","What do I want to last, and what keeps it steady through change?"],
+    ["qian","gen","遯","Dùn","Retreat","withdrawal · timing · strategic distance","Where is stepping back the strong move right now?"],
+    ["zhen","qian","大壯","Dà Zhuàng","Great Power","strength · right use of power","Is my strength in line with what is right?"],
+    ["li","kun","晉","Jìn","Progress","advance · recognition · the rising sun","How can I rise in a way that brightens what I serve?"],
+    ["kun","li","明夷","Míng Yí","Darkening of the Light","adversity · hidden light · perseverance","How do I protect my inner light when the outer world is dim?"],
+    ["xun","li","家人","Jiā Rén","The Family","roles · home · inner order","What role am I playing at home, and does it reflect who I want to be?"],
+    ["li","dui","睽","Kuí","Opposition","polarity · difference · small matters","Where can difference coexist without needing to be resolved?"],
+    ["kan","gen","蹇","Jiǎn","Obstruction","obstacles · turning inward · seeking help","What is this obstacle teaching me about myself?"],
+    ["zhen","kan","解","Xiè","Deliverance","release · relief · forgiveness","What can I release now, and what must I quickly put in order?"],
+    ["gen","dui","損","Sǔn","Decrease","simplicity · sacrifice · giving","What can I lessen so that something truer can increase?"],
+    ["xun","zhen","益","Yì","Increase","gain · generosity · opportunity","How do I use this time of increase to grow and to give?"],
+    ["dui","qian","夬","Guài","Breakthrough","resolution · naming the truth · determination","What needs to be named out loud, firmly and without aggression?"],
+    ["qian","xun","姤","Gòu","Coming to Meet","encounter · temptation · small influences","What seemingly small influence is entering my life, and do I welcome it?"],
+    ["dui","kun","萃","Cuì","Gathering Together","assembly · shared purpose · devotion","What is gathering around me, and what holds it together?"],
+    ["kun","xun","升","Shēng","Pushing Upward","gradual growth · effort · ascent","What steady, patient effort is pushing me upward like a sapling?"],
+    ["dui","kan","困","Kùn","Exhaustion","constraint · adversity · inner resolve","When I feel drained and unheard, what remains true in me?"],
+    ["kan","xun","井","Jǐng","The Well","source · shared nourishment · depth","What is my deep source, and is my rope long enough to reach it?"],
+    ["dui","li","革","Gé","Revolution","molting · transformation · ripe timing","What needs to change completely, and is the time ripe?"],
+    ["li","xun","鼎","Dǐng","The Cauldron","transformation · offering · refinement","What is cooking in me — what is being refined?"],
+    ["zhen","zhen","震","Zhèn","The Arousing (Thunder)","shock · awakening · fear and laughter","What shock is waking me up, and can I stay centred in it?"],
+    ["gen","gen","艮","Gèn","Keeping Still (Mountain)","stillness · meditation · knowing when to stop","Where do I need to stop — my thoughts, my action, my reaching?"],
+    ["xun","gen","漸","Jiàn","Development","gradual progress · the tree on the mountain","What is unfolding slowly, step by proper step?"],
+    ["zhen","dui","歸妹","Guī Mèi","The Marrying Maiden","subordinate position · tact · the long view","Where am I not in charge, and how do I act with dignity there?"],
+    ["zhen","li","豐","Fēng","Abundance","fullness · the zenith · the moment of peak","How do I live fully in this peak, knowing it will pass?"],
+    ["li","gen","旅","Lǚ","The Wanderer","travel · being a stranger · caution","Where am I a guest, and how do I conduct myself lightly?"],
+    ["xun","xun","巽","Xùn","The Gentle (Wind)","penetration · gentle persistence · influence","What gentle, persistent influence would work better than force?"],
+    ["dui","dui","兌","Duì","The Joyous (Lake)","joy · exchange · openness","What genuine joy can I share, and what hollow joy can I let go of?"],
+    ["xun","kan","渙","Huàn","Dispersion","dissolving · releasing rigidity · reuniting","What hardness in me is ready to dissolve?"],
+    ["kan","dui","節","Jié","Limitation","boundaries · measure · structure","What healthy limit would give my life shape, and what limit is too harsh?"],
+    ["xun","dui","中孚","Zhōng Fú","Inner Truth","sincerity · trust · the empty centre","What do I hear when I listen from an empty, sincere centre?"],
+    ["zhen","gen","小過","Xiǎo Guò","Small Exceeding","attention to detail · modesty · the small bird","Where should I aim lower and attend to the small things?"],
+    ["kan","li","既濟","Jì Jì","After Completion","fulfilment · vigilance · order","Now that it is done, what needs care so it doesn't slide back into disorder?"],
+    ["li","kan","未濟","Wèi Jì","Before Completion","transition · almost there · caution","What is nearly complete, and what care does the final step need?"],
+  ];
+  const HEX = RAW.map((r, i) => ({
+    n: i + 1, up: r[0], lo: r[1], zh: r[2], py: r[3], name: r[4], kw: r[5], ask: r[6],
+    bits: TRI[r[1]].bits + TRI[r[0]].bits, // bottom → top
+  }));
+  const BY_BITS = Object.fromEntries(HEX.map(h => [h.bits, h.n]));
+  const hx = n => HEX[n - 1];
+
+  const POS = ["at the beginning", "in the second place", "in the third place", "in the fourth place", "in the fifth place", "at the top"];
+  const POS_MEANING = [
+    "The beginning: entering the situation, the foundation, not yet visible.",
+    "The inner centre: grounded, responsive, in the field. Resonates with line 5.",
+    "The threshold of the lower trigram: restless transition, the risk of overreaching.",
+    "Entering the upper trigram: near the ruler, the place of the adviser. Care and service.",
+    "The outer centre: the ruler's place, full expression and responsibility.",
+    "The culmination: beyond the situation, going too far, or the wisdom of withdrawal.",
+  ];
+  const FIELD_LABEL = { name: "My name for it", judgment: "The Judgment", image: "The Image", attitude: "Attitude & practice", sources: "Private notes & sources", l7: "When all six lines move" };
+  const CORE = ["judgment", "image", "l1", "l2", "l3", "l4", "l5", "l6", "attitude"];
+
+  /* ---------- Helpers ---------- */
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5;
+  const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const dstr = ts => new Date(ts).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  const isYang = v => v === 1 || v === 7 || v === 9;
+  const moving = v => v === 6 || v === 9;
+  const bitsOf = lines => lines.map(v => isYang(v) ? "1" : "0").join("");
+  const linesOf = n => [...hx(n).bits].map(Number);
+  const flip = s => [...s].map(b => b === "1" ? "0" : "1").join("");
+  const words = s => (String(s || "").trim().match(/\S+/g) || []).length;
+  const lineName = (i, yang) => i === 0 ? `${yang ? "Nine" : "Six"} at the beginning` : i === 5 ? `${yang ? "Nine" : "Six"} at the top` : `${yang ? "Nine" : "Six"} ${POS[i]}`;
+  const triPair = h => h.up === h.lo ? `${TRI[h.up].img} doubled` : `${TRI[h.up].img} over ${TRI[h.lo].img}`;
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  function toast(msg) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2400); }
+  function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+  function hashStr(s) { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+
+  function hexSVG(lines, { w = 64, mark = true, cls = "" } = {}) {
+    const lh = w * 0.115, sp = w * 0.085, H = 6 * lh + 5 * sp, mw = mark ? w * 0.24 : 0, W = w + mw * 2;
+    let s = `<svg class="hex ${cls}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><g>`;
+    for (let i = 0; i < 6; i++) {
+      const v = lines[i], y = H - (i + 1) * lh - i * sp, r = lh * 0.18;
+      if (v == null) { s += `<rect x="${mw}" y="${y}" width="${w}" height="${lh}" rx="${r}" class="ln-empty"/>`; continue; }
+      if (isYang(v)) s += `<rect class="ln" style="--i:${i}" x="${mw}" y="${y}" width="${w}" height="${lh}" rx="${r}"/>`;
+      else { const half = (w - w * 0.17) / 2; s += `<rect class="ln" style="--i:${i}" x="${mw}" y="${y}" width="${half}" height="${lh}" rx="${r}"/><rect class="ln" style="--i:${i}" x="${mw + w - half}" y="${y}" width="${half}" height="${lh}" rx="${r}"/>`; }
+    }
+    s += "</g>";
+    if (mark) for (let i = 0; i < 6; i++) {
+      const v = lines[i]; if (!moving(v)) continue;
+      const y = H - (i + 1) * lh - i * sp, cx = mw + w + mw * 0.55, cy = y + lh / 2, r = Math.max(2.5, lh * 0.42), sw = Math.max(1.2, w / 50);
+      s += v === 9 ? `<circle class="mk" cx="${cx}" cy="${cy}" r="${r}" stroke-width="${sw}"/>`
+        : `<path class="mk" stroke-width="${sw}" d="M${cx - r} ${cy - r}L${cx + r} ${cy + r}M${cx + r} ${cy - r}L${cx - r} ${cy + r}"/>`;
+    }
+    return s + "</svg>";
+  }
+  const fig = (n, w = 40) => hexSVG(linesOf(n), { w, mark: false });
+
+  /* ---------- Storage (on this device only) ---------- */
+  const KEY = "my-i-ching-v1";
+  const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
+  let db = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v) return Object.assign(fresh(), d); } catch (e) {} return fresh(); })();
+  let saveT;
+  function save(now) {
+    clearTimeout(saveT);
+    const f = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Couldn't save. Is storage full?"); } };
+    now ? f() : (saveT = setTimeout(f, 250));
+  }
+  addEventListener("pagehide", () => save(true));
+  document.addEventListener("visibilitychange", () => document.hidden && save(true));
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+  const ch = n => (db.book.ch[n] ||= { f: {}, h: {}, u: 0 });
+  const chText = (n, k) => (db.book.ch[n] && db.book.ch[n].f[k]) || "";
+  const chFilled = n => CORE.filter(k => chText(n, k).trim()).length;
+  const getReading = id => db.readings.find(r => r.id === id);
+  function markDay() { const d = new Date().toISOString().slice(0, 10); if (!db.days.includes(d)) { db.days.push(d); if (db.days.length > 800) db.days.shift(); } }
+
+  // Keep versions of each book passage so the book's evolution stays visible.
+  function snapshot(n, k, t) {
+    const c = ch(n), H = (c.h[k] ||= []), last = H[H.length - 1], now = Date.now();
+    if (last && last.t === t) return;
+    if (last && now - last.at < 20 * 60e3) { last.t = t; last.at = now; } else H.push({ t, at: now });
+    if (H.length > 40) H.splice(0, H.length - 40);
+    c.u = now; save();
+  }
+
+  function setBind(b, val) {
+    const [kind, a, ...rest] = b.split(":"); const k = rest.join(":");
+    if (kind === "b") { ch(a).f[k] = val; ch(a).u = Date.now(); markDay(); }
+    else if (kind === "r") { const r = getReading(a); if (!r) return; const p = k.split("."); let o = r; while (p.length > 1) o = (o[p[0]] ||= {}), p.shift(); o[p[0]] = val; markDay(); }
+    else if (kind === "meta") db.book[a] = val;
+    else if (kind === "draft") db.draft[a] = val;
+  }
+  function autogrow(el) { if (el.tagName !== "TEXTAREA") return; el.style.height = "auto"; el.style.height = el.scrollHeight + 2 + "px"; }
+
+  document.addEventListener("input", e => {
+    const el = e.target, b = el.dataset.bind; if (!b) return;
+    setBind(b, el.value); autogrow(el); save();
+    // mirror the same book passage if it appears twice on screen
+    document.querySelectorAll(`[data-bind="${CSS.escape(b)}"]`).forEach(o => { if (o !== el) { o.value = el.value; autogrow(o); } });
+  });
+  document.addEventListener("change", e => {
+    const b = e.target.dataset.bind; if (!b || !b.startsWith("b:")) return;
+    const [, n, k] = b.split(":"); snapshot(n, k, e.target.value);
+  });
+
+  /* ---------- Field components ---------- */
+  function bookField(n, k, { label, hint, ph, compact } = {}) {
+    const h = hx(n), c = db.book.ch[n], hist = (c && c.h[k]) || [], earlier = hist.slice(0, -1).reverse();
+    const lab = label || FIELD_LABEL[k] || lineLabel(n, +k.slice(1) - 1);
+    const id = `f-${n}-${k}`;
+    return `<div class="field">
+      <div class="row between"><label for="${id}">${esc(lab)}</label>${compact ? `<span class="bookmark">In my book · ${h.n}</span>` : ""}</div>
+      ${hint ? `<div class="hint">${hint}</div>` : ""}
+      <textarea id="${id}" rows="2" data-bind="b:${n}:${k}" placeholder="${esc(ph || "In your own words…")}">${esc(chText(n, k))}</textarea>
+      ${earlier.length ? `<details class="drafts"><summary class="small">Earlier drafts (${earlier.length})</summary>${earlier.map((d, i) =>
+        `<div class="draft">${esc(d.t) || "<em>(empty)</em>"}<div class="small muted" style="font-family:var(--sans)">${dstr(d.at)} · <button class="link small" data-act="restore" data-n="${n}" data-k="${k}" data-i="${hist.length - 2 - i}">Restore</button></div></div>`).join("")}</details>` : ""}
+    </div>`;
+  }
+  function lineLabel(n, i) { const yang = hx(n).bits[i] === "1"; return `Line ${i + 1} · ${lineName(i, yang)}`; }
+  function lineHint(n, i) {
+    const yang = hx(n).bits[i] === "1", fits = (i % 2 === 0) === yang;
+    return `${POS_MEANING[i]} A ${yang ? "yang" : "yin"} line in a ${i % 2 === 0 ? "yang" : "yin"} place (${fits ? "fitting" : "not fitting"}).`;
+  }
+  function relField(id, path, label, ph) {
+    const r = getReading(id); const val = path.split(".").reduce((o, p) => o && o[p], r) || "";
+    return `<div class="field"><label>${esc(label)}</label><textarea rows="2" data-bind="r:${id}:${path}" placeholder="${esc(ph || "")}">${esc(val)}</textarea></div>`;
+  }
+  const imageHint = h => `${TRI[h.up].sym} ${TRI[h.up].img} ${h.up === h.lo ? "upon " + TRI[h.lo].img.toLowerCase() : "above, " + TRI[h.lo].sym + " " + TRI[h.lo].img + " below"}. What picture do they make together, and what does a wise person do in its presence?`;
+  const judgmentHint = "What is the overall counsel of this time? What is favourable, what is the risk?";
+
+  /* ---------- Router ---------- */
+  const ROUTES = [
+    [/^#?\/?$/, viewToday, "today"],
+    [/^#\/new$/, viewNew, "today"],
+    [/^#\/r\/([\w]+)$/, viewReading, "readings"],
+    [/^#\/readings$/, viewReadings, "readings"],
+    [/^#\/book$/, viewBook, "book"],
+    [/^#\/book\/(\d+)(?:\/(\w+))?$/, viewChapter, "book"],
+    [/^#\/practice$/, viewPractice, "practice"],
+    [/^#\/settings$/, viewSettings, "today"],
+    [/^#\/science$/, viewScience, "today"],
+    [/^#\/print$/, viewPrint, "book"],
+  ];
+  let lastHash = "";
+  function route() {
+    const hash = location.hash || "#/";
+    document.body.classList.remove("printing");
+    for (const [re, fn, tab] of ROUTES) {
+      const m = hash.match(re); if (!m) continue;
+      const html = fn(...m.slice(1));
+      if (html != null) {
+        $("#main").innerHTML = `<div class="view">${html}</div>`;
+        document.querySelectorAll("#main textarea").forEach(autogrow);
+      }
+      document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+      $("#fab").classList.toggle("hide", !(tab === "today" && hash.match(/^#?\/?$/) || hash === "#/readings"));
+      const base = h => h.replace(/\/(words|structure|readings)$/, "");
+      if (base(hash) !== base(lastHash)) scrollTo(0, 0);
+      lastHash = hash; return;
+    }
+    location.hash = "#/";
+  }
+  addEventListener("hashchange", route);
+  const rerender = () => { const y = scrollY; route(); scrollTo(0, y); };
+
+  /* ---------- Today ---------- */
+  function suggestChapter() {
+    for (const r of [...db.readings].reverse().slice(0, 10)) {
+      const n = BY_BITS[bitsOf(r.lines)]; if (chFilled(n) < CORE.length) return [n, "from your recent reading"];
+    }
+    const unbegun = HEX.find(h => chFilled(h.n) === 0);
+    if (unbegun && Object.keys(db.book.ch).length < 3) return [unbegun.n, "the next chapter in sequence"];
+    const n = (hashStr(new Date().toDateString()) % 64) + 1; return [n, "today's chapter"];
+  }
+  function viewToday() {
+    const now = Date.now(), hr = new Date().getHours();
+    const greet = hr < 5 ? "Still night" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+    const begun = HEX.filter(h => chFilled(h.n) > 0).length;
+    const total = HEX.reduce((a, h) => a + chFilled(h.n), 0), pct = Math.round(total / (64 * CORE.length) * 100);
+    const allWords = HEX.reduce((a, h) => a + Object.values((db.book.ch[h.n] || { f: {} }).f).reduce((x, t) => x + words(t), 0), 0);
+    const carrying = [...db.readings].reverse().find(r => (r.attitude || r.will) && !(r.back && r.back.at) && now - r.at < 45 * DAY);
+    const dueBack = db.readings.filter(r => r.backAt && r.backAt <= now && !(r.back && r.back.at));
+    const due = dueCount();
+    const [sn, why] = suggestChapter(), sh = hx(sn);
+    const draft = db.draft && db.draft.lines.some(v => v != null);
+    return `
+      <div class="row between" style="margin-bottom:18px">
+        <div><div class="eyebrow">${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div>
+        <h1>${greet}</h1></div>
+        <a class="btn ghost" href="#/settings" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>
+      </div>
+      <div class="stack">
+        <a class="card tap" href="#/new" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">
+          <div class="row between"><div>
+            <div class="eyebrow" style="color:inherit;opacity:.6">${draft ? "Continue" : "Consult"}</div>
+            <h2 style="margin-top:4px">${draft ? "Finish your hexagram" : "Bring a question"}</h2>
+            <p style="opacity:.75;margin:6px 0 0">Make your hexagram your own way, then meet it in your words.</p></div>
+            <div style="color:var(--paper);opacity:.9">${hexSVG([7, 8, 9, 7, 8, 7], { w: 46, mark: false })}</div></div>
+        </a>
+        ${carrying ? `<a class="card tap" href="#/r/${carrying.id}"><div class="eyebrow"><span class="seal-dot"></span>What I'm carrying · ${hx(BY_BITS[bitsOf(carrying.lines)]).name}</div>
+          ${carrying.attitude ? `<p class="quote" style="margin-top:8px">${esc(carrying.attitude)}</p>` : ""}
+          ${carrying.will ? `<p class="muted">When ${esc(carrying.when || "…")}, I will ${esc(carrying.will)}.</p>` : ""}</a>` : ""}
+        ${dueBack.map(r => `<a class="card tap" href="#/r/${r.id}"><div class="eyebrow" style="color:var(--seal)">Time to look back</div>
+          <p class="serif" style="font-size:18px;margin-top:6px">${esc(r.q || "Your reading")} <span class="muted">· ${dstr(r.at)}</span></p>
+          <p class="small muted">What actually happened? Close the loop while it's fresh.</p></a>`).join("")}
+        <a class="card tap" href="#/book/${sn}">
+          <div class="eyebrow">A page to write · ${why}</div>
+          <div class="row" style="margin-top:10px;gap:16px">${fig(sn, 42)}
+            <div class="grow"><div class="num">${sn} · <span class="cjk">${sh.zh}</span> · ${sh.py}</div><h3>${sh.name}</h3>
+            <p class="serif muted" style="font-style:italic">${esc(sh.ask)}</p></div></div>
+        </a>
+        <div class="row" style="gap:10px">
+          <a class="card tap grow" href="#/book"><div class="row"><div class="ring" style="--p:${pct}"><span>${pct}%</span></div>
+            <div><div class="eyebrow">My book</div><div class="stat">${begun}<span class="muted small"> / 64</span></div><div class="small muted">${allWords.toLocaleString()} words</div></div></div></a>
+          <a class="card tap grow" href="#/practice"><div class="eyebrow">Practice</div><div class="stat">${due}</div><div class="small muted">${due ? "cards ready" : "all caught up"}</div></a>
+        </div>
+        <p class="center small"><a class="link" href="#/science">The science behind this app</a></p>
+      </div>`;
+  }
+
+  /* ---------- New reading: build the hexagram ---------- */
+  function viewNew() {
+    db.draft ||= { lines: [null, null, null, null, null, null], q: "", sit: "", method: "" };
+    const d = db.draft, next = d.lines.findIndex(v => v == null), ready = next === -1;
+    const n = ready ? BY_BITS[bitsOf(d.lines)] : null;
+    const opt = (i, v, nm) => `<button class="lopt ${d.lines[i] === v ? "on" : ""}" data-act="setline" data-i="${i}" data-v="${v}">${hexLine(v)}${v}<small>${nm}</small></button>`;
+    const rows = [5, 4, 3, 2, 1, 0].map(i => `<div class="lrow ${i === next ? "next" : ""}"><span class="lbl">LINE ${i + 1}</span><div class="opts">
+      ${opt(i, 6, "old yin")}${opt(i, 7, "yang")}${opt(i, 8, "yin")}${opt(i, 9, "old yang")}</div></div>`).join("");
+    return `
+      <a class="back" href="#/">← Today</a>
+      <h1>A new reading</h1>
+      <p class="muted">Write the question first. A clear question gives you something to check against later.</p>
+      <div class="card" style="margin-top:16px">
+        <div class="field" style="padding-top:0"><label>My question</label><textarea rows="1" data-bind="draft:q" placeholder="What do I need to understand about…">${esc(d.q)}</textarea></div>
+        <div class="field"><label>What's alive in my life right now</label><textarea rows="2" data-bind="draft:sit" placeholder="The situation, the feelings, what I hope and fear…">${esc(d.sit)}</textarea></div>
+        <div class="field"><label>How I'm producing it</label><input type="text" data-bind="draft:method" value="${esc(d.method)}" placeholder="Coins, yarrow, dice, numbers from the moment, a walk…"></div>
+      </div>
+      <div class="sechead"><h3>Build it from the bottom up</h3></div>
+      <p class="small muted">Lines are written from line 1 at the bottom to line 6 at the top. 6 and 9 are moving lines that change into their opposite.</p>
+      <div class="card" style="margin-top:10px">
+        <div class="builder"><div>${rows}</div>
+          <div class="center" style="width:110px">${hexSVG(d.lines, { w: 70, cls: "ink" })}
+            <div style="margin-top:10px;min-height:44px">${n ? `<div class="num">${n}</div><div class="serif" style="font-size:15px">${hx(n).name}</div>` : `<div class="small muted">${6 - d.lines.filter(v => v != null).length} to go</div>`}</div></div></div>
+        <hr style="margin:14px 0">
+        <div class="row wrap" style="gap:8px">
+          <input type="text" id="numcode" inputmode="numeric" placeholder="Or type 6 digits, bottom → top: 789678" style="font:15px var(--sans);flex:1;min-width:200px;border-bottom:1px solid var(--line)">
+          <button class="btn sm" data-act="numcode">Use</button>
+        </div>
+        <div class="row wrap" style="gap:8px;margin-top:10px">
+          <input type="text" id="hexnum" inputmode="numeric" placeholder="Or start from a number 1–64" style="font:15px var(--sans);flex:1;min-width:200px;border-bottom:1px solid var(--line)">
+          <button class="btn sm" data-act="hexnum">Use</button>
+        </div>
+        <details style="margin-top:14px"><summary class="small">Let the app cast instead</summary>
+          <div class="row wrap" style="gap:8px;margin-top:10px">
+            <button class="btn sm" data-act="cast" data-m="coins">Three coins</button>
+            <button class="btn sm" data-act="cast" data-m="yarrow">Yarrow-stalk odds</button>
+            <button class="btn sm ghost" data-act="clearlines">Clear</button>
+          </div>
+          <p class="small muted">Coins: each moving line 1 in 8. Yarrow: old yang 3/16, old yin 1/16, so yin rarely moves.</p>
+        </details>
+      </div>
+      <button class="btn seal block" style="margin-top:20px" data-act="begin" ${ready ? "" : "disabled"}>Meet the hexagram →</button>`;
+  }
+  function hexLine(v) {
+    const yang = isYang(v), c = moving(v);
+    return `<svg width="34" height="10" viewBox="0 0 34 10" aria-hidden="true">${yang ? `<rect x="0" y="3" width="${c ? 26 : 34}" height="4" rx="1" fill="currentColor"/>` : `<rect x="0" y="3" width="${c ? 11 : 15}" height="4" rx="1" fill="currentColor"/><rect x="${c ? 15 : 19}" y="3" width="11" height="4" rx="1" fill="currentColor"/>`}
+      ${c ? (v === 9 ? `<circle cx="31" cy="5" r="2.6" fill="none" stroke="var(--seal)" stroke-width="1.3"/>` : `<path d="M28.5 2.5l5 5M33.5 2.5l-5 5" stroke="var(--seal)" stroke-width="1.3"/>`) : ""}</svg>`;
+  }
+  function randLine(m) {
+    const r = crypto.getRandomValues(new Uint32Array(3));
+    if (m === "coins") return [...r].reduce((a, x) => a + (x % 2 ? 3 : 2), 0);
+    const x = r[0] % 16; return x < 1 ? 6 : x < 4 ? 9 : x < 9 ? 7 : 8; // old yin 1/16, old yang 3/16, yang 5/16, yin 7/16
+  }
+
+  /* ---------- A reading ---------- */
+  const viewOpen = new Set();
+  function emphasis(lines, n, m) {
+    const mv = [0, 1, 2, 3, 4, 5].filter(i => moving(lines[i])), un = [0, 1, 2, 3, 4, 5].filter(i => !moving(lines[i])), k = mv.length;
+    if (!k) return { text: "No moving lines: read the hexagram as a whole, through its Judgment and Image.", lines: [], relLines: [] };
+    if (k === 1) return { text: `One moving line: line ${mv[0] + 1} carries the main message.`, lines: mv, relLines: [] };
+    if (k === 2) return { text: `Two moving lines: the upper one, line ${mv[1] + 1}, leads.`, lines: mv, relLines: [] };
+    if (k === 3) return { text: "Three moving lines: weigh the present and where it's heading equally.", lines: mv, relLines: [] };
+    if (k === 4) return { text: `Four moving lines: the lower unchanging line (${un[0] + 1}) of the relating hexagram speaks.`, lines: mv, relLines: [un[0]] };
+    if (k === 5) return { text: `Five moving lines: the one unchanging line (${un[0] + 1}) of the relating hexagram speaks.`, lines: mv, relLines: [un[0]] };
+    return { text: n <= 2 ? "All six lines move: read the special text for all lines moving." : "All six lines move: let the relating hexagram's Judgment lead.", lines: mv, relLines: [], all: n <= 2 };
+  }
+  function viewReading(id) {
+    const r = getReading(id); if (!r) { location.hash = "#/readings"; return null; }
+    const n = BY_BITS[bitsOf(r.lines)], h = hx(n);
+    const relBits = r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("");
+    const m = r.lines.some(moving) ? BY_BITS[relBits] : null, hm = m && hx(m);
+    const em = emphasis(r.lines, n, m), showAll = viewOpen.has(id);
+    const lineIdx = showAll ? [0, 1, 2, 3, 4, 5] : em.lines;
+    const backDue = r.backAt && r.backAt <= Date.now();
+    let step = 0; const S = t => `<div class="sechead"><span class="stepn">${++step}</span><h3>${t}</h3></div>`;
+    return `
+      <a class="back" href="#/readings">← Readings</a>
+      <div class="eyebrow">${dstr(r.at)}${r.method ? " · " + esc(r.method) : ""}</div>
+      <textarea class="serif" style="font-size:26px;line-height:1.3;margin-top:4px" rows="1" data-bind="r:${id}:q" placeholder="My question">${esc(r.q)}</textarea>
+      <div class="card" style="margin-top:12px">
+        <div class="row" style="justify-content:center;gap:22px">
+          <a href="#/book/${n}" class="center" style="text-decoration:none">${hexSVG(r.lines, { w: 78, cls: "ink anim" })}<div class="num" style="margin-top:10px">${n}</div><div class="serif">${h.name}</div><div class="small muted cjk">${h.zh} ${h.py}</div></a>
+          ${m ? `<div class="arrow">→</div><a href="#/book/${m}" class="center" style="text-decoration:none;opacity:.8">${hexSVG(linesOf(m), { w: 60, mark: false, cls: "ink" })}<div class="num" style="margin-top:10px">${m}</div><div class="serif">${hm.name}</div><div class="small muted cjk">${hm.zh} ${hm.py}</div></a>` : ""}
+        </div>
+        <p class="small muted center" style="margin-top:14px">${triPair(h)} · ${h.kw}</p>
+        <p class="small center" style="margin:6px 0 0"><span class="seal-dot"></span>${em.text} <span class="muted">(Zhu Xi's rule; trust your own sense.)</span></p>
+      </div>
+      ${r.sit ? `<details style="margin-top:12px"><summary class="small">The situation I described</summary>${relField(id, "sit", "What was alive", "")}</details>` : ""}
+
+      ${S("First impression")}
+      <p class="hint">Before analysing: what did you feel when you saw it? Write it fast.</p>
+      <div class="card flat">${relField(id, "first", "My gut response", "The first thing that came…")}</div>
+
+      ${S("The Judgment")}
+      <div class="card flat">${bookField(n, "judgment", { compact: true, hint: judgmentHint, ph: "Not written yet. Say it in your own words now; it goes into your book." })}
+        ${relField(id, "rel.judgment", "How it speaks to my life now", "Here, today, this means…")}</div>
+
+      ${S("The Image")}
+      <div class="card flat">${bookField(n, "image", { compact: true, hint: imageHint(h), ph: "Not written yet. Describe the image in your own words." })}
+        ${relField(id, "rel.image", "What the image asks of me", "The wise response for me would be…")}</div>
+
+      ${lineIdx.length || em.all ? S(showAll ? "All six lines" : "The moving lines") : ""}
+      ${lineIdx.map(i => `<div class="card flat" style="margin-top:10px">${bookField(n, "l" + (i + 1), { compact: true, hint: lineHint(n, i) + (moving(r.lines[i]) ? ` <b style="color:var(--seal)">Moving.</b>` : "") })}
+        ${relField(id, "rel.l" + (i + 1), "Where this line touches my life", "")}</div>`).join("")}
+      ${em.all ? `<div class="card flat" style="margin-top:10px">${bookField(n, "l7", { compact: true, hint: "The special text for when every line moves." })}${relField(id, "rel.l7", "What it means for me", "")}</div>` : ""}
+      <p style="margin-top:10px"><button class="link small" data-act="alllines" data-id="${id}">${showAll ? "Show only the moving lines" : "Show all six lines"}</button></p>
+
+      ${m ? `${S("Where it's heading · " + hm.name)}
+      <div class="card flat">${bookField(m, "judgment", { compact: true, hint: "The relating hexagram: the direction, the potential, or the outcome.", ph: "Not written yet…" })}
+        ${em.relLines.map(i => bookField(m, "l" + (i + 1), { compact: true, hint: lineHint(m, i) })).join("")}
+        ${relField(id, "heading", "The movement from here to there", "From " + h.name + " towards " + hm.name + "…")}</div>` : ""}
+
+      ${S("Carry it into life")}
+      <div class="card flat">
+        ${chText(n, "attitude") ? `<div class="field" style="padding-top:0"><span class="bookmark">From my book</span><p class="serif muted" style="white-space:pre-wrap">${esc(chText(n, "attitude"))}</p></div>` : ""}
+        ${relField(id, "attitude", "The attitude I'll embody", "Steady, patient, open-handed…")}
+        <div class="field"><label>My plan</label>
+          <div class="row wrap serif" style="font-size:18px;gap:4px 8px"><span>When</span><input type="text" data-bind="r:${id}:when" value="${esc(r.when)}" placeholder="the situation arises" style="flex:1;min-width:160px;border-bottom:1px solid var(--line)"></div>
+          <div class="row wrap serif" style="font-size:18px;gap:4px 8px;margin-top:6px"><span>I will</span><input type="text" data-bind="r:${id}:will" value="${esc(r.will)}" placeholder="one concrete thing" style="flex:1;min-width:160px;border-bottom:1px solid var(--line)"></div></div>
+        <div class="field"><label>Look back in</label><div class="row wrap" style="gap:6px;margin-top:8px">
+          ${[3, 7, 14, 30].map(dd => `<button class="chip ${r.backDays === dd ? "on" : ""}" data-act="backin" data-id="${id}" data-d="${dd}">${dd} days</button>`).join("")}</div>
+          ${r.backAt ? `<p class="small muted">On ${dstr(r.backAt)} it will appear on Today.</p>` : ""}</div>
+      </div>
+
+      <div id="back"></div>
+      ${S(backDue || (r.back && r.back.at) ? "Looking back" : "Look back (later)")}
+      <details ${backDue || (r.back && r.back.at) ? "open" : ""}><summary class="small muted">${backDue || (r.back && r.back.at) ? "" : "Open early"}</summary>
+      <div class="card flat">
+        ${relField(id, "back.happened", "What actually happened", "Facts first, then how I responded…")}
+        ${relField(id, "back.fit", "What fit, and what didn't", "Be honest; both are useful…")}
+        ${relField(id, "back.friend", "If a friend had this reading and this week", "What would I tell them?")}
+        ${relField(id, "back.learned", "What I now understand about " + h.name, "This changes how I read the hexagram…")}
+        <div class="row wrap" style="gap:8px;margin-top:10px">
+          ${r.back && r.back.at ? `<span class="small muted">Looked back on ${dstr(r.back.at)}.</span>` : `<button class="btn sm primary" data-act="backdone" data-id="${id}">Done looking back</button>`}
+          <a class="btn sm" href="#/book/${n}">Revise chapter ${n} with what I learned →</a></div>
+      </div></details>
+      <hr><button class="btn ghost sm" data-act="delreading" data-id="${id}" style="color:var(--seal)">Delete this reading</button>`;
+  }
+
+  /* ---------- Readings list ---------- */
+  let readingQuery = "";
+  function viewReadings() {
+    return `<h1>Readings</h1><p class="muted">Your journal of consultations, newest first.</p>
+      <input type="search" id="rq" value="${esc(readingQuery)}" placeholder="Search questions, words, hexagrams…" style="font:16px var(--sans);border-bottom:1px solid var(--line);margin:10px 0 16px">
+      <div class="list" id="rlist">${readingsList()}</div>`;
+  }
+  function readingsList() {
+    const q = readingQuery.toLowerCase();
+    const list = [...db.readings].reverse().filter(r => !q || JSON.stringify(r).toLowerCase().includes(q) || hx(BY_BITS[bitsOf(r.lines)]).name.toLowerCase().includes(q));
+    return `${list.map(r => {
+        const n = BY_BITS[bitsOf(r.lines)], mv = r.lines.some(moving);
+        const m = mv ? BY_BITS[r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("")] : null;
+        const back = r.back && r.back.at ? "looked back" : r.backAt && r.backAt <= Date.now() ? "<b style='color:var(--seal)'>look back now</b>" : "";
+        return `<a class="card tap ritem" href="#/r/${r.id}">${hexSVG(r.lines, { w: 34 })}<div class="grow">
+          <div class="eyebrow">${dstr(r.at)}${back ? " · " + back : ""}</div>
+          <div class="serif" style="font-size:18px;margin-top:2px">${esc(r.q || "Untitled question")}</div>
+          <div class="small muted">${n} ${hx(n).name}${m ? ` → ${m} ${hx(m).name}` : ""}</div></div></a>`;
+      }).join("") || `<div class="card center muted" style="padding:40px 18px"><p class="serif" style="font-size:19px">${readingQuery ? "Nothing matches." : "No readings yet."}</p><p class="small">${readingQuery ? "" : "Tap + to bring your first question."}</p></div>`}`;
+  }
+
+  /* ---------- The book ---------- */
+  let bookMode = "seq";
+  function viewBook() {
+    const begun = HEX.filter(h => chFilled(h.n) > 0).length;
+    const grid = bookMode === "seq"
+      ? `<div class="grid64">${HEX.map(h => { const f = chFilled(h.n); return `<a class="cell ${f === CORE.length ? "done" : ""}" href="#/book/${h.n}">
+          <span class="n">${h.n}</span>${fig(h.n, 34)}<span class="nm">${h.name}</span><span class="bar"><i style="width:${f / CORE.length * 100}%"></i></span></a>`; }).join("")}</div>`
+      : `<p class="small muted">Rows: upper trigram. Columns: lower trigram. Every hexagram is two trigrams meeting.</p>
+         <div class="map"><div></div>${TRI_ORDER.map(t => `<div class="h">${TRI[t].sym}<small>${TRI[t].img}</small></div>`).join("")}
+         ${TRI_ORDER.map(u => `<div class="h">${TRI[u].sym}<small>${TRI[u].img}</small></div>${TRI_ORDER.map(l => { const n = BY_BITS[TRI[l].bits + TRI[u].bits];
+           return `<a href="#/book/${n}" title="${hx(n).name}">${n}<i style="width:${chFilled(n) / CORE.length * 100}%"></i></a>`; }).join("")}`).join("")}</div>`;
+    return `<div class="eyebrow">My book</div>
+      <h1 class="serif">${esc(db.book.title || "My Book of Changes")}</h1>
+      <p class="muted">${begun} of 64 chapters begun. Each one is written by you, line by line, as the hexagrams come into your life.</p>
+      <div class="row between wrap" style="margin:16px 0;gap:10px">
+        <div class="seg"><button class="${bookMode === "seq" ? "on" : ""}" data-act="bookmode" data-m="seq">Sequence</button><button class="${bookMode === "map" ? "on" : ""}" data-act="bookmode" data-m="map">Trigram map</button></div>
+        <div class="row" style="gap:6px"><a class="btn sm" href="#/settings">Title & preface</a><a class="btn sm primary" href="#/print">Read as a book</a></div>
+      </div>${grid}`;
+  }
+
+  function viewChapter(nStr, tab = "words") {
+    const n = +nStr; if (n < 1 || n > 64) { location.hash = "#/book"; return null; }
+    const h = hx(n), up = TRI[h.up], lo = TRI[h.lo];
+    const tabs = ["words", "structure", "readings"].map(t => `<a href="#/book/${n}/${t}" class="${tab === t ? "on" : ""}">${{ words: "My words", structure: "Structure", readings: "In my life" }[t]}</a>`).join("");
+    let body = "";
+    if (tab === "words") {
+      body = `<p class="serif muted" style="font-style:italic;font-size:18px;margin:16px 0 8px">${esc(h.ask)}</p>
+        <div class="card">
+          ${bookField(n, "name", { hint: "Name it in a way that means something to you." })}
+          ${bookField(n, "judgment", { hint: judgmentHint })}
+          ${bookField(n, "image", { hint: imageHint(h) })}
+          ${[0, 1, 2, 3, 4, 5].map(i => bookField(n, "l" + (i + 1), { hint: lineHint(n, i) })).join("")}
+          ${n <= 2 ? bookField(n, "l7", { hint: "The special text for when all six lines move." }) : ""}
+          ${bookField(n, "attitude", { hint: "What attitude does this hexagram teach? How will I practise it in daily life?" })}
+          ${bookField(n, "sources", { hint: "Kept private, never printed. Notes from translations you own, teachers, dreams." })}
+        </div>`;
+    } else if (tab === "structure") {
+      const b = h.bits, nucBits = b.slice(1, 4) + b.slice(2, 5), nuc = BY_BITS[nucBits], inv = BY_BITS[[...b].reverse().join("")], opp = BY_BITS[flip(b)];
+      const pair = n % 2 ? n + 1 : n - 1;
+      const link = (k, label, why) => `<a class="card tap flat ritem" href="#/book/${k}">${fig(k, 30)}<div class="grow"><div class="eyebrow">${label}</div><div class="serif">${k} · ${hx(k).name}</div><div class="small muted">${why}</div></div></a>`;
+      const triCard = (t, where) => `<div class="card flat tri grow"><div class="sym">${t.sym}</div><div><div class="eyebrow">${where}</div><div class="serif" style="font-size:18px">${t.img} <span class="cjk muted">${t.zh}</span></div>
+        <div class="small muted">${t.py} · ${t.q}<br>${t.fam} · ${t.body} · ${t.ani} · ${t.dir}</div></div></div>`;
+      body = `<div class="stack" style="margin-top:16px">${triCard(up, "Upper trigram · outer · later")}${triCard(lo, "Lower trigram · inner · earlier")}</div>
+        <p class="small muted" style="margin-top:10px">The lower trigram is the inner world and the start of things; the upper is the outer world and where they lead.</p>
+        <h3 style="margin-top:22px">The six places</h3>
+        <table class="lines"><tr><th>Line</th><th>Nature</th><th>Place</th><th>Resonates with</th></tr>
+        ${[5, 4, 3, 2, 1, 0].map(i => { const y = b[i] === "1", fits = (i % 2 === 0) === y, o = (i + 3) % 6, res = b[o] !== b[i];
+          return `<tr><td><b>${i + 1}</b>${i === 1 || i === 4 ? " <span class='small muted'>centre</span>" : ""}</td><td>${y ? "yang ⚊" : "yin ⚋"}</td><td>${fits ? "fitting" : "<span class='muted'>not fitting</span>"}</td><td>${res ? `line ${o + 1} ✓` : `<span class='muted'>line ${o + 1} (no)</span>`}</td></tr>`; }).join("")}</table>
+        <p class="small muted">Odd places are yang, even places yin; a line "fits" when its nature matches. Lines 2 and 5 are the centres. Lines 1–4, 2–5 and 3–6 resonate when one is yin and the other yang.</p>
+        <h3 style="margin-top:22px">Related hexagrams</h3>
+        <div class="list" style="margin-top:10px">
+          ${link(nuc, "Nuclear (hidden within)", "Lines 2–4 and 3–5: the core inside the situation")}
+          ${link(pair, "Its pair in the sequence", "The King Wen sequence moves in pairs")}
+          ${inv !== n ? link(inv, "Inverse (turned over)", "The same situation seen from the other side") : ""}
+          ${link(opp, "Opposite (every line changed)", "Its complement, the shadow or the missing half")}
+        </div>`;
+    } else {
+      const rs = db.readings.filter(r => { const p = BY_BITS[bitsOf(r.lines)]; const m = BY_BITS[r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("")]; return p === n || (r.lines.some(moving) && m === n); }).reverse();
+      body = `<p class="muted" style="margin-top:16px">Every time ${h.name} appeared in your readings. This is how the chapter grows from lived experience.</p>
+        <div class="list">${rs.map(r => `<a class="card tap flat" href="#/r/${r.id}"><div class="eyebrow">${dstr(r.at)}${BY_BITS[bitsOf(r.lines)] !== n ? " · as where it was heading" : ""}</div>
+          <div class="serif" style="font-size:18px">${esc(r.q || "Untitled")}</div>
+          ${[r.rel && r.rel.judgment, r.attitude, r.back && r.back.learned].filter(Boolean).map(t => `<p class="small muted" style="white-space:pre-wrap">${esc(t.slice(0, 220))}</p>`).join("")}</a>`).join("") || `<div class="card flat center muted small" style="padding:30px">Not yet in a reading.</div>`}</div>`;
+    }
+    return `<a class="back" href="#/book">← My book</a>
+      <div class="hexhead"><span class="glyph">${h.zh}</span>${hexSVG(linesOf(n), { w: 84, mark: false, cls: "ink" })}
+        <div><div class="num">HEXAGRAM ${n}</div><h1>${esc(chText(n, "name") || h.name)}</h1>
+        <div class="muted"><span class="cjk">${h.zh}</span> · ${h.py}${chText(n, "name") ? " · " + h.name : ""}</div>
+        <div class="small muted" style="margin-top:4px">${up.sym} ${triPair(h)} ${lo.sym}</div><div class="small muted">${h.kw}</div></div></div>
+      <div class="tabsline">${tabs}</div>${body}
+      <div class="row between" style="margin-top:22px"><a class="btn sm" href="#/book/${n === 1 ? 64 : n - 1}/${tab}">← ${n === 1 ? 64 : n - 1}</a><a class="btn sm" href="#/book/${n === 64 ? 1 : n + 1}/${tab}">${n === 64 ? 1 : n + 1} →</a></div>`;
+  }
+
+  /* ---------- Practice: spaced retrieval ---------- */
+  const BOX_DAYS = [0, 1, 3, 7, 16, 35, 90];
+  const NEW_PER_DAY = 5;
+  const DECKS = {
+    tri: { name: "The eight trigrams", about: "The alphabet of the I Ching. Learn these first.", ids: () => TRI_ORDER.map(t => "tri:" + t) },
+    fig: { name: "Figure → name", about: "See the six lines, recall the number and name.", ids: () => HEX.map(h => "fig:" + h.n) },
+    bld: { name: "Name → figure", about: "Build the hexagram from its name, through its trigrams.", ids: () => HEX.map(h => "bld:" + h.n) },
+    own: { name: "My own words", about: "Recall what you wrote before you see it.", ids: () => HEX.filter(h => chText(h.n, "judgment").trim() || chText(h.n, "image").trim() || chText(h.n, "attitude").trim()).map(h => "own:" + h.n) },
+  };
+  function newLeft(deck) { const d = new Date().toDateString(); if (db.newDay.date !== d) db.newDay = { date: d }; return NEW_PER_DAY - (db.newDay[deck] || 0); }
+  function deckQueue(deck) {
+    const now = Date.now(), ids = DECKS[deck].ids();
+    const due = ids.filter(id => db.cards[id] && db.cards[id].due <= now).sort((a, b) => db.cards[a].due - db.cards[b].due);
+    const fresh = ids.filter(id => !db.cards[id]).slice(0, Math.max(0, deck === "own" ? 99 : newLeft(deck)));
+    return [...due, ...fresh];
+  }
+  function dueCount() { return Object.keys(DECKS).reduce((a, k) => a + deckQueue(k).length, 0); }
+  let sess = null;
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function startSession(deck) {
+    const q = deck === "mix" ? shuffle(Object.keys(DECKS).flatMap(k => deckQueue(k))) : deckQueue(deck);
+    sess = { deck, queue: q.slice(0, 20), i: 0, shown: false, built: [0, 0, 0, 0, 0, 0], done: 0, right: 0 };
+  }
+  function grade(id, g) {
+    const c = db.cards[id] || { box: 0, seen: 0 };
+    if (!db.cards[id]) { const deck = id.split(":")[0]; newLeft(deck); db.newDay[deck] = (db.newDay[deck] || 0) + 1; }
+    c.box = g === 0 ? 1 : Math.min(6, c.box + (g === 2 ? 2 : 1)); c.seen++;
+    c.due = g === 0 ? Date.now() + 10 * 60e3 : today0() + BOX_DAYS[c.box] * DAY;
+    db.cards[id] = c; markDay(); save();
+    if (g === 0) sess.queue.push(id); else sess.right++;
+    sess.done++; sess.i++; sess.shown = false; sess.built = [0, 0, 0, 0, 0, 0];
+  }
+  function viewPractice() {
+    if (!sess || sess.i >= sess.queue.length) {
+      const finished = sess && sess.done; sess = null;
+      const mastered = Object.values(db.cards).filter(c => c.box >= 4).length;
+      return `<h1>Practice</h1><p class="muted">A few minutes of recall, spaced over days, is what moves the hexagrams from the page into memory.</p>
+        ${finished ? `<div class="card center" style="margin:14px 0"><p class="serif" style="font-size:20px">Session complete.</p><p class="small muted">${finished} cards reviewed. They'll return just as you're about to forget them.</p></div>` : ""}
+        <div class="list" style="margin-top:16px">
+          <button class="card tap" style="width:100%;text-align:left;font:inherit;color:inherit" data-act="practice" data-d="mix" ${dueCount() ? "" : "disabled"}>
+            <div class="row between"><div><div class="eyebrow" style="color:var(--seal)">Interleaved</div><h3>Everything due, mixed</h3></div><div class="stat">${dueCount()}</div></div></button>
+          ${Object.entries(DECKS).map(([k, d]) => { const q = deckQueue(k).length, total = d.ids().length;
+            return `<button class="card tap flat" style="width:100%;text-align:left;font:inherit;color:inherit" data-act="practice" data-d="${k}" ${q ? "" : "disabled"}>
+            <div class="row between"><div class="grow"><h3>${d.name}</h3><p class="small muted">${d.about}${k === "own" && !total ? " Write in your book to unlock." : ""}</p></div>
+            <div class="center"><div class="stat">${q}</div><div class="small muted">due</div></div></div></button>`; }).join("")}
+        </div>
+        <p class="small muted center" style="margin-top:18px">${mastered} cards well-learned · ${new Set(db.days).size} days with the book</p>`;
+    }
+    const id = sess.queue[sess.i], [kind, key] = id.split(":"), s = sess.shown;
+    let front = "", backHtml = "";
+    if (kind === "tri") {
+      const t = TRI[key];
+      front = `<div style="font-size:96px;line-height:1">${t.sym}</div><p class="muted">Name its image, quality and family member.</p>`;
+      backHtml = `<h2>${t.img} <span class="cjk muted">${t.zh}</span></h2><p class="muted">${t.py} · ${t.q}</p><p class="small muted">${t.fam} · ${t.body} · ${t.ani} · ${t.dir}</p>`;
+    } else if (kind === "fig") {
+      const h = hx(+key);
+      front = `${hexSVG(linesOf(h.n), { w: 96, mark: false, cls: "ink" })}<p class="muted">Which hexagram is this?</p><p class="small muted">Read the two trigrams first: lower, then upper.</p>`;
+      backHtml = `<div class="num">${h.n}</div><h2>${h.name}</h2><p class="muted"><span class="cjk">${h.zh}</span> · ${h.py}</p><p class="small muted">${TRI[h.up].sym} ${triPair(h)} ${TRI[h.lo].sym} · ${h.kw}</p>`;
+    } else if (kind === "bld") {
+      const h = hx(+key), correct = sess.built.join("") === h.bits;
+      front = `<div class="num">${h.n}</div><h2>${h.name}</h2><p class="muted cjk">${h.zh} · ${h.py}</p>
+        <p class="small muted">Tap the lines to build it. Bottom is line 1.</p>
+        <div data-act="buildtap" style="cursor:pointer;padding:6px">${buildSVG(sess.built)}</div>
+        ${s ? "" : `<details><summary class="small muted">Hint</summary><p class="small">${TRI[h.up].img} over ${TRI[h.lo].img}</p></details>`}`;
+      backHtml = `<p style="color:${correct ? "var(--ink)" : "var(--seal)"};font-weight:600">${correct ? "Exactly right." : "Not quite. Here it is:"}</p>${hexSVG(linesOf(h.n), { w: 70, mark: false })}<p class="small muted">${TRI[h.up].sym} ${triPair(h)} ${TRI[h.lo].sym}</p>`;
+    } else {
+      const h = hx(+key);
+      front = `${hexSVG(linesOf(h.n), { w: 70, mark: false, cls: "ink" })}<div><div class="num">${h.n}</div><h2>${esc(chText(h.n, "name") || h.name)}</h2></div>
+        <p class="muted">Recall what you wrote: its Judgment, its Image, the attitude it teaches. Say it aloud or in your head first.</p>`;
+      backHtml = `<div style="text-align:left;width:100%" class="stack">${["judgment", "image", "attitude"].filter(k => chText(h.n, k).trim()).map(k => `<div><div class="eyebrow">${FIELD_LABEL[k]}</div><p class="serif" style="font-size:17px;white-space:pre-wrap">${esc(chText(h.n, k))}</p></div>`).join("")}</div>`;
+    }
+    return `<div class="row between"><button class="btn ghost sm" data-act="endsession">✕ End</button><span class="small muted">${sess.i + 1} / ${sess.queue.length}</span></div>
+      <div style="height:3px;background:var(--line);border-radius:3px;margin:8px 0 14px"><div style="height:100%;width:${sess.i / sess.queue.length * 100}%;background:var(--seal);border-radius:3px"></div></div>
+      <div class="card flash">${front}${s ? `<hr style="width:60%">${backHtml}` : ""}</div>
+      <div style="margin-top:16px">${s
+        ? `<div class="grade"><button class="btn" data-act="grade" data-g="0">Again</button><button class="btn primary" data-act="grade" data-g="1">Got it</button><button class="btn" data-act="grade" data-g="2">Easy</button></div>
+           <p class="small muted center" style="margin-top:8px">Be honest; "Again" brings it back in a few minutes.</p>`
+        : `<button class="btn primary block" data-act="reveal">${kind === "bld" ? "Check" : "Show answer"}</button>`}</div>`;
+  }
+  function buildSVG(b) {
+    const w = 120, lh = 13, sp = 11, H = 6 * lh + 5 * sp;
+    let s = `<svg viewBox="0 0 ${w} ${H}" width="${w}" height="${H}" style="color:var(--ink)">`;
+    for (let i = 0; i < 6; i++) { const y = H - (i + 1) * lh - i * sp;
+      s += `<g data-i="${i}"><rect x="0" y="${y - 4}" width="${w}" height="${lh + 8}" fill="transparent"/>${b[i] ? `<rect x="0" y="${y}" width="${w}" height="${lh}" rx="2" fill="currentColor"/>` : `<rect x="0" y="${y}" width="52" height="${lh}" rx="2" fill="currentColor"/><rect x="68" y="${y}" width="52" height="${lh}" rx="2" fill="currentColor"/>`}</g>`; }
+    return s + "</svg>";
+  }
+
+  /* ---------- Settings, backup, science ---------- */
+  function viewSettings() {
+    const th = db.settings.theme;
+    return `<a class="back" href="#/">← Today</a><h1>Settings</h1>
+      <div class="sechead"><h3>The book</h3></div>
+      <div class="card">
+        <div class="field" style="padding-top:0"><label>Title</label><input type="text" data-bind="meta:title" value="${esc(db.book.title)}"></div>
+        <div class="field"><label>Author</label><input type="text" data-bind="meta:author" value="${esc(db.book.author)}" placeholder="Your name"></div>
+        <div class="field"><label>Preface</label><textarea rows="3" data-bind="meta:preface" placeholder="Why I'm writing this book, and how I came to the I Ching…">${esc(db.book.preface)}</textarea></div>
+      </div>
+      <div class="sechead"><h3>Appearance</h3></div>
+      <div class="seg">${["auto", "light", "dark"].map(t => `<button class="${th === t ? "on" : ""}" data-act="theme" data-t="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div>
+      <div class="sechead"><h3>Keep it safe</h3></div>
+      <p class="small muted">Everything lives only on this device. Back up now and then, and use the file to move to a new phone.</p>
+      <div class="row wrap" style="gap:8px;margin-top:10px">
+        <button class="btn" data-act="backup">Back up (.json)</button>
+        <label class="btn">Restore…<input type="file" accept=".json,application/json" id="restore" hidden></label>
+        <button class="btn" data-act="markdown">Export book (.md)</button>
+        <a class="btn" href="#/print">Print / save as PDF</a>
+      </div>
+      <div class="sechead"><h3>Install</h3></div>
+      <p class="small muted">${matchMedia("(display-mode: standalone)").matches ? "Installed. It works offline." : "iPhone: Share → Add to Home Screen. Android: ⋮ → Install app. It then works offline."}
+      ${deferredInstall ? ` <button class="link" data-act="install">Install now</button>` : ""}</p>
+      <div class="sechead"><h3>About</h3></div>
+      <p class="small muted">The structure of the hexagrams, the trigram attributes and the sequence are ancient and public domain. The keywords and questions are original to this app. Every Judgment, Image and line is yours to write. If you study a translation you own, keep notes from it in "Private notes & sources"; those are never printed.</p>
+      <p class="small"><a class="link" href="#/science">The science behind this app</a> · <a class="link" href="../../">Apps Studio</a></p>
+      <p style="margin-top:30px"><button class="btn ghost sm" data-act="wipe" style="color:var(--seal)">Erase everything on this device</button></p>`;
+  }
+  const SCIENCE = [
+    ["Writing every text in your own words", "Information you generate yourself is remembered far better than information you read. Here the book starts blank, and you are its author.", "Generation effect: Slamecka & Graf, 1978; meta-analysis Bertsch et al., 2007"],
+    ["\"How it speaks to my life now\"", "Linking material to yourself is one of the strongest memory encoders known, and it turns symbols into lived understanding.", "Self-reference effect: Rogers, Kuiper & Kirker, 1977; meta-analysis Symons & Johnson, 1997"],
+    ["Practice cards with recall before reveal", "Trying to remember strengthens memory more than rereading does, even when you fail.", "Testing effect: Roediger & Karpicke, 2006; Bjork, 1994 (desirable difficulties)"],
+    ["Cards return after 1, 3, 7, 16, 35 and 90 days", "Expanding gaps between reviews keep learning durable for the least effort. It's a Leitner box system.", "Spacing effect: Cepeda et al., 2006; Leitner, 1972"],
+    ["Interleaved practice", "Mixing card types and hexagrams helps you tell similar figures apart.", "Interleaving: Rohrer & Taylor, 2007"],
+    ["Learning hexagrams through trigrams", "64 figures become 8 meaningful chunks in pairs. The trigram map and the build-the-figure cards rely on this.", "Chunking: Miller, 1956; Chase & Simon, 1973. Dual coding (image + word): Paivio, 1971"],
+    ["Question and first impression written before analysis", "A record of what you asked and expected, made before events unfold, lets you look back honestly instead of remembering selectively.", "Confirmation bias: Nickerson, 1998; hindsight bias: Fischhoff, 1975"],
+    ["Reflective writing about your situation", "Putting experience into structured words helps you make sense of it and lowers stress.", "Expressive writing: Pennebaker & Beall, 1986; Pennebaker, 1997"],
+    ["\"When ___, I will ___\"", "Plans in an if-then form make it far more likely that an attitude becomes an action.", "Implementation intentions: Gollwitzer, 1999; meta-analysis Gollwitzer & Sheeran, 2006"],
+    ["Look back after days or weeks", "Reflecting on experience improves later performance. The loop goes: experience, reflect, conceptualise, try again.", "Di Stefano, Gino, Pisano & Staats, 2014; Kolb, 1984"],
+    ["\"What would I tell a friend?\"", "Taking a step back from yourself leads to wiser, calmer reasoning about your own problems.", "Self-distancing: Kross & Ayduk, 2011; Solomon's paradox: Grossmann & Kross, 2014"],
+    ["Drafts kept as your understanding deepens", "Revisiting and revising earlier ideas, and seeing how they changed, supports deeper learning and keeps the book alive.", "Elaborative rehearsal: Craik & Lockhart, 1972"],
+    ["One page to write on Today, no streak pressure", "Small, easy daily actions grow into habits, and missing a day doesn't break them.", "Fogg, 2019; Lally et al., 2010"],
+  ];
+  function viewScience() {
+    return `<a class="back" href="#/">← Today</a><h1>Why it works</h1>
+      <p class="muted">The I Ching here is a mirror for reflection, not a fortune-teller. Each design choice comes from research on learning, memory and behaviour change.</p>
+      <dl class="science">${SCIENCE.map(([a, b, c]) => `<dt>${a}</dt><dd>${b}<cite>${c}</cite></dd>`).join("")}</dl>`;
+  }
+
+  /* ---------- Print: the book, typeset ---------- */
+  let printOpts = { empty: false, readings: false };
+  function viewPrint() {
+    document.body.classList.add("printing");
+    const B = db.book, chapters = HEX.filter(h => printOpts.empty || Object.entries((B.ch[h.n] || { f: {} }).f).some(([k, t]) => k !== "sources" && t.trim()));
+    const sec = (lab, t) => t && t.trim() ? `<h4>${lab}</h4><p>${esc(t.trim())}</p>` : "";
+    $("#printbook").innerHTML = `<div class="bar"><a class="btn sm" href="#/book">← Back</a><button class="btn sm primary" data-act="print">Print / Save as PDF</button>
+      <label class="small"><input type="checkbox" data-act="popt" data-k="empty" ${printOpts.empty ? "checked" : ""}> Include unwritten chapters</label>
+      <label class="small"><input type="checkbox" data-act="popt" data-k="readings" ${printOpts.readings ? "checked" : ""}> Include lessons from readings</label></div>
+      <article>
+        <section class="pb-title">${hexSVG([9, 7, 8, 8, 7, 7], { w: 90, mark: false, cls: "ink" })}<h1>${esc(B.title || "My Book of Changes")}</h1>
+          ${B.author ? `<p style="font-size:18px">${esc(B.author)}</p>` : ""}<p class="muted small">${chapters.length} chapters · ${new Date().getFullYear()}</p></section>
+        ${B.preface.trim() ? `<section class="pb-ch pb-pre"><h2>Preface</h2><p style="margin-top:18px">${esc(B.preface.trim())}</p></section>` : ""}
+        <section class="pb-toc">${chapters.map(h => `<div>${h.n}. ${esc(chText(h.n, "name") || h.name)}</div>`).join("")}</section>
+        ${chapters.map(h => {
+          const lessons = printOpts.readings ? db.readings.filter(r => BY_BITS[bitsOf(r.lines)] === h.n && r.back && r.back.learned).map(r => `<p style="margin-bottom:10px"><span class="muted small">${dstr(r.at)}</span><br>${esc(r.back.learned)}</p>`).join("") : "";
+          return `<section class="pb-ch"><div class="row" style="gap:20px">${hexSVG(linesOf(h.n), { w: 70, mark: false })}<div><div class="num">${h.n}</div>
+            <h2>${esc(chText(h.n, "name") || h.name)}</h2><div class="muted small"><span class="cjk">${h.zh}</span> ${h.py} · ${triPair(h)}</div></div></div>
+            ${sec("The Judgment", chText(h.n, "judgment"))}${sec("The Image", chText(h.n, "image"))}
+            ${[0, 1, 2, 3, 4, 5].map(i => sec(lineName(i, h.bits[i] === "1"), chText(h.n, "l" + (i + 1)))).join("")}
+            ${sec("When all lines move", chText(h.n, "l7"))}${sec("Attitude & practice", chText(h.n, "attitude"))}
+            ${lessons ? `<h4>Lessons from my readings</h4>${lessons}` : ""}</section>`; }).join("")}
+      </article>`;
+    scrollTo(0, 0);
+    return null;
+  }
+  function bookMarkdown() {
+    const B = db.book; let md = `# ${B.title || "My Book of Changes"}\n\n${B.author ? "_" + B.author + "_\n\n" : ""}${B.preface ? B.preface + "\n\n" : ""}`;
+    for (const h of HEX) {
+      const f = (B.ch[h.n] || { f: {} }).f; if (!Object.entries(f).some(([k, t]) => k !== "sources" && t.trim())) continue;
+      md += `\n---\n\n## ${h.n}. ${f.name || h.name}\n\n${h.zh} ${h.py} · ${triPair(h)}\n\n`;
+      const add = (lab, t) => { if (t && t.trim()) md += `### ${lab}\n\n${t.trim()}\n\n`; };
+      add("The Judgment", f.judgment); add("The Image", f.image);
+      for (let i = 0; i < 6; i++) add(lineName(i, h.bits[i] === "1"), f["l" + (i + 1)]);
+      add("When all lines move", f.l7); add("Attitude & practice", f.attitude);
+    }
+    return md;
+  }
+
+  /* ---------- Actions ---------- */
+  let deferredInstall = null;
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; });
+  function applyTheme() { const t = db.settings.theme; if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = t; }
+  applyTheme();
+
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, d = el.dataset;
+    if (a === "setline") { db.draft.lines[+d.i] = +d.v; save(); rerender(); }
+    else if (a === "clearlines") { db.draft.lines = [null, null, null, null, null, null]; save(); rerender(); }
+    else if (a === "numcode") {
+      const v = ($("#numcode").value.match(/[6-9]/g) || []);
+      if (v.length !== 6) return toast("Six digits, each 6, 7, 8 or 9");
+      db.draft.lines = v.map(Number); save(); rerender();
+    } else if (a === "hexnum") {
+      const k = parseInt($("#hexnum").value, 10); if (!(k >= 1 && k <= 64)) return toast("A number from 1 to 64");
+      db.draft.lines = [...hx(k).bits].map(b => b === "1" ? 7 : 8); save(); rerender(); toast("Tap 6 or 9 on any line that moves");
+    } else if (a === "cast") {
+      db.draft.lines = [null, null, null, null, null, null]; rerender();
+      for (let i = 0; i < 6; i++) { await new Promise(r => setTimeout(r, 380)); db.draft.lines[i] = randLine(d.m); rerender(); }
+      if (!db.draft.method) db.draft.method = d.m === "coins" ? "Three coins (app)" : "Yarrow odds (app)";
+      save(); rerender();
+    } else if (a === "begin") {
+      const dr = db.draft; if (dr.lines.some(v => v == null)) return;
+      const r = { id: uid(), at: Date.now(), q: dr.q, sit: dr.sit, method: dr.method, lines: dr.lines, rel: {}, back: {} };
+      db.readings.push(r); db.draft = null; markDay(); save(true); location.hash = "#/r/" + r.id;
+    } else if (a === "alllines") { viewOpen.has(d.id) ? viewOpen.delete(d.id) : viewOpen.add(d.id); rerender(); }
+    else if (a === "backin") { const r = getReading(d.id); r.backDays = +d.d; r.backAt = today0() + (+d.d) * DAY; save(); rerender(); }
+    else if (a === "backdone") { const r = getReading(d.id); r.back = r.back || {}; r.back.at = Date.now(); save(); rerender(); toast("Loop closed. Consider revising the chapter."); }
+    else if (a === "delreading") { if (confirm("Delete this reading? Your book passages stay.")) { db.readings = db.readings.filter(r => r.id !== d.id); save(true); location.hash = "#/readings"; } }
+    else if (a === "restore") { const c = ch(d.n), t = c.h[d.k][+d.i].t; c.f[d.k] = t; snapshot(d.n, d.k, t); rerender(); toast("Draft restored"); }
+    else if (a === "bookmode") { bookMode = d.m; rerender(); }
+    else if (a === "practice") { startSession(d.d); rerender(); }
+    else if (a === "reveal") { sess.shown = true; rerender(); }
+    else if (a === "grade") { grade(sess.queue[sess.i], +d.g); rerender(); }
+    else if (a === "endsession") { sess = null; rerender(); }
+    else if (a === "buildtap") { const g = e.target.closest("g[data-i]"); if (!g || sess.shown) return; sess.built[+g.dataset.i] ^= 1; rerender(); }
+    else if (a === "theme") { db.settings.theme = d.t; applyTheme(); save(); rerender(); }
+    else if (a === "backup") download(`my-i-ching-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(db, null, 1), "application/json");
+    else if (a === "markdown") download(`${(db.book.title || "my-book-of-changes").replace(/[^\w]+/g, "-").toLowerCase()}.md`, bookMarkdown(), "text/markdown");
+    else if (a === "print") window.print();
+    else if (a === "popt") { printOpts[d.k] = el.checked; viewPrint(); }
+    else if (a === "install" && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; }
+    else if (a === "wipe") { if (confirm("Erase your whole book, readings and practice from this device? Back up first.") && confirm("Really erase everything?")) { db = fresh(); save(true); location.hash = "#/"; rerender(); } }
+  });
+  document.addEventListener("input", e => { if (e.target.id === "rq") { readingQuery = e.target.value; $("#rlist").innerHTML = readingsList(); } });
+  document.addEventListener("change", async e => {
+    if (e.target.id !== "restore" || !e.target.files[0]) return;
+    try {
+      const d = JSON.parse(await e.target.files[0].text());
+      if (!d || d.v !== 1 || !d.book) throw 0;
+      if (!confirm("Replace everything on this device with this backup?")) return;
+      db = Object.assign(fresh(), d); save(true); applyTheme(); toast("Restored"); location.hash = "#/";
+    } catch (err) { toast("That file isn't a My I Ching backup"); }
+  });
+
+  route();
+  // Offline + installable support.
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  </script>
+</body>
+</html>
