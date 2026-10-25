@@ -166,7 +166,7 @@
     .list > * + * { margin-top: 10px; }
     .ritem, .card.tap.ritem { display: flex; gap: 14px; align-items: center; text-decoration: none; }
     .quote { font: italic 19px/1.55 var(--serif); }
-    .tabsline { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin: 22px 0 6px; }
+    .tabsline { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; border-bottom: 1px solid var(--line); margin: 22px 0 6px; }
     .tabsline a { text-decoration: none; padding: 10px 0; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
     .tabsline a.on { color: var(--ink); border-color: var(--seal); }
     table.lines { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -335,7 +335,7 @@
     "The outer centre: the ruler's place, full expression and responsibility.",
     "The culmination: beyond the situation, going too far, or the wisdom of withdrawal.",
   ];
-  const FIELD_LABEL = { name: "My name for it", judgment: "The Judgment", image: "The Image", attitude: "Attitude & practice", sources: "Private notes & sources", l7: "When all six lines move" };
+  const FIELD_LABEL = { name: "My name for it", judgment: "The Judgment", image: "The Image", attitude: "Attitude & practice", sources: "Private notes & sources", l7: "When all six lines move", tri: "The meeting of the trigrams", nuc: "What lies hidden within" };
   const CORE = ["judgment", "image", "l1", "l2", "l3", "l4", "l5", "l6", "attitude"];
 
   /* ---------- Helpers ---------- */
@@ -462,6 +462,7 @@
     [/^#\/practice$/, viewPractice, "practice"],
     [/^#\/settings$/, viewSettings, "today"],
     [/^#\/science$/, viewScience, "today"],
+    [/^#\/guide$/, viewGuide, "book"],
     [/^#\/print$/, viewPrint, "book"],
   ];
   let lastHash = "";
@@ -477,7 +478,7 @@
       }
       document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
       $("#fab").classList.toggle("hide", !(tab === "today" && hash.match(/^#?\/?$/) || hash === "#/readings"));
-      const base = h => h.replace(/\/(words|structure|readings)$/, "");
+      const base = h => h.replace(/\/(words|interpret|structure|readings)$/, "");
       if (base(hash) !== base(lastHash)) scrollTo(0, 0);
       lastHash = hash; return;
     }
@@ -537,7 +538,7 @@
             <div><div class="eyebrow">My book</div><div class="stat">${begun}<span class="muted small"> / 64</span></div><div class="small muted">${allWords.toLocaleString()} words</div></div></div></a>
           <a class="card tap grow" href="#/practice"><div class="eyebrow">Practice</div><div class="stat">${due}</div><div class="small muted">${due ? "cards ready" : "all caught up"}</div></a>
         </div>
-        <p class="center small"><a class="link" href="#/science">The science behind this app</a></p>
+        <p class="center small"><a class="link" href="#/guide">How to read a hexagram</a> · <a class="link" href="#/science">The science behind this app</a></p>
       </div>`;
   }
 
@@ -627,6 +628,7 @@
         </div>
         <p class="small muted center" style="margin-top:14px">${triPair(h)} · ${h.kw}</p>
         <p class="small center" style="margin:6px 0 0"><span class="seal-dot"></span>${em.text} <span class="muted">(Zhu Xi's rule; trust your own sense.)</span></p>
+        <p class="small center" style="margin:6px 0 0"><a class="link" href="#/guide">How to read a hexagram →</a></p>
       </div>
       ${r.sit ? `<details style="margin-top:12px"><summary class="small">The situation I described</summary>${relField(id, "sit", "What was alive", "")}</details>` : ""}
 
@@ -717,14 +719,14 @@
       <p class="muted">${begun} of 64 chapters begun. Each one is written by you, line by line, as the hexagrams come into your life.</p>
       <div class="row between wrap" style="margin:16px 0;gap:10px">
         <div class="seg"><button class="${bookMode === "seq" ? "on" : ""}" data-act="bookmode" data-m="seq">Sequence</button><button class="${bookMode === "map" ? "on" : ""}" data-act="bookmode" data-m="map">Trigram map</button></div>
-        <div class="row" style="gap:6px"><a class="btn sm" href="#/settings">Title & preface</a><a class="btn sm primary" href="#/print">Read as a book</a></div>
+        <div class="row wrap" style="gap:6px"><a class="btn sm" href="#/guide">How to read</a><a class="btn sm" href="#/settings">Title & preface</a><a class="btn sm primary" href="#/print">Read as a book</a></div>
       </div>${grid}`;
   }
 
   function viewChapter(nStr, tab = "words") {
     const n = +nStr; if (n < 1 || n > 64) { location.hash = "#/book"; return null; }
     const h = hx(n), up = TRI[h.up], lo = TRI[h.lo];
-    const tabs = ["words", "structure", "readings"].map(t => `<a href="#/book/${n}/${t}" class="${tab === t ? "on" : ""}">${{ words: "My words", structure: "Structure", readings: "In my life" }[t]}</a>`).join("");
+    const tabs = ["words", "interpret", "structure", "readings"].map(t => `<a href="#/book/${n}/${t}" class="${tab === t ? "on" : ""}">${{ words: "My words", interpret: "Interpret", structure: "Structure", readings: "In my life" }[t]}</a>`).join("");
     let body = "";
     if (tab === "words") {
       body = `<p class="serif muted" style="font-style:italic;font-size:18px;margin:16px 0 8px">${esc(h.ask)}</p>
@@ -737,6 +739,8 @@
           ${bookField(n, "attitude", { hint: "What attitude does this hexagram teach? How will I practise it in daily life?" })}
           ${bookField(n, "sources", { hint: "Kept private, never printed. Notes from translations you own, teachers, dreams." })}
         </div>`;
+    } else if (tab === "interpret") {
+      body = interpretTab(n);
     } else if (tab === "structure") {
       const b = h.bits, nucBits = b.slice(1, 4) + b.slice(2, 5), nuc = BY_BITS[nucBits], inv = BY_BITS[[...b].reverse().join("")], opp = BY_BITS[flip(b)];
       const pair = n % 2 ? n + 1 : n - 1;
@@ -771,6 +775,93 @@
         <div class="small muted" style="margin-top:4px">${up.sym} ${triPair(h)} ${lo.sym}</div><div class="small muted">${h.kw}</div></div></div>
       <div class="tabsline">${tabs}</div>${body}
       <div class="row between" style="margin-top:22px"><a class="btn sm" href="#/book/${n === 1 ? 64 : n - 1}/${tab}">← ${n === 1 ? 64 : n - 1}</a><a class="btn sm" href="#/book/${n === 64 ? 1 : n + 1}/${tab}">${n === 64 ? 1 : n + 1} →</a></div>`;
+  }
+
+  /* ---------- Guided interpretation: the method, with a worked example ---------- */
+  // The worked example is original writing: a fictional reading of Hexagram 3, line 1 moving → 8.
+  const EX = { lines: [9, 8, 8, 8, 7, 8], q: "I've just opened a small pottery studio and everything feels chaotic. How should I approach this first season?" };
+  const GUIDE = [
+    ["Arrive with the question",
+     "Read your question again, slowly. Then write your first impression of the hexagram before you analyse anything: a feeling, a picture, a word. It's raw material, and it's an honest record to check against later.",
+     `<p><b>Question:</b> ${EX.q}</p><p><b>First impression:</b> "Messy, but it feels like a birth, not a failure."</p>`],
+    ["See the two trigrams",
+     "Every hexagram is two trigrams meeting. The lower one is the inner world, the start, what moves in you. The upper one is the outer world, what you meet, where things lead. Ask: what happens when this inner quality meets that outer one?",
+     `<p>☳ <b>Thunder</b> below: arousal, movement, the first push of spring. ☵ <b>Water</b> above: depth, danger, uncertainty.</p>
+      <p>Energy rising straight into something murky. Like a sprout pushing up through wet, heavy soil: the push is real, the way through isn't clear yet.</p>`],
+    ["The name and the Judgment",
+     "The name tells you what <i>time</i> you are in. The Judgment is the overall counsel for that time: what is favourable, what to avoid. Write it in your own words first, then let it touch your question.",
+     `<p><b>Zhūn 屯, Difficult Beginnings.</b> The character is often read as a sprout breaking through the ground, bent where it meets the surface. The difficulty is the difficulty of being born.</p>
+      <p><b>In my words:</b> "A beginning in chaos is still a beginning. Keep going, but don't try to go far yet. Put first things in order and gather helpers."</p>`],
+    ["The Image",
+     "The Image pairs a picture from nature with how a wise person responds to it. Read the trigrams as images (Water above can be clouds or rain) and ask what wise action that picture calls for.",
+     `<p>Clouds and thunder: a storm gathering that hasn't broken into rain yet. Tension before release.</p>
+      <p><b>In my words:</b> "When everything is tangled, the wise person sorts the threads one by one and weaves a little order, rather than waiting for calm."</p>
+      <p><b>For me:</b> "One clear system: a shelf for drying, a list for orders. Then the next."</p>`],
+    ["The lines, and above all the moving ones",
+     "Each line is a stage or a role within the situation, from 1 (entering) to 6 (going beyond). Look at its <b>place</b>: a yang line in an odd place or a yin line in an even place fits. Lines 2 and 5 are centres. Lines 1↔4, 2↔5 and 3↔6 <b>resonate</b> when one is yin and the other yang. A line that is alone of its kind, like one yang among yin, often defines the hexagram. Moving lines (6 or 9) are where your situation is alive.",
+     `<p><b>Line 1, moving (Nine at the beginning).</b> A yang line in a yang place, fitting, and resonating with the yin line 4. It's the only yang line of Thunder: the source of all the movement.</p>
+      <p><b>In my words:</b> "At the very bottom the drive is real, but it meets an obstacle right away. Don't force it. Stay where you are, keep your integrity, and find helpers. Lead by being humble with those who come to help."</p>
+      <p><b>For me:</b> "Don't sign the big lease yet. Get the kiln working. Ask the two potters I know whether they'd like to share the space."</p>
+      <p class="small muted">Line 5, the strong centre and ruler, isn't moving. It stays in the background, in charge but hemmed in by danger.</p>`],
+    ["What's hidden, and where it's heading",
+     "The <b>nuclear hexagram</b> (lines 2-3-4 below, 3-4-5 above) is the core hidden inside the situation. The <b>relating hexagram</b>, made by changing the moving lines, shows the direction, the potential, or what it becomes. The <b>inverse</b> shows the same situation seen from the other side.",
+     `<p><b>Hidden within: 23 Splitting Apart.</b> "Under the chaos, old forms are falling away: my old job, my old idea of how this should look. Let them."</p>
+      <p><b>Heading towards: 8 Holding Together</b> (Water over Earth). "From struggling alone to belonging. The studio becomes a place people gather around."</p>`],
+    ["Bring it home",
+     "Answer your question in one sentence. Name the attitude to embody, then make it concrete: <i>When ___, I will ___.</i> Choose a day to look back.",
+     `<p><b>Answer:</b> "Treat this as a birth: steady, small, and with helpers."</p>
+      <p><b>Attitude:</b> "Patient persistence." <b>Plan:</b> "When I feel the urge to expand fast, I will ask one person for help instead."</p>`],
+    ["Look back and let the book grow",
+     "After days or weeks, write what actually happened, what fitted and what didn't, and what you'd tell a friend with the same reading. Then revise the chapter. That's how your book becomes yours.",
+     `<p><b>Two weeks later:</b> "A friend took a shelf of space and now fires with me. The chaos eased once there were two of us. I'd add to my Difficult Beginnings chapter: <i>help is part of the beginning, not a sign it failed.</i>"</p>`],
+  ];
+  function viewGuide() {
+    const n = BY_BITS[bitsOf(EX.lines)];
+    return `<a class="back" href="javascript:history.back()">← Back</a>
+      <div class="eyebrow">Guided interpretation</div><h1>How to read a hexagram</h1>
+      <p class="muted">The same eight steps work for any hexagram. Each step has the method, then a worked example: one reading of Hexagram 3 with its first line moving.</p>
+      <div class="card" style="margin-top:14px">
+        <div class="row" style="justify-content:center;gap:22px">
+          <a href="#/book/3/interpret" class="center" style="text-decoration:none">${hexSVG(EX.lines, { w: 70, cls: "ink" })}<div class="num" style="margin-top:8px">${n}</div><div class="serif">${hx(n).name}</div></a>
+          <div class="arrow">→</div>
+          <a href="#/book/8" class="center" style="text-decoration:none;opacity:.8">${hexSVG(linesOf(8), { w: 54, mark: false, cls: "ink" })}<div class="num" style="margin-top:8px">8</div><div class="serif">${hx(8).name}</div></a>
+        </div>
+        <p class="small muted center" style="margin-top:10px">The example: 9 8 8 8 7 8, read bottom to top</p>
+      </div>
+      ${GUIDE.map(([t, how, ex], i) => `<div class="sechead"><span class="stepn">${i + 1}</span><h3>${t}</h3></div>
+        <p style="color:var(--ink2)">${how}</p>
+        <div class="boxed serif" style="font-size:16.5px;line-height:1.6;margin-top:8px"><div class="eyebrow" style="font-family:var(--sans);margin-bottom:4px">Example · Hexagram 3</div>${ex}</div>`).join("")}
+      <p class="small muted" style="margin-top:22px">The example's wording is a model, not the meaning. Your own chapters will say it differently, and they should.</p>
+      <div class="row wrap" style="gap:8px;margin-top:14px"><a class="btn seal" href="#/new">Try it with my own question</a><a class="btn" href="#/book/3/interpret">Interpret Hexagram 3 myself</a></div>`;
+  }
+
+  // The same method, applied to any hexagram, with the book's writing fields built in.
+  function interpretTab(n) {
+    const h = hx(n), up = TRI[h.up], lo = TRI[h.lo], b = h.bits;
+    const yangs = [...b].filter(x => x === "1").length;
+    const lone = yangs === 1 ? b.indexOf("1") : yangs === 5 ? b.indexOf("0") : -1;
+    const nuc = BY_BITS[b.slice(1, 4) + b.slice(2, 5)], inv = BY_BITS[[...b].reverse().join("")], opp = BY_BITS[flip(b)];
+    let step = 0; const S = (t, how) => `<div class="sechead"><span class="stepn">${++step}</span><h3>${t}</h3></div><p class="small" style="color:var(--ink2)">${how}</p>`;
+    const lineFacts = i => { const y = b[i] === "1", fits = (i % 2 === 0) === y, o = (i + 3) % 6;
+      return [fits ? "fitting" : "not fitting", i === 1 || i === 4 ? "centre" : "", b[o] !== b[i] ? `resonates with ${o + 1}` : `no resonance with ${o + 1}`, i === lone ? `<b style="color:var(--seal)">the only ${y ? "yang" : "yin"} line: it defines the hexagram</b>` : ""].filter(Boolean).join(" · "); };
+    return `<p class="small muted" style="margin-top:16px">The eight steps of <a class="link" href="#/guide">How to read a hexagram</a>, applied to ${h.name}. Everything you write here goes into your book.</p>
+      ${S("Arrive", "Bring a question, or ask where in your life this time is present.")}
+      <p class="serif" style="font-style:italic;font-size:18px">${esc(h.ask)}</p>
+      ${S("See the two trigrams", `${lo.sym} <b>${lo.img}</b> (${lo.q}) within, ${up.sym} <b>${up.img}</b> (${up.q}) without. What happens when something ${lo.q.split(",")[0]} meets something ${up.q.split(",")[0]}?`)}
+      <div class="card flat">${bookField(n, "tri", { ph: "The inner pushes… the outer answers…" })}</div>
+      ${S("The name and the Judgment", `<span class="cjk">${h.zh}</span> ${h.py}, ${h.name}: ${h.kw}. What time is this, and what does it counsel?`)}
+      <div class="card flat">${bookField(n, "judgment", { hint: judgmentHint })}</div>
+      ${S("The Image", imageHint(h))}
+      <div class="card flat">${bookField(n, "image")}</div>
+      ${S("The lines", "Each line is a stage within the situation. Notice its place, its centre and its resonance." + (lone >= 0 ? ` Line ${lone + 1} is alone of its kind and rules the figure.` : ""))}
+      <div class="card flat">${[0, 1, 2, 3, 4, 5].map(i => bookField(n, "l" + (i + 1), { hint: `${POS_MEANING[i]}<br><span style="color:var(--ink2)">${lineFacts(i)}</span>` })).join("")}
+        ${n <= 2 ? bookField(n, "l7", { hint: "The special text for when all six lines move." }) : ""}</div>
+      ${S("What's hidden, and where it can lead", `Hidden within: <a class="link" href="#/book/${nuc}/interpret">${nuc} ${hx(nuc).name}</a>. ${inv !== n ? `From the other side: <a class="link" href="#/book/${inv}/interpret">${inv} ${hx(inv).name}</a>. ` : ""}Its opposite: <a class="link" href="#/book/${opp}/interpret">${opp} ${hx(opp).name}</a>. In a reading, the moving lines decide where it leads.`)}
+      <div class="card flat">${bookField(n, "nuc", { ph: "Underneath, what's really at work is…" })}</div>
+      ${S("Bring it home", "What attitude does this time ask for? How would you practise it this week?")}
+      <div class="card flat">${bookField(n, "attitude")}</div>
+      ${S("Look back", "Readings where this hexagram appeared, and what you learned, are under In my life. Return here and revise as your understanding deepens.")}
+      <a class="btn sm" href="#/book/${n}/readings">In my life →</a>`;
   }
 
   /* ---------- Practice: spaced retrieval ---------- */
@@ -929,7 +1020,7 @@
             <h2>${esc(chText(h.n, "name") || h.name)}</h2><div class="muted small"><span class="cjk">${h.zh}</span> ${h.py} · ${triPair(h)}</div></div></div>
             ${sec("The Judgment", chText(h.n, "judgment"))}${sec("The Image", chText(h.n, "image"))}
             ${[0, 1, 2, 3, 4, 5].map(i => sec(lineName(i, h.bits[i] === "1"), chText(h.n, "l" + (i + 1)))).join("")}
-            ${sec("When all lines move", chText(h.n, "l7"))}${sec("Attitude & practice", chText(h.n, "attitude"))}
+            ${sec("When all lines move", chText(h.n, "l7"))}${sec("Attitude & practice", chText(h.n, "attitude"))}${sec("The meeting of the trigrams", chText(h.n, "tri"))}${sec("What lies hidden within", chText(h.n, "nuc"))}
             ${lessons ? `<h4>Lessons from my readings</h4>${lessons}` : ""}</section>`; }).join("")}
       </article>`;
     scrollTo(0, 0);
@@ -943,7 +1034,7 @@
       const add = (lab, t) => { if (t && t.trim()) md += `### ${lab}\n\n${t.trim()}\n\n`; };
       add("The Judgment", f.judgment); add("The Image", f.image);
       for (let i = 0; i < 6; i++) add(lineName(i, h.bits[i] === "1"), f["l" + (i + 1)]);
-      add("When all lines move", f.l7); add("Attitude & practice", f.attitude);
+      add("When all lines move", f.l7); add("Attitude & practice", f.attitude); add("The meeting of the trigrams", f.tri); add("What lies hidden within", f.nuc);
     }
     return md;
   }
