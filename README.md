@@ -74,3 +74,4 @@ python3 -m http.server 8000
 | [Excuse Generator](apps/excuse-generator/) | Produces a fresh, highly specific excuse for whatever you didn't do. |
 | [Tao Reader](apps/tao-reader/) | The Tao Te Ching in English and French, offline: chapters, random verses, read-aloud. Installable PWA. |
 | [Little Pages](apps/little-pages/) | Read your own EPUB/PDF/TXT books, with habit-building features grounded in behaviour science. Installable PWA. |
+| [My I Ching](apps/i-ching-book/) | Learn the 64 hexagrams by writing your own Book of Changes: readings, reflections, spaced practice, printable book. Installable PWA. |
