@@ -52,4 +52,4 @@ paper. Modern-app details:
 ## Data
 
 Everything is in `localStorage` on the device. Settings → *Back up* exports a JSON file you can
-restore on another device. Bump `VERSION` in `sw.js` when files change.
+restore on another device. When files change, bump `VERSION` in `sw.js` and `APP_VERSION`/`APP_DATE` in `index.html` (shown at the bottom of Today and Settings).

@@ -239,6 +239,9 @@
     .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 100px); transform: translateX(-50%); background: var(--ink);
              color: var(--paper); padding: 12px 20px 12px 16px; border-radius: 999px; font: 500 14px var(--sans); z-index: 50; box-shadow: var(--e3);
              display: flex; gap: 10px; align-items: center; animation: toast .45s var(--spring) both; white-space: nowrap; }
+    .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 12px); transform: translateX(-50%); z-index: 55; border: 0; cursor: pointer;
+              background: var(--seal); color: var(--seal-ink); padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--e3);
+              white-space: nowrap; animation: toast .45s var(--spring) both; }
     .toast::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--seal); transform: rotate(45deg); }
     @keyframes toast { from { opacity: 0; transform: translate(-50%, 16px) scale(.95); } to { opacity: 1; transform: translate(-50%, 0); } }
     .science dt { font: 450 19px var(--serif); margin-top: 20px; }
@@ -468,6 +471,9 @@
   const fig = (n, w = 40) => hexSVG(linesOf(n), { w, mark: false });
 
   /* ---------- Storage (on this device only) ---------- */
+  // Shown at the bottom of Today and Settings. Keep in step with VERSION in sw.js.
+  const APP_VERSION = "5", APP_DATE = "25 Oct 2026";
+  const versionTag = () => `<p class="center small muted" style="margin-top:22px;opacity:.75">My I Ching · version ${APP_VERSION} · ${APP_DATE}</p>`;
   const KEY = "my-i-ching-v1";
   const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
   let db = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v) return Object.assign(fresh(), d); } catch (e) {} return fresh(); })();
@@ -641,6 +647,7 @@
           <a class="card tap grow" href="#/practice"><div class="eyebrow">Practice</div><div class="stat">${due}</div><div class="small muted">${due ? "cards ready" : "all caught up"}</div></a>
         </div>
         <p class="center small"><a class="link" href="#/guide">How to read a hexagram</a> · <a class="link" href="#/science">The science behind this app</a></p>
+        ${versionTag()}
       </div>`;
   }
 
@@ -1179,6 +1186,7 @@
       <div class="sechead"><h3>About</h3></div>
       <p class="small muted">The structure of the hexagrams, the trigram attributes and the sequence are ancient and public domain. The keywords and questions are original to this app. Every Judgment, Image and line is yours to write. If you study a translation you own, keep notes from it in "Private notes & sources"; those are never printed.</p>
       <p class="small"><a class="link" href="#/science">The science behind this app</a> · <a class="link" href="../../">Apps Studio</a></p>
+      ${versionTag()}
       <p style="margin-top:30px"><button class="btn ghost sm" data-act="wipe" style="color:var(--seal)">Erase everything on this device</button></p>`;
   }
   const SCIENCE = [
@@ -1307,7 +1315,16 @@
 
   route();
   // Offline + installable support.
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    // When an update has been downloaded and taken over, offer to reload into it.
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || $(".update")) return;
+      const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload";
+      u.onclick = () => location.reload(); document.body.appendChild(u);
+    });
+  }
   </script>
 </body>
 </html>
