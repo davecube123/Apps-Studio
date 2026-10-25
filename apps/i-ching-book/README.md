@@ -40,7 +40,14 @@ The same list is in the app under **The science behind this app**.
 ## Design
 
 Calm, writing-first journaling (in the spirit of Day One and Stoic), with the look of ink on rice
-paper: serif writing surfaces, one vermilion seal accent, brush-textured hexagrams, light and dark themes.
+paper. Modern-app details:
+
+- **Newsreader**, an editorial serif with optical sizes (bundled in `fonts/`, SIL Open Font License), for all writing surfaces
+- Paper grain, a warm light glow, layered soft shadows, one vermilion seal accent; refined light and dark themes
+- Floating pill tab bar with an active highlight, a large title that condenses into a blurred top bar on scroll
+- Cross-fade view transitions, staggered entrance motion, spring press feedback, a light haptic tap on Android (can be turned off)
+- Focused fields get a seal-red accent bar; finished chapters get a 成 seal, with a stamp celebration when you complete one
+- Respects reduced-motion settings, 44 px touch targets, visible keyboard focus
 
 ## Data
 
