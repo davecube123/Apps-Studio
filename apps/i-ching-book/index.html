@@ -242,6 +242,15 @@
     .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 12px); transform: translateX(-50%); z-index: 55; border: 0; cursor: pointer;
               background: var(--seal); color: var(--seal-ink); padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--e3);
               white-space: nowrap; animation: toast .45s var(--spring) both; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,14,8,.38); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(520px, 100%); background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px);
+             box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    .sheet-back.out { animation: fade .25s reverse both; } .sheet-back.out .sheet { animation: sheetup .28s reverse both; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15.5px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--seal-soft); color: var(--seal); font: 700 12.5px/24px var(--sans); text-align: center; }
     .toast::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--seal); transform: rotate(45deg); }
     @keyframes toast { from { opacity: 0; transform: translate(-50%, 16px) scale(.95); } to { opacity: 1; transform: translate(-50%, 0); } }
     .science dt { font: 450 19px var(--serif); margin-top: 20px; }
@@ -253,6 +262,12 @@
              color: var(--seal); font: 700 12.5px var(--sans); margin-right: 10px; flex: none; }
     .sechead { display: flex; align-items: center; margin: 34px 0 8px; }
     .arrow { font-size: 22px; color: var(--muted); }
+    .pair { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); align-items: start; }
+    .pair.single { grid-template-columns: minmax(0, 1fr); }
+    .pfig { display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; gap: 3px; }
+    .pfig .fbox, .pair .arrow { height: 100px; display: flex; align-items: center; justify-content: center; }
+    .pfig .fbox { margin-bottom: 8px; }
+    .pfig .pname { font: 450 18px/1.2 var(--serif); text-wrap: balance; }
     .empty { text-align: center; padding: 44px 20px; }
     .empty .hex { margin: 0 auto 16px; color: var(--line2); }
 
@@ -472,7 +487,7 @@
 
   /* ---------- Storage (on this device only) ---------- */
   // Shown at the bottom of Today and Settings. Keep in step with VERSION in sw.js.
-  const APP_VERSION = "5", APP_DATE = "25 Oct 2026";
+  const APP_VERSION = "7", APP_DATE = "26 Oct 2026";
   const versionTag = () => `<p class="center small muted" style="margin-top:22px;opacity:.75">My I Ching · version ${APP_VERSION} · ${APP_DATE}</p>`;
   const KEY = "my-i-ching-v1";
   const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
@@ -738,10 +753,12 @@
   const inkLines = rows => rows.map(r => r.state === "yang" ? (r.moving ? 9 : 7) : r.state === "yin" ? (r.moving ? 6 : 8) : null);
   // Rendered cropped to the ink itself, at a given height, so a hand-drawn figure sits like a printed one.
   function inkSVG(ink, h = 96, cls = "") {
-    const pts = ink.flatMap(s => s.p), pad = 40;
-    const x0 = Math.min(...pts.map(p => p[0] - p[2])) - pad, x1 = Math.max(...pts.map(p => p[0] + p[2])) + pad;
-    const y0 = Math.min(0, ...pts.map(p => p[1] - p[2])), y1 = Math.max(PAD_H, ...pts.map(p => p[1] + p[2]));
-    const w = Math.round(h * (x1 - x0) / (y1 - y0));
+    const all = ink.flatMap(s => s.p), lines = ink.filter(s => !s.z).flatMap(s => s.p), lp = lines.length ? lines : all;
+    const lx0 = Math.min(...lp.map(p => p[0] - p[2] / 2)), lx1 = Math.max(...lp.map(p => p[0] + p[2] / 2));
+    const y0 = Math.min(...lp.map(p => p[1] - p[2] / 2)), y1 = Math.max(...lp.map(p => p[1] + p[2] / 2));
+    // centre on the lines, leaving equal room either side for margin marks (as the printed figures do)
+    const c = (lx0 + lx1) / 2, half = Math.max(c - Math.min(...all.map(p => p[0] - p[2] / 2)), Math.max(...all.map(p => p[0] + p[2] / 2)) - c, (lx1 - lx0) * 0.74);
+    const x0 = c - half, x1 = c + half, w = Math.round(h * (x1 - x0) / (y1 - y0));
     return `<svg class="inkfig ${cls}" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" width="${w}" height="${h}" aria-hidden="true">${ink.map((s, i) => {
       const col = s.z ? "var(--seal)" : "currentColor";
       if (s.p.length < 2) return `<circle cx="${s.p[0][0]}" cy="${s.p[0][1]}" r="${s.p[0][2] / 2}" fill="${col}" style="--i:${i}"/>`;
@@ -804,6 +821,13 @@
       ${unclear.length ? `<div style="color:var(--seal)">Line ${unclear.join(", ")}: draw across the guide, left to right.</div>` : ""}</div></div>`;
   }
 
+  // Two figures side by side (present → where it's heading) in matched boxes, so they line up.
+  const FIG_W = 72, FIG_H = Math.round(FIG_W * 1.115);
+  function figPair(a, b) {
+    const col = (f, n, extra = "") => `<a class="pfig" href="#/book/${n}" style="${extra}"><div class="fbox">${f}</div><div class="num">${n}</div><div class="pname">${hx(n).name}</div><div class="small muted cjk">${hx(n).zh} ${hx(n).py}</div></a>`;
+    return `<div class="pair${b ? "" : " single"}">${col(a.fig, a.n)}${b ? `<div class="arrow">→</div>${col(b.fig, b.n, "opacity:.82")}` : ""}</div>`;
+  }
+
   /* ---------- A reading ---------- */
   const viewOpen = new Set();
   function emphasis(lines, n, m) {
@@ -830,10 +854,7 @@
       <div class="eyebrow">${dstr(r.at)}${r.method ? " · " + esc(r.method) : ""}</div>
       <textarea class="serif title" style="font-size:28px;line-height:1.22;letter-spacing:-.015em;margin-top:4px" rows="1" data-bind="r:${id}:q" placeholder="My question">${esc(r.q)}</textarea>
       <div class="card" style="margin-top:12px">
-        <div class="row" style="justify-content:center;gap:22px">
-          <a href="#/book/${n}" class="center" style="text-decoration:none">${r.ink ? inkSVG(r.ink, 118, "anim") : hexSVG(r.lines, { w: 78, cls: "ink anim" })}<div class="num" style="margin-top:10px">${n}</div><div class="serif">${h.name}</div><div class="small muted cjk">${h.zh} ${h.py}</div></a>
-          ${m ? `<div class="arrow">→</div><a href="#/book/${m}" class="center" style="text-decoration:none;opacity:.8">${hexSVG(linesOf(m), { w: 60, mark: false, cls: "ink" })}<div class="num" style="margin-top:10px">${m}</div><div class="serif">${hm.name}</div><div class="small muted cjk">${hm.zh} ${hm.py}</div></a>` : ""}
-        </div>
+        ${figPair({ n, fig: r.ink ? inkSVG(r.ink, FIG_H, "anim") : hexSVG(r.lines, { w: FIG_W, cls: "anim" }) }, m && { n: m, fig: hexSVG(linesOf(m), { w: FIG_W }) })}
         <p class="small muted center" style="margin-top:14px">${triPair(h)} · ${h.kw}</p>
         <p class="small center" style="margin:6px 0 0"><span class="seal-dot"></span>${em.text} <span class="muted">(Zhu Xi's rule; trust your own sense.)</span></p>
         <p class="small center" style="margin:6px 0 0"><a class="link" href="#/guide">How to read a hexagram →</a></p>
@@ -1029,11 +1050,7 @@
       <div class="eyebrow">Guided interpretation</div><h1>How to read a hexagram</h1>
       <p class="muted">The same eight steps work for any hexagram. Each step has the method, then a worked example: one reading of Hexagram 3 with its first line moving.</p>
       <div class="card" style="margin-top:14px">
-        <div class="row" style="justify-content:center;gap:22px">
-          <a href="#/book/3/interpret" class="center" style="text-decoration:none">${hexSVG(EX.lines, { w: 70, cls: "ink" })}<div class="num" style="margin-top:8px">${n}</div><div class="serif">${hx(n).name}</div></a>
-          <div class="arrow">→</div>
-          <a href="#/book/8" class="center" style="text-decoration:none;opacity:.8">${hexSVG(linesOf(8), { w: 54, mark: false, cls: "ink" })}<div class="num" style="margin-top:8px">8</div><div class="serif">${hx(8).name}</div></a>
-        </div>
+        ${figPair({ n, fig: hexSVG(EX.lines, { w: FIG_W }) }, { n: 8, fig: hexSVG(linesOf(8), { w: FIG_W }) })}
         <p class="small muted center" style="margin-top:10px">The example: 9 8 8 8 7 8, read bottom to top</p>
       </div>
       ${GUIDE.map(([t, how, ex], i) => `<div class="sechead"><span class="stepn">${i + 1}</span><h3>${t}</h3></div>
@@ -1182,7 +1199,7 @@
       </div>
       <div class="sechead"><h3>Install</h3></div>
       <p class="small muted">${matchMedia("(display-mode: standalone)").matches ? "Installed. It works offline." : "iPhone: Share → Add to Home Screen. Android: ⋮ → Install app. It then works offline."}
-      ${deferredInstall ? ` <button class="link" data-act="install">Install now</button>` : ""}</p>
+      ${isStandalone() ? "" : ` <button class="link" data-act="installsheet">Install now</button>`}</p>
       <div class="sechead"><h3>About</h3></div>
       <p class="small muted">The structure of the hexagrams, the trigram attributes and the sequence are ancient and public domain. The keywords and questions are original to this app. Every Judgment, Image and line is yours to write. If you study a translation you own, keep notes from it in "Private notes & sources"; those are never printed.</p>
       <p class="small"><a class="link" href="#/science">The science behind this app</a> · <a class="link" href="../../">Apps Studio</a></p>
@@ -1250,8 +1267,43 @@
   }
 
   /* ---------- Actions ---------- */
+  /* ---------- Install prompt ----------
+     Android/desktop Chrome hands us its install prompt (beforeinstallprompt); iOS Safari
+     doesn't, so there the sheet shows the two Share-menu steps instead. */
   let deferredInstall = null;
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; });
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "my-i-ching-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  const snooze = days => { try { localStorage.setItem(SNOOZE, String(Date.now() + days * DAY)); } catch (e) {} };
+  function installSheetBody() {
+    const share = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7"/></svg>`;
+    if (deferredInstall) return `<button class="btn seal block" data-act="install">Install the app</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> ${share} in Safari's toolbar.</span></li><li><span>Scroll and tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon at the right of the address bar,</span></li><li><span>or open the browser menu and choose <b>Install My I Ching</b>.</span></li></ol>`;
+  }
+  function showInstallSheet(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed()) || document.body.classList.contains("printing")) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
+        <div><div class="eyebrow">Free · works offline</div><h2 id="sheet-t">Install My I Ching</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Open it full screen from your home screen, like any app. Your book, readings and drawings stay private on this phone.</p>
+      <div id="sheet-body">${installSheetBody()}</div>
+      <button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstallSheet(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstallSheet(later) { const b = $(".sheet-back"); if (!b) return; if (later) snooze(3); b.classList.add("out"); setTimeout(() => b.remove(), 280); }
+  addEventListener("beforeinstallprompt", e => {
+    e.preventDefault(); deferredInstall = e;
+    const body = $("#sheet-body"); if (body) body.innerHTML = installSheetBody(); // upgrade the steps to a one-tap button
+  });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstallSheet(false); toast("Installed. Open it from your home screen."); });
+  // Offer it shortly after the page opens in a browser; wait a moment for Chrome's prompt to arrive.
+  setTimeout(() => showInstallSheet(false), 1800);
   function applyTheme() { const t = db.settings.theme; if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = t; }
   applyTheme();
 
@@ -1299,7 +1351,13 @@
     else if (a === "markdown") download(`${(db.book.title || "my-book-of-changes").replace(/[^\w]+/g, "-").toLowerCase()}.md`, bookMarkdown(), "text/markdown");
     else if (a === "print") window.print();
     else if (a === "popt") { printOpts[d.k] = el.checked; viewPrint(); }
-    else if (a === "install" && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; }
+    else if (a === "install" && deferredInstall) {
+      const ev = deferredInstall; deferredInstall = null; ev.prompt();
+      const { outcome } = await ev.userChoice.catch(() => ({}));
+      closeInstallSheet(outcome !== "accepted");
+    }
+    else if (a === "installsheet") showInstallSheet(true);
+    else if (a === "installlater") closeInstallSheet(true);
     else if (a === "wipe") { if (confirm("Erase your whole book, readings and practice from this device? Back up first.") && confirm("Really erase everything?")) { db = fresh(); save(true); location.hash = "#/"; rerender(); } }
   });
   document.addEventListener("input", e => { if (e.target.id === "rq") { readingQuery = e.target.value; $("#rlist").innerHTML = readingsList(); } });

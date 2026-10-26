@@ -1,7 +1,7 @@
 {
   "name": "My I Ching",
   "short_name": "My I Ching",
-  "description": "Learn the 64 hexagrams by writing your own Book of Changes.",
+  "description": "Learn the 64 hexagrams of the I Ching by writing your own Book of Changes: draw your hexagram by hand, reflect in your own words, and practise with spaced recall.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -9,8 +9,57 @@
   "background_color": "#f5efe3",
   "theme_color": "#f5efe3",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "lifestyle",
+    "education",
+    "books"
+  ],
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "screenshots/today.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Today: bring a question and write a page of your book"
+    },
+    {
+      "src": "screenshots/draw.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Draw your hexagram by hand, line by line"
+    },
+    {
+      "src": "screenshots/reading.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Meet the hexagram in your own words"
+    },
+    {
+      "src": "screenshots/book.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Your own Book of Changes, 64 chapters"
+    }
   ]
 }
