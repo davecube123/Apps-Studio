@@ -242,6 +242,15 @@
     .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 12px); transform: translateX(-50%); z-index: 55; border: 0; cursor: pointer;
               background: var(--seal); color: var(--seal-ink); padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--e3);
               white-space: nowrap; animation: toast .45s var(--spring) both; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,14,8,.38); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(520px, 100%); background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px);
+             box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    .sheet-back.out { animation: fade .25s reverse both; } .sheet-back.out .sheet { animation: sheetup .28s reverse both; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15.5px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--seal-soft); color: var(--seal); font: 700 12.5px/24px var(--sans); text-align: center; }
     .toast::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--seal); transform: rotate(45deg); }
     @keyframes toast { from { opacity: 0; transform: translate(-50%, 16px) scale(.95); } to { opacity: 1; transform: translate(-50%, 0); } }
     .science dt { font: 450 19px var(--serif); margin-top: 20px; }
@@ -472,7 +481,7 @@
 
   /* ---------- Storage (on this device only) ---------- */
   // Shown at the bottom of Today and Settings. Keep in step with VERSION in sw.js.
-  const APP_VERSION = "5", APP_DATE = "25 Oct 2026";
+  const APP_VERSION = "6", APP_DATE = "26 Oct 2026";
   const versionTag = () => `<p class="center small muted" style="margin-top:22px;opacity:.75">My I Ching · version ${APP_VERSION} · ${APP_DATE}</p>`;
   const KEY = "my-i-ching-v1";
   const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
@@ -1182,7 +1191,7 @@
       </div>
       <div class="sechead"><h3>Install</h3></div>
       <p class="small muted">${matchMedia("(display-mode: standalone)").matches ? "Installed. It works offline." : "iPhone: Share → Add to Home Screen. Android: ⋮ → Install app. It then works offline."}
-      ${deferredInstall ? ` <button class="link" data-act="install">Install now</button>` : ""}</p>
+      ${isStandalone() ? "" : ` <button class="link" data-act="installsheet">Install now</button>`}</p>
       <div class="sechead"><h3>About</h3></div>
       <p class="small muted">The structure of the hexagrams, the trigram attributes and the sequence are ancient and public domain. The keywords and questions are original to this app. Every Judgment, Image and line is yours to write. If you study a translation you own, keep notes from it in "Private notes & sources"; those are never printed.</p>
       <p class="small"><a class="link" href="#/science">The science behind this app</a> · <a class="link" href="../../">Apps Studio</a></p>
@@ -1250,8 +1259,43 @@
   }
 
   /* ---------- Actions ---------- */
+  /* ---------- Install prompt ----------
+     Android/desktop Chrome hands us its install prompt (beforeinstallprompt); iOS Safari
+     doesn't, so there the sheet shows the two Share-menu steps instead. */
   let deferredInstall = null;
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; });
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "my-i-ching-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  const snooze = days => { try { localStorage.setItem(SNOOZE, String(Date.now() + days * DAY)); } catch (e) {} };
+  function installSheetBody() {
+    const share = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7"/></svg>`;
+    if (deferredInstall) return `<button class="btn seal block" data-act="install">Install the app</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> ${share} in Safari's toolbar.</span></li><li><span>Scroll and tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon at the right of the address bar,</span></li><li><span>or open the browser menu and choose <b>Install My I Ching</b>.</span></li></ol>`;
+  }
+  function showInstallSheet(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed()) || document.body.classList.contains("printing")) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
+        <div><div class="eyebrow">Free · works offline</div><h2 id="sheet-t">Install My I Ching</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Open it full screen from your home screen, like any app. Your book, readings and drawings stay private on this phone.</p>
+      <div id="sheet-body">${installSheetBody()}</div>
+      <button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstallSheet(true); });
+    document.body.appendChild(back); haptic(6);
+  }
+  function closeInstallSheet(later) { const b = $(".sheet-back"); if (!b) return; if (later) snooze(3); b.classList.add("out"); setTimeout(() => b.remove(), 280); }
+  addEventListener("beforeinstallprompt", e => {
+    e.preventDefault(); deferredInstall = e;
+    const body = $("#sheet-body"); if (body) body.innerHTML = installSheetBody(); // upgrade the steps to a one-tap button
+  });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstallSheet(false); toast("Installed. Open it from your home screen."); });
+  // Offer it shortly after the page opens in a browser; wait a moment for Chrome's prompt to arrive.
+  setTimeout(() => showInstallSheet(false), 1800);
   function applyTheme() { const t = db.settings.theme; if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = t; }
   applyTheme();
 
@@ -1299,7 +1343,13 @@
     else if (a === "markdown") download(`${(db.book.title || "my-book-of-changes").replace(/[^\w]+/g, "-").toLowerCase()}.md`, bookMarkdown(), "text/markdown");
     else if (a === "print") window.print();
     else if (a === "popt") { printOpts[d.k] = el.checked; viewPrint(); }
-    else if (a === "install" && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; }
+    else if (a === "install" && deferredInstall) {
+      const ev = deferredInstall; deferredInstall = null; ev.prompt();
+      const { outcome } = await ev.userChoice.catch(() => ({}));
+      closeInstallSheet(outcome !== "accepted");
+    }
+    else if (a === "installsheet") showInstallSheet(true);
+    else if (a === "installlater") closeInstallSheet(true);
     else if (a === "wipe") { if (confirm("Erase your whole book, readings and practice from this device? Back up first.") && confirm("Really erase everything?")) { db = fresh(); save(true); location.hash = "#/"; rerender(); } }
   });
   document.addEventListener("input", e => { if (e.target.id === "rq") { readingQuery = e.target.value; $("#rlist").innerHTML = readingsList(); } });
