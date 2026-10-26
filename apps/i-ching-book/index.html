@@ -1286,7 +1286,7 @@
       <div id="sheet-body">${installSheetBody()}</div>
       <button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
     back.addEventListener("click", e => { if (e.target === back) closeInstallSheet(true); });
-    document.body.appendChild(back); haptic(6);
+    document.body.appendChild(back);
   }
   function closeInstallSheet(later) { const b = $(".sheet-back"); if (!b) return; if (later) snooze(3); b.classList.add("out"); setTimeout(() => b.remove(), 280); }
   addEventListener("beforeinstallprompt", e => {
