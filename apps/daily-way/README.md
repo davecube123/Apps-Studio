@@ -28,6 +28,18 @@ Plus **Teach it back** on Sundays (explain a thread to a beginner; protégé eff
 - Week of rings, an 18-week heatmap, progress through each book, memory maturity, and 16 milestones.
 - A daily calendar reminder (.ics) at your chosen time.
 
+## Translations: one primary, the others as lenses
+
+Each book has a **primary** translation you follow chapter by chapter and any number of **lenses**.
+On Tao Te Ching days a lens always comes in (the 81 chapters line up, e.g. Legge + *The Tao of
+Leadership*); for the other books, every second time. The Read step says which lens to open and asks
+you to notice one thing it shows differently; Capture records which translation a passage came from
+and what the lens showed. Comparing versions of the same passage (contrasting cases) deepens
+understanding (Schwartz & Bransford, 1998; Marton & Booth, 1997). A **Later shelf** per book parks
+translations you're curious about. Books can follow a **chapter selection** (e.g. Chuang Tzu
+*Basic Writings*: 1–7, 17–20), with presets for the Golden Flower (Cleary 13 / Wilhelm 8) and the
+Chuang Tzu (Complete Works 1–33 / Basic Writings).
+
 ## Books and copyright
 
 The Tao Te Ching is James Legge's 1891 translation (public domain), taken from Tao Reader. For the
