@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "5", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "6", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -285,7 +285,9 @@
       if (b.id === "gf" && !b.read.length) { if (/wilhelm/i.test(b.edition)) { b.units = 8; b.lenses = ["Cleary"]; } else { b.edition ||= "Cleary"; b.units = 13; } } }
     b.later ??= ""; b.list ??= null; });
   // Practice mode (v5): you already keep your own meditation practice, so the step bridges into it.
-  if (db.settings.practice === undefined) { db.settings.practice = "own"; db.settings.myPractices ||= "Trataka\nDeath meditation\nCyclic breathing"; }
+  if (db.settings.practice === undefined) { db.settings.practice = "own"; db.settings.myPractices ||= "Trataka\nDeath meditation\nCyclic sighing"; }
+  // It's cyclic sighing, not generic "cyclic breathing" (v6): rename it where it was prefilled.
+  if (/^cyclic breathing$/im.test(db.settings.myPractices || "")) db.settings.myPractices = db.settings.myPractices.replace(/^cyclic breathing$/im, "Cyclic sighing");
   let saveT;
   function save(now) { clearTimeout(saveT); const f = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Couldn't save. Is storage full?"); } }; now ? f() : (saveT = setTimeout(f, 250)); }
   addEventListener("pagehide", () => save(true));
@@ -668,7 +670,8 @@
     const n = name.toLowerCase();
     if (/tr[aā]taka|candle|flame|gaz/.test(n)) return "As you gaze, let the light turn back towards its source: the Golden Flower's circulating the light, almost word for word. When the eyes close, rest in the afterimage with today's line.";
     if (/death|mara|mortal|dying/.test(n)) return "Read today's line as if this were your last day. Chuang Tzu drummed and sang after his wife died; the Tao Te Ching says he who dies and yet does not perish has longevity. What of the line remains?";
-    if (/breath|pranayama|cyclic|sighing|box/.test(n)) return "Let the breath grow fine and even, as the Golden Flower advises, and let each exhale be a small return (fu 復) to the root.";
+    if (/sigh/.test(n)) return "Two breaths in through the nose, then one long breath out. Let each long exhale take something away: the Tao Te Ching says the one who follows the Tao seeks from day to day to diminish. Empty a little, and let today's line fill the space.";
+    if (/breath|pranayama|cyclic|box/.test(n)) return "Let the breath grow fine and even, as the Golden Flower advises, and let each exhale be a small return (fu 復) to the root.";
     if (/walk|tai ?chi|qi ?gong|yoga/.test(n)) return "Move with the line: no forcing, soft over hard. Notice where it lives in the body.";
     return "Hold today's line lightly through the practice, without thinking about it. Notice what it becomes.";
   }
@@ -886,7 +889,7 @@
   function practiceChooser() {
     const m = pmode(), S = db.settings;
     return `<div class="seg">${[["own", "My own practice"], ["app", "Sit here"], ["off", "None"]].map(([k, l]) => `<button class="${m === k ? "on" : ""}" data-act="pmode" data-m="${k}">${l}</button>`).join("")}</div>
-      ${m === "own" ? `<div class="field" style="margin-top:10px"><label>My practices, one per line</label>${bound("settings.myPractices", "Trataka\nDeath meditation\nCyclic breathing", "write", 3)}</div>
+      ${m === "own" ? `<div class="field" style="margin-top:10px"><label>My practices, one per line</label>${bound("settings.myPractices", "Trataka\nDeath meditation\nCyclic sighing", "write", 3)}</div>
         <p class="gfoot">One minute each day to carry the line you read into your own practice. Your tracking stays in your other app.</p>`
       : m === "app" ? `<div class="seg" style="margin-top:10px">${[3, 4, 5, 8, 10, 15].map(x => `<button class="${S.sitMin === x ? "on" : ""}" data-act="sitmin" data-m="${x}">${x} min</button>`).join("")}</div>
         <p class="gfoot">A short sitting each session: circulating the light, from the Golden Flower.</p>`
