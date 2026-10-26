@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "2", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "3", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -211,12 +211,26 @@
 
   /* ---------- The four books ---------- */
   const BOOKS0 = [
-    { id: "ttc", title: "Tao Te Ching", author: "Lao Tzu", unit: "Chapter", units: 81, edition: "Legge (built in)", builtin: true },
-    { id: "iching", title: "I Ching", author: "Book of Changes", unit: "Hexagram", units: 64, edition: "" },
-    { id: "gf", title: "The Secret of the Golden Flower", author: "Lü Dongbin (attrib.)", unit: "Chapter", units: 8, edition: "" },
-    { id: "zz", title: "Chuang Tzu", author: "Zhuangzi", unit: "Chapter", units: 33, edition: "" },
+    { id: "ttc", title: "Tao Te Ching", author: "Lao Tzu", unit: "Chapter", units: 81, edition: "Legge (built in)", lenses: ["The Tao of Leadership (Heider)"], builtin: true },
+    { id: "iching", title: "I Ching", author: "Book of Changes", unit: "Hexagram", units: 64, edition: "Wilhelm", lenses: ["Minford"] },
+    { id: "gf", title: "The Secret of the Golden Flower", author: "Lü Dongbin (attrib.)", unit: "Chapter", units: 13, edition: "Cleary", lenses: ["Wilhelm"] },
+    { id: "zz", title: "Chuang Tzu", author: "Zhuangzi", unit: "Chapter", units: 33, edition: "Burton Watson", lenses: [] },
   ];
-  const BOOK_HINT = { gf: "Wilhelm's translation has 8 chapters; Cleary's has 13.", zz: "33 chapters in full: the Inner Chapters are 1–7. Set this to the sections in your selection.", iching: "64 hexagrams.", ttc: "81 chapters." };
+  const BOOK_HINT = { gf: "Cleary's translation has 13 chapters; Wilhelm's has 8. The chapters don't line up, so with a lens you look for the matching passage.", zz: "The Complete Works has all 33 chapters (Inner Chapters 1–7). If yours is a selection, list its chapters, e.g. 1–7, 17–20; check them against your contents page.", iching: "64 hexagrams in every translation.", ttc: "81 chapters in every translation, so a lens always lines up." };
+  const PRESETS = { gf: [["Cleary · 13 chapters", "1-13"], ["Wilhelm · 8 chapters", "1-8"]], zz: [["Complete Works · 1–33", "1-33"], ["Basic Writings · 1–7, 17–20", "1-7, 17-20"]] };
+  // Chapter lists: a book can follow a selection (e.g. 1–7, 17–20) instead of 1…N.
+  const seq = b => b.list?.length ? b.list : Array.from({ length: b.units }, (_, i) => i + 1);
+  const total = b => seq(b).length;
+  const nextUnit = (b, n) => { const s = seq(b), i = s.indexOf(n); return s[(i + 1) % s.length] ?? s[0]; };
+  function parseList(t) { const out = new Set(); for (const part of String(t).split(/[,;]+/)) { const m = part.trim().match(/^(\d+)\s*(?:[-–—]\s*(\d+))?$/); if (!m) continue; const a = +m[1], z = +(m[2] || m[1]); for (let n = Math.min(a, z); n <= Math.max(a, z) && n <= 300; n++) out.add(n); } return [...out].sort((x, y) => x - y); }
+  function fmtList(l) { const r = []; for (let i = 0; i < l.length; i++) { let j = i; while (j + 1 < l.length && l[j + 1] === l[j] + 1) j++; r.push(i === j ? `${l[i]}` : `${l[i]}–${l[j]}`); i = j; } return r.join(", "); }
+  function setChapters(b, text) {
+    const l = parseList(text); if (!l.length) return false;
+    const contiguous = l[0] === 1 && l[l.length - 1] === l.length;
+    b.list = contiguous ? null : l; b.units = contiguous ? l.length : l.length;
+    if (!seq(b).includes(b.pos)) b.pos = seq(b).find(n => !b.read.includes(n)) ?? seq(b)[0];
+    return true;
+  }
 
   /* ---------- Threads: the ideas that run through all four ---------- */
   // Short descriptions are original to this app, to be replaced by your own understanding over time.
@@ -263,6 +277,11 @@
     threadNotes: {}, teach: [], conceptIntro: 0, hexCards: [],
     settings: { name: "", why: "", time: "07:00", sitMin: 4, theme: "auto", week: ["zz", "ttc", "iching", "zz", "ttc", "gf", "iching"], breathGuide: true } });
   let db = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v) return Object.assign(fresh(), d); } catch (e) {} return fresh(); })();
+  // v2 of the book model: lenses, chapter lists and a later shelf (keeps what was already set)
+  db.books.forEach(b => { const d = BOOKS0.find(x => x.id === b.id) || {};
+    if (!Array.isArray(b.lenses)) { b.lenses = d.lenses ? [...d.lenses] : []; if (!b.edition) b.edition = d.edition || "";
+      if (b.id === "gf" && !b.read.length) { if (/wilhelm/i.test(b.edition)) { b.units = 8; b.lenses = ["Cleary"]; } else { b.edition ||= "Cleary"; b.units = 13; } } }
+    b.later ??= ""; b.list ??= null; });
   let saveT;
   function save(now) { clearTimeout(saveT); const f = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Couldn't save. Is storage full?"); } }; now ? f() : (saveT = setTimeout(f, 250)); }
   addEventListener("pagehide", () => save(true));
@@ -307,6 +326,9 @@
     const d = day(); if (!d.readBook) { const b = book(db.settings.week[new Date().getDay()]); d.readBook = b.id; d.readUnit = b.pos; }
     return { b: book(d.readBook), n: d.readUnit };
   }
+  // Tao Te Ching days always bring a lens (the chapters line up); other books every second time.
+  function lensToday(b) { const L = b.lenses || []; if (!L.length) return null; const k = b.read.length;
+    return b.id === "ttc" || k % 2 === 1 ? L[Math.floor(k / (b.id === "ttc" ? 1 : 2)) % L.length] : null; }
   const unitLabel = (b, n) => b.id === "iching" ? `Hexagram ${n} · ${HEXN[n - 1].name}` : `${b.unit} ${n}`;
   const BOOK_GLYPH = { ttc: "道", iching: "易", gf: "華", zz: "莊" };
   const bookIcon = (b, size = 30) => `<span class="icon cjk" style="background:var(--${b.id}, var(--tint));width:${size}px;height:${size}px;font-size:${size * .5}px;border-radius:${size * .27}px">${BOOK_GLYPH[b.id] || esc(b.title[0])}</span>`;
@@ -461,11 +483,8 @@
        <div class="ghead caps">What should we call you?</div><div class="field"><input type="text" data-bind="settings.name" value="${esc(db.settings.name)}" placeholder="Your first name"></div>
        <div class="ghead caps">Why are you walking this path?</div><div class="field">${bound("settings.why", "In a sentence or two. You'll see it on hard days.", "write", 3)}</div>
        <p class="gfoot">Writing your own reason makes a goal yours, and people persist far longer with goals they own.</p>`,
-      `<h1>Your books</h1><p class="sub">Tell me which editions you're reading. The plan follows their chapters. Legge's Tao Te Ching is built in; for the others you'll read from your own copy.</p>
-       ${db.books.map((b, i) => `<div class="ghead caps row" style="gap:8px">${bookIcon(b, 22)} ${esc(b.title)}</div><div class="group">
-         <div class="cell static"><span class="grow">Edition / translator</span><input type="text" data-bind="books.${i}.edition" value="${esc(b.edition)}" placeholder="e.g. Wilhelm, Watson…" style="text-align:right;width:55%;color:var(--label2)"></div>
-         <div class="cell static"><span class="grow">${b.unit}s in your copy</span><input type="number" min="1" max="200" data-bind="books.${i}.units" value="${b.units}" style="text-align:right;width:70px;color:var(--label2)"></div></div>
-         <p class="gfoot">${BOOK_HINT[b.id]}</p>`).join("")}`,
+      `<h1>Your books</h1><p class="sub">For each book, one <b>primary</b> translation you follow chapter by chapter, and <b>lenses</b>: the other translations you bring in to compare. Legge's Tao Te Ching is built in.</p>
+       ${db.books.map((b, i) => `<div class="ghead caps row" style="gap:8px">${bookIcon(b, 22)} ${esc(b.title)}</div>${translationsEditor(b, i)}<p class="gfoot">${BOOK_HINT[b.id]}</p>`).join("")}`,
       `<h1>Your daily time</h1><p class="sub">The same time and place each day, anchored to something you already do, is how a practice becomes automatic.</p>
        <div class="ghead caps">When</div><div class="group">
          <div class="cell static"><span class="grow">Practice time</span><input type="time" data-bind="settings.time" value="${db.settings.time}" style="width:auto;color:var(--tint)"></div>
@@ -517,10 +536,10 @@
         back: `<h2>${h.n} · ${h.name} <span class="cjk sub">${h.zh}</span></h2>${(() => { const m = myIChing(h.n); return m?.judgment ? `<p class="serif">${esc(m.judgment)}</p><p class="fine">From your My I Ching book</p>` : ""; })()}` }; }
     const c = db.cards.find(x => x.id === key); if (!c) return null; const b = book(c.book), s = db.srs[id];
     const dirA = c.quote && (!c.mine || !s || s.reps % 2 === 0);
-    return { tag: `${b.title} · ${unitLabel(b, c.unit)}`, color: `var(--${b.id}, var(--tint))`,
+    return { tag: `${b.title} · ${unitLabel(b, c.unit)}${c.ed ? ` · ${c.ed}` : ""}`, color: `var(--${b.id}, var(--tint))`,
       front: dirA ? `<p class="quote">“${esc(c.quote)}”</p><p class="sub">What does this mean, in your own words? How would you live it?</p>`
                   : `<p class="serif" style="font-size:19px">${esc(c.mine)}</p><p class="sub">That's your paraphrase. Recall the original passage it came from.</p>`,
-      back: dirA ? `${c.mine ? `<div class="caps">In your words</div><p class="serif" style="font-size:18px">${esc(c.mine)}</p>` : ""}${c.q ? `<p class="fine">Your question: ${esc(c.q)}</p>` : ""}`
+      back: dirA ? `${c.mine ? `<div class="caps">In your words</div><p class="serif" style="font-size:18px">${esc(c.mine)}</p>` : ""}${c.lens?.text ? `<p class="fine"><b>${esc(c.lens.name)}</b> shows: ${esc(c.lens.text)}</p>` : ""}${c.q ? `<p class="fine">Your question: ${esc(c.q)}</p>` : ""}`
                  : `<div class="caps">The passage</div><p class="quote">“${esc(c.quote)}”</p>` };
   }
   function stRecall() {
@@ -544,23 +563,31 @@
   function stRead() {
     const { b, n } = assignment(), d = day();
     let body = "";
-    if (b.id === "ttc" && b.builtin) {
-      if (!TTC) { loadTTC().then(() => location.hash === "#/s/read" && rerender()); body = `<p class="sub">Opening the text…</p>`; }
-      else { const ch = TTC.chapters[n - 1];
-        body = `<h2 class="serif" style="font-weight:500;font-size:26px;margin:8px 0 14px">${esc(ch.title)}</h2><div class="passage">${ch.paras.map((p, i) => `<p class="pick ${sess.picks.has(i) ? "on" : ""}" data-act="pick" data-i="${i}">${esc(p)}</p>`).join("")}</div>
-          <p class="fine">Legge's translation (1891). Read it twice, slowly; the second time, aloud. Tap a line that strikes you to carry it into Capture.</p>`; }
+    const lens = lensToday(b), lensCard = lens ? `<div class="card" style="margin-top:14px;box-shadow:inset 3px 0 0 var(--${b.id})"><div class="caps" style="color:var(--${b.id})">Lens · ${esc(lens)}</div>
+        <p style="margin:6px 0 0">Then open <b>${esc(lens)}</b> at ${b.id === "gf" ? "the passage that matches" : `the same ${b.unit.toLowerCase()}`} and read it once. Notice <b>one thing</b> it shows that ${esc(b.edition || "your primary")} doesn't.</p>
+        ${/heider|leadership/i.test(lens) ? `<p class="fine" style="margin-top:6px">Heider's modern reading turns the chapter into practice. Let it shape today's intention.</p>` : ""}</div>` : "";
+    sess.lens = lens;
+    const legge = b.id === "ttc" && TTC ? TTC.chapters[n - 1] : null, leggePrimary = b.id === "ttc" && /legge/i.test(b.edition || "Legge");
+    const leggeText = legge ? `<div class="passage">${legge.paras.map((p, i) => `<p class="pick ${sess.picks.has(i) ? "on" : ""}" data-act="pick" data-i="${i}">${esc(p)}</p>`).join("")}</div>` : "";
+    if (b.id === "ttc" && !TTC) { loadTTC().then(() => location.hash === "#/s/read" && rerender()); body = `<p class="sub">Opening the text…</p>`; }
+    else if (leggePrimary) {
+      body = `<h2 class="serif" style="font-weight:500;font-size:26px;margin:8px 0 14px">${esc(legge.title)}</h2>${leggeText}
+        <p class="fine">Legge's translation (1891). Read it twice, slowly; the second time, aloud. Tap a line that strikes you to carry it into Capture.</p>${lensCard}`;
+    } else if (b.id === "ttc") {
+      body = `<div class="card" style="margin-top:12px"><p style="margin:0">Open <b>${esc(b.edition)}</b> at <b>Chapter ${n}</b>. Read it twice, slowly; the second time, aloud.</p></div>${lensCard}
+        <details style="margin-top:12px"><summary class="fine" style="cursor:pointer">Legge's translation, built in</summary><h3 class="serif" style="margin:12px 0 8px;font-weight:500">${esc(legge.title)}</h3>${leggeText}</details>`;
     } else {
       const ic = b.id === "iching" ? `<div class="center" style="margin:10px 0 6px">${hexSVG(n, 84)}</div><h2 class="center">${n} · ${HEXN[n - 1].name} <span class="cjk sub">${HEXN[n - 1].zh}</span></h2>` : "";
       const mine = b.id === "iching" ? myIChing(n) : null;
       body = `${ic}<div class="card" style="margin-top:12px"><p style="margin:0">Open <b>${esc(b.title)}</b>${b.edition ? ` (${esc(b.edition)})` : ""} at <b>${unitLabel(b, n)}</b>.</p>
           <p class="sub">${b.id === "iching" ? "Read the Judgment and the Image, then the lines." : b.id === "gf" ? "Read slowly. If the chapter is long, read part of it today and continue next time." : "Read slowly, twice. Notice an image or story that stays with you."}</p></div>
         <div class="card center" style="margin-top:12px"><div class="timer" id="rtimer">${fmt(sess.readLeft ?? 300)}</div>
-          <button class="btn sm gray" style="margin-top:10px" data-act="rtimer">${sess.timer ? "Pause" : sess.readLeft != null && sess.readLeft < 300 ? "Resume" : "Start a 5-minute reading timer"}</button></div>
+          <button class="btn sm gray" style="margin-top:10px" data-act="rtimer">${sess.timer ? "Pause" : sess.readLeft != null && sess.readLeft < 300 ? "Resume" : "Start a 5-minute reading timer"}</button></div>${lensCard}
         ${mine && (mine.judgment || mine.image) ? `<div class="ghead caps">From your My I Ching book</div><div class="card">${mine.judgment ? `<p class="serif">${esc(mine.judgment)}</p>` : ""}${mine.image ? `<p class="serif sub">${esc(mine.image)}</p>` : ""}</div>` : ""}`;
     }
     const already = d.done.read && d.readUnitDone && d.readUnitDone !== n ? `<div class="card" style="margin-bottom:12px;background:var(--tint-soft)"><b>✓ You read ${unitLabel(b, d.readUnitDone)} today.</b><div class="fine">Here's the next one, if you'd like to keep going.</div></div>` : "";
     return stepFrame("read", `${already}${eyebrow("Read · 5 min", "var(--learn)")}<div class="row between"><div class="stitle">${esc(b.title)}</div></div>
-      <div class="row" style="gap:8px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, n)} · pass ${Math.floor(b.read.length / b.units) + 1}</span>
+      <div class="row" style="gap:8px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, n)}${b.edition ? ` · ${esc(b.edition)}` : ""}</span>
       <button class="btn plain sm" data-act="switchbook" style="margin-left:auto;white-space:nowrap;flex:none">Another book</button></div>${body}`,
       `<button class="btn" data-act="readdone">Finished ${b.id === "iching" ? "the hexagram" : `${b.unit.toLowerCase()} ${n}`}</button>
        <button class="btn plain" data-act="readlater">I'll continue next time</button>`);
@@ -568,24 +595,29 @@
   const fmt = s => `${Math.floor(s / 60)}:${String(Math.max(0, s % 60)).padStart(2, "0")}`;
 
   function captureForm(bk, unit, pre = {}) {
-    const C = sess.cap ||= { quote: pre.quote || "", mine: "", q: "", th: new Set([threadOfDay().id]) };
-    const b = book(bk);
+    const b = book(bk), eds = [b.edition, ...(b.lenses || [])].filter(Boolean);
+    const C = sess.cap ||= { quote: pre.quote || "", mine: "", q: "", th: new Set([threadOfDay().id]), ed: pre.ed || eds[0] || "", lensNote: "" };
+    const lens = pre.lens;
     return `<div class="row" style="gap:8px;margin:4px 0 12px">${bookIcon(b, 22)}<span class="sub">${esc(b.title)} · ${unitLabel(b, unit)}</span></div>
-      <div class="field"><label>The passage that struck you</label><textarea class="write" rows="2" data-cap="quote" placeholder="Copy the line or two from your book">${esc(C.quote)}</textarea></div>
+      <div class="field"><label>The passage that struck you</label><textarea class="write" rows="2" data-cap="quote" placeholder="Copy the line or two from your book">${esc(C.quote)}</textarea>
+        ${eds.length > 1 ? `<div class="chips" style="margin-top:8px">${eds.map(e => `<button class="chip ${C.ed === e ? "on" : ""}" data-act="caped" data-v="${esc(e)}" style="font-size:13px;padding:5px 11px">${esc(e)}</button>`).join("")}</div>` : ""}</div>
       <div class="field"><label>In my own words</label><textarea class="write" rows="2" data-cap="mine" placeholder="What it says, as you'd say it to a friend">${esc(C.mine)}</textarea></div>
+      ${lens ? `<div class="field" style="box-shadow:inset 3px 0 0 var(--${b.id})"><label>What ${esc(lens)} shows differently</label><textarea class="write" rows="2" data-cap="lensNote" placeholder="One word, image or emphasis that changes the meaning">${esc(C.lensNote)}</textarea></div>` : ""}
       <div class="field"><label>A question it raises (optional)</label><textarea class="write" rows="1" data-cap="q" placeholder="Why…? What if…? Where in my life…?">${esc(C.q)}</textarea></div>
       <div class="ghead caps">Threads it touches</div><div class="chips">${THREADS.map(t => `<button class="chip ${C.th.has(t.id) ? "on" : ""}" data-act="capth" data-t="${t.id}">${t.gloss}</button>`).join("")}</div>
       <p class="gfoot">Putting it in your own words is the single most effective way to remember and understand it.</p>`;
   }
   document.addEventListener("input", e => { const k = e.target.dataset.cap; if (k && sess.cap) sess.cap[k] = e.target.value; });
   function saveCapture(bk, unit) {
-    const C = sess.cap; if (!C || !(C.quote.trim() || C.mine.trim())) return null;
-    const c = { id: uid(), book: bk, unit: +unit, quote: C.quote.trim(), mine: C.mine.trim(), q: C.q.trim(), th: [...C.th], at: Date.now() };
+    const C = sess.cap; if (!C || !(C.quote.trim() || C.mine.trim() || C.lensNote?.trim())) return null;
+    const c = { id: uid(), book: bk, unit: +unit, quote: C.quote.trim(), mine: C.mine.trim(), q: C.q.trim(), th: [...C.th], at: Date.now(), ed: C.ed || "" };
+    if (C.lensNote.trim() && C.lensName) c.lens = { name: C.lensName, text: C.lensNote.trim() };
     db.cards.push(c); db.srs["c:" + c.id] = { ivl: 0, ease: 2.5, reps: 0, due: today0() + DAY }; sess.cap = null; save(); return c;
   }
   function stCapture() {
     const d = day(), { b, n } = assignment(), unit = d.readUnitDone || n;
-    const pre = b.id === "ttc" && TTC && sess.picks.size ? { quote: [...sess.picks].sort((x, y) => x - y).map(i => TTC.chapters[unit - 1]?.paras[i]).filter(Boolean).join("\n") } : {};
+    const pre = b.id === "ttc" && TTC && sess.picks.size ? { quote: [...sess.picks].sort((x, y) => x - y).map(i => TTC.chapters[unit - 1]?.paras[i]).filter(Boolean).join("\n"), ed: "Legge (built in)" } : {};
+    pre.lens = sess.lens; if (sess.cap) sess.cap.lensName = sess.lens; else { captureForm(b.id, unit, pre); sess.cap.lensName = sess.lens; }
     return stepFrame("capture", `${eyebrow("Capture · 3 min", "var(--learn)")}<div class="stitle">Make it yours</div>${captureForm(b.id, unit, pre)}`,
       `<button class="btn" data-act="capsave">Save and continue</button>`);
   }
@@ -666,11 +698,21 @@
       <div class="sfoot"><div class="inner"><button class="btn" data-act="minidone">Done. I showed up today</button></div></div>`;
   }
 
+  function translationsEditor(b, i) {
+    const presets = PRESETS[b.id] || [], cur = fmtList(seq(b));
+    return `<div class="group">
+        <div class="cell static"><span class="grow">Primary</span><input type="text" data-bind="books.${i}.edition" value="${esc(b.edition)}" placeholder="The one you follow" style="text-align:right;width:60%;color:var(--label2)"></div>
+        ${b.lenses.map((l, j) => `<div class="cell static"><span class="grow"><span class="fine">Lens</span><br>${esc(l)}</span><button class="btn plain sm" data-act="dellens" data-b="${b.id}" data-j="${j}" style="color:#ff3b30">Remove</button></div>`).join("")}
+        <div class="cell static"><input type="text" id="lens-${b.id}" placeholder="Add a lens translation…"><button class="btn plain sm" data-act="addlens" data-b="${b.id}">Add</button></div>
+        <div class="cell static"><span class="grow">${b.unit}s</span><input type="text" data-chlist="${b.id}" value="${esc(cur)}" style="text-align:right;width:55%;color:var(--label2)" ${b.id === "iching" ? "readonly" : ""}></div></div>
+      ${presets.length ? `<div class="chips" style="margin:10px 4px 0">${presets.map(([lab, v]) => `<button class="chip ${cur === fmtList(parseList(v)) ? "on" : ""}" data-act="preset" data-b="${b.id}" data-v="${v}">${lab}</button>`).join("")}</div>` : ""}`;
+  }
+
   /* ---------- Library ---------- */
-  const readCount = b => new Set(b.read).size;
+  const readCount = b => seq(b).filter(n => b.read.includes(n)).length;
   function viewLibrary() {
     return `<h1>Library</h1><p class="sub">Your four books and everything you've drawn from them.</p>
-      <div class="group" style="margin-top:16px">${db.books.map(b => { const p = Math.min(1, readCount(b) / b.units), caps = db.cards.filter(c => c.book === b.id).length;
+      <div class="group" style="margin-top:16px">${db.books.map(b => { const p = Math.min(1, readCount(b) / total(b)), caps = db.cards.filter(c => c.book === b.id).length;
         return `<a class="cell" href="#/book/${b.id}" style="--inset:62px;padding-top:12px;padding-bottom:12px">${bookIcon(b, 36)}
           <div class="grow"><div style="font-weight:600">${esc(b.title)}</div><div class="fine">${esc(b.edition || b.author)} · next: ${unitLabel(b, b.pos)}</div>
           <div class="bar" style="margin-top:7px"><i style="width:${p * 100}%;background:var(--${b.id})"></i></div></div>
@@ -681,7 +723,7 @@
   }
   function cardRow(c) { const b = book(c.book);
     return `<a class="cell" href="#/card/${c.id}" style="--inset:16px;align-items:flex-start"><span class="dot" style="background:var(--${b.id});margin-top:8px"></span>
-      <div class="grow"><div class="fine">${esc(b.title)} · ${unitLabel(b, c.unit)}</div><div class="serif" style="font-size:17px">${esc((c.quote || c.mine).slice(0, 160))}</div>
+      <div class="grow"><div class="fine">${esc(b.title)} · ${unitLabel(b, c.unit)}${c.ed ? ` · ${esc(c.ed)}` : ""}</div><div class="serif" style="font-size:17px">${esc((c.quote || c.mine).slice(0, 160))}</div>
       ${c.mine && c.quote ? `<div class="fine">${esc(c.mine.slice(0, 120))}</div>` : ""}</div></a>`; }
   document.addEventListener("input", e => {
     if (e.target.id !== "libq") return; const q = e.target.value.trim().toLowerCase();
@@ -692,13 +734,13 @@
     const b = book(id), i = db.books.indexOf(b), caps = db.cards.filter(c => c.book === id).reverse(), read = new Set(b.read);
     return `<a href="#/library" class="btn plain sm" style="padding-left:0">‹ Library</a>
       <div class="row" style="gap:14px;margin-top:4px">${bookIcon(b, 56)}<div><h1 style="font-size:28px">${esc(b.title)}</h1><div class="sub">${esc(b.author)}</div></div></div>
-      <div class="ghead caps">Progress · pass ${Math.floor(b.read.length / b.units) + 1}</div>
-      <div class="card"><div class="units">${Array.from({ length: b.units }, (_, k) => k + 1).map(n => `<a href="${b.id === "ttc" ? "#/ttc/" + n : `#/capture/${b.id}/${n}`}" class="${read.has(n) ? "read" : ""} ${n === b.pos ? "next" : ""}" style="${read.has(n) ? `background:var(--${b.id})` : ""}" title="${unitLabel(b, n)}">${n}</a>`).join("")}</div>
-        <p class="fine" style="margin-top:10px">${read.size} of ${b.units} read · next is ${unitLabel(b, b.pos)}. Tap a number to ${b.id === "ttc" ? "read it" : "capture from it"}.</p></div>
-      <div class="ghead caps">Your edition</div><div class="group">
-        <div class="cell static"><span class="grow">Edition / translator</span><input type="text" data-bind="books.${i}.edition" value="${esc(b.edition)}" style="text-align:right;width:55%;color:var(--label2)"></div>
-        <div class="cell static"><span class="grow">${b.unit}s</span><input type="number" min="1" max="200" data-bind="books.${i}.units" value="${b.units}" style="text-align:right;width:70px;color:var(--label2)"></div>
-        <div class="cell static"><span class="grow">Next to read</span><input type="number" min="1" max="${b.units}" data-bind="books.${i}.pos" value="${b.pos}" style="text-align:right;width:70px;color:var(--label2)"></div></div>
+      <div class="ghead caps">Progress</div>
+      <div class="card"><div class="units">${seq(b).map(n => `<a href="${b.id === "ttc" ? "#/ttc/" + n : `#/capture/${b.id}/${n}`}" class="${read.has(n) ? "read" : ""} ${n === b.pos ? "next" : ""}" style="${read.has(n) ? `background:var(--${b.id})` : ""}" title="${unitLabel(b, n)}">${n}</a>`).join("")}</div>
+        <p class="fine" style="margin-top:10px">${readCount(b)} of ${total(b)} read · next is ${unitLabel(b, b.pos)}. Tap a number to ${b.id === "ttc" ? "read it" : "capture from it"}.</p></div>
+      ${translationsEditor(b, i)}
+      <div class="group" style="margin-top:10px"><div class="cell static"><span class="grow">Next to read</span><input type="number" min="1" max="300" data-bind="books.${i}.pos" value="${b.pos}" style="text-align:right;width:70px;color:var(--label2)"></div></div>
+      <div class="ghead caps">Later shelf</div><div class="field">${bound(`books.${i}.later`, "Translations you're curious about, parked here so they can wait", "write", 2)}</div>
+      <p class="gfoot">Depth before breadth: master one translation and let the others serve as lenses. When one is finished, take the next from this shelf.</p>
       <p class="gfoot">${BOOK_HINT[b.id] || ""}${b.id === "iching" ? ` For the full I Ching practice, use <a href="../i-ching-book/">My I Ching</a>; your words there appear here on I Ching days.` : ""}</p>
       <div class="ghead caps">Captured · ${caps.length}</div>
       ${caps.length ? `<div class="group">${caps.map(cardRow).join("")}</div>` : `<div class="card center sub">Passages you capture from this book will gather here.</div>`}`;
@@ -723,9 +765,10 @@
     const c = db.cards.find(x => x.id === id); if (!c) { location.hash = "#/library"; return null; }
     const i = db.cards.indexOf(c), b = book(c.book), s = db.srs["c:" + id], links = db.links.filter(l => l.a === id || l.b === id);
     return `<a href="#/book/${b.id}" class="btn plain sm" style="padding-left:0">‹ ${esc(b.title)}</a>
-      <div class="row" style="gap:8px;margin-top:6px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, c.unit)} · ${new Date(c.at).toLocaleDateString()}</span></div>
+      <div class="row" style="gap:8px;margin-top:6px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, c.unit)}${c.ed ? ` · ${esc(c.ed)}` : ""} · ${new Date(c.at).toLocaleDateString()}</span></div>
       <div class="field" style="margin-top:14px"><label>Passage</label>${bound(`cards.${i}.quote`, "")}</div>
       <div class="field"><label>In my own words</label>${bound(`cards.${i}.mine`, "")}</div>
+      ${c.lens ? `<div class="field"><label>What ${esc(c.lens.name)} shows differently</label>${bound(`cards.${i}.lens.text`, "")}</div>` : ""}
       <div class="field"><label>My question</label>${bound(`cards.${i}.q`, "", "write", 1)}</div>
       <div class="ghead caps">Threads</div><div class="chips">${THREADS.map(t => `<button class="chip ${c.th?.includes(t.id) ? "on" : ""}" data-act="cardth" data-c="${id}" data-t="${t.id}">${t.gloss}</button>`).join("")}</div>
       ${links.length ? `<div class="ghead caps">Connections</div><div class="group">${links.map(l => `<div class="cell static"><span class="serif">${esc(l.text)}</span></div>`).join("")}</div>` : ""}
@@ -774,8 +817,9 @@
     ["📜", "First capture", () => db.cards.length >= 1], ["📚", "50 captures", () => db.cards.length >= 50],
     ["🔗", "10 connections", () => db.links.length >= 10], ["🧭", "First teach-back", () => db.teach.length >= 1],
     ["🕯", "1 hour of sitting", () => totalSit() >= 3600], ["🌊", "10 hours of sitting", () => totalSit() >= 36000],
-    ["☯️", "Tao Te Ching, all 81", () => readCount(book("ttc")) >= book("ttc").units], ["䷀", "I Ching, all 64", () => readCount(book("iching")) >= book("iching").units],
-    ["🌸", "Golden Flower complete", () => readCount(book("gf")) >= book("gf").units], ["🦋", "Chuang Tzu complete", () => readCount(book("zz")) >= book("zz").units],
+    ["☯️", "Tao Te Ching, all 81", () => readCount(book("ttc")) >= total(book("ttc"))], ["䷀", "I Ching, all 64", () => readCount(book("iching")) >= total(book("iching"))],
+    ["🌸", "Golden Flower complete", () => readCount(book("gf")) >= total(book("gf"))], ["🦋", "Chuang Tzu complete", () => readCount(book("zz")) >= total(book("zz"))],
+    ["🔍", "10 lens comparisons", () => db.cards.filter(c => c.lens?.text).length >= 10]
   ];
   const totalSit = () => Object.values(db.days).reduce((a, d) => a + (d.sitSec || 0), 0);
   function viewProgress() {
@@ -792,8 +836,8 @@
         <div class="cell static"><span class="grow">Time sitting</span><b>${Math.round(totalSit() / 60)} min</b></div>
         <div class="cell static"><span class="grow">Captures · links · teach-backs</span><b>${db.cards.length} · ${db.links.length} · ${db.teach.length}</b></div></div>
       <div class="ghead caps">The last 18 weeks</div><div class="card"><div class="heat">${heat}</div><p class="fine" style="margin-top:8px">Darker means more rings closed. One missed day doesn't break your streak; two in a row do.</p></div>
-      <div class="ghead caps">The four books</div><div class="card stack">${db.books.map(b => `<div><div class="row between"><span>${esc(b.title)}</span><span class="fine">${readCount(b)}/${b.units}</span></div>
-        <div class="bar" style="margin-top:6px"><i style="width:${Math.min(100, readCount(b) / b.units * 100)}%;background:var(--${b.id})"></i></div></div>`).join("")}</div>
+      <div class="ghead caps">The four books</div><div class="card stack">${db.books.map(b => `<div><div class="row between"><span>${esc(b.title)}</span><span class="fine">${readCount(b)}/${total(b)}</span></div>
+        <div class="bar" style="margin-top:6px"><i style="width:${Math.min(100, readCount(b) / total(b) * 100)}%;background:var(--${b.id})"></i></div></div>`).join("")}</div>
       <div class="ghead caps">Memory</div><div class="card"><div class="row between"><div class="center grow"><div class="v" style="font:600 24px var(--round)">${ids.length - mature - learning}</div><div class="fine">new</div></div>
         <div class="center grow"><div class="v" style="font:600 24px var(--round)">${learning}</div><div class="fine">learning</div></div><div class="center grow"><div class="v" style="font:600 24px var(--round);color:var(--tint)">${mature}</div><div class="fine">well learned</div></div></div>
         <p class="fine" style="margin-top:8px">"Well learned" means you can recall it after three weeks or more.</p></div>
@@ -833,6 +877,7 @@
     ["In your own words", "Generating an explanation yourself is remembered and understood better than reading one.", "Slamecka & Graf, 1978; Bertsch et al., 2007"],
     ["A question for each passage", "Asking why and how invites deeper processing and links new ideas to what you know.", "Pressley et al., 1987; Dunlosky et al., 2013"],
     ["Connect two books", "Integrating ideas across sources builds a coherent understanding instead of scattered facts.", "Wiley & Voss, 1999; Chi, 2009"],
+    ["One primary translation, others as lenses", "Comparing two versions of the same passage (contrasting cases) shows what each one emphasises and leaves out, and deepens understanding more than reading either alone. Depth in one, comparison with the rest.", "Schwartz & Bransford, 1998; Marton & Booth, 1997; Ericsson et al., 1993"],
     ["Threads in your own understanding", "Revising your own definition of a concept over time is elaborative rehearsal and deepens comprehension.", "Craik & Lockhart, 1972"],
     ["Teach it back", "Explaining to someone else exposes gaps and consolidates learning (the protégé effect).", "Fiorella & Mayer, 2013; Chase et al., 2009"],
     ["Sitting practice", "Brief daily meditation improves attention and emotional regulation, even in beginners.", "Zeidan et al., 2010; Tang et al., 2015"],
@@ -922,10 +967,14 @@
     else if (a === "rtimer") { if (sess.timer) { clearInterval(sess.timer); sess.timer = null; } else { sess.readLeft ??= 300; tick("#rtimer", "readLeft", () => toast("Five minutes. Finish the passage at your own pace.")); } el.textContent = sess.timer ? "Pause" : "Resume"; }
     else if (a === "readdone" || a === "readlater") {
       const dd = day(), { b, n } = assignment();
-      if (a === "readdone") { if (!b.read.includes(n)) b.read.push(n); dd.readUnitDone = n; b.pos = n % b.units + 1; dd.readUnit = b.pos; sess.picks.clear(); if (b.id === "iching" && !db.hexCards.includes(n)) db.hexCards.push(n); }
+      if (a === "readdone") { if (!b.read.includes(n)) b.read.push(n); dd.readUnitDone = n; b.pos = nextUnit(b, n); dd.readUnit = b.pos; if (b.id === "iching" && !db.hexCards.includes(n)) db.hexCards.push(n); }
       else dd.readUnitDone = n;
       sess.readLeft = null; markDone("read"); go("#/s/capture");
     }
+    else if (a === "caped") { sess.cap.ed = d.v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
+    else if (a === "addlens") { const inp = $("#lens-" + d.b), v = inp?.value.trim(); if (!v) return; const b = book(d.b); if (!b.lenses.includes(v)) b.lenses.push(v); save(); rerender(); }
+    else if (a === "dellens") { const b = book(d.b); b.lenses.splice(+d.j, 1); save(); rerender(); }
+    else if (a === "preset") { const b = book(d.b); setChapters(b, d.v); save(); rerender(); toast(`${total(b)} ${b.unit.toLowerCase()}s: ${fmtList(seq(b))}`); }
     else if (a === "capth") { const C = sess.cap; C.th.has(d.t) ? C.th.delete(d.t) : C.th.add(d.t); el.classList.toggle("on"); }
     else if (a === "capsave") { const { b, n } = assignment(), c = saveCapture(b.id, day().readUnitDone || n); if (c) { day().capture = c.id; toast("Captured. It will return for recall."); } markDone("capture"); sess.picks.clear(); go("#/s/connect"); }
     else if (a === "capsave2") { const c = saveCapture(d.b, +d.u); if (c) { toast("Captured"); go("#/book/" + d.b); } else toast("Write the passage or your own words first"); }
@@ -954,7 +1003,8 @@
   document.addEventListener("change", async e => {
     const el = e.target;
     if (el.dataset.act === "weekday") { db.settings.week[+el.dataset.d] = el.value; save(); }
-    if (el.dataset.bind?.startsWith("books.")) { db.books.forEach(b => { b.units = Math.max(1, b.units | 0); b.pos = Math.min(Math.max(1, b.pos | 0), b.units); }); save(); }
+    if (el.dataset.bind?.startsWith("books.")) { db.books.forEach(b => { b.units = Math.max(1, b.units | 0); if (!seq(b).includes(b.pos | 0)) b.pos = seq(b)[0]; }); save(); }
+    if (el.dataset.chlist) { const b = book(el.dataset.chlist); if (setChapters(b, el.value)) { save(); toast(`${total(b)} ${b.unit.toLowerCase()}s: ${fmtList(seq(b))}`); setTimeout(rerender, 0); /* after the blur or tap that fired this */ } else toast("Use numbers like 1-7, 17-20"); }
     if (el.id === "restore" && el.files[0]) {
       try { const d = JSON.parse(await el.files[0].text()); if (!d || d.v !== 1 || !d.books) throw 0;
         if (confirm("Replace everything on this device with this backup?")) { db = Object.assign(fresh(), d); save(true); applyTheme(); toast("Restored"); go("#/"); rerender(); } }
