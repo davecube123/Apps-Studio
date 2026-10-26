@@ -77,3 +77,4 @@ Live at **https://davecube123.github.io/Apps-Studio/**
 | [Tao Reader](apps/tao-reader/) | The Tao Te Ching in English and French, offline: chapters, random verses, read-aloud. Installable PWA. |
 | [Little Pages](apps/little-pages/) | Read your own EPUB/PDF/TXT books, with habit-building features grounded in behaviour science. Installable PWA. |
 | [My I Ching](apps/i-ching-book/) ([open](https://davecube123.github.io/Apps-Studio/apps/i-ching-book/)) | Learn the 64 hexagrams by writing your own Book of Changes: readings, reflections, spaced practice, printable book. Installable PWA. |
+| [Daily Way](apps/daily-way/) ([open](https://davecube123.github.io/Apps-Studio/apps/daily-way/)) | A 20-minute daily practice with the Tao Te Ching, I Ching, Golden Flower and Chuang Tzu: recall, read, capture, connect, sit, carry. Installable PWA. |

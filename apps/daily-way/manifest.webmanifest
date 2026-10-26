@@ -1,0 +1,18 @@
+{
+  "name": "Daily Way",
+  "short_name": "Daily Way",
+  "description": "Twenty minutes a day with the Tao Te Ching, the I Ching, The Secret of the Golden Flower and the Chuang Tzu: recall, read, capture, connect, sit and carry the teaching into your life.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2f2f7",
+  "categories": ["education", "lifestyle", "books"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

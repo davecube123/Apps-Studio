@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Daily Way">
+  <link rel="preload" href="fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Daily Way</title>
+  <style>
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader.woff2) format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader-italic.woff2) format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+    :root {
+      --bg: #f2f2f7; --card: #ffffff; --card2: #f2f2f7; --label: #000; --label2: rgba(60,60,67,.6); --label3: rgba(60,60,67,.3);
+      --sep: rgba(60,60,67,.18); --fill: rgba(120,120,128,.12); --tint: #1f8a70; --tint-soft: rgba(31,138,112,.12);
+      --learn: #30b08f; --practice: #e2a528; --reflect: #5e5ce6;
+      --ttc: #30b08f; --iching: #5e5ce6; --gf: #e2a528; --zz: #32ade6;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --round: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
+      --serif: "New York", ui-serif, "Newsreader", Georgia, serif;
+      --cjk: "PingFang TC", "Noto Sans CJK TC", "Hiragino Sans", sans-serif;
+      --ease: cubic-bezier(.2,.8,.2,1); --spring: cubic-bezier(.3,1.3,.5,1);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+      --bg: #000; --card: #1c1c1e; --card2: #2c2c2e; --label: #fff; --label2: rgba(235,235,245,.6); --label3: rgba(235,235,245,.3);
+      --sep: rgba(84,84,88,.6); --fill: rgba(120,120,128,.24); --tint: #3cc49f; --tint-soft: rgba(60,196,159,.16); color-scheme: dark; } }
+    :root[data-theme="dark"] {
+      --bg: #000; --card: #1c1c1e; --card2: #2c2c2e; --label: #fff; --label2: rgba(235,235,245,.6); --label3: rgba(235,235,245,.3);
+      --sep: rgba(84,84,88,.6); --fill: rgba(120,120,128,.24); --tint: #3cc49f; --tint-soft: rgba(60,196,159,.16); color-scheme: dark; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--bg); }
+    body { margin: 0; background: var(--bg); color: var(--label); font: 17px/1.42 var(--sans); letter-spacing: -.01em; -webkit-font-smoothing: antialiased; }
+    main { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 108px); }
+    a { color: var(--tint); text-decoration: none; }
+    h1 { font: 700 34px/1.12 var(--sans); letter-spacing: .01em; margin: 6px 0 2px; }
+    h2 { font: 700 22px/1.2 var(--sans); letter-spacing: .01em; margin: 0; }
+    h3 { font: 600 17px/1.3 var(--sans); margin: 0; }
+    p { margin: .35em 0; }
+    .sub { color: var(--label2); }
+    .fine { font-size: 13px; color: var(--label2); }
+    .caps { font: 600 13px var(--sans); text-transform: uppercase; letter-spacing: .02em; color: var(--label2); }
+    .serif { font-family: var(--serif); letter-spacing: 0; }
+    .cjk { font-family: var(--cjk); }
+    .row { display: flex; align-items: center; gap: 12px; }
+    .between { justify-content: space-between; }
+    .wrap { flex-wrap: wrap; }
+    .grow { flex: 1; min-width: 0; }
+    .center { text-align: center; }
+    .hide { display: none !important; }
+    .stack > * + * { margin-top: 12px; }
+    .view.enter > * { animation: rise .45s var(--ease) both; }
+    .view.enter > *:nth-child(2) { animation-delay: 30ms; } .view.enter > *:nth-child(3) { animation-delay: 60ms; } .view.enter > *:nth-child(n+4) { animation-delay: 90ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Navigation bar that condenses on scroll */
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 30; padding: calc(env(safe-area-inset-top) + 11px) 16px 11px; text-align: center;
+              font: 600 17px var(--sans); background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: saturate(1.8) blur(20px);
+              -webkit-backdrop-filter: saturate(1.8) blur(20px); border-bottom: .5px solid var(--sep); opacity: 0; transition: opacity .2s; pointer-events: none; }
+    #navbar.on { opacity: 1; }
+
+    /* Grouped lists (iOS inset grouped) */
+    .group { background: var(--card); border-radius: 12px; overflow: hidden; }
+    .ghead { margin: 26px 16px 7px; }
+    .gfoot { margin: 7px 16px 0; font-size: 13px; color: var(--label2); }
+    .cell { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 16px; color: var(--label); position: relative; background: var(--card); width: 100%;
+            border: 0; text-align: left; font: inherit; cursor: pointer; transition: background .15s; }
+    .cell:active { background: var(--fill); }
+    .cell + .cell::before { content: ""; position: absolute; top: 0; right: 0; left: var(--inset, 16px); border-top: .5px solid var(--sep); }
+    .cell.static { cursor: default; } .cell.static:active { background: var(--card); }
+    .cell .chev { color: var(--label3); font-size: 20px; line-height: 1; }
+    .cell .detail { color: var(--label2); }
+    .icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; flex: none; }
+    .icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+    .check { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--label3); display: grid; place-items: center; flex: none; }
+    .check.on { background: var(--tint); border-color: var(--tint); }
+    .check.on::after { content: ""; width: 10px; height: 5px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+
+    /* Cards & controls */
+    .card { background: var(--card); border-radius: 16px; padding: 18px; }
+    .card.tap { display: block; color: inherit; cursor: pointer; transition: transform .25s var(--spring); }
+    .card.tap:active { transform: scale(.98); }
+    .btn { appearance: none; border: 0; border-radius: 14px; min-height: 50px; padding: 14px 20px; font: 600 17px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+           background: var(--tint); color: #fff; transition: transform .2s var(--spring), opacity .2s; width: 100%; }
+    .btn:active { transform: scale(.97); opacity: .9; }
+    .btn.gray { background: var(--fill); color: var(--tint); }
+    .btn.plain { background: none; color: var(--tint); min-height: 44px; padding: 10px; font-weight: 400; }
+    .btn.sm { width: auto; min-height: 34px; padding: 7px 14px; font-size: 15px; border-radius: 999px; }
+    .btn:disabled { opacity: .35; pointer-events: none; }
+    .seg { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; }
+    .seg button { flex: 1; border: 0; background: none; color: var(--label); font: 500 13px var(--sans); padding: 7px 4px; border-radius: 7px; cursor: pointer; }
+    .seg button.on { background: var(--card); box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 1px 1px rgba(0,0,0,.04); font-weight: 600; }
+    .chip { border: 0; background: var(--fill); color: var(--label); border-radius: 999px; padding: 7px 13px; font: 500 15px var(--sans); cursor: pointer; transition: all .2s var(--ease); }
+    .chip.on { background: var(--tint); color: #fff; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    textarea, input[type=text], input[type=time], input[type=number], input[type=search], select {
+      width: 100%; border: 0; outline: 0; background: transparent; color: var(--label); font: 17px/1.45 var(--sans); padding: 0; resize: none; }
+    textarea.write { font: 19px/1.55 var(--serif); min-height: 52px; }
+    textarea::placeholder, input::placeholder { color: var(--label3); }
+    .field { background: var(--card); border-radius: 12px; padding: 12px 16px; }
+    .field + .field { margin-top: 10px; }
+    .field label { display: block; font: 600 13px var(--sans); color: var(--label2); margin-bottom: 4px; }
+    .field:focus-within label { color: var(--tint); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; background: var(--fill); border-radius: 999px; padding: 4px 10px; font: 600 13px var(--sans); }
+
+    /* Rings */
+    .rings { position: relative; flex: none; }
+    .rings svg { transform: rotate(-90deg); display: block; }
+    .rings circle { fill: none; stroke-linecap: round; }
+    .rings .pr { transition: stroke-dashoffset 1.2s var(--ease); }
+    .legend .v { font: 600 20px var(--round); }
+    .legend .v small { font: 500 13px var(--sans); color: var(--label2); }
+
+    /* Tab bar */
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 6px 8px calc(env(safe-area-inset-bottom) + 4px);
+               background: color-mix(in srgb, var(--card) 80%, transparent); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px); border-top: .5px solid var(--sep); }
+    nav.tabs .inner { display: flex; width: 100%; max-width: 520px; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--label2); font: 500 10px var(--sans); padding: 3px 0; }
+    nav.tabs a svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--tint); }
+    body.immersive nav.tabs, body.immersive #navbar { display: none; }
+
+    /* Session (full screen steps) */
+    .shead { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .segs { flex: 1; display: flex; gap: 4px; }
+    .segs i { flex: 1; height: 4px; border-radius: 4px; background: var(--fill); overflow: hidden; }
+    .segs i.done { background: var(--tint); } .segs i.now { background: color-mix(in srgb, var(--tint) 45%, var(--fill)); }
+    .xbtn { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--fill); color: var(--label2); font: 600 15px var(--sans); cursor: pointer; display: grid; place-items: center; flex: none; }
+    .stitle { font: 700 30px/1.15 var(--sans); margin: 4px 0 6px; }
+    .sfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; padding: 12px 16px calc(env(safe-area-inset-bottom) + 14px); background: linear-gradient(transparent, var(--bg) 28%); }
+    .sfoot .inner { max-width: 608px; margin: 0 auto; display: grid; gap: 4px; }
+    body.immersive main { padding-bottom: calc(env(safe-area-inset-bottom) + 150px); }
+    .breath { width: 180px; height: 180px; margin: 30px auto; border-radius: 50%; position: relative; display: grid; place-items: center; }
+    .breath::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--practice) 55%, transparent), color-mix(in srgb, var(--practice) 8%, transparent) 70%);
+                      transform: scale(.55); animation: breathe 10s ease-in-out infinite; }
+    .breath span { position: relative; font: 500 15px var(--sans); color: var(--label2); }
+    @keyframes breathe { 0% { transform: scale(.55); } 40% { transform: scale(1); } 100% { transform: scale(.55); } }
+    .timer { font: 300 64px/1 var(--round); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .quote { font: 400 21px/1.55 var(--serif); }
+    .passage p { font: 400 19px/1.65 var(--serif); margin: 0 0 14px; white-space: pre-wrap; }
+    .passage p.pick { cursor: pointer; border-radius: 8px; margin-left: -8px; margin-right: -8px; padding: 2px 8px; transition: background .2s; }
+    .passage p.pick.on { background: var(--tint-soft); box-shadow: inset 3px 0 0 var(--tint); }
+    .flash { min-height: 260px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+    .grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .grade .btn { padding: 8px 4px; min-height: 56px; flex-direction: column; gap: 0; font-size: 15px; }
+    .grade .btn small { font: 400 12px var(--sans); opacity: .8; }
+    .hexfig { color: var(--label); }
+    .heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 3px; }
+    .heat i { width: 100%; aspect-ratio: 1; border-radius: 3px; background: var(--fill); }
+    .heat i.l1 { background: color-mix(in srgb, var(--tint) 35%, var(--fill)); } .heat i.l2 { background: color-mix(in srgb, var(--tint) 65%, var(--fill)); } .heat i.l3 { background: var(--tint); }
+    .bar { height: 6px; border-radius: 6px; background: var(--fill); overflow: hidden; } .bar i { display: block; height: 100%; border-radius: 6px; }
+    .badge { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font: 500 12px/1.25 var(--sans); }
+    .badge .medal { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; background: var(--fill); filter: grayscale(1); opacity: .45; }
+    .badge.got .medal { filter: none; opacity: 1; background: linear-gradient(145deg, color-mix(in srgb, var(--practice) 40%, var(--card)), color-mix(in srgb, var(--tint) 30%, var(--card))); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+    .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; }
+    .units { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
+    .units a { aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; background: var(--fill); color: var(--label); font: 600 14px var(--round); }
+    .units a.read { color: #fff; } .units a.next { box-shadow: inset 0 0 0 2px var(--tint); }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); background: color-mix(in srgb, var(--label) 88%, transparent); color: var(--bg);
+             padding: 11px 18px; border-radius: 999px; font: 600 15px var(--sans); z-index: 60; animation: rise .3s var(--ease) both; white-space: nowrap; backdrop-filter: blur(10px); }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.35); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(560px, 100%); background: var(--bg); border-radius: 14px 14px 0 0; padding: 8px 16px calc(env(safe-area-inset-bottom) + 18px); max-height: 88vh; overflow: auto; animation: sheetup .4s var(--ease) both; }
+    .sheet .grab { width: 36px; height: 5px; border-radius: 5px; background: var(--label3); margin: 0 auto 12px; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 10px); transform: translateX(-50%); z-index: 80; border: 0; background: var(--tint); color: #fff; padding: 10px 18px;
+              border-radius: 999px; font: 600 15px var(--sans); box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; }
+    .celebrate { text-align: center; padding-top: 30px; }
+    .science dt { font: 600 17px var(--sans); margin-top: 18px; } .science dd { margin: 4px 0 0; color: var(--label2); } .science cite { display: block; font-style: normal; font-size: 13px; color: var(--label3); margin-top: 4px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="navbar" aria-hidden="true"></div>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs"><div class="inner">
+    <a href="#/" data-tab="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>Today</a>
+    <a href="#/library" data-tab="library"><svg viewBox="0 0 24 24"><path d="M4 4.5h4v15H4zM10 4.5h4v15h-4zM16.2 5.2l3.8-1 3 14.6-3.8 1z" transform="translate(-1 0)"/></svg>Library</a>
+    <a href="#/threads" data-tab="threads"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.3 8.2l2.6 7.6M15.7 8.2l-2.6 7.6M8.5 7h7"/></svg>Threads</a>
+    <a href="#/progress" data-tab="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progress</a>
+  </div></nav>
+
+  <script>
+  "use strict";
+  /* =====================================================================
+     Daily Way: a 20-minute daily practice towards mastery of the
+     Tao Te Ching, the I Ching, The Secret of the Golden Flower and
+     the Chuang Tzu, and towards living their shared teaching.
+     Texts other than Legge's public-domain Tao Te Ching are your own
+     editions: the app tells you where to read and keeps what you
+     capture, privately, on this device.
+     ===================================================================== */
+  const APP_VERSION = "1", APP_DATE = "26 Oct 2026";
+  const DAY = 864e5, $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const dkey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const words = s => (String(s || "").trim().match(/\S+/g) || []).length;
+  function toast(m) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2400); }
+  const haptic = (ms = 8) => { if (navigator.vibrate && navigator.userActivation?.hasBeenActive) try { navigator.vibrate(ms); } catch (e) {} };
+
+  /* ---------- The four books ---------- */
+  const BOOKS0 = [
+    { id: "ttc", title: "Tao Te Ching", author: "Lao Tzu", unit: "Chapter", units: 81, edition: "Legge (built in)", builtin: true },
+    { id: "iching", title: "I Ching", author: "Book of Changes", unit: "Hexagram", units: 64, edition: "" },
+    { id: "gf", title: "The Secret of the Golden Flower", author: "Lü Dongbin (attrib.)", unit: "Chapter", units: 8, edition: "" },
+    { id: "zz", title: "Chuang Tzu", author: "Zhuangzi", unit: "Chapter", units: 33, edition: "" },
+  ];
+  const BOOK_HINT = { gf: "Wilhelm's translation has 8 chapters; Cleary's has 13.", zz: "33 chapters in full: the Inner Chapters are 1–7. Set this to the sections in your selection.", iching: "64 hexagrams.", ttc: "81 chapters." };
+
+  /* ---------- Threads: the ideas that run through all four ---------- */
+  // Short descriptions are original to this app, to be replaced by your own understanding over time.
+  const THREADS = [
+    ["tao", "Tao 道", "The Way", "The nameless source and the course of all things; not a thing among things, but how things go."],
+    ["de", "De 德", "Virtue, power", "The quiet potency that comes from being in accord with the Way: character as a natural force."],
+    ["wuwei", "Wu wei 無為", "Non-forcing", "Acting without strain or contrivance, so that what needs doing gets done without being pushed."],
+    ["ziran", "Ziran 自然", "Self-so", "Things being what they are of themselves: the spontaneous, unforced order of nature."],
+    ["xu", "Xu 虛", "Emptiness", "Open, receptive space: the empty hub that makes the wheel useful, the empty mind that can receive."],
+    ["jing", "Jing 靜", "Stillness", "Settling into quiet so that clarity can arise, as muddy water clears when it is left alone."],
+    ["fu", "Fu 復", "Return", "Everything goes back to its root. The movement of the Way is returning."],
+    ["rou", "Rou 柔", "Softness", "The soft and yielding overcomes the hard. Water is the model of strength."],
+    ["pu", "Pu 樸", "The uncarved block", "Simplicity before shaping: original nature, not yet cut into roles and names."],
+    ["yinyang", "Yin yang 陰陽", "Complementary forces", "Opposites that give rise to each other and alternate within every situation."],
+    ["yi", "Yi 易", "Change", "All things are in transformation; wisdom is reading the change and moving with it."],
+    ["shi", "Shi 時", "Timing", "Each moment calls for its own response: knowing when to advance, to wait or to withdraw."],
+    ["guang", "Huiguang 迴光", "Circulating the light", "Turning the light of awareness back towards its source, gathering it instead of letting it scatter outward."],
+    ["shenqi", "Shen qi 神氣", "Spirit and breath", "Refining vitality, breath and spirit through stillness and attention."],
+    ["xiaoyao", "Xiaoyao 逍遙", "Free wandering", "The easy, unbounded roaming of a heart-mind not tied to fixed purposes."],
+    ["qiwu", "Qiwu 齊物", "Equality of things", "Seeing past fixed perspectives: this and that, right and wrong, arise together."],
+    ["useless", "Wuyong 無用", "Use of the useless", "What looks useless often preserves life; value beyond utility."],
+    ["zhi", "Zhi 知", "Knowing and not-knowing", "The limits of words and knowledge; knowing that you do not know."],
+    ["xinzhai", "Xinzhai 心齋", "Fasting of the heart", "Emptying the heart-mind so you listen with spirit rather than with ears or thoughts."],
+    ["sage", "Shengren 聖人", "The sage", "One who leads without dominating, acts without claiming credit, and stays close to the source."],
+    ["xia", "Xia 下", "Lowness, humility", "Rivers rule the valleys by staying below them. Low places gather."],
+    ["zu", "Zhizu 知足", "Contentment", "Knowing what is enough: freedom from craving is the true wealth."],
+  ].map(([id, name, gloss, desc]) => ({ id, name, gloss, desc }));
+  const TH = Object.fromEntries(THREADS.map(t => [t.id, t]));
+
+  /* ---------- I Ching structure (public domain) ---------- */
+  const TRI = { qian: "111", dui: "110", li: "101", zhen: "100", xun: "011", kan: "010", gen: "001", kun: "000" };
+  const HEXN = "qian qian 乾 The Creative|kun kun 坤 The Receptive|kan zhen 屯 Difficult Beginnings|gen kan 蒙 Youthful Folly|kan qian 需 Waiting|qian kan 訟 Conflict|kun kan 師 The Army|kan kun 比 Holding Together|xun qian 小畜 Small Taming|qian dui 履 Treading|kun qian 泰 Peace|qian kun 否 Standstill|qian li 同人 Fellowship|li qian 大有 Great Possession|kun gen 謙 Modesty|zhen kun 豫 Enthusiasm|dui zhen 隨 Following|gen xun 蠱 Repairing the Spoiled|kun dui 臨 Approach|xun kun 觀 Contemplation|li zhen 噬嗑 Biting Through|gen li 賁 Grace|gen kun 剝 Splitting Apart|kun zhen 復 Return|qian zhen 無妄 Innocence|gen qian 大畜 Great Taming|gen zhen 頤 Nourishment|dui xun 大過 Great Exceeding|kan kan 坎 The Abyss|li li 離 The Clinging|dui gen 咸 Influence|zhen xun 恆 Duration|qian gen 遯 Retreat|zhen qian 大壯 Great Power|li kun 晉 Progress|kun li 明夷 Darkening of the Light|xun li 家人 The Family|li dui 睽 Opposition|kan gen 蹇 Obstruction|zhen kan 解 Deliverance|gen dui 損 Decrease|xun zhen 益 Increase|dui qian 夬 Breakthrough|qian xun 姤 Coming to Meet|dui kun 萃 Gathering Together|kun xun 升 Pushing Upward|dui kan 困 Exhaustion|kan xun 井 The Well|dui li 革 Revolution|li xun 鼎 The Cauldron|zhen zhen 震 The Arousing|gen gen 艮 Keeping Still|xun gen 漸 Development|zhen dui 歸妹 The Marrying Maiden|zhen li 豐 Abundance|li gen 旅 The Wanderer|xun xun 巽 The Gentle|dui dui 兌 The Joyous|xun kan 渙 Dispersion|kan dui 節 Limitation|xun dui 中孚 Inner Truth|zhen gen 小過 Small Exceeding|kan li 既濟 After Completion|li kan 未濟 Before Completion"
+    .split("|").map((s, i) => { const [u, l, zh, ...nm] = s.split(" "); return { n: i + 1, zh, name: nm.join(" "), bits: TRI[l] + TRI[u] }; });
+  function hexSVG(n, w = 44) {
+    const b = HEXN[n - 1].bits, lh = w * .12, sp = w * .085, H = 6 * lh + 5 * sp; let s = `<svg class="hexfig" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">`;
+    for (let i = 0; i < 6; i++) { const y = H - (i + 1) * lh - i * sp;
+      s += b[i] === "1" ? `<rect x="0" y="${y}" width="${w}" height="${lh}" rx="${lh * .25}" fill="currentColor"/>` : `<rect x="0" y="${y}" width="${w * .42}" height="${lh}" rx="${lh * .25}" fill="currentColor"/><rect x="${w * .58}" y="${y}" width="${w * .42}" height="${lh}" rx="${lh * .25}" fill="currentColor"/>`; }
+    return s + "</svg>";
+  }
+
+  /* ---------- Storage (on this device only) ---------- */
+  const KEY = "daily-way-v1";
+  const fresh = () => ({ v: 1, onboarded: false, start: dkey(), books: BOOKS0.map(b => ({ ...b, pos: 1, read: [] })), cards: [], links: [], days: {},
+    threadNotes: {}, teach: [], conceptIntro: 0, hexCards: [],
+    settings: { name: "", why: "", time: "07:00", sitMin: 4, theme: "auto", week: ["zz", "ttc", "iching", "zz", "ttc", "gf", "iching"], breathGuide: true } });
+  let db = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v) return Object.assign(fresh(), d); } catch (e) {} return fresh(); })();
+  let saveT;
+  function save(now) { clearTimeout(saveT); const f = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Couldn't save. Is storage full?"); } }; now ? f() : (saveT = setTimeout(f, 250)); }
+  addEventListener("pagehide", () => save(true));
+  document.addEventListener("visibilitychange", () => document.hidden && save(true));
+  if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+  const book = id => db.books.find(b => b.id === id) || db.books[0];
+  const day = (k = dkey()) => (db.days[k] ||= { done: {}, reviewed: 0, sitSec: 0, min: 0 });
+
+  let TTC = null;
+  const loadTTC = () => TTC ? Promise.resolve(TTC) : fetch("data/tao-te-ching.json").then(r => r.json()).then(j => (TTC = j));
+
+  /* ---------- Spaced retrieval (simplified SM-2) ----------
+     Cards: "c:<id>" your captures, "t:<thread>" the threads, "h:<n>" hexagrams you've read. */
+  db.srs ||= {};
+  function introduceConcepts() {
+    const k = dkey(); if (db.introDay === k || db.conceptIntro >= THREADS.length) return;
+    db.introDay = k; db.conceptIntro = Math.min(THREADS.length, db.conceptIntro + (db.conceptIntro ? 2 : 3)); save();
+  }
+  const allCardIds = () => [...db.cards.map(c => "c:" + c.id), ...THREADS.slice(0, db.conceptIntro).map(t => "t:" + t.id), ...db.hexCards.map(n => "h:" + n)];
+  function dueIds() {
+    const now = Date.now(), ids = allCardIds().filter(id => !db.srs[id] || db.srs[id].due <= now);
+    const due = ids.filter(id => db.srs[id]).sort((a, b) => db.srs[a].due - db.srs[b].due), fresh = ids.filter(id => !db.srs[id]);
+    return shuffle([...due.slice(0, 12), ...fresh.slice(0, 4)]); // interleaved across books and kinds
+  }
+  function nextIvl(id, g) {
+    const s = db.srs[id] || { ivl: 0, ease: 2.5, reps: 0 };
+    if (g === 0) return 0;
+    const good = s.reps === 0 ? 1 : s.reps === 1 ? 3 : Math.round(s.ivl * s.ease);
+    return g === 1 ? Math.max(1, Math.round(Math.max(s.ivl, 1) * 1.2)) : g === 2 ? good : Math.round(good * 1.4) + 1;
+  }
+  function grade(id, g) {
+    const s = db.srs[id] ||= { ivl: 0, ease: 2.5, reps: 0, due: 0 }, ivl = nextIvl(id, g);
+    s.ease = Math.max(1.3, s.ease + [-.2, -.15, 0, .15][g]);
+    if (g === 0) { s.reps = 0; s.ivl = 0; s.due = Date.now() + 10 * 60e3; } else { s.reps++; s.ivl = ivl; s.due = today0() + ivl * DAY; }
+    save();
+  }
+  const ivlLabel = d => d === 0 ? "10 min" : d < 30 ? d + "d" : d < 365 ? Math.round(d / 30) + "mo" : (d / 365).toFixed(1) + "y";
+
+  /* ---------- Reading plan ---------- */
+  const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  function assignment() {
+    const d = day(); if (!d.readBook) { const b = book(db.settings.week[new Date().getDay()]); d.readBook = b.id; d.readUnit = b.pos; }
+    return { b: book(d.readBook), n: d.readUnit };
+  }
+  const unitLabel = (b, n) => b.id === "iching" ? `Hexagram ${n} · ${HEXN[n - 1].name}` : `${b.unit} ${n}`;
+  const BOOK_GLYPH = { ttc: "道", iching: "易", gf: "華", zz: "莊" };
+  const bookIcon = (b, size = 30) => `<span class="icon cjk" style="background:var(--${b.id}, var(--tint));width:${size}px;height:${size}px;font-size:${size * .5}px;border-radius:${size * .27}px">${BOOK_GLYPH[b.id] || esc(b.title[0])}</span>`;
+  function threadOfDay(k = dkey()) { let h = 0; for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0; return THREADS[h % THREADS.length]; }
+  function myIChing(n) { try { const d = JSON.parse(localStorage.getItem("my-i-ching-v1")); const f = d?.book?.ch?.[n]?.f; return f ? { judgment: f.judgment, image: f.image, attitude: f.attitude } : null; } catch (e) { return null; } }
+
+  /* ---------- Days, rings, streak ---------- */
+  const STEPS = [
+    { id: "arrive", name: "Arrive", min: 1, ring: "practice", what: "Three slow breaths and today's thread", ic: "M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0M12 5v3M5.2 9.2l2 2M18.8 9.2l-2 2" },
+    { id: "recall", name: "Recall", min: 4, ring: "learn", what: "Remember before you read", ic: "M4 12a8 8 0 1 0 3-6.2M4 4v4h4" },
+    { id: "read", name: "Read", min: 5, ring: "learn", what: "Today's passage, slowly, twice", ic: "M4 5c3-1.4 5.5-1.4 8 0v14c-2.5-1.4-5-1.4-8 0zM20 5c-3-1.4-5.5-1.4-8 0v14c2.5-1.4 5-1.4 8 0z" },
+    { id: "capture", name: "Capture", min: 3, ring: "learn", what: "One passage in your own words", ic: "M4 20h4L19 9l-4-4L4 16zM13 7l4 4" },
+    { id: "connect", name: "Connect", min: 2, ring: "reflect", what: "Let two books speak to each other", ic: "M9 15l6-6M10 6l1-1a4 4 0 0 1 6 6l-1 1M14 18l-1 1a4 4 0 0 1-6-6l1-1" },
+    { id: "sit", name: "Sit", min: 4, ring: "practice", what: "Circulate the light", ic: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z" },
+    { id: "carry", name: "Carry", min: 1, ring: "reflect", what: "One intention for the day", ic: "M5 12h14M13 6l6 6-6 6" },
+  ];
+  const STEP_COLOR = { learn: "var(--learn)", practice: "var(--practice)", reflect: "var(--reflect)" };
+  const sitMin = () => STEPS.find(s => s.id === "sit").min = db.settings.sitMin;
+  function rings(k = dkey()) {
+    const d = db.days[k] || { done: {}, sitSec: 0 };
+    return {
+      learn: ["recall", "read", "capture"].filter(s => d.done[s]).length / 3,
+      practice: Math.min(1, ((d.sitSec || 0) + (d.done.arrive ? 60 : 0)) / ((db.settings.sitMin + 1) * 60)),
+      reflect: ["connect", "carry", "evening"].filter(s => d.done[s]).length / 3,
+    };
+  }
+  const shownUp = k => { const d = db.days[k]; return !!d && (d.done.read || d.done.sit || d.done.recall || d.done.mini || d.done.arrive); };
+  const allClosed = k => { const r = rings(k); return r.learn >= 1 && r.practice >= 1 && r.reflect >= 1; };
+  function streak() {
+    // forgiving: one missed day doesn't break it, two in a row does
+    let t = today0(), n = 0, miss = 0; const start = new Date(db.start + "T00:00").getTime();
+    if (!shownUp(dkey(t))) t -= DAY;
+    for (; t >= start; t -= DAY) { if (shownUp(dkey(t))) { n++; miss = 0; } else if (++miss >= 2) break; }
+    return n;
+  }
+  const daysOnPath = () => Object.keys(db.days).filter(shownUp).length;
+  function markDone(step) { const d = day(); if (!d.done[step]) { d.done[step] = Date.now(); save(); } }
+  function ringSVG(r, size = 120, stroke = 13) {
+    const keys = ["learn", "practice", "reflect"]; let s = `<div class="rings" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+    keys.forEach((k, i) => { const rad = size / 2 - stroke / 2 - i * (stroke + 2.5), c = 2 * Math.PI * rad, v = Math.min(1, r[k]);
+      s += `<circle cx="${size / 2}" cy="${size / 2}" r="${rad}" stroke="${STEP_COLOR[k]}" stroke-opacity=".2" stroke-width="${stroke}"/>
+            <circle class="pr" cx="${size / 2}" cy="${size / 2}" r="${rad}" stroke="${STEP_COLOR[k]}" stroke-width="${stroke}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" ${v > 0 ? "" : `style="opacity:0"`}/>`; });
+    return s + "</svg></div>";
+  }
+
+  /* ---------- Router ---------- */
+  const ROUTES = [
+    [/^#?\/?$/, viewToday, "today"], [/^#\/welcome$/, viewWelcome, ""], [/^#\/s\/(\w+)$/, viewStep, ""],
+    [/^#\/library$/, viewLibrary, "library"], [/^#\/book\/(\w+)$/, viewBook, "library"], [/^#\/ttc\/(\d+)$/, viewTTC, "library"],
+    [/^#\/capture\/(\w+)\/(\d+)$/, viewCaptureStandalone, "library"], [/^#\/card\/(\w+)$/, viewCard, "library"],
+    [/^#\/threads$/, viewThreads, "threads"], [/^#\/thread\/(\w+)$/, viewThread, "threads"], [/^#\/teach(?:\/(\w+))?$/, viewTeach, "threads"],
+    [/^#\/progress$/, viewProgress, "progress"], [/^#\/settings$/, viewSettings, "progress"], [/^#\/science$/, viewScience, "progress"],
+  ];
+  let lastHash = "";
+  function route() {
+    const hash = location.hash || "#/";
+    if (!db.onboarded && hash !== "#/welcome") { location.replace("#/welcome"); return; }
+    stopTimers();
+    for (const [re, fn, tab] of ROUTES) {
+      const m = hash.match(re); if (!m) continue;
+      const isNav = hash !== lastHash, html = fn(...m.slice(1));
+      if (html != null) { $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`; afterRender(); }
+      document.body.classList.toggle("immersive", !tab);
+      document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+      const h1 = $("#main h1"); $("#navbar").textContent = h1 ? h1.textContent : "";
+      if (isNav) scrollTo(0, 0); lastHash = hash; onScroll(); return;
+    }
+    location.hash = "#/";
+  }
+  function afterRender() {
+    document.querySelectorAll("#main textarea").forEach(autogrow);
+    mounts.splice(0).forEach(f => f());
+  }
+  const mounts = [];
+  addEventListener("hashchange", () => {
+    if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return route();
+    const t = document.startViewTransition(route); t.ready.catch(() => {}); t.finished.catch(() => {}); // an interrupted transition is harmless
+  });
+  function onScroll() { $("#navbar").classList.toggle("on", scrollY > 52 && !!$("#navbar").textContent && !document.body.classList.contains("immersive")); }
+  addEventListener("scroll", onScroll, { passive: true });
+  const rerender = () => { const y = scrollY; lastHash = location.hash || "#/"; route(); scrollTo(0, y); };
+  function autogrow(el) { el.style.height = "auto"; el.style.height = el.scrollHeight + 2 + "px"; }
+
+  /* Two-way bindings: data-bind="path" into db (dotted), saved as you type */
+  function setPath(path, val) { const p = path.split("."); let o = db; while (p.length > 1) { const k = p.shift(); o = (o[k] ??= {}); } o[p[0]] = val; save(); }
+  function getPath(path) { return path.split(".").reduce((o, k) => o?.[k], db); }
+  document.addEventListener("input", e => { const el = e.target; if (el.dataset.bind) { setPath(el.dataset.bind, el.type === "number" ? +el.value : el.value); } if (el.tagName === "TEXTAREA") autogrow(el); });
+  const bound = (path, ph, cls = "write", rows = 2) => `<textarea class="${cls}" rows="${rows}" data-bind="${path}" placeholder="${esc(ph)}">${esc(getPath(path) || "")}</textarea>`;
+
+  /* ---------- Today ---------- */
+  function todaysLine() {
+    const k = dkey(); let h = 0; for (const c of k + "line") h = (h * 33 + c.charCodeAt(0)) >>> 0;
+    const caps = db.cards.filter(c => c.quote && c.quote.trim());
+    if (caps.length && h % 3) { const c = caps[h % caps.length], b = book(c.book); return { text: c.quote, src: `${b.title} · ${unitLabel(b, c.unit)}`, mine: c.mine }; }
+    if (!TTC) return null;
+    const ch = TTC.chapters[h % 81], p = ch.paras[h % ch.paras.length]; return { text: p, src: `Tao Te Ching · Chapter ${ch.n} (Legge)` };
+  }
+  function nextStep() { const d = day(); return STEPS.find(s => !d.done[s.id]); }
+  function viewToday() {
+    sitMin(); introduceConcepts();
+    const d = day(), r = rings(), hr = new Date().getHours(), nm = db.settings.name ? `, ${esc(db.settings.name)}` : "";
+    const greet = hr < 5 ? "Still night" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+    const nx = nextStep(), started = STEPS.some(s => d.done[s.id]), total = STEPS.reduce((a, s) => a + s.min, 0);
+    const line = todaysLine(); if (!TTC) loadTTC().then(() => location.hash.match(/^#?\/?$/) && rerender());
+    const { b, n } = assignment(), th = threadOfDay(), st = streak();
+    const evening = d.intent && (d.intent.will || d.intent.when) && !d.done.evening && hr >= 16;
+    const sunday = new Date().getDay() === 0 && !db.teach.some(t => Date.now() - t.at < 6 * DAY);
+    return `
+      <div class="caps">${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</div>
+      <div class="row between" style="align-items:flex-end"><h1>${greet}${nm}</h1>
+        <a href="#/settings" class="xbtn" aria-label="Settings" style="margin-bottom:6px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></a></div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="row" style="gap:18px">${ringSVG(r, 118, 13)}
+          <div class="legend grow stack" style="--g:6px">
+            <div><div class="fine" style="color:var(--learn);font-weight:600">Learn</div><div class="v">${Math.round(r.learn * 3)}<small>/3</small></div></div>
+            <div><div class="fine" style="color:var(--practice);font-weight:600">Practice</div><div class="v">${Math.round((d.sitSec || 0) / 60)}<small>/${db.settings.sitMin} min</small></div></div>
+            <div><div class="fine" style="color:var(--reflect);font-weight:600">Reflect</div><div class="v">${Math.round(r.reflect * 3)}<small>/3</small></div></div>
+          </div>
+          <div class="center" style="align-self:flex-start"><div class="v" style="font:600 28px var(--round)">${st}</div><div class="fine">day${st === 1 ? "" : "s"}<br>streak</div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">${nx
+        ? `<a class="btn" href="#/s/${nx.id}">${started ? `Continue · ${nx.name}` : `Begin today's practice · ${total} min`}</a>`
+        : `<div class="card center"><h3>Today's practice is complete</h3><p class="fine">${allClosed(dkey()) ? "All three rings closed." : "Close the Reflect ring with this evening's look back."}</p></div>`}
+        ${!started && !d.done.mini ? `<a class="btn plain" href="#/s/mini">Busy day? Just 2 minutes</a>` : ""}</div>
+
+      ${evening ? `<a class="card tap" href="#/s/evening" style="margin-top:14px"><div class="caps" style="color:var(--reflect)">This evening</div><h3 style="margin-top:4px">Look back on your intention</h3>
+        <p class="sub serif" style="font-style:italic">When ${esc(d.intent.when || "…")}, I will ${esc(d.intent.will || "…")}</p></a>` : ""}
+      ${sunday ? `<a class="card tap" href="#/teach" style="margin-top:14px"><div class="caps" style="color:var(--tint)">Sunday</div><h3 style="margin-top:4px">Teach it back</h3><p class="sub">Explain one thread to a beginner in five sentences. The best test of understanding.</p></a>` : ""}
+
+      <div class="ghead caps">Today's practice</div>
+      <div class="group">${STEPS.map(s => `<a class="cell" href="#/s/${s.id}" style="--inset:58px">
+        <span class="icon" style="background:${STEP_COLOR[s.ring]}"><svg viewBox="0 0 24 24"><path d="${s.ic}"/></svg></span>
+        <div class="grow"><div>${s.name}</div><div class="fine">${s.id === "read" ? `${esc(b.title)} · ${unitLabel(b, d.readUnitDone || n)}` : s.id === "arrive" ? `Thread: ${th.gloss}` : s.what}</div></div>
+        <span class="fine">${s.min} min</span><span class="check ${d.done[s.id] ? "on" : ""}"></span></a>`).join("")}</div>
+
+      ${line ? `<div class="ghead caps">Today's line</div><div class="card"><p class="quote" style="margin:0">${esc(line.text)}</p>
+        <p class="fine" style="margin-top:10px">${esc(line.src)}</p>${line.mine ? `<p class="sub" style="margin-top:6px">In your words: ${esc(line.mine)}</p>` : ""}</div>` : ""}
+
+      ${db.settings.why ? `<div class="ghead caps">Why I walk this path</div><div class="card"><p class="serif" style="font-size:18px;font-style:italic;margin:0">${esc(db.settings.why)}</p></div>` : ""}
+      <p class="fine center" style="margin-top:28px">Daily Way · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+
+  /* ---------- Welcome (first run) ---------- */
+  let welcomeStep = 0;
+  function viewWelcome() {
+    const pages = [
+      `<div style="padding-top:8vh" class="center"><img src="icons/icon-192.png" width="96" height="96" style="border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.18)" alt="">
+        <h1 style="margin-top:22px">Daily Way</h1><p class="sub" style="font-size:19px">Twenty minutes a day with the Tao Te Ching, the I Ching, the Golden Flower and the Chuang Tzu, until their one teaching becomes the way you live.</p></div>
+       <div class="ghead caps">What should we call you?</div><div class="field"><input type="text" data-bind="settings.name" value="${esc(db.settings.name)}" placeholder="Your first name"></div>
+       <div class="ghead caps">Why are you walking this path?</div><div class="field">${bound("settings.why", "In a sentence or two. You'll see it on hard days.", "write", 3)}</div>
+       <p class="gfoot">Writing your own reason makes a goal yours, and people persist far longer with goals they own.</p>`,
+      `<h1>Your books</h1><p class="sub">Tell me which editions you're reading. The plan follows their chapters. Legge's Tao Te Ching is built in; for the others you'll read from your own copy.</p>
+       ${db.books.map((b, i) => `<div class="ghead caps row" style="gap:8px">${bookIcon(b, 22)} ${esc(b.title)}</div><div class="group">
+         <div class="cell static"><span class="grow">Edition / translator</span><input type="text" data-bind="books.${i}.edition" value="${esc(b.edition)}" placeholder="e.g. Wilhelm, Watson…" style="text-align:right;width:55%;color:var(--label2)"></div>
+         <div class="cell static"><span class="grow">${b.unit}s in your copy</span><input type="number" min="1" max="200" data-bind="books.${i}.units" value="${b.units}" style="text-align:right;width:70px;color:var(--label2)"></div></div>
+         <p class="gfoot">${BOOK_HINT[b.id]}</p>`).join("")}`,
+      `<h1>Your daily time</h1><p class="sub">The same time and place each day, anchored to something you already do, is how a practice becomes automatic.</p>
+       <div class="ghead caps">When</div><div class="group">
+         <div class="cell static"><span class="grow">Practice time</span><input type="time" data-bind="settings.time" value="${db.settings.time}" style="width:auto;color:var(--tint)"></div>
+         <button class="cell" data-act="ics"><span class="grow" style="color:var(--tint)">Add a daily reminder to my calendar</span></button></div>
+       <p class="gfoot">Tip: "After my morning tea, I open Daily Way."</p>
+       <div class="ghead caps">Sitting practice</div><div class="seg">${[3, 4, 5, 8, 10].map(m => `<button class="${db.settings.sitMin === m ? "on" : ""}" data-act="sitmin" data-m="${m}">${m} min</button>`).join("")}</div>
+       <p class="gfoot">Start small; you can lengthen it as the habit grows.</p>`,
+    ];
+    return `<div class="row between" style="margin-bottom:8px"><span class="fine">${welcomeStep + 1} of 3</span>${welcomeStep ? `<button class="btn plain sm" data-act="wback">Back</button>` : ""}</div>
+      ${pages[welcomeStep]}
+      <div style="margin-top:28px"><button class="btn" data-act="wnext">${welcomeStep < 2 ? "Continue" : "Begin"}</button></div>`;
+  }
+
+  /* ---------- Session steps ---------- */
+  let sess = { picks: new Set(), recall: null, timer: null, connectSeed: 0 };
+  function stopTimers() { if (sess.timer) { clearInterval(sess.timer); sess.timer = null; } releaseWake(); }
+  function stepFrame(id, body, foot) {
+    const i = STEPS.findIndex(s => s.id === id), d = day();
+    return `<div class="shead"><a class="xbtn" href="#/" aria-label="Close">✕</a><div class="segs">${STEPS.map((s, j) => `<i class="${d.done[s.id] ? "done" : j === i ? "now" : ""}"></i>`).join("")}</div>
+      ${i >= 0 && i < STEPS.length - 1 ? `<button class="btn plain sm" data-act="skip" data-s="${id}" style="padding:4px 2px">Skip</button>` : ""}</div>
+      ${body}<div class="sfoot"><div class="inner">${foot}</div></div>`;
+  }
+  const nextOf = id => { const i = STEPS.findIndex(s => s.id === id); return i < STEPS.length - 1 ? "#/s/" + STEPS[i + 1].id : "#/s/done"; };
+  function viewStep(id) {
+    const f = { arrive: stArrive, recall: stRecall, read: stRead, capture: stCapture, connect: stConnect, sit: stSit, carry: stCarry, done: stDone, evening: stEvening, mini: stMini }[id];
+    return f ? f() : (location.hash = "#/", null);
+  }
+  const eyebrow = (s, c) => `<div class="caps" style="color:${c}">${s}</div>`;
+
+  function stArrive() {
+    const th = threadOfDay();
+    return stepFrame("arrive", `${eyebrow("Arrive · 1 min", "var(--practice)")}<div class="stitle">Settle</div>
+      <p class="sub">Let the breath slow down. In through the nose for four, out for six. Three breaths.</p>
+      <div class="breath"><span id="bcue">breathe in</span></div>
+      <div class="card"><div class="caps">Today's thread</div><h2 style="margin-top:6px">${th.name}</h2><p class="sub" style="margin:2px 0 8px">${th.gloss}</p>
+        <p class="serif" style="font-size:18px;margin:0">${esc(db.threadNotes[th.id] || th.desc)}</p>
+        ${db.threadNotes[th.id] ? `<p class="fine" style="margin-top:6px">Your own words, from Threads.</p>` : ""}</div>
+      <p class="fine center" style="margin-top:14px">Carry it lightly through the session. Where does it appear in today's reading?</p>`,
+      `<button class="btn" data-act="next" data-s="arrive">I've arrived</button>`);
+  }
+
+  function recallCard(id, shown) {
+    const [k, key] = [id.slice(0, 1), id.slice(2)];
+    if (k === "t") { const t = TH[key]; const caps = db.cards.filter(c => c.th?.includes(key)).slice(-2);
+      return { tag: "Thread", color: "var(--tint)", front: `<h2 class="serif" style="font-size:30px;font-weight:500">${t.name}</h2><p class="sub">What does it mean? Recall one passage where you've met it.</p>`,
+        back: `<h3>${t.gloss}</h3><p class="serif" style="font-size:18px">${esc(db.threadNotes[key] || t.desc)}</p>${caps.map(c => `<p class="fine">${esc(book(c.book).title)} ${c.unit}: “${esc((c.quote || c.mine).slice(0, 140))}”</p>`).join("")}` }; }
+    if (k === "h") { const h = HEXN[+key - 1];
+      return { tag: "I Ching", color: "var(--iching)", front: `<div style="margin:6px 0">${hexSVG(+key, 70)}</div><p class="sub">Which hexagram is this? Its name, and what it asks of you.</p>`,
+        back: `<h2>${h.n} · ${h.name} <span class="cjk sub">${h.zh}</span></h2>${(() => { const m = myIChing(h.n); return m?.judgment ? `<p class="serif">${esc(m.judgment)}</p><p class="fine">From your My I Ching book</p>` : ""; })()}` }; }
+    const c = db.cards.find(x => x.id === key); if (!c) return null; const b = book(c.book), s = db.srs[id];
+    const dirA = c.quote && (!c.mine || !s || s.reps % 2 === 0);
+    return { tag: `${b.title} · ${unitLabel(b, c.unit)}`, color: `var(--${b.id}, var(--tint))`,
+      front: dirA ? `<p class="quote">“${esc(c.quote)}”</p><p class="sub">What does this mean, in your own words? How would you live it?</p>`
+                  : `<p class="serif" style="font-size:19px">${esc(c.mine)}</p><p class="sub">That's your paraphrase. Recall the original passage it came from.</p>`,
+      back: dirA ? `${c.mine ? `<div class="caps">In your words</div><p class="serif" style="font-size:18px">${esc(c.mine)}</p>` : ""}${c.q ? `<p class="fine">Your question: ${esc(c.q)}</p>` : ""}`
+                 : `<div class="caps">The passage</div><p class="quote">“${esc(c.quote)}”</p>` };
+  }
+  function stRecall() {
+    if (!sess.recall) sess.recall = { q: dueIds(), i: 0, shown: false, n: 0 };
+    const R = sess.recall, id = R.q[R.i];
+    if (!id) {
+      return stepFrame("recall", `${eyebrow("Recall · 4 min", "var(--learn)")}<div class="stitle">${R.n ? "All caught up" : "Nothing due yet"}</div>
+        <p class="sub">${R.n ? `${R.n} card${R.n === 1 ? "" : "s"} reviewed. Each will return just before you'd forget it.` : "Your cards will appear here as you capture passages. Tomorrow they start coming back."}</p>
+        <div class="card center" style="margin-top:20px"><div style="font-size:44px">🍃</div><p class="sub">Remembering, not rereading, is what makes knowledge stay.</p></div>`,
+        `<button class="btn" data-act="next" data-s="recall">Continue</button>`);
+    }
+    const c = recallCard(id); if (!c) { R.i++; return stRecall(); }
+    return stepFrame("recall", `${eyebrow(`Recall · ${R.i + 1} of ${R.q.length}`, "var(--learn)")}
+      <div class="card flash" style="margin-top:12px"><span class="pill" style="align-self:flex-start;color:${c.color}"><span class="dot" style="background:${c.color}"></span>${esc(c.tag)}</span>
+        ${c.front}${R.shown ? `<hr style="border:0;border-top:.5px solid var(--sep);width:100%;margin:6px 0">${c.back}` : ""}</div>
+      <p class="fine center" style="margin-top:10px">${R.shown ? "How well did you remember?" : "Try to recall first, even roughly. The effort is what builds memory."}</p>`,
+      R.shown ? `<div class="grade">${["Again", "Hard", "Good", "Easy"].map((g, i) => `<button class="btn ${i === 2 ? "" : "gray"}" data-act="grade" data-g="${i}">${g}<small>${ivlLabel(nextIvl(id, i))}</small></button>`).join("")}</div>`
+               : `<button class="btn" data-act="reveal">Show</button>`);
+  }
+
+  function stRead() {
+    const { b, n } = assignment(), d = day();
+    let body = "";
+    if (b.id === "ttc" && b.builtin) {
+      if (!TTC) { loadTTC().then(() => location.hash === "#/s/read" && rerender()); body = `<p class="sub">Opening the text…</p>`; }
+      else { const ch = TTC.chapters[n - 1];
+        body = `<h2 class="serif" style="font-weight:500;font-size:26px;margin:8px 0 14px">${esc(ch.title)}</h2><div class="passage">${ch.paras.map((p, i) => `<p class="pick ${sess.picks.has(i) ? "on" : ""}" data-act="pick" data-i="${i}">${esc(p)}</p>`).join("")}</div>
+          <p class="fine">Legge's translation (1891). Read it twice, slowly; the second time, aloud. Tap a line that strikes you to carry it into Capture.</p>`; }
+    } else {
+      const ic = b.id === "iching" ? `<div class="center" style="margin:10px 0 6px">${hexSVG(n, 84)}</div><h2 class="center">${n} · ${HEXN[n - 1].name} <span class="cjk sub">${HEXN[n - 1].zh}</span></h2>` : "";
+      const mine = b.id === "iching" ? myIChing(n) : null;
+      body = `${ic}<div class="card" style="margin-top:12px"><p style="margin:0">Open <b>${esc(b.title)}</b>${b.edition ? ` (${esc(b.edition)})` : ""} at <b>${unitLabel(b, n)}</b>.</p>
+          <p class="sub">${b.id === "iching" ? "Read the Judgment and the Image, then the lines." : b.id === "gf" ? "Read slowly. If the chapter is long, read part of it today and continue next time." : "Read slowly, twice. Notice an image or story that stays with you."}</p></div>
+        <div class="card center" style="margin-top:12px"><div class="timer" id="rtimer">${fmt(sess.readLeft ?? 300)}</div>
+          <button class="btn sm gray" style="margin-top:10px" data-act="rtimer">${sess.timer ? "Pause" : sess.readLeft != null && sess.readLeft < 300 ? "Resume" : "Start a 5-minute reading timer"}</button></div>
+        ${mine && (mine.judgment || mine.image) ? `<div class="ghead caps">From your My I Ching book</div><div class="card">${mine.judgment ? `<p class="serif">${esc(mine.judgment)}</p>` : ""}${mine.image ? `<p class="serif sub">${esc(mine.image)}</p>` : ""}</div>` : ""}`;
+    }
+    const already = d.done.read && d.readUnitDone && d.readUnitDone !== n ? `<div class="card" style="margin-bottom:12px;background:var(--tint-soft)"><b>✓ You read ${unitLabel(b, d.readUnitDone)} today.</b><div class="fine">Here's the next one, if you'd like to keep going.</div></div>` : "";
+    return stepFrame("read", `${already}${eyebrow("Read · 5 min", "var(--learn)")}<div class="row between"><div class="stitle">${esc(b.title)}</div></div>
+      <div class="row" style="gap:8px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, n)} · pass ${Math.floor(b.read.length / b.units) + 1}</span>
+      <button class="btn plain sm" data-act="switchbook" style="margin-left:auto;white-space:nowrap;flex:none">Another book</button></div>${body}`,
+      `<button class="btn" data-act="readdone">Finished ${b.id === "iching" ? "the hexagram" : `${b.unit.toLowerCase()} ${n}`}</button>
+       <button class="btn plain" data-act="readlater">I'll continue next time</button>`);
+  }
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.max(0, s % 60)).padStart(2, "0")}`;
+
+  function captureForm(bk, unit, pre = {}) {
+    const C = sess.cap ||= { quote: pre.quote || "", mine: "", q: "", th: new Set([threadOfDay().id]) };
+    const b = book(bk);
+    return `<div class="row" style="gap:8px;margin:4px 0 12px">${bookIcon(b, 22)}<span class="sub">${esc(b.title)} · ${unitLabel(b, unit)}</span></div>
+      <div class="field"><label>The passage that struck you</label><textarea class="write" rows="2" data-cap="quote" placeholder="Copy the line or two from your book">${esc(C.quote)}</textarea></div>
+      <div class="field"><label>In my own words</label><textarea class="write" rows="2" data-cap="mine" placeholder="What it says, as you'd say it to a friend">${esc(C.mine)}</textarea></div>
+      <div class="field"><label>A question it raises (optional)</label><textarea class="write" rows="1" data-cap="q" placeholder="Why…? What if…? Where in my life…?">${esc(C.q)}</textarea></div>
+      <div class="ghead caps">Threads it touches</div><div class="chips">${THREADS.map(t => `<button class="chip ${C.th.has(t.id) ? "on" : ""}" data-act="capth" data-t="${t.id}">${t.gloss}</button>`).join("")}</div>
+      <p class="gfoot">Putting it in your own words is the single most effective way to remember and understand it.</p>`;
+  }
+  document.addEventListener("input", e => { const k = e.target.dataset.cap; if (k && sess.cap) sess.cap[k] = e.target.value; });
+  function saveCapture(bk, unit) {
+    const C = sess.cap; if (!C || !(C.quote.trim() || C.mine.trim())) return null;
+    const c = { id: uid(), book: bk, unit: +unit, quote: C.quote.trim(), mine: C.mine.trim(), q: C.q.trim(), th: [...C.th], at: Date.now() };
+    db.cards.push(c); db.srs["c:" + c.id] = { ivl: 0, ease: 2.5, reps: 0, due: today0() + DAY }; sess.cap = null; save(); return c;
+  }
+  function stCapture() {
+    const d = day(), { b, n } = assignment(), unit = d.readUnitDone || n;
+    const pre = b.id === "ttc" && TTC && sess.picks.size ? { quote: [...sess.picks].sort((x, y) => x - y).map(i => TTC.chapters[unit - 1]?.paras[i]).filter(Boolean).join("\n") } : {};
+    return stepFrame("capture", `${eyebrow("Capture · 3 min", "var(--learn)")}<div class="stitle">Make it yours</div>${captureForm(b.id, unit, pre)}`,
+      `<button class="btn" data-act="capsave">Save and continue</button>`);
+  }
+
+  function pairFor(a) {
+    const others = db.cards.filter(c => c.id !== a.id && c.book !== a.book);
+    const shared = others.filter(c => c.th?.some(t => a.th?.includes(t)));
+    const pool = shared.length ? shared : others;
+    return pool.length ? pool[sess.connectSeed % pool.length] : null;
+  }
+  function stConnect() {
+    const d = day(), a = db.cards.find(c => c.id === d.capture) || db.cards[db.cards.length - 1];
+    const bCard = a ? pairFor(a) : null, th = threadOfDay();
+    const show = c => { const bk = book(c.book); return `<div class="card"><span class="pill" style="color:var(--${bk.id})"><span class="dot" style="background:var(--${bk.id})"></span>${esc(bk.title)} · ${c.unit}</span>
+      <p class="serif" style="font-size:18px;margin:10px 0 0">${esc(c.quote || c.mine)}</p></div>`; };
+    const other = bCard ? show(bCard) : `<div class="card"><span class="pill">Thread</span><h3 style="margin-top:10px">${th.name} · ${th.gloss}</h3><p class="serif" style="font-size:18px;margin:6px 0 0">${esc(db.threadNotes[th.id] || th.desc)}</p></div>`;
+    sess.connect = { a: a?.id, b: bCard ? bCard.id : "t:" + th.id };
+    return stepFrame("connect", `${eyebrow("Connect · 2 min", "var(--reflect)")}<div class="stitle">Two voices</div>
+      <p class="sub">${a ? "Put today's passage beside another. How do they speak to each other? Where do they agree, and where do they pull apart?" : "Capture a passage first; then it can meet the others."}</p>
+      <div class="stack" style="margin-top:12px">${a ? show(a) : ""}<div class="center sub" style="font-size:22px">⇅</div>${other}</div>
+      ${bCard ? `<p class="center"><button class="btn plain sm" data-act="reshuffle">Another pairing</button></p>` : ""}
+      <div class="field" style="margin-top:12px"><label>What I see between them</label><textarea class="write" rows="3" id="linktext" placeholder="Both point to… / One says… while the other…"></textarea></div>`,
+      `<button class="btn" data-act="linksave">Save and continue</button>`);
+  }
+
+  let wake = null;
+  async function holdWake() { try { wake = await navigator.wakeLock?.request("screen"); } catch (e) {} }
+  function releaseWake() { try { wake?.release(); } catch (e) {} wake = null; }
+  function bell() {
+    try { const ac = new (window.AudioContext || window.webkitAudioContext)(), t = ac.currentTime;
+      [[432, .5], [864, .18], [1296, .08], [1729, .04]].forEach(([f, g]) => { const o = ac.createOscillator(), v = ac.createGain(); o.frequency.value = f; o.type = "sine";
+        v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g * .5, t + .02); v.gain.exponentialRampToValueAtTime(.0001, t + 6); o.connect(v).connect(ac.destination); o.start(t); o.stop(t + 6.2); }); } catch (e) {}
+  }
+  function stSit() {
+    const total = db.settings.sitMin * 60; sess.sitLeft ??= total;
+    return stepFrame("sit", `${eyebrow(`Sit · ${db.settings.sitMin} min`, "var(--practice)")}<div class="stitle">Circulate the light</div>
+      <p class="sub">Sit upright and at ease. Let the eyes half close, resting along the line of the nose. Gather attention softly between the eyes and let it turn back inward, as if light were circling back to its source. Let the breath grow slow, fine and quiet. When thoughts scatter, notice, and return.</p>
+      <div class="breath" style="${db.settings.breathGuide ? "" : "visibility:hidden"}"><span class="timer" id="stimer" style="font-size:44px;color:var(--label)">${fmt(sess.sitLeft)}</span></div>
+      <div class="row" style="justify-content:center;gap:10px"><button class="chip ${db.settings.breathGuide ? "on" : ""}" data-act="breathguide">Breathing guide</button></div>`,
+      `<button class="btn" data-act="sit" style="background:var(--practice)">${sess.timer ? "Pause" : sess.sitLeft < total ? "Resume" : "Begin sitting"}</button>
+       <button class="btn plain" data-act="sitend">${sess.sitLeft < total ? "Finish and continue" : "Skip for today"}</button>`);
+  }
+
+  function stCarry() {
+    const d = day(), th = threadOfDay(), I = d.intent ||= { when: "", will: "" };
+    const cap = db.cards.find(c => c.id === d.capture);
+    return stepFrame("carry", `${eyebrow("Carry · 1 min", "var(--reflect)")}<div class="stitle">Into the day</div>
+      <p class="sub">Choose one moment today to live what you read. A specific "when" makes it far more likely to happen.</p>
+      ${cap ? `<div class="card" style="margin:12px 0"><p class="serif" style="margin:0;font-size:17px">${esc(cap.mine || cap.quote)}</p></div>` : `<div class="card" style="margin:12px 0"><p style="margin:0"><b>${th.gloss}</b>: <span class="serif">${esc(th.desc)}</span></p></div>`}
+      <div class="field"><label>When…</label><input type="text" data-bind="days.${dkey()}.intent.when" value="${esc(I.when)}" placeholder="I feel the urge to push or control"></div>
+      <div class="field"><label>I will…</label><input type="text" data-bind="days.${dkey()}.intent.will" value="${esc(I.will)}" placeholder="pause for one breath and let it unfold"></div>`,
+      `<button class="btn" data-act="next" data-s="carry">Done for now</button>`);
+  }
+  function stDone() {
+    const d = day(), r = rings(), mins = STEPS.filter(s => d.done[s.id] && s.id !== "sit").reduce((a, s) => a + s.min, 0) + Math.round((d.sitSec || 0) / 60);
+    mounts.push(() => { haptic([10, 60, 20]); });
+    return `<div class="celebrate"><div style="display:inline-block">${ringSVG(r, 190, 20)}</div>
+      <h1 style="margin-top:18px">Day ${daysOnPath()} on the path</h1><p class="sub">${mins} minutes today · ${streak()}-day streak</p>
+      <div class="card" style="margin-top:20px;text-align:left"><div class="caps">This evening</div><p style="margin:4px 0 0">Come back for a two-minute look back to close the Reflect ring.</p></div>
+      <a class="btn" href="#/" style="margin-top:20px">Back to Today</a></div>`;
+  }
+  function stEvening() {
+    const d = day(), I = d.intent || {}, E = d.evening ||= { did: "", notice: "" };
+    return `<div class="shead"><a class="xbtn" href="#/" aria-label="Close">✕</a><span class="grow"></span></div>
+      ${eyebrow("Evening · 2 min", "var(--reflect)")}<div class="stitle">Look back</div>
+      ${I.will ? `<div class="card" style="margin:10px 0"><p class="serif" style="margin:0;font-size:18px">When ${esc(I.when || "…")}, I will ${esc(I.will)}.</p></div>` : ""}
+      <div class="ghead caps">Did you practise it?</div><div class="chips">${["Yes", "Partly", "Not today"].map(x => `<button class="chip ${E.did === x ? "on" : ""}" data-act="did" data-v="${x}">${x}</button>`).join("")}</div>
+      <div class="field" style="margin-top:14px"><label>What did I notice?</label>${bound(`days.${dkey()}.evening.notice`, "A moment, a feeling, what the teaching looked like in real life…")}</div>
+      <div class="field"><label>If a friend had my day, what would I tell them?</label>${bound(`days.${dkey()}.evening.friend`, "Stepping back makes the lesson clearer…")}</div>
+      <div class="sfoot"><div class="inner"><button class="btn" style="background:var(--reflect)" data-act="evedone">Close the day</button></div></div>`;
+  }
+  function stMini() {
+    const line = todaysLine();
+    return `<div class="shead"><a class="xbtn" href="#/" aria-label="Close">✕</a><span class="grow"></span></div>
+      ${eyebrow("Two minutes", "var(--tint)")}<div class="stitle">Just this</div><p class="sub">Read the line slowly, then breathe with the circle for a minute. Showing up is what keeps a practice alive.</p>
+      ${line ? `<div class="card" style="margin-top:12px"><p class="quote" style="margin:0">${esc(line.text)}</p><p class="fine" style="margin-top:8px">${esc(line.src)}</p></div>` : ""}
+      <div class="breath"><span>breathe</span></div>
+      <div class="sfoot"><div class="inner"><button class="btn" data-act="minidone">Done. I showed up today</button></div></div>`;
+  }
+
+  /* ---------- Library ---------- */
+  const readCount = b => new Set(b.read).size;
+  function viewLibrary() {
+    return `<h1>Library</h1><p class="sub">Your four books and everything you've drawn from them.</p>
+      <div class="group" style="margin-top:16px">${db.books.map(b => { const p = Math.min(1, readCount(b) / b.units), caps = db.cards.filter(c => c.book === b.id).length;
+        return `<a class="cell" href="#/book/${b.id}" style="--inset:62px;padding-top:12px;padding-bottom:12px">${bookIcon(b, 36)}
+          <div class="grow"><div style="font-weight:600">${esc(b.title)}</div><div class="fine">${esc(b.edition || b.author)} · next: ${unitLabel(b, b.pos)}</div>
+          <div class="bar" style="margin-top:7px"><i style="width:${p * 100}%;background:var(--${b.id})"></i></div></div>
+          <div class="center" style="min-width:44px"><div style="font:600 17px var(--round)">${caps}</div><div class="fine">notes</div></div><span class="chev">›</span></a>`; }).join("")}</div>
+      <p class="gfoot">Days in the week rotate through the books (Settings → Weekly rhythm), so each one stays alive in memory.</p>
+      <div class="ghead caps">Search what you've captured</div>
+      <div class="field"><input type="search" id="libq" placeholder="A word, a theme, a chapter…"></div><div id="libres" style="margin-top:10px"></div>`;
+  }
+  function cardRow(c) { const b = book(c.book);
+    return `<a class="cell" href="#/card/${c.id}" style="--inset:16px;align-items:flex-start"><span class="dot" style="background:var(--${b.id});margin-top:8px"></span>
+      <div class="grow"><div class="fine">${esc(b.title)} · ${unitLabel(b, c.unit)}</div><div class="serif" style="font-size:17px">${esc((c.quote || c.mine).slice(0, 160))}</div>
+      ${c.mine && c.quote ? `<div class="fine">${esc(c.mine.slice(0, 120))}</div>` : ""}</div></a>`; }
+  document.addEventListener("input", e => {
+    if (e.target.id !== "libq") return; const q = e.target.value.trim().toLowerCase();
+    const res = q ? db.cards.filter(c => [c.quote, c.mine, c.q, book(c.book).title, ...(c.th || []).map(t => TH[t]?.gloss)].join(" ").toLowerCase().includes(q)) : [];
+    $("#libres").innerHTML = q ? (res.length ? `<div class="group">${res.slice(0, 50).map(cardRow).join("")}</div>` : `<p class="fine center">Nothing yet.</p>`) : "";
+  });
+  function viewBook(id) {
+    const b = book(id), i = db.books.indexOf(b), caps = db.cards.filter(c => c.book === id).reverse(), read = new Set(b.read);
+    return `<a href="#/library" class="btn plain sm" style="padding-left:0">‹ Library</a>
+      <div class="row" style="gap:14px;margin-top:4px">${bookIcon(b, 56)}<div><h1 style="font-size:28px">${esc(b.title)}</h1><div class="sub">${esc(b.author)}</div></div></div>
+      <div class="ghead caps">Progress · pass ${Math.floor(b.read.length / b.units) + 1}</div>
+      <div class="card"><div class="units">${Array.from({ length: b.units }, (_, k) => k + 1).map(n => `<a href="${b.id === "ttc" ? "#/ttc/" + n : `#/capture/${b.id}/${n}`}" class="${read.has(n) ? "read" : ""} ${n === b.pos ? "next" : ""}" style="${read.has(n) ? `background:var(--${b.id})` : ""}" title="${unitLabel(b, n)}">${n}</a>`).join("")}</div>
+        <p class="fine" style="margin-top:10px">${read.size} of ${b.units} read · next is ${unitLabel(b, b.pos)}. Tap a number to ${b.id === "ttc" ? "read it" : "capture from it"}.</p></div>
+      <div class="ghead caps">Your edition</div><div class="group">
+        <div class="cell static"><span class="grow">Edition / translator</span><input type="text" data-bind="books.${i}.edition" value="${esc(b.edition)}" style="text-align:right;width:55%;color:var(--label2)"></div>
+        <div class="cell static"><span class="grow">${b.unit}s</span><input type="number" min="1" max="200" data-bind="books.${i}.units" value="${b.units}" style="text-align:right;width:70px;color:var(--label2)"></div>
+        <div class="cell static"><span class="grow">Next to read</span><input type="number" min="1" max="${b.units}" data-bind="books.${i}.pos" value="${b.pos}" style="text-align:right;width:70px;color:var(--label2)"></div></div>
+      <p class="gfoot">${BOOK_HINT[b.id] || ""}${b.id === "iching" ? ` For the full I Ching practice, use <a href="../i-ching-book/">My I Ching</a>; your words there appear here on I Ching days.` : ""}</p>
+      <div class="ghead caps">Captured · ${caps.length}</div>
+      ${caps.length ? `<div class="group">${caps.map(cardRow).join("")}</div>` : `<div class="card center sub">Passages you capture from this book will gather here.</div>`}`;
+  }
+  function viewTTC(nStr) {
+    const n = Math.max(1, Math.min(81, +nStr));
+    if (!TTC) { loadTTC().then(rerender); return `<p class="sub">Opening…</p>`; }
+    const ch = TTC.chapters[n - 1];
+    return `<a href="#/book/ttc" class="btn plain sm" style="padding-left:0">‹ Tao Te Ching</a>
+      <div class="caps" style="margin-top:6px">Chapter ${n}</div><h1 class="serif" style="font-weight:500">${esc(ch.title)}</h1>
+      <div class="passage" style="margin-top:14px">${ch.paras.map(p => `<p>${esc(p)}</p>`).join("")}</div>
+      <p class="fine">James Legge (1891), public domain.</p>
+      <div class="row" style="margin-top:16px"><a class="btn gray sm" href="#/ttc/${n === 1 ? 81 : n - 1}">‹ ${n === 1 ? 81 : n - 1}</a><a class="btn sm" style="flex:1" href="#/capture/ttc/${n}">Capture from this chapter</a><a class="btn gray sm" href="#/ttc/${n === 81 ? 1 : n + 1}">${n === 81 ? 1 : n + 1} ›</a></div>`;
+  }
+  let capCtx = "";
+  function viewCaptureStandalone(bk, unit) {
+    if (capCtx !== bk + unit) { sess.cap = null; capCtx = bk + unit; }
+    return `<a href="#/book/${bk}" class="btn plain sm" style="padding-left:0">‹ ${esc(book(bk).title)}</a><h1>Capture</h1>${captureForm(bk, +unit)}
+      <div style="margin-top:20px"><button class="btn" data-act="capsave2" data-b="${bk}" data-u="${unit}">Save</button></div>`;
+  }
+  function viewCard(id) {
+    const c = db.cards.find(x => x.id === id); if (!c) { location.hash = "#/library"; return null; }
+    const i = db.cards.indexOf(c), b = book(c.book), s = db.srs["c:" + id], links = db.links.filter(l => l.a === id || l.b === id);
+    return `<a href="#/book/${b.id}" class="btn plain sm" style="padding-left:0">‹ ${esc(b.title)}</a>
+      <div class="row" style="gap:8px;margin-top:6px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, c.unit)} · ${new Date(c.at).toLocaleDateString()}</span></div>
+      <div class="field" style="margin-top:14px"><label>Passage</label>${bound(`cards.${i}.quote`, "")}</div>
+      <div class="field"><label>In my own words</label>${bound(`cards.${i}.mine`, "")}</div>
+      <div class="field"><label>My question</label>${bound(`cards.${i}.q`, "", "write", 1)}</div>
+      <div class="ghead caps">Threads</div><div class="chips">${THREADS.map(t => `<button class="chip ${c.th?.includes(t.id) ? "on" : ""}" data-act="cardth" data-c="${id}" data-t="${t.id}">${t.gloss}</button>`).join("")}</div>
+      ${links.length ? `<div class="ghead caps">Connections</div><div class="group">${links.map(l => `<div class="cell static"><span class="serif">${esc(l.text)}</span></div>`).join("")}</div>` : ""}
+      <p class="gfoot">${s ? `Next review in ${Math.max(0, Math.round((s.due - Date.now()) / DAY))} days · seen ${s.reps} times.` : ""}</p>
+      <button class="btn plain" data-act="delcard" data-c="${id}" style="color:#ff3b30;margin-top:10px">Delete</button>`;
+  }
+
+  /* ---------- Threads: integration across the four books ---------- */
+  function viewThreads() {
+    const count = id => db.cards.filter(c => c.th?.includes(id)).length;
+    return `<h1>Threads</h1><p class="sub">The ideas that run through all four books. Each grows as you capture passages and connect them.</p>
+      <a class="card tap" href="#/teach" style="margin-top:14px"><div class="row"><span class="icon" style="background:var(--tint)"><svg viewBox="0 0 24 24"><path d="M4 19V6l8-3 8 3v13l-8-3z"/></svg></span>
+        <div class="grow"><h3>Teach it back</h3><div class="fine">Explain a thread to a beginner. ${db.teach.length} so far.</div></div><span class="chev" style="color:var(--label3)">›</span></div></a>
+      <div class="group" style="margin-top:14px">${THREADS.map(t => { const n = count(t.id), books = [...new Set(db.cards.filter(c => c.th?.includes(t.id)).map(c => c.book))];
+        return `<a class="cell" href="#/thread/${t.id}"><div class="grow"><div><span class="cjk">${t.name}</span></div><div class="fine">${t.gloss}${db.threadNotes[t.id] ? " · in your words" : ""}</div></div>
+          <div class="row" style="gap:3px">${["ttc", "iching", "gf", "zz"].map(bk => `<span class="dot" style="width:8px;height:8px;background:${books.includes(bk) ? `var(--${bk})` : "var(--fill)"}"></span>`).join("")}</div>
+          <span class="fine" style="min-width:22px;text-align:right">${n || ""}</span><span class="chev">›</span></a>`; }).join("")}</div>
+      <p class="gfoot">Dots show which books you've linked to each thread: <span style="color:var(--ttc)">●</span> Tao Te Ching <span style="color:var(--iching)">●</span> I Ching <span style="color:var(--gf)">●</span> Golden Flower <span style="color:var(--zz)">●</span> Chuang Tzu.</p>`;
+  }
+  function viewThread(id) {
+    const t = TH[id]; if (!t) { location.hash = "#/threads"; return null; }
+    const caps = db.cards.filter(c => c.th?.includes(id)), teach = db.teach.filter(x => x.th === id).reverse();
+    return `<a href="#/threads" class="btn plain sm" style="padding-left:0">‹ Threads</a>
+      <h1 class="cjk" style="font-weight:600">${t.name}</h1><p class="sub" style="font-size:19px">${t.gloss}</p>
+      <div class="card" style="margin-top:12px"><div class="caps">A starting point</div><p class="serif" style="font-size:18px;margin:6px 0 0">${t.desc}</p></div>
+      <div class="ghead caps">My understanding</div><div class="field">${bound(`threadNotes.${id}`, "Say it in your own words, and revise it as your understanding deepens.", "write", 3)}</div>
+      ${db.books.map(b => { const cs = caps.filter(c => c.book === b.id); return cs.length ? `<div class="ghead caps row" style="gap:8px">${bookIcon(b, 20)} ${esc(b.title)}</div><div class="group">${cs.map(cardRow).join("")}</div>` : ""; }).join("")}
+      ${caps.length ? "" : `<div class="card center sub" style="margin-top:14px">When you tag a capture with this thread, it appears here, gathered by book.</div>`}
+      ${teach.length ? `<div class="ghead caps">Taught</div><div class="group">${teach.map(x => `<div class="cell static"><div><div class="fine">${new Date(x.at).toLocaleDateString()}</div><div class="serif">${esc(x.text)}</div></div></div>`).join("")}</div>` : ""}
+      <a class="btn gray" href="#/teach/${id}" style="margin-top:18px">Teach this thread</a>`;
+  }
+  function viewTeach(id) {
+    const recent = db.cards.filter(c => Date.now() - c.at < 7 * DAY).flatMap(c => c.th || []);
+    const pick = id || recent.sort((a, b) => recent.filter(x => x === b).length - recent.filter(x => x === a).length)[0] || threadOfDay().id, t = TH[pick];
+    return `<a href="#/threads" class="btn plain sm" style="padding-left:0">‹ Threads</a><h1>Teach it back</h1>
+      <p class="sub">Explain <b>${t.gloss}</b> (<span class="cjk">${t.name}</span>) to a curious beginner in about five sentences. Use one image or story from each book you've met it in. Where you get stuck is exactly what to study next.</p>
+      <div class="chips" style="margin:12px 0">${THREADS.map(x => `<a class="chip ${x.id === pick ? "on" : ""}" href="#/teach/${x.id}" style="color:${x.id === pick ? "#fff" : "var(--label)"}">${x.gloss}</a>`).join("")}</div>
+      <div class="field"><label>My explanation</label><textarea class="write" rows="6" id="teachtext" placeholder="Imagine a friend asked you…"></textarea></div>
+      <div style="margin-top:16px"><button class="btn" data-act="teachsave" data-t="${pick}">Save</button></div>`;
+  }
+
+  /* ---------- Progress ---------- */
+  const MILESTONES = [
+    ["🌱", "First day", () => daysOnPath() >= 1], ["🍃", "7 days on the path", () => daysOnPath() >= 7], ["🌿", "30 days", () => daysOnPath() >= 30], ["🌳", "100 days", () => daysOnPath() >= 100],
+    ["⭕️", "All rings closed", () => Object.keys(db.days).some(allClosed)], ["🔥", "Rings closed 7 times", () => Object.keys(db.days).filter(allClosed).length >= 7],
+    ["📜", "First capture", () => db.cards.length >= 1], ["📚", "50 captures", () => db.cards.length >= 50],
+    ["🔗", "10 connections", () => db.links.length >= 10], ["🧭", "First teach-back", () => db.teach.length >= 1],
+    ["🕯", "1 hour of sitting", () => totalSit() >= 3600], ["🌊", "10 hours of sitting", () => totalSit() >= 36000],
+    ["☯️", "Tao Te Ching, all 81", () => readCount(book("ttc")) >= book("ttc").units], ["䷀", "I Ching, all 64", () => readCount(book("iching")) >= book("iching").units],
+    ["🌸", "Golden Flower complete", () => readCount(book("gf")) >= book("gf").units], ["🦋", "Chuang Tzu complete", () => readCount(book("zz")) >= book("zz").units],
+  ];
+  const totalSit = () => Object.values(db.days).reduce((a, d) => a + (d.sitSec || 0), 0);
+  function viewProgress() {
+    const now = today0(), week = Array.from({ length: 7 }, (_, i) => now - (6 - i) * DAY);
+    const weeks = 18, startHeat = now - (weeks * 7 - 1 - (6 - new Date().getDay())) * DAY;
+    const heat = Array.from({ length: weeks * 7 }, (_, i) => { const t = startHeat + i * DAY; if (t > now) return `<i style="opacity:0"></i>`;
+      const r = rings(dkey(t)), s = (r.learn + r.practice + r.reflect) / 3; return `<i class="${s >= .99 ? "l3" : s >= .5 ? "l2" : shownUp(dkey(t)) ? "l1" : ""}" title="${dkey(t)}"></i>`; }).join("");
+    const ids = allCardIds(), mature = ids.filter(id => db.srs[id]?.ivl >= 21).length, learning = ids.filter(id => db.srs[id] && db.srs[id].ivl < 21).length;
+    return `<h1>Progress</h1>
+      <div class="ghead caps">This week</div><div class="card"><div class="row" style="justify-content:space-between">${week.map(t => `<div class="center">${ringSVG(rings(dkey(t)), 38, 4.5)}<div class="fine" style="margin-top:4px">${DOW[new Date(t).getDay()][0]}</div></div>`).join("")}</div></div>
+      <div class="group" style="margin-top:12px">
+        <div class="cell static"><span class="grow">Current streak</span><b>${streak()} day${streak() === 1 ? "" : "s"}</b></div>
+        <div class="cell static"><span class="grow">Days on the path</span><b>${daysOnPath()}</b></div>
+        <div class="cell static"><span class="grow">Time sitting</span><b>${Math.round(totalSit() / 60)} min</b></div>
+        <div class="cell static"><span class="grow">Captures · links · teach-backs</span><b>${db.cards.length} · ${db.links.length} · ${db.teach.length}</b></div></div>
+      <div class="ghead caps">The last 18 weeks</div><div class="card"><div class="heat">${heat}</div><p class="fine" style="margin-top:8px">Darker means more rings closed. One missed day doesn't break your streak; two in a row do.</p></div>
+      <div class="ghead caps">The four books</div><div class="card stack">${db.books.map(b => `<div><div class="row between"><span>${esc(b.title)}</span><span class="fine">${readCount(b)}/${b.units}</span></div>
+        <div class="bar" style="margin-top:6px"><i style="width:${Math.min(100, readCount(b) / b.units * 100)}%;background:var(--${b.id})"></i></div></div>`).join("")}</div>
+      <div class="ghead caps">Memory</div><div class="card"><div class="row between"><div class="center grow"><div class="v" style="font:600 24px var(--round)">${ids.length - mature - learning}</div><div class="fine">new</div></div>
+        <div class="center grow"><div class="v" style="font:600 24px var(--round)">${learning}</div><div class="fine">learning</div></div><div class="center grow"><div class="v" style="font:600 24px var(--round);color:var(--tint)">${mature}</div><div class="fine">well learned</div></div></div>
+        <p class="fine" style="margin-top:8px">"Well learned" means you can recall it after three weeks or more.</p></div>
+      <div class="ghead caps">Milestones</div><div class="card"><div class="badges">${MILESTONES.map(([ic, nm, ok]) => `<div class="badge ${ok() ? "got" : ""}"><div class="medal">${ic}</div>${nm}</div>`).join("")}</div></div>
+      <div class="group" style="margin-top:22px"><a class="cell" href="#/science"><span class="grow">The science behind Daily Way</span><span class="chev">›</span></a><a class="cell" href="#/settings"><span class="grow">Settings</span><span class="chev">›</span></a></div>`;
+  }
+
+  /* ---------- Settings & science ---------- */
+  function viewSettings() {
+    const S = db.settings;
+    return `<a href="#/progress" class="btn plain sm" style="padding-left:0">‹ Progress</a><h1>Settings</h1>
+      <div class="ghead caps">You</div><div class="group">
+        <div class="cell static"><span class="grow">Name</span><input type="text" data-bind="settings.name" value="${esc(S.name)}" style="text-align:right;width:55%;color:var(--label2)"></div></div>
+      <div class="field" style="margin-top:10px"><label>Why I walk this path</label>${bound("settings.why", "Your reason, in your words")}</div>
+      <div class="ghead caps">Daily practice</div><div class="group">
+        <div class="cell static"><span class="grow">Practice time</span><input type="time" data-bind="settings.time" value="${S.time}" style="width:auto;color:var(--tint)"></div>
+        <button class="cell" data-act="ics"><span class="grow" style="color:var(--tint)">Add a daily reminder to my calendar</span></button></div>
+      <div class="ghead caps">Sitting</div><div class="seg">${[3, 4, 5, 8, 10, 15].map(m => `<button class="${S.sitMin === m ? "on" : ""}" data-act="sitmin" data-m="${m}">${m}</button>`).join("")}</div>
+      <p class="gfoot">Minutes of sitting in each session.</p>
+      <div class="ghead caps">Weekly rhythm</div><div class="group">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="cell static"><span class="grow">${DOW[d]}</span>
+        <select data-act="weekday" data-d="${d}" style="width:auto;color:var(--label2);text-align:right">${db.books.map(b => `<option value="${b.id}" ${S.week[d] === b.id ? "selected" : ""}>${esc(b.title)}</option>`).join("")}</select></div>`).join("")}</div>
+      <p class="gfoot">Which book you read each day. Moving between them (interleaving) helps you see what they share.</p>
+      <div class="ghead caps">Appearance</div><div class="seg">${["auto", "light", "dark"].map(t => `<button class="${S.theme === t ? "on" : ""}" data-act="theme" data-t="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div>
+      <div class="ghead caps">Your data</div><div class="group">
+        <button class="cell" data-act="backup"><span class="grow" style="color:var(--tint)">Back up everything (.json)</span></button>
+        <label class="cell"><span class="grow" style="color:var(--tint)">Restore from a backup…</span><input type="file" id="restore" accept=".json,application/json" hidden></label>
+        ${isStandalone() ? "" : `<button class="cell" data-act="installsheet"><span class="grow" style="color:var(--tint)">Install the app</span></button>`}</div>
+      <p class="gfoot">Everything stays on this device. Back up now and then, and use the file to move to a new phone.</p>
+      <div class="group" style="margin-top:22px"><button class="cell" data-act="wipe"><span class="grow" style="color:#ff3b30">Erase everything</span></button></div>
+      <p class="fine center" style="margin-top:22px">Daily Way · version ${APP_VERSION} · ${APP_DATE}<br>Tao Te Ching: James Legge (1891), public domain. Thread notes and prompts are original.</p>`;
+  }
+  const SCIENCE = [
+    ["One short session, every day", "Daily practice at a consistent time and place turns effort into habit; automaticity grows over about two months, and missing a single day barely matters.", "Lally et al., 2010; Wood & Neal, 2007"],
+    ["Recall before you read", "Retrieving what you learned strengthens memory far more than rereading it.", "Roediger & Karpicke, 2006; Karpicke & Blunt, 2011"],
+    ["Cards return at growing intervals", "Spacing reviews just before you'd forget gives the most durable learning for the least time.", "Cepeda et al., 2006; Ebbinghaus, 1885"],
+    ["Four books, interleaved", "Mixing related subjects helps you discriminate and connect them, rather than learning each in isolation.", "Rohrer & Taylor, 2007; Kornell & Bjork, 2008"],
+    ["In your own words", "Generating an explanation yourself is remembered and understood better than reading one.", "Slamecka & Graf, 1978; Bertsch et al., 2007"],
+    ["A question for each passage", "Asking why and how invites deeper processing and links new ideas to what you know.", "Pressley et al., 1987; Dunlosky et al., 2013"],
+    ["Connect two books", "Integrating ideas across sources builds a coherent understanding instead of scattered facts.", "Wiley & Voss, 1999; Chi, 2009"],
+    ["Threads in your own understanding", "Revising your own definition of a concept over time is elaborative rehearsal and deepens comprehension.", "Craik & Lockhart, 1972"],
+    ["Teach it back", "Explaining to someone else exposes gaps and consolidates learning (the protégé effect).", "Fiorella & Mayer, 2013; Chase et al., 2009"],
+    ["Sitting practice", "Brief daily meditation improves attention and emotional regulation, even in beginners.", "Zeidan et al., 2010; Tang et al., 2015"],
+    ["\"When ___, I will ___\"", "If-then plans more than double the chance an intention becomes action.", "Gollwitzer & Sheeran, 2006"],
+    ["Evening look back", "Reflecting on experience improves what you learn from it; stepping back as if advising a friend makes reflection wiser.", "Di Stefano et al., 2014; Kross & Ayduk, 2011"],
+    ["Rings, streaks and milestones", "Visible progress and small completions sustain motivation (goal gradient); a forgiving streak avoids the all-or-nothing trap.", "Kivetz et al., 2006; Polivy & Herman, 1985"],
+    ["Your own why", "Goals that express your own values are pursued with more persistence and well-being.", "Sheldon & Elliot, 1999; Deci & Ryan, 2000"],
+    ["Just two minutes", "Making the smallest version easy keeps the habit alive on hard days.", "Fogg, 2019"],
+  ];
+  function viewScience() {
+    return `<a href="#/progress" class="btn plain sm" style="padding-left:0">‹ Progress</a><h1>Why it works</h1>
+      <p class="sub">Every part of the daily session comes from research on learning, memory and habits.</p>
+      <dl class="science">${SCIENCE.map(([a, b, c]) => `<dt>${a}</dt><dd>${b}<cite>${c}</cite></dd>`).join("")}</dl>`;
+  }
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const SNOOZE = "daily-way-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function sheetBody() {
+    if (deferredInstall) return `<button class="btn" data-act="install">Install Daily Way</button>`;
+    if (isIOS) return `<div class="group"><div class="cell static">1. Tap <b>Share</b> in Safari's toolbar</div><div class="cell static">2. Tap <b>Add to Home Screen</b>, then <b>Add</b></div></div>`;
+    return `<div class="group"><div class="cell static">1. Open the browser menu <b>⋮</b></div><div class="cell static">2. Tap <b>Install app</b> or <b>Add to Home screen</b></div></div>`;
+  }
+  function showSheet(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed()) || !db.onboarded) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><div class="row" style="gap:14px;margin-bottom:12px"><img src="icons/icon-192.png" width="60" height="60" style="border-radius:14px" alt="">
+      <div><h2>Daily Way</h2><div class="fine">Free · works offline · private</div></div></div>
+      <p class="sub">Put it on your home screen so your daily practice is one tap away, full screen, like any app.</p><div id="sheetbody" style="margin-top:12px">${sheetBody()}</div>
+      <button class="btn plain" data-act="later">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeSheet(true); }); document.body.appendChild(back);
+  }
+  function closeSheet(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheetbody"); if (b) b.innerHTML = sheetBody(); });
+  addEventListener("appinstalled", () => { closeSheet(false); toast("Installed. Open it from your home screen."); });
+  setTimeout(() => showSheet(false), 2500);
+
+  /* ---------- Book choice sheet (Read step) ---------- */
+  function chooseBook() {
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><h2 style="margin-bottom:12px">Read another book today</h2><div class="group">${db.books.map(b => `<button class="cell" data-act="pickbook" data-b="${b.id}" style="--inset:58px">${bookIcon(b)}<span class="grow">${esc(b.title)}<div class="fine">${unitLabel(b, b.pos)}</div></span></button>`).join("")}</div>
+      <button class="btn plain" data-act="closesheet">Cancel</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
+  }
+
+  /* ---------- Actions ---------- */
+  function applyTheme() { const t = db.settings.theme; t === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = t); }
+  applyTheme();
+  function ics() {
+    const [h, m] = (db.settings.time || "07:00").split(":"), d = new Date(); d.setHours(+h, +m, 0, 0);
+    const p = n => String(n).padStart(2, "0"), dt = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
+    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Apps Studio//Daily Way//EN", "BEGIN:VEVENT", `UID:daily-way-${Date.now()}@apps-studio`, `DTSTAMP:${dt}`, `DTSTART:${dt}`, "DURATION:PT20M",
+      "RRULE:FREQ=DAILY", "SUMMARY:Daily Way · 20 minutes", "DESCRIPTION:Arrive · Recall · Read · Capture · Connect · Sit · Carry", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:Daily Way", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    download("daily-way.ics", body, "text/calendar");
+  }
+  function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+  function go(h) { location.hash = h; }
+  function tick(id, key, onEnd) {
+    sess.timer = setInterval(() => {
+      sess[key]--; const el = $(id); if (el) el.textContent = fmt(sess[key]);
+      if (key === "sitLeft") { day().sitSec = (day().sitSec || 0) + 1; if (sess[key] % 15 === 0) save(); }
+      if (sess[key] <= 0) { clearInterval(sess.timer); sess.timer = null; releaseWake(); bell(); haptic([20, 80, 20]); onEnd(); }
+    }, 1000);
+  }
+
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, d = el.dataset; if (el.tagName === "BUTTON") haptic(6);
+    if (a === "wnext") { if (welcomeStep < 2) { welcomeStep++; rerender(); scrollTo(0, 0); } else { db.onboarded = true; db.start = dkey(); save(true); go("#/"); } }
+    else if (a === "wback") { welcomeStep--; rerender(); }
+    else if (a === "sitmin") { db.settings.sitMin = +d.m; sess.sitLeft = null; save(); rerender(); }
+    else if (a === "ics") ics();
+    else if (a === "next") { markDone(d.s); go(nextOf(d.s)); }
+    else if (a === "skip") go(nextOf(d.s));
+    else if (a === "reveal") { sess.recall.shown = true; rerender(); }
+    else if (a === "grade") { const R = sess.recall, id = R.q[R.i]; grade(id, +d.g); if (+d.g === 0) R.q.push(id); R.i++; R.n++; R.shown = false; day().reviewed = (day().reviewed || 0) + 1; if (R.i >= R.q.length || R.n >= 10) markDone("recall"); rerender(); }
+    else if (a === "pick") { const i = +d.i; sess.picks.has(i) ? sess.picks.delete(i) : sess.picks.add(i); el.classList.toggle("on"); sess.cap = null; }
+    else if (a === "switchbook") chooseBook();
+    else if (a === "pickbook") { const b = book(d.b), dd = day(); dd.readBook = b.id; dd.readUnit = b.pos; sess.picks.clear(); sess.cap = null; save(); el.closest(".sheet-back").remove(); rerender(); }
+    else if (a === "closesheet") el.closest(".sheet-back").remove();
+    else if (a === "rtimer") { if (sess.timer) { clearInterval(sess.timer); sess.timer = null; } else { sess.readLeft ??= 300; tick("#rtimer", "readLeft", () => toast("Five minutes. Finish the passage at your own pace.")); } el.textContent = sess.timer ? "Pause" : "Resume"; }
+    else if (a === "readdone" || a === "readlater") {
+      const dd = day(), { b, n } = assignment();
+      if (a === "readdone") { if (!b.read.includes(n)) b.read.push(n); dd.readUnitDone = n; b.pos = n % b.units + 1; dd.readUnit = b.pos; sess.picks.clear(); if (b.id === "iching" && !db.hexCards.includes(n)) db.hexCards.push(n); }
+      else dd.readUnitDone = n;
+      sess.readLeft = null; markDone("read"); go("#/s/capture");
+    }
+    else if (a === "capth") { const C = sess.cap; C.th.has(d.t) ? C.th.delete(d.t) : C.th.add(d.t); el.classList.toggle("on"); }
+    else if (a === "capsave") { const { b, n } = assignment(), c = saveCapture(b.id, day().readUnitDone || n); if (c) { day().capture = c.id; toast("Captured. It will return for recall."); } markDone("capture"); sess.picks.clear(); go("#/s/connect"); }
+    else if (a === "capsave2") { const c = saveCapture(d.b, +d.u); if (c) { toast("Captured"); go("#/book/" + d.b); } else toast("Write the passage or your own words first"); }
+    else if (a === "reshuffle") { sess.connectSeed++; rerender(); }
+    else if (a === "linksave") { const t = ($("#linktext")?.value || "").trim(); if (t && sess.connect?.a) db.links.push({ a: sess.connect.a, b: sess.connect.b, text: t, at: Date.now() }); markDone("connect"); save(); go("#/s/sit"); }
+    else if (a === "breathguide") { db.settings.breathGuide = !db.settings.breathGuide; save(); rerender(); }
+    else if (a === "sit") {
+      if (sess.timer) { clearInterval(sess.timer); sess.timer = null; releaseWake(); save(); el.textContent = "Resume"; return; }
+      sess.sitLeft ??= db.settings.sitMin * 60; holdWake(); bell(); el.textContent = "Pause";
+      tick("#stimer", "sitLeft", () => { markDone("sit"); save(); toast("Rest a moment before you rise."); setTimeout(() => location.hash === "#/s/sit" && go("#/s/carry"), 2500); });
+    }
+    else if (a === "sitend") { if (sess.sitLeft < db.settings.sitMin * 60) markDone("sit"); sess.sitLeft = null; save(); go("#/s/carry"); }
+    else if (a === "did") { day().evening ||= {}; day().evening.did = d.v; save(); el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
+    else if (a === "evedone") { markDone("evening"); toast("Day closed. Rest well."); go("#/"); }
+    else if (a === "minidone") { markDone("mini"); toast("Showed up. That counts."); go("#/"); }
+    else if (a === "teachsave") { const t = ($("#teachtext")?.value || "").trim(); if (!t) return toast("Write your explanation first"); db.teach.push({ th: d.t, text: t, at: Date.now() }); save(); toast("Saved to the thread"); go("#/thread/" + d.t); }
+    else if (a === "cardth") { const c = db.cards.find(x => x.id === d.c); c.th ||= []; c.th.includes(d.t) ? c.th.splice(c.th.indexOf(d.t), 1) : c.th.push(d.t); el.classList.toggle("on"); save(); }
+    else if (a === "delcard") { if (confirm("Delete this capture?")) { db.cards = db.cards.filter(c => c.id !== d.c); delete db.srs["c:" + d.c]; save(); history.back(); } }
+    else if (a === "theme") { db.settings.theme = d.t; applyTheme(); save(); rerender(); }
+    else if (a === "backup") download(`daily-way-${dkey()}.json`, JSON.stringify(db, null, 1), "application/json");
+    else if (a === "wipe") { if (confirm("Erase everything on this device? Back up first.") && confirm("Really erase?")) { localStorage.removeItem(KEY); location.reload(); } }
+    else if (a === "installsheet") showSheet(true);
+    else if (a === "later") closeSheet(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(r => closeSheet(r.outcome !== "accepted")).catch(() => closeSheet(true)); }
+  });
+  document.addEventListener("change", async e => {
+    const el = e.target;
+    if (el.dataset.act === "weekday") { db.settings.week[+el.dataset.d] = el.value; save(); }
+    if (el.dataset.bind?.startsWith("books.")) { db.books.forEach(b => { b.units = Math.max(1, b.units | 0); b.pos = Math.min(Math.max(1, b.pos | 0), b.units); }); save(); }
+    if (el.id === "restore" && el.files[0]) {
+      try { const d = JSON.parse(await el.files[0].text()); if (!d || d.v !== 1 || !d.books) throw 0;
+        if (confirm("Replace everything on this device with this backup?")) { db = Object.assign(fresh(), d); save(true); applyTheme(); toast("Restored"); go("#/"); rerender(); } }
+      catch (err) { toast("That isn't a Daily Way backup"); }
+    }
+  });
+  // The breathing cue in Arrive follows the 10-second circle: 4 in, 6 out.
+  const arriveCue = () => { const el = $("#bcue"); if (!el) return; let t = 0; sess.timer = setInterval(() => { t = (t + 1) % 10; el.textContent = t < 4 ? "breathe in" : "breathe out"; }, 1000); };
+  const _stArrive = stArrive; stArrive = function () { mounts.push(arriveCue); return _stArrive(); };
+
+  route();
+  if (!TTC) loadTTC().catch(() => {});
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+</script>
+</body>
+</html>
