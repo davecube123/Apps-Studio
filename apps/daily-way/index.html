@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "1", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "2", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -785,7 +785,7 @@
       const r = rings(dkey(t)), s = (r.learn + r.practice + r.reflect) / 3; return `<i class="${s >= .99 ? "l3" : s >= .5 ? "l2" : shownUp(dkey(t)) ? "l1" : ""}" title="${dkey(t)}"></i>`; }).join("");
     const ids = allCardIds(), mature = ids.filter(id => db.srs[id]?.ivl >= 21).length, learning = ids.filter(id => db.srs[id] && db.srs[id].ivl < 21).length;
     return `<h1>Progress</h1>
-      <div class="ghead caps">This week</div><div class="card"><div class="row" style="justify-content:space-between">${week.map(t => `<div class="center">${ringSVG(rings(dkey(t)), 38, 4.5)}<div class="fine" style="margin-top:4px">${DOW[new Date(t).getDay()][0]}</div></div>`).join("")}</div></div>
+      <div class="ghead caps">This week</div><div class="card"><div class="row" style="justify-content:space-between;gap:0">${week.map(t => `<div class="center">${ringSVG(rings(dkey(t)), 38, 4.5)}<div class="fine" style="margin-top:4px">${DOW[new Date(t).getDay()][0]}</div></div>`).join("")}</div></div>
       <div class="group" style="margin-top:12px">
         <div class="cell static"><span class="grow">Current streak</span><b>${streak()} day${streak() === 1 ? "" : "s"}</b></div>
         <div class="cell static"><span class="grow">Days on the path</span><b>${daysOnPath()}</b></div>
@@ -856,22 +856,25 @@
   const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
   function sheetBody() {
     if (deferredInstall) return `<button class="btn" data-act="install">Install Daily Way</button>`;
-    if (isIOS) return `<div class="group"><div class="cell static">1. Tap <b>Share</b> in Safari's toolbar</div><div class="cell static">2. Tap <b>Add to Home Screen</b>, then <b>Add</b></div></div>`;
-    return `<div class="group"><div class="cell static">1. Open the browser menu <b>⋮</b></div><div class="cell static">2. Tap <b>Install app</b> or <b>Add to Home screen</b></div></div>`;
+    const share = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7"/></svg>`;
+    const step = (n, t) => `<div class="cell static" style="--inset:52px"><span class="icon" style="background:var(--tint-soft);color:var(--tint);font:700 14px var(--sans);width:26px;height:26px">${n}</span><span>${t}</span></div>`;
+    if (isIOS) return `<div class="group">${step(1, `Tap <b>Share</b> ${share} in Safari's toolbar`)}${step(2, `Tap <b>Add to Home Screen</b>, then <b>Add</b>`)}</div>`;
+    if (/android/i.test(navigator.userAgent)) return `<div class="group">${step(1, `Tap the <b>⋮</b> menu at the top right of Chrome`)}${step(2, `Tap <b>Install app</b> (or <b>Add to Home screen</b>)`)}</div>`;
+    return `<div class="group">${step(1, `Click the <b>install</b> icon at the right of the address bar`)}${step(2, `or choose <b>Install Daily Way</b> in the browser menu`)}</div>`;
   }
   function showSheet(force) {
-    if (isStandalone() || $(".sheet-back") || (!force && snoozed()) || !db.onboarded) return;
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
     const back = document.createElement("div"); back.className = "sheet-back";
     back.innerHTML = `<div class="sheet"><div class="grab"></div><div class="row" style="gap:14px;margin-bottom:12px"><img src="icons/icon-192.png" width="60" height="60" style="border-radius:14px" alt="">
-      <div><h2>Daily Way</h2><div class="fine">Free · works offline · private</div></div></div>
-      <p class="sub">Put it on your home screen so your daily practice is one tap away, full screen, like any app.</p><div id="sheetbody" style="margin-top:12px">${sheetBody()}</div>
+      <div><div class="fine">Free · works offline · private</div><h2>Install Daily Way</h2></div></div>
+      <p class="sub">Put it on your home screen so your daily practice is one tap away, full screen, like any app. Everything you write stays on this phone.</p><div id="sheetbody" style="margin-top:12px">${sheetBody()}</div>
       <button class="btn plain" data-act="later">Not now</button></div>`;
     back.addEventListener("click", e => { if (e.target === back) closeSheet(true); }); document.body.appendChild(back);
   }
   function closeSheet(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheetbody"); if (b) b.innerHTML = sheetBody(); });
   addEventListener("appinstalled", () => { closeSheet(false); toast("Installed. Open it from your home screen."); });
-  setTimeout(() => showSheet(false), 2500);
+  setTimeout(() => showSheet(false), 1800);
 
   /* ---------- Book choice sheet (Read step) ---------- */
   function chooseBook() {
