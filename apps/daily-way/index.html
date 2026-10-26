@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "4", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "5", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -275,13 +275,17 @@
   const KEY = "daily-way-v1";
   const fresh = () => ({ v: 1, onboarded: false, start: dkey(), books: BOOKS0.map(b => ({ ...b, pos: 1, read: [] })), cards: [], links: [], days: {},
     threadNotes: {}, teach: [], conceptIntro: 0, hexCards: [],
-    settings: { name: "", why: "", time: "07:00", sitMin: 4, theme: "auto", week: ["zz", "ttc", "iching", "zz", "ttc", "gf", "iching"], breathGuide: true } });
+    settings: { name: "", why: "", time: "07:00", sitMin: 4, practice: "app", myPractices: "", theme: "auto", week: ["zz", "ttc", "iching", "zz", "ttc", "gf", "iching"], breathGuide: true } });
   let db = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v) return Object.assign(fresh(), d); } catch (e) {} return fresh(); })();
+  // Any of the four books missing from saved data (e.g. an old or partial backup) is restored.
+  BOOKS0.forEach(d => { if (!db.books.some(b => b.id === d.id)) db.books.push({ ...d, lenses: [...d.lenses], pos: 1, read: [] }); });
   // v2 of the book model: lenses, chapter lists and a later shelf (keeps what was already set)
   db.books.forEach(b => { const d = BOOKS0.find(x => x.id === b.id) || {};
     if (!Array.isArray(b.lenses)) { b.lenses = d.lenses ? [...d.lenses] : []; if (!b.edition) b.edition = d.edition || "";
       if (b.id === "gf" && !b.read.length) { if (/wilhelm/i.test(b.edition)) { b.units = 8; b.lenses = ["Cleary"]; } else { b.edition ||= "Cleary"; b.units = 13; } } }
     b.later ??= ""; b.list ??= null; });
+  // Practice mode (v5): you already keep your own meditation practice, so the step bridges into it.
+  if (db.settings.practice === undefined) { db.settings.practice = "own"; db.settings.myPractices ||= "Trataka\nDeath meditation\nCyclic breathing"; }
   let saveT;
   function save(now) { clearTimeout(saveT); const f = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Couldn't save. Is storage full?"); } }; now ? f() : (saveT = setTimeout(f, 250)); }
   addEventListener("pagehide", () => save(true));
@@ -348,11 +352,20 @@
   ];
   const STEP_COLOR = { learn: "var(--learn)", practice: "var(--practice)", reflect: "var(--reflect)" };
   const sitMin = () => STEPS.find(s => s.id === "sit").min = db.settings.sitMin;
+  // The sitting step adapts: sit here (app), bridge into your own practice (own), or leave it out (off).
+  const pmode = () => db.settings.practice || "app";
+  const myPractices = () => String(db.settings.myPractices || "").split(/\n|,/).map(x => x.trim()).filter(Boolean);
+  function steps() {
+    sitMin(); const m = pmode();
+    return STEPS.filter(s => s.id !== "sit" || m !== "off").map(s => s.id === "sit" && m === "own"
+      ? { ...s, name: "Bring it to practice", min: 1, what: "Today's line, carried into your own practice", ic: "M4 12h10M10 6l6 6-6 6M20 5v14" } : s);
+  }
   function rings(k = dkey()) {
     const d = db.days[k] || { done: {}, sitSec: 0 };
     return {
       learn: ["recall", "read", "capture"].filter(s => d.done[s]).length / 3,
-      practice: Math.min(1, ((d.sitSec || 0) + (d.done.arrive ? 60 : 0)) / ((db.settings.sitMin + 1) * 60)),
+      practice: pmode() === "own" ? (d.done.sit ? 1 : 0) : pmode() === "off" ? (d.done.arrive ? 1 : 0)
+        : Math.min(1, ((d.sitSec || 0) + (d.done.arrive ? 60 : 0)) / ((db.settings.sitMin + 1) * 60)),
       reflect: ["connect", "carry", "evening"].filter(s => d.done[s]).length / 3,
     };
   }
@@ -427,12 +440,12 @@
     if (!TTC) return null;
     const ch = TTC.chapters[h % 81], p = ch.paras[h % ch.paras.length]; return { text: p, src: `Tao Te Ching · Chapter ${ch.n} (Legge)` };
   }
-  function nextStep() { const d = day(); return STEPS.find(s => !d.done[s.id]); }
+  function nextStep() { const d = day(); return steps().find(s => !d.done[s.id]); }
   function viewToday() {
     sitMin(); introduceConcepts();
     const d = day(), r = rings(), hr = new Date().getHours(), nm = db.settings.name ? `, ${esc(db.settings.name)}` : "";
     const greet = hr < 5 ? "Still night" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
-    const nx = nextStep(), started = STEPS.some(s => d.done[s.id]), total = STEPS.reduce((a, s) => a + s.min, 0);
+    const nx = nextStep(), started = steps().some(s => d.done[s.id]), total = steps().reduce((a, s) => a + s.min, 0);
     const line = todaysLine(); if (!TTC) loadTTC().then(() => location.hash.match(/^#?\/?$/) && rerender());
     const { b, n } = assignment(), th = threadOfDay(), st = streak();
     const evening = d.intent && (d.intent.will || d.intent.when) && !d.done.evening && hr >= 16;
@@ -446,7 +459,7 @@
         <div class="row" style="gap:18px">${ringSVG(r, 118, 13)}
           <div class="legend grow stack" style="--g:6px">
             <div><div class="fine" style="color:var(--learn);font-weight:600">Learn</div><div class="v">${Math.round(r.learn * 3)}<small>/3</small></div></div>
-            <div><div class="fine" style="color:var(--practice);font-weight:600">Practice</div><div class="v">${Math.round((d.sitSec || 0) / 60)}<small>/${db.settings.sitMin} min</small></div></div>
+            <div><div class="fine" style="color:var(--practice);font-weight:600">Practice</div><div class="v">${pmode() === "own" ? (d.done.sit ? `✓<small> carried in</small>` : `–<small> carry it in</small>`) : pmode() === "off" ? (d.done.arrive ? "✓" : "–") : `${Math.round((d.sitSec || 0) / 60)}<small>/${db.settings.sitMin} min</small>`}</div></div>
             <div><div class="fine" style="color:var(--reflect);font-weight:600">Reflect</div><div class="v">${Math.round(r.reflect * 3)}<small>/3</small></div></div>
           </div>
           <div class="center" style="align-self:flex-start"><div class="v" style="font:600 28px var(--round)">${st}</div><div class="fine">day${st === 1 ? "" : "s"}<br>streak</div></div>
@@ -463,7 +476,7 @@
       ${sunday ? `<a class="card tap" href="#/teach" style="margin-top:14px"><div class="caps" style="color:var(--tint)">Sunday</div><h3 style="margin-top:4px">Teach it back</h3><p class="sub">Explain one thread to a beginner in five sentences. The best test of understanding.</p></a>` : ""}
 
       <div class="ghead caps">Today's practice</div>
-      <div class="group">${STEPS.map(s => `<a class="cell" href="#/s/${s.id}" style="--inset:58px">
+      <div class="group">${steps().map(s => `<a class="cell" href="#/s/${s.id}" style="--inset:58px">
         <span class="icon" style="background:${STEP_COLOR[s.ring]}"><svg viewBox="0 0 24 24"><path d="${s.ic}"/></svg></span>
         <div class="grow"><div>${s.name}</div><div class="fine">${s.id === "read" ? `${esc(b.title)} · ${unitLabel(b, d.readUnitDone || n)}` : s.id === "arrive" ? `Thread: ${th.gloss}` : s.what}</div></div>
         <span class="fine">${s.id === "read" ? "unhurried" : `${s.min} min`}</span><span class="check ${d.done[s.id] ? "on" : ""}"></span></a>`).join("")}</div>
@@ -491,8 +504,7 @@
          <div class="cell static"><span class="grow">Practice time</span><input type="time" data-bind="settings.time" value="${db.settings.time}" style="width:auto;color:var(--tint)"></div>
          <button class="cell" data-act="ics"><span class="grow" style="color:var(--tint)">Add a daily reminder to my calendar</span></button></div>
        <p class="gfoot">Tip: "After my morning tea, I open Daily Way."</p>
-       <div class="ghead caps">Sitting practice</div><div class="seg">${[3, 4, 5, 8, 10].map(m => `<button class="${db.settings.sitMin === m ? "on" : ""}" data-act="sitmin" data-m="${m}">${m} min</button>`).join("")}</div>
-       <p class="gfoot">Start small; you can lengthen it as the habit grows.</p>`,
+       <div class="ghead caps">Meditation</div>${practiceChooser()}`,
     ];
     return `<div class="row between" style="margin-bottom:8px"><span class="fine">${welcomeStep + 1} of 3</span>${welcomeStep ? `<button class="btn plain sm" data-act="wback">Back</button>` : ""}</div>
       ${pages[welcomeStep]}
@@ -503,12 +515,12 @@
   let sess = { picks: new Set(), recall: null, timer: null, connectSeed: 0 };
   function stopTimers() { if (sess.timer) { clearInterval(sess.timer); sess.timer = null; } releaseWake(); }
   function stepFrame(id, body, foot) {
-    const i = STEPS.findIndex(s => s.id === id), d = day();
-    return `<div class="shead"><a class="xbtn" href="#/" aria-label="Close">✕</a><div class="segs">${STEPS.map((s, j) => `<i class="${d.done[s.id] ? "done" : j === i ? "now" : ""}"></i>`).join("")}</div>
-      ${i >= 0 && i < STEPS.length - 1 ? `<button class="btn plain sm" data-act="skip" data-s="${id}" style="padding:4px 2px">Skip</button>` : ""}</div>
+    const S = steps(), i = S.findIndex(s => s.id === id), d = day();
+    return `<div class="shead"><a class="xbtn" href="#/" aria-label="Close">✕</a><div class="segs">${S.map((s, j) => `<i class="${d.done[s.id] ? "done" : j === i ? "now" : ""}"></i>`).join("")}</div>
+      ${i >= 0 && i < S.length - 1 ? `<button class="btn plain sm" data-act="skip" data-s="${id}" style="padding:4px 2px">Skip</button>` : ""}</div>
       ${body}<div class="sfoot"><div class="inner">${foot}</div></div>`;
   }
-  const nextOf = id => { const i = STEPS.findIndex(s => s.id === id); return i < STEPS.length - 1 ? "#/s/" + STEPS[i + 1].id : "#/s/done"; };
+  const nextOf = id => { const S = steps(), i = S.findIndex(s => s.id === id); return i < S.length - 1 ? "#/s/" + S[i + 1].id : "#/s/done"; };
   function viewStep(id) {
     const f = { arrive: stArrive, recall: stRecall, read: stRead, capture: stCapture, connect: stConnect, sit: stSit, carry: stCarry, done: stDone, evening: stEvening, mini: stMini }[id];
     return f ? f() : (location.hash = "#/", null);
@@ -652,7 +664,30 @@
       [[432, .5], [864, .18], [1296, .08], [1729, .04]].forEach(([f, g]) => { const o = ac.createOscillator(), v = ac.createGain(); o.frequency.value = f; o.type = "sine";
         v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g * .5, t + .02); v.gain.exponentialRampToValueAtTime(.0001, t + 6); o.connect(v).connect(ac.destination); o.start(t); o.stop(t + 6.2); }); } catch (e) {}
   }
+  function bridgePrompt(name) {
+    const n = name.toLowerCase();
+    if (/tr[aā]taka|candle|flame|gaz/.test(n)) return "As you gaze, let the light turn back towards its source: the Golden Flower's circulating the light, almost word for word. When the eyes close, rest in the afterimage with today's line.";
+    if (/death|mara|mortal|dying/.test(n)) return "Read today's line as if this were your last day. Chuang Tzu drummed and sang after his wife died; the Tao Te Ching says he who dies and yet does not perish has longevity. What of the line remains?";
+    if (/breath|pranayama|cyclic|sighing|box/.test(n)) return "Let the breath grow fine and even, as the Golden Flower advises, and let each exhale be a small return (fu 復) to the root.";
+    if (/walk|tai ?chi|qi ?gong|yoga/.test(n)) return "Move with the line: no forcing, soft over hard. Notice where it lives in the body.";
+    return "Hold today's line lightly through the practice, without thinking about it. Notice what it becomes.";
+  }
+  function stBridge() {
+    const d = day(), th = threadOfDay(), cap = db.cards.find(c => c.id === d.capture), P = myPractices(), chosen = new Set(d.bridge || []);
+    const line = cap ? (cap.mine || cap.quote) : th.desc;
+    return stepFrame("sit", `${eyebrow("Bring it to practice · 1 min", "var(--practice)")}<div class="stitle">Carry it in</div>
+      <p class="sub">You already practise. Instead of another sitting, give today's line a place in what you do.</p>
+      <div class="card" style="margin:12px 0"><div class="caps">Today's line</div><p class="serif" style="font-size:19px;margin:6px 0 0">${esc(line)}</p></div>
+      ${P.length ? P.map(nm => `<button class="card tap" data-act="bridgepick" data-v="${esc(nm)}" style="width:100%;text-align:left;font:inherit;color:inherit;border:0;margin-top:10px;${chosen.has(nm) ? "box-shadow:inset 0 0 0 2px var(--practice)" : ""}">
+          <div class="row between"><h3>${esc(nm)}</h3><span class="check ${chosen.has(nm) ? "on" : ""}" style="${chosen.has(nm) ? "background:var(--practice);border-color:var(--practice)" : ""}"></span></div>
+          <p class="sub" style="margin:6px 0 0">${bridgePrompt(nm)}</p></button>`).join("")
+        : `<div class="card"><p class="sub" style="margin:0">Add your practices in Settings → Practice, and each will get its own way of carrying the line.</p></div>`}
+      <p class="fine center" style="margin-top:14px">Keep tracking your practice where you already do. Here it's just the bridge.</p>`,
+      `<button class="btn" data-act="bridgedone" style="background:var(--practice)">I'll carry this into my practice</button>`);
+  }
   function stSit() {
+    if (pmode() === "own") return stBridge();
+    if (pmode() === "off") { setTimeout(() => go(nextOf("connect")), 0); return ""; }
     const total = db.settings.sitMin * 60; sess.sitLeft ??= total;
     return stepFrame("sit", `${eyebrow(`Sit · ${db.settings.sitMin} min`, "var(--practice)")}<div class="stitle">Circulate the light</div>
       <p class="sub">Sit upright and at ease. Let the eyes half close, resting along the line of the nose. Gather attention softly between the eyes and let it turn back inward, as if light were circling back to its source. Let the breath grow slow, fine and quiet. When thoughts scatter, notice, and return.</p>
@@ -673,7 +708,7 @@
       `<button class="btn" data-act="next" data-s="carry">Done for now</button>`);
   }
   function stDone() {
-    const d = day(), r = rings(), mins = STEPS.filter(s => d.done[s.id] && s.id !== "sit").reduce((a, s) => a + s.min, 0) + Math.round((d.sitSec || 0) / 60);
+    const d = day(), r = rings(), mins = steps().filter(s => d.done[s.id] && !(s.id === "sit" && pmode() === "app")).reduce((a, s) => a + s.min, 0) + Math.round((d.sitSec || 0) / 60);
     mounts.push(() => { haptic([10, 60, 20]); });
     return `<div class="celebrate"><div style="display:inline-block">${ringSVG(r, 190, 20)}</div>
       <h1 style="margin-top:18px">Day ${daysOnPath()} on the path</h1><p class="sub">${mins} minutes today · ${streak()}-day streak</p>
@@ -687,6 +722,7 @@
       ${I.will ? `<div class="card" style="margin:10px 0"><p class="serif" style="margin:0;font-size:18px">When ${esc(I.when || "…")}, I will ${esc(I.will)}.</p></div>` : ""}
       <div class="ghead caps">Did you practise it?</div><div class="chips">${["Yes", "Partly", "Not today"].map(x => `<button class="chip ${E.did === x ? "on" : ""}" data-act="did" data-v="${x}">${x}</button>`).join("")}</div>
       <div class="field" style="margin-top:14px"><label>What did I notice?</label>${bound(`days.${dkey()}.evening.notice`, "A moment, a feeling, what the teaching looked like in real life…")}</div>
+      ${pmode() === "own" && d.done.sit ? `<div class="field"><label>What did today's line become in my practice?</label>${bound(`days.${dkey()}.evening.practice`, "In the gaze, the breath, facing death…")}</div>` : ""}
       <div class="field"><label>If a friend had my day, what would I tell them?</label>${bound(`days.${dkey()}.evening.friend`, "Stepping back makes the lesson clearer…")}</div>
       <div class="sfoot"><div class="inner"><button class="btn" style="background:var(--reflect)" data-act="evedone">Close the day</button></div></div>`;
   }
@@ -820,6 +856,7 @@
     ["🕯", "1 hour of sitting", () => totalSit() >= 3600], ["🌊", "10 hours of sitting", () => totalSit() >= 36000],
     ["☯️", "Tao Te Ching, all 81", () => readCount(book("ttc")) >= total(book("ttc"))], ["䷀", "I Ching, all 64", () => readCount(book("iching")) >= total(book("iching"))],
     ["🌸", "Golden Flower complete", () => readCount(book("gf")) >= total(book("gf"))], ["🦋", "Chuang Tzu complete", () => readCount(book("zz")) >= total(book("zz"))],
+    ["🌉", "Carried into practice 30 times", () => Object.values(db.days).filter(d => d.done?.sit && !d.sitSec).length >= 30],
     ["🔍", "10 lens comparisons", () => db.cards.filter(c => c.lens?.text).length >= 10]
   ];
   const totalSit = () => Object.values(db.days).reduce((a, d) => a + (d.sitSec || 0), 0);
@@ -834,7 +871,7 @@
       <div class="group" style="margin-top:12px">
         <div class="cell static"><span class="grow">Current streak</span><b>${streak()} day${streak() === 1 ? "" : "s"}</b></div>
         <div class="cell static"><span class="grow">Days on the path</span><b>${daysOnPath()}</b></div>
-        <div class="cell static"><span class="grow">Time sitting</span><b>${Math.round(totalSit() / 60)} min</b></div>
+        ${pmode() === "own" ? `<div class="cell static"><span class="grow">Days carried into practice</span><b>${Object.values(db.days).filter(d => d.done?.sit).length}</b></div>` : `<div class="cell static"><span class="grow">Time sitting</span><b>${Math.round(totalSit() / 60)} min</b></div>`}
         <div class="cell static"><span class="grow">Captures · links · teach-backs</span><b>${db.cards.length} · ${db.links.length} · ${db.teach.length}</b></div></div>
       <div class="ghead caps">The last 18 weeks</div><div class="card"><div class="heat">${heat}</div><p class="fine" style="margin-top:8px">Darker means more rings closed. One missed day doesn't break your streak; two in a row do.</p></div>
       <div class="ghead caps">The four books</div><div class="card stack">${db.books.map(b => `<div><div class="row between"><span>${esc(b.title)}</span><span class="fine">${readCount(b)}/${total(b)}</span></div>
@@ -844,6 +881,16 @@
         <p class="fine" style="margin-top:8px">"Well learned" means you can recall it after three weeks or more.</p></div>
       <div class="ghead caps">Milestones</div><div class="card"><div class="badges">${MILESTONES.map(([ic, nm, ok]) => `<div class="badge ${ok() ? "got" : ""}"><div class="medal">${ic}</div>${nm}</div>`).join("")}</div></div>
       <div class="group" style="margin-top:22px"><a class="cell" href="#/science"><span class="grow">The science behind Daily Way</span><span class="chev">›</span></a><a class="cell" href="#/settings"><span class="grow">Settings</span><span class="chev">›</span></a></div>`;
+  }
+
+  function practiceChooser() {
+    const m = pmode(), S = db.settings;
+    return `<div class="seg">${[["own", "My own practice"], ["app", "Sit here"], ["off", "None"]].map(([k, l]) => `<button class="${m === k ? "on" : ""}" data-act="pmode" data-m="${k}">${l}</button>`).join("")}</div>
+      ${m === "own" ? `<div class="field" style="margin-top:10px"><label>My practices, one per line</label>${bound("settings.myPractices", "Trataka\nDeath meditation\nCyclic breathing", "write", 3)}</div>
+        <p class="gfoot">One minute each day to carry the line you read into your own practice. Your tracking stays in your other app.</p>`
+      : m === "app" ? `<div class="seg" style="margin-top:10px">${[3, 4, 5, 8, 10, 15].map(x => `<button class="${S.sitMin === x ? "on" : ""}" data-act="sitmin" data-m="${x}">${x} min</button>`).join("")}</div>
+        <p class="gfoot">A short sitting each session: circulating the light, from the Golden Flower.</p>`
+      : `<p class="gfoot">No practice step. The Practice ring fills with the Arrive breaths.</p>`}`;
   }
 
   /* ---------- Settings & science ---------- */
@@ -856,8 +903,7 @@
       <div class="ghead caps">Daily practice</div><div class="group">
         <div class="cell static"><span class="grow">Practice time</span><input type="time" data-bind="settings.time" value="${S.time}" style="width:auto;color:var(--tint)"></div>
         <button class="cell" data-act="ics"><span class="grow" style="color:var(--tint)">Add a daily reminder to my calendar</span></button></div>
-      <div class="ghead caps">Sitting</div><div class="seg">${[3, 4, 5, 8, 10, 15].map(m => `<button class="${S.sitMin === m ? "on" : ""}" data-act="sitmin" data-m="${m}">${m}</button>`).join("")}</div>
-      <p class="gfoot">Minutes of sitting in each session.</p>
+      <div class="ghead caps">Practice</div>${practiceChooser()}
       <div class="ghead caps">Weekly rhythm</div><div class="group">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="cell static"><span class="grow">${DOW[d]}</span>
         <select data-act="weekday" data-d="${d}" style="width:auto;color:var(--label2);text-align:right">${db.books.map(b => `<option value="${b.id}" ${S.week[d] === b.id ? "selected" : ""}>${esc(b.title)}</option>`).join("")}</select></div>`).join("")}</div>
       <p class="gfoot">Which book you read each day. Moving between them (interleaving) helps you see what they share.</p>
@@ -882,6 +928,7 @@
     ["Threads in your own understanding", "Revising your own definition of a concept over time is elaborative rehearsal and deepens comprehension.", "Craik & Lockhart, 1972"],
     ["Teach it back", "Explaining to someone else exposes gaps and consolidates learning (the protégé effect).", "Fiorella & Mayer, 2013; Chase et al., 2009"],
     ["Sitting practice", "Brief daily meditation improves attention and emotional regulation, even in beginners.", "Zeidan et al., 2010; Tang et al., 2015"],
+    ["Bring it to the practice you already have", "Attaching something new to an established routine makes it stick (habit stacking), and applying an idea in a real context is what lets it transfer from page to life.", "Fogg, 2019; Gardner et al., 2012; Perkins & Salomon, 1992"],
     ["\"When ___, I will ___\"", "If-then plans more than double the chance an intention becomes action.", "Gollwitzer & Sheeran, 2006"],
     ["Evening look back", "Reflecting on experience improves what you learn from it; stepping back as if advising a friend makes reflection wiser.", "Di Stefano et al., 2014; Kross & Ayduk, 2011"],
     ["Rings, streaks and milestones", "Visible progress and small completions sustain motivation (goal gradient); a forgiving streak avoids the all-or-nothing trap.", "Kivetz et al., 2006; Polivy & Herman, 1985"],
@@ -1001,7 +1048,10 @@
     else if (a === "capsave") { const { b, n } = assignment(), c = saveCapture(b.id, day().readUnitDone || n); if (c) { day().capture = c.id; toast("Captured. It will return for recall."); } markDone("capture"); sess.picks.clear(); go("#/s/connect"); }
     else if (a === "capsave2") { const c = saveCapture(d.b, +d.u); if (c) { toast("Captured"); go("#/book/" + d.b); } else toast("Write the passage or your own words first"); }
     else if (a === "reshuffle") { sess.connectSeed++; rerender(); }
-    else if (a === "linksave") { const t = ($("#linktext")?.value || "").trim(); if (t && sess.connect?.a) db.links.push({ a: sess.connect.a, b: sess.connect.b, text: t, at: Date.now() }); markDone("connect"); save(); go("#/s/sit"); }
+    else if (a === "linksave") { const t = ($("#linktext")?.value || "").trim(); if (t && sess.connect?.a) db.links.push({ a: sess.connect.a, b: sess.connect.b, text: t, at: Date.now() }); markDone("connect"); save(); go(nextOf("connect")); }
+    else if (a === "bridgepick") { const dd = day(), s0 = new Set(dd.bridge || []); s0.has(d.v) ? s0.delete(d.v) : s0.add(d.v); dd.bridge = [...s0]; save(); rerender(); }
+    else if (a === "bridgedone") { markDone("sit"); save(); go(nextOf("sit")); }
+    else if (a === "pmode") { db.settings.practice = d.m; save(); rerender(); }
     else if (a === "breathguide") { db.settings.breathGuide = !db.settings.breathGuide; save(); rerender(); }
     else if (a === "sit") {
       if (sess.timer) { clearInterval(sess.timer); sess.timer = null; releaseWake(); save(); el.textContent = "Resume"; return; }
