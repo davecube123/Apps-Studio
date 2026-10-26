@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "3", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "4", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -323,7 +323,8 @@
   /* ---------- Reading plan ---------- */
   const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   function assignment() {
-    const d = day(); if (!d.readBook) { const b = book(db.settings.week[new Date().getDay()]); d.readBook = b.id; d.readUnit = b.pos; }
+    const d = day();
+    if (!d.readBook) { const carried = db.carry?.day === dkey() ? db.carry.book : null; const b = book(carried || db.settings.week[new Date().getDay()]); d.readBook = b.id; d.readUnit = b.pos; }
     return { b: book(d.readBook), n: d.readUnit };
   }
   // Tao Te Ching days always bring a lens (the chapters line up); other books every second time.
@@ -453,7 +454,7 @@
       </div>
 
       <div style="margin-top:14px">${nx
-        ? `<a class="btn" href="#/s/${nx.id}">${started ? `Continue · ${nx.name}` : `Begin today's practice · ${total} min`}</a>`
+        ? `<a class="btn" href="#/s/${nx.id}">${started ? `Continue · ${nx.name}` : `Begin today's practice · about ${total} min`}</a>`
         : `<div class="card center"><h3>Today's practice is complete</h3><p class="fine">${allClosed(dkey()) ? "All three rings closed." : "Close the Reflect ring with this evening's look back."}</p></div>`}
         ${!started && !d.done.mini ? `<a class="btn plain" href="#/s/mini">Busy day? Just 2 minutes</a>` : ""}</div>
 
@@ -465,7 +466,7 @@
       <div class="group">${STEPS.map(s => `<a class="cell" href="#/s/${s.id}" style="--inset:58px">
         <span class="icon" style="background:${STEP_COLOR[s.ring]}"><svg viewBox="0 0 24 24"><path d="${s.ic}"/></svg></span>
         <div class="grow"><div>${s.name}</div><div class="fine">${s.id === "read" ? `${esc(b.title)} · ${unitLabel(b, d.readUnitDone || n)}` : s.id === "arrive" ? `Thread: ${th.gloss}` : s.what}</div></div>
-        <span class="fine">${s.min} min</span><span class="check ${d.done[s.id] ? "on" : ""}"></span></a>`).join("")}</div>
+        <span class="fine">${s.id === "read" ? "unhurried" : `${s.min} min`}</span><span class="check ${d.done[s.id] ? "on" : ""}"></span></a>`).join("")}</div>
 
       ${line ? `<div class="ghead caps">Today's line</div><div class="card"><p class="quote" style="margin:0">${esc(line.text)}</p>
         <p class="fine" style="margin-top:10px">${esc(line.src)}</p>${line.mine ? `<p class="sub" style="margin-top:6px">In your words: ${esc(line.mine)}</p>` : ""}</div>` : ""}
@@ -580,17 +581,17 @@
       const ic = b.id === "iching" ? `<div class="center" style="margin:10px 0 6px">${hexSVG(n, 84)}</div><h2 class="center">${n} · ${HEXN[n - 1].name} <span class="cjk sub">${HEXN[n - 1].zh}</span></h2>` : "";
       const mine = b.id === "iching" ? myIChing(n) : null;
       body = `${ic}<div class="card" style="margin-top:12px"><p style="margin:0">Open <b>${esc(b.title)}</b>${b.edition ? ` (${esc(b.edition)})` : ""} at <b>${unitLabel(b, n)}</b>.</p>
-          <p class="sub">${b.id === "iching" ? "Read the Judgment and the Image, then the lines." : b.id === "gf" ? "Read slowly. If the chapter is long, read part of it today and continue next time." : "Read slowly, twice. Notice an image or story that stays with you."}</p></div>
-        <div class="card center" style="margin-top:12px"><div class="timer" id="rtimer">${fmt(sess.readLeft ?? 300)}</div>
-          <button class="btn sm gray" style="margin-top:10px" data-act="rtimer">${sess.timer ? "Pause" : sess.readLeft != null && sess.readLeft < 300 ? "Resume" : "Start a 5-minute reading timer"}</button></div>${lensCard}
+          <p class="sub">${b.id === "iching" ? "A hexagram is not read in one sitting. Perhaps the Judgment and the Image today, the lines on another day. Stop where it asks you to stay." : b.id === "gf" ? "Read slowly. When a passage asks you to stay with it, stop there. The rest will wait for you." : "Read slowly, as far as feels right. Stop at a story or image that stays with you."}</p></div>${lensCard}
         ${mine && (mine.judgment || mine.image) ? `<div class="ghead caps">From your My I Ching book</div><div class="card">${mine.judgment ? `<p class="serif">${esc(mine.judgment)}</p>` : ""}${mine.image ? `<p class="serif sub">${esc(mine.image)}</p>` : ""}</div>` : ""}`;
     }
+    const mark = b.mark?.n === n ? `<div class="card" style="margin:12px 0 0;background:var(--tint-soft)"><div class="caps" style="color:var(--tint)">Continuing</div><p style="margin:4px 0 0">You paused ${b.mark.where ? `at <b>${esc(b.mark.where)}</b>` : "partway"} on ${new Date(b.mark.at).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}. Pick up the thread there.</p></div>` : "";
     const already = d.done.read && d.readUnitDone && d.readUnitDone !== n ? `<div class="card" style="margin-bottom:12px;background:var(--tint-soft)"><b>✓ You read ${unitLabel(b, d.readUnitDone)} today.</b><div class="fine">Here's the next one, if you'd like to keep going.</div></div>` : "";
-    return stepFrame("read", `${already}${eyebrow("Read · 5 min", "var(--learn)")}<div class="row between"><div class="stitle">${esc(b.title)}</div></div>
+    return stepFrame("read", `${already}${eyebrow("Read · unhurried", "var(--learn)")}<div class="row between"><div class="stitle">${esc(b.title)}</div></div>
       <div class="row" style="gap:8px">${bookIcon(b, 22)}<span class="sub">${unitLabel(b, n)}${b.edition ? ` · ${esc(b.edition)}` : ""}</span>
-      <button class="btn plain sm" data-act="switchbook" style="margin-left:auto;white-space:nowrap;flex:none">Another book</button></div>${body}`,
+      <button class="btn plain sm" data-act="switchbook" style="margin-left:auto;white-space:nowrap;flex:none">Another book</button></div>${mark}${body}
+      <p class="fine center" style="margin-top:18px">There is no clock here. Reading a little, deeply, is the whole practice.</p>`,
       `<button class="btn" data-act="readdone">Finished ${b.id === "iching" ? "the hexagram" : `${b.unit.toLowerCase()} ${n}`}</button>
-       <button class="btn plain" data-act="readlater">I'll continue next time</button>`);
+       <button class="btn gray" data-act="readpause">Pause here, continue later</button>`);
   }
   const fmt = s => `${Math.floor(s / 60)}:${String(Math.max(0, s % 60)).padStart(2, "0")}`;
 
@@ -929,6 +930,20 @@
     back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
   }
 
+  // Pausing in the middle of a hexagram or chapter: note where, choose when to return.
+  function pauseSheet() {
+    const { b, n } = assignment(), here = b.id === "iching" ? ["Judgment", "Image", "Line 1", "Line 2", "Line 3", "Line 4", "Line 5", "Line 6", "Commentary"] : [];
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><h2>Pause here</h2><p class="sub">Note where you stopped; next time begins there.</p>
+      ${here.length ? `<div class="chips" style="margin:12px 0">${here.map(h => `<button class="chip" data-act="pausewhere" data-v="${h}">${h}</button>`).join("")}</div>` : ""}
+      <div class="field" style="margin-top:10px"><label>Where I stopped</label><input type="text" id="pausewhere" placeholder="${b.id === "iching" ? "e.g. after the Image" : "e.g. page 34, the butterfly dream"}" value="${esc(b.mark?.n === n ? b.mark.where : "")}"></div>
+      <div class="ghead caps">Continue</div><div class="group">
+        <button class="cell" data-act="pausego" data-when="tomorrow"><span class="grow">Tomorrow<div class="fine">Keep the thread unbroken</div></span><span class="chev">›</span></button>
+        <button class="cell" data-act="pausego" data-when="rhythm"><span class="grow">On its usual day<div class="fine">${DOW[db.settings.week.findIndex((x, i) => x === b.id && i !== new Date().getDay())] || "In the weekly rhythm"}</div></span><span class="chev">›</span></button></div>
+      <button class="btn plain" data-act="closesheet">Cancel</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
+  }
+
   /* ---------- Actions ---------- */
   function applyTheme() { const t = db.settings.theme; t === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = t); }
   applyTheme();
@@ -964,12 +979,19 @@
     else if (a === "switchbook") chooseBook();
     else if (a === "pickbook") { const b = book(d.b), dd = day(); dd.readBook = b.id; dd.readUnit = b.pos; sess.picks.clear(); sess.cap = null; save(); el.closest(".sheet-back").remove(); rerender(); }
     else if (a === "closesheet") el.closest(".sheet-back").remove();
-    else if (a === "rtimer") { if (sess.timer) { clearInterval(sess.timer); sess.timer = null; } else { sess.readLeft ??= 300; tick("#rtimer", "readLeft", () => toast("Five minutes. Finish the passage at your own pace.")); } el.textContent = sess.timer ? "Pause" : "Resume"; }
-    else if (a === "readdone" || a === "readlater") {
+    else if (a === "readdone") {
       const dd = day(), { b, n } = assignment();
-      if (a === "readdone") { if (!b.read.includes(n)) b.read.push(n); dd.readUnitDone = n; b.pos = nextUnit(b, n); dd.readUnit = b.pos; if (b.id === "iching" && !db.hexCards.includes(n)) db.hexCards.push(n); }
-      else dd.readUnitDone = n;
-      sess.readLeft = null; markDone("read"); go("#/s/capture");
+      if (!b.read.includes(n)) b.read.push(n); dd.readUnitDone = n; b.pos = nextUnit(b, n); dd.readUnit = b.pos; b.mark = null;
+      if (b.id === "iching" && !db.hexCards.includes(n)) db.hexCards.push(n);
+      markDone("read"); go("#/s/capture");
+    }
+    else if (a === "readpause") pauseSheet();
+    else if (a === "pausewhere") { $("#pausewhere").value = d.v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
+    else if (a === "pausego") {
+      const dd = day(), { b, n } = assignment();
+      b.mark = { n, where: ($("#pausewhere")?.value || "").trim(), at: Date.now() }; dd.readUnitDone = n;
+      db.carry = d.when === "tomorrow" ? { book: b.id, day: dkey(today0() + DAY + 3600e3) } : null;
+      el.closest(".sheet-back").remove(); markDone("read"); save(); toast(d.when === "tomorrow" ? "Tomorrow you'll continue here." : "It will be waiting on its day."); go("#/s/capture");
     }
     else if (a === "caped") { sess.cap.ed = d.v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
     else if (a === "addlens") { const inp = $("#lens-" + d.b), v = inp?.value.trim(); if (!v) return; const b = book(d.b); if (!b.lenses.includes(v)) b.lenses.push(v); save(); rerender(); }
