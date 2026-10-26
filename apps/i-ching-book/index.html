@@ -185,6 +185,17 @@
     .lopt.on { border-color: transparent; background: var(--ink); color: var(--paper); box-shadow: var(--e1); }
     .lopt.on small { color: color-mix(in srgb, var(--paper) 70%, transparent); }
     .lopt.on svg [stroke] { stroke: var(--seal); }
+    .yarrow svg { display: block; cursor: pointer; touch-action: manipulation; }
+    .yarrow .yarea { fill: color-mix(in srgb, var(--ink) 4%, transparent); }
+    .yarrow .ylab { font: 600 9px var(--sans); letter-spacing: .08em; fill: var(--muted); text-transform: uppercase; }
+    .stalk { fill: #a98450; transition: transform .55s var(--ease), fill .3s, opacity .3s; transform-box: view-box; }
+    .yarrow svg.complete .stalk:not(.watch) { opacity: .35 !important; }
+    .stalk.rem { fill: var(--seal); } .stalk.aside { fill: #c3a679; } .stalk.watch { fill: #c3a679; opacity: .55 !important; }
+    .coins { display: flex; justify-content: center; gap: 14px; padding: 18px 0 4px; cursor: pointer; touch-action: manipulation; }
+    .coin { width: 68px; height: 68px; border-radius: 50%; filter: drop-shadow(0 4px 8px rgba(60,40,10,.18)); }
+    .coin .cf { fill: #b38b4d; } .coin .cr { fill: none; stroke: #8a6a35; stroke-width: 1.6; } .coin .ch { fill: var(--card); stroke: #8a6a35; stroke-width: 1.2; } .coin .cm { fill: #7d5f2e; }
+    .coin.spin { animation: coinspin .8s var(--ease) both; }
+    @keyframes coinspin { 0% { transform: translateY(0) rotateX(0); } 40% { transform: translateY(-46px) rotateX(900deg); } 100% { transform: translateY(0) rotateX(1800deg); } }
     #inkpad { display: block; width: 100%; max-width: 440px; margin: 0 auto; aspect-ratio: 1000 / 1150; touch-action: none; cursor: crosshair;
               border-radius: 16px; background: color-mix(in srgb, var(--paper) 55%, var(--card)); box-shadow: inset 0 1px 3px rgba(60,40,10,.08); user-select: none; -webkit-user-select: none; }
     .inkfig { display: block; color: var(--ink); overflow: visible; margin: 0 auto; }
@@ -487,7 +498,7 @@
 
   /* ---------- Storage (on this device only) ---------- */
   // Shown at the bottom of Today and Settings. Keep in step with VERSION in sw.js.
-  const APP_VERSION = "7", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "8", APP_DATE = "26 Oct 2026";
   const versionTag = () => `<p class="center small muted" style="margin-top:22px;opacity:.75">My I Ching · version ${APP_VERSION} · ${APP_DATE}</p>`;
   const KEY = "my-i-ching-v1";
   const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
@@ -590,7 +601,7 @@
       if (html != null) {
         $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
         document.querySelectorAll("#main textarea").forEach(autogrow);
-        mountInkPad();
+        mountInkPad(); mountYarrow();
       }
       document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
       $("#fab").classList.toggle("hide", hash !== "#/readings");
@@ -667,13 +678,47 @@
   }
 
   /* ---------- New reading: build the hexagram ---------- */
+  const MODES = [["yarrow", "Yarrow"], ["coins", "Coins"], ["draw", "Draw"], ["tap", "Tap"]];
   function viewNew() {
-    db.draft ||= { lines: [null, null, null, null, null, null], q: "", sit: "", method: "", mode: "draw", ink: [] };
-    const d = db.draft, drawMode = (d.mode || "draw") === "draw", next = d.lines.findIndex(v => v == null), ready = next === -1;
+    db.draft ||= { lines: [null, null, null, null, null, null], q: "", sit: "", method: "", mode: "yarrow", ink: [] };
+    const d = db.draft; d.mode ||= "yarrow";
+    const mode = d.mode, next = d.lines.findIndex(v => v == null), ready = next === -1;
     const n = ready ? BY_BITS[bitsOf(d.lines)] : null;
     const opt = (i, v, nm) => `<button class="lopt ${d.lines[i] === v ? "on" : ""}" data-act="setline" data-i="${i}" data-v="${v}">${hexLine(v)}${v}<small>${nm}</small></button>`;
     const rows = [5, 4, 3, 2, 1, 0].map(i => `<div class="lrow ${i === next ? "next" : ""}"><span class="lbl">${i + 1}</span><div class="opts">
       ${opt(i, 6, "old yin")}${opt(i, 7, "yang")}${opt(i, 8, "yin")}${opt(i, 9, "old yang")}</div></div>`).join("");
+    if (mode === "yarrow" || mode === "coins") castOf(d); else d.cast = null;
+    const castFoot = !d.cast ? "" : `<div class="row between" style="margin-top:14px;gap:10px"><div id="castread" class="grow">${castReadout(d)}</div>
+        <button class="btn sm ghost" data-act="castreset">Start over</button></div>`;
+    const panels = {
+      yarrow: `<p class="small muted">Hold your question. Then <b>tap the bundle where your hand would divide it</b>. One stalk is taken from the right, both heaps are counted off by fours, and the remainders are laid aside. Three divisions make a line; six lines, a hexagram. Your tap chooses roughly where, never the exact count, just as with real stalks.</p>
+        <div class="card" style="margin-top:10px"><div id="yarrow" class="yarrow"></div>${castFoot}
+          <label class="small muted row" style="gap:8px;margin-top:10px"><input type="checkbox" data-act="slowcast" ${db.settings.slowCast !== false ? "checked" : ""}> Show the counting</label></div>`,
+      coins: `<p class="small muted">Hold your question, then <b>tap the coins or shake your phone</b> to toss. The inscribed side counts 2, the plain side 3: their sum is the line (6, 7, 8 or 9). Six tosses, from the bottom line up.</p>
+        <div class="card" style="margin-top:10px"><div id="coins" class="coins" data-act="toss" role="button" aria-label="Toss the coins">${[3, 2, 3].map(f => `<div class="coin">${coinSVG(f)}</div>`).join("")}</div>
+          <p class="center small muted" style="margin:6px 0 0">Tap to toss</p>${castFoot}</div>`,
+      draw: `<p class="small muted">For when you cast with your own coins or stalks: draw each line as it comes. <b>One unbroken stroke</b> for yang, <b>two strokes with a gap</b> for yin, and any mark in the right margin for a moving line.</p>
+        <div class="card" style="margin-top:10px">
+          <canvas id="inkpad" aria-label="Drawing pad for six lines"></canvas>
+          <div class="row between" style="margin-top:12px"><div id="inkread" class="grow">${inkReadout(d.lines, ready ? n : null, readInk(d.ink || []).map((r, i) => r.state === "unclear" ? i + 1 : 0).filter(Boolean))}</div>
+            <div class="row" style="gap:6px"><button class="btn sm" data-act="inkundo" aria-label="Undo last stroke">Undo</button><button class="btn sm ghost" data-act="inkclear">Clear</button></div></div>
+        </div>`,
+      tap: `<p class="small muted">For when you cast with your own coins or stalks: enter each line from 1 at the bottom to 6 at the top. 6 and 9 are moving lines.</p>
+        <div class="card" style="margin-top:10px">
+          <div class="builder"><div>${rows}</div>
+            <div class="center" style="width:110px">${hexSVG(d.lines, { w: 70 })}
+              <div style="margin-top:10px;min-height:44px">${n ? `<div class="num">${n}</div><div class="serif" style="font-size:15px">${hx(n).name}</div>` : `<div class="small muted">${6 - d.lines.filter(v => v != null).length} to go</div>`}</div></div></div>
+          <hr style="margin:14px 0">
+          <div class="row wrap" style="gap:8px">
+            <input type="text" id="numcode" inputmode="numeric" class="pillin" placeholder="Or type 6 digits, bottom → top: 789678" style="flex:1;min-width:200px">
+            <button class="btn sm" data-act="numcode">Use</button>
+          </div>
+          <div class="row wrap" style="gap:8px;margin-top:10px">
+            <input type="text" id="hexnum" inputmode="numeric" class="pillin" placeholder="Or start from a number 1–64" style="flex:1;min-width:200px">
+            <button class="btn sm" data-act="hexnum">Use</button>
+          </div>
+        </div>`,
+    };
     return `
       <a class="back" href="#/">← Today</a>
       <h1>A new reading</h1>
@@ -681,50 +726,20 @@
       <div class="card" style="margin-top:16px">
         <div class="field" style="padding-top:0"><label>My question</label><textarea rows="1" data-bind="draft:q" placeholder="What do I need to understand about…">${esc(d.q)}</textarea></div>
         <div class="field"><label>What's alive in my life right now</label><textarea rows="2" data-bind="draft:sit" placeholder="The situation, the feelings, what I hope and fear…">${esc(d.sit)}</textarea></div>
-        <div class="field"><label>How I'm producing it</label><input type="text" data-bind="draft:method" value="${esc(d.method)}" placeholder="Coins, yarrow, dice, numbers from the moment, a walk…"></div>
+        ${mode === "draw" || mode === "tap" ? `<div class="field"><label>How I produced it</label><input type="text" data-bind="draft:method" value="${esc(d.method)}" placeholder="My coins, yarrow stalks, dice, numbers from the moment…"></div>` : ""}
       </div>
-      <div class="sechead between"><h3>${drawMode ? "Draw it from the bottom up" : "Build it from the bottom up"}</h3></div>
-      <div class="seg" style="margin:4px 0 10px"><button class="${drawMode ? "on" : ""}" data-act="buildmode" data-m="draw">Draw by hand</button><button class="${drawMode ? "" : "on"}" data-act="buildmode" data-m="tap">Tap the lines</button></div>
-      ${drawMode ? `<p class="small muted">As each line comes to you, by coins, stalks or any way of your own, draw it with your finger: <b>one unbroken stroke</b> for yang, <b>two strokes with a gap</b> for yin. If a line is moving, make any mark beside it in the right margin. Go slowly; the ink follows your hand.</p>
-      <div class="card" style="margin-top:10px">
-        <canvas id="inkpad" aria-label="Drawing pad for six lines"></canvas>
-        <div class="row between" style="margin-top:12px"><div id="inkread" class="grow">${inkReadout(d.lines, ready ? n : null, readInk(d.ink || []).map((r, i) => r.state === "unclear" ? i + 1 : 0).filter(Boolean))}</div>
-          <div class="row" style="gap:6px"><button class="btn sm" data-act="inkundo" aria-label="Undo last stroke">Undo</button><button class="btn sm ghost" data-act="inkclear">Clear</button></div></div>
-      </div>` : `<p class="small muted">Lines are written from line 1 at the bottom to line 6 at the top. 6 and 9 are moving lines that change into their opposite.</p>
-      <div class="card" style="margin-top:10px">
-        <div class="builder"><div>${rows}</div>
-          <div class="center" style="width:110px">${hexSVG(d.lines, { w: 70, cls: "ink" })}
-            <div style="margin-top:10px;min-height:44px">${n ? `<div class="num">${n}</div><div class="serif" style="font-size:15px">${hx(n).name}</div>` : `<div class="small muted">${6 - d.lines.filter(v => v != null).length} to go</div>`}</div></div></div>
-        <hr style="margin:14px 0">
-        <div class="row wrap" style="gap:8px">
-          <input type="text" id="numcode" inputmode="numeric" class="pillin" placeholder="Or type 6 digits, bottom → top: 789678" style="flex:1;min-width:200px">
-          <button class="btn sm" data-act="numcode">Use</button>
-        </div>
-        <div class="row wrap" style="gap:8px;margin-top:10px">
-          <input type="text" id="hexnum" inputmode="numeric" class="pillin" placeholder="Or start from a number 1–64" style="flex:1;min-width:200px">
-          <button class="btn sm" data-act="hexnum">Use</button>
-        </div>
-        <details style="margin-top:14px"><summary class="small">Let the app cast instead</summary>
-          <div class="row wrap" style="gap:8px;margin-top:10px">
-            <button class="btn sm" data-act="cast" data-m="coins">Three coins</button>
-            <button class="btn sm" data-act="cast" data-m="yarrow">Yarrow-stalk odds</button>
-            <button class="btn sm ghost" data-act="clearlines">Clear</button>
-          </div>
-          <p class="small muted">Coins: each moving line 1 in 8. Yarrow: old yang 3/16, old yin 1/16, so yin rarely moves.</p>
-        </details>
-      </div>`}
+      <div class="sechead"><h3>Cast the hexagram</h3></div>
+      <div class="seg" style="margin:4px 0 12px">${MODES.map(([k, l]) => `<button class="${mode === k ? "on" : ""}" data-act="buildmode" data-m="${k}">${l}</button>`).join("")}</div>
+      ${panels[mode]}
       <button class="btn seal block" style="margin-top:20px" data-act="begin" ${ready ? "" : "disabled"}>Meet the hexagram →</button>`;
   }
+
   function hexLine(v) {
     const yang = isYang(v), c = moving(v);
     return `<svg width="34" height="10" viewBox="0 0 34 10" aria-hidden="true">${yang ? `<rect x="0" y="3" width="${c ? 26 : 34}" height="4" rx="1" fill="currentColor"/>` : `<rect x="0" y="3" width="${c ? 11 : 15}" height="4" rx="1" fill="currentColor"/><rect x="${c ? 15 : 19}" y="3" width="11" height="4" rx="1" fill="currentColor"/>`}
       ${c ? (v === 9 ? `<circle cx="31" cy="5" r="2.6" fill="none" stroke="var(--seal)" stroke-width="1.3"/>` : `<path d="M28.5 2.5l5 5M33.5 2.5l-5 5" stroke="var(--seal)" stroke-width="1.3"/>`) : ""}</svg>`;
   }
-  function randLine(m) {
-    const r = crypto.getRandomValues(new Uint32Array(3));
-    if (m === "coins") return [...r].reduce((a, x) => a + (x % 2 ? 3 : 2), 0);
-    const x = r[0] % 16; return x < 1 ? 6 : x < 4 ? 9 : x < 9 ? 7 : 8; // old yin 1/16, old yang 3/16, yang 5/16, yin 7/16
-  }
+
 
   /* ---------- Drawing the hexagram by hand ----------
      Coordinates are normalised to a 1000 × 1150 pad: lines are drawn in the left zone,
@@ -828,6 +843,133 @@
     return `<div class="pair${b ? "" : " single"}">${col(a.fig, a.n)}${b ? `<div class="arrow">→</div>${col(b.fig, b.n, "opacity:.82")}` : ""}</div>`;
   }
 
+  /* ---------- Casting: yarrow stalks and three coins ----------
+     Yarrow follows the classical procedure: of 50 stalks one is set aside; the 49 are
+     divided (by your tap), one is taken from the right heap, both heaps are counted off by
+     fours and the remainders laid aside. Three divisions make a line (36/32/28/24 stalks
+     left → 9/8/7/6), six lines a hexagram. A tap picks roughly where, never the exact
+     count (±4 stalks, like a hand), so the odds are the true yarrow odds:
+     old yin 1/16, yang 5/16, yin 7/16, old yang 3/16. */
+  const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+  const LINE_NAME = { 6: "old yin, moving", 7: "young yang", 8: "young yin", 9: "old yang, moving" };
+  const freshCast = m => ({ m, line: 0, div: 0, pool: [...Array(49).keys()], aside: [], piles: [], log: [] });
+  const castOf = d => (d.cast && d.cast.m === d.mode) ? d.cast : (d.cast = freshCast(d.mode));
+  let castBusy = false;
+
+  function castReadout(d) {
+    const c = d.cast, lines = d.lines, done = lines.every(v => v != null), n = done ? BY_BITS[bitsOf(lines)] : null;
+    const last = c && c.log.length ? lines[c.log.length - 1] : null;
+    const status = done ? `<div class="num">${n}</div><div class="serif" style="font-size:18px">${hx(n).name}</div><div class="small muted">Cast complete.</div>`
+      : `<div class="eyebrow">Line ${c.line + 1} of 6${c.m === "yarrow" ? ` · division ${c.div + 1} of 3` : ""}</div>
+         ${last != null ? `<div class="small" style="margin-top:4px">Line ${c.log.length}: <b>${last}</b> · ${LINE_NAME[last]}</div>` : `<div class="small muted" style="margin-top:4px">Hold your question in mind.</div>`}`;
+    return `<div class="row" style="gap:14px">${hexSVG(lines, { w: 40 })}<div class="grow">${status}</div></div>`;
+  }
+  function refreshCast() {
+    const d = db.draft, box = $("#castread"); if (box) box.innerHTML = castReadout(d);
+    const btn = $("[data-act=begin]"); if (btn) btn.disabled = d.lines.some(v => v == null);
+  }
+  function finishLine(d, value, entry) {
+    const c = d.cast; d.lines[c.line] = value; c.log.push(entry); c.line++;
+    haptic(moving(value) ? [10, 40, 16] : 10); save(); refreshCast();
+    if (c.line === 6) { haptic([12, 60, 24]); toast(`${BY_BITS[bitsOf(d.lines)]} · ${hx(BY_BITS[bitsOf(d.lines)]).name}`); }
+  }
+
+  /* Yarrow stalks */
+  const YW = 360, YH = 216;
+  function stalkPos(c, phase, split) {
+    // returns {id: [x, y, rotateDeg, scale, cls]}
+    const P = {}, pool = c.pool, wob = id => ((id * 37) % 11 - 5) * 0.12;
+    P[49] = [48, 30, 90, 0.5, "watch"];
+    c.piles.forEach((pile, j) => pile.forEach((id, k) => { P[id] = [172 + j * 64, 18 + k * 3.4, 90, 0.48, "aside"]; }));
+    if (phase === "bundle") {
+      const step = Math.min(6.2, 300 / pool.length), x0 = YW / 2 - (pool.length - 1) * step / 2;
+      pool.forEach((id, k) => { P[id] = [x0 + k * step, 148, wob(id), 1, ""]; });
+    } else {
+      const { left, finger, right, remL, remR } = split;
+      const heap = (ids, cx, rem, side) => {
+        // counted off by fours: small gaps between groups; the remainder (seal red) sits at the outer end
+        const g = Math.ceil(ids.length / 4), gw = Math.min(24, 150 / g), sp = phase === "count" ? gw * 0.17 : gw / 4, gap = phase === "count" ? gw - 3 * sp : 0;
+        const x0 = cx - (phase === "count" ? g * gw - gap : ids.length * sp) / 2;
+        ids.forEach((id, k) => {
+          const isRem = phase === "count" && (side < 0 ? k < rem : k >= ids.length - rem);
+          const x = phase === "count" ? x0 + Math.floor(k / 4) * gw + (k % 4) * sp : x0 + k * sp;
+          P[id] = [x, 148, wob(id), 1, isRem ? "rem" : ""]; });
+      };
+      heap(left, 92, remL, -1); heap(right, 270, remR, 1);
+      P[finger] = [YW / 2, 112, -18, 0.9, "rem"];
+    }
+    return P;
+  }
+  function mountYarrow() {
+    const box = $("#yarrow"); if (!box) return;
+    const c = castOf(db.draft);
+    box.innerHTML = `<svg viewBox="0 0 ${YW} ${YH}" width="100%" role="img" aria-label="Yarrow stalks. Tap to divide.">
+      <text x="48" y="58" text-anchor="middle" class="ylab">the 50th</text>
+      <text x="236" y="70" text-anchor="middle" class="ylab" id="ytray"></text>
+      <rect x="20" y="86" width="${YW - 40}" height="124" rx="14" class="yarea"/>
+      <text x="${YW / 2}" y="${YH - 1}" text-anchor="middle" class="ylab" id="yhint">tap where you would divide</text>
+      ${[...Array(50).keys()].map(id => `<rect class="stalk" data-id="${id}" x="-1.5" y="-56" width="3" height="112" rx="1.5"/>`).join("")}</svg>`;
+    placeStalks(stalkPos(c, "bundle"));
+    box.querySelector("svg").onclick = e => divideAt(e);
+  }
+  function placeStalks(P) {
+    document.querySelectorAll("#yarrow .stalk").forEach(el => {
+      const p = P[el.dataset.id];
+      if (!p) { el.style.opacity = 0; return; }
+      el.style.opacity = 1; el.style.transform = `translate(${p[0]}px, ${p[1]}px) rotate(${p[2]}deg) scale(${p[3]})`;
+      el.setAttribute("class", "stalk " + p[4]);
+    });
+    const c = db.draft.cast, t = $("#ytray");
+    if (t) t.textContent = c.piles.length ? `set aside: ${c.piles.map(p => p.length).join(" · ")}` : "";
+    const h = $("#yhint"); if (h) h.textContent = c.line >= 6 ? "cast complete" : "tap where you would divide";
+    $("#yarrow svg")?.classList.toggle("complete", c.line >= 6);
+  }
+  function divideAt(e) {
+    const d = db.draft, c = castOf(d); if (castBusy || c.line >= 6) return;
+    const svg = e.currentTarget, r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * YW;
+    const N = c.pool.length, step = Math.min(6.2, 300 / N), x0 = YW / 2 - (N - 1) * step / 2;
+    const f = Math.max(0, Math.min(1, (x - x0) / ((N - 1) * step)));
+    let L = Math.round(f * N) + rnd(8) - 4; L = Math.max(3, Math.min(N - 3, L));
+    const left = c.pool.slice(0, L), finger = c.pool[L], right = c.pool.slice(L + 1);
+    const remL = left.length % 4 || 4, remR = right.length % 4 || 4;
+    const split = { left, finger, right, remL, remR };
+    const slow = db.settings.slowCast !== false, T = slow ? [650, 1500] : [180, 420];
+    castBusy = true; haptic(8);
+    placeStalks(stalkPos(c, "split", split));
+    setTimeout(() => placeStalks(stalkPos(c, "count", split)), T[0]);
+    setTimeout(() => {
+      const aside = [finger, ...left.slice(0, remL), ...right.slice(right.length - remR)];
+      c.piles.push(aside); c.pool = [...left.slice(remL), ...right.slice(0, right.length - remR)]; c.div++;
+      if (c.div === 3) {
+        const value = c.pool.length / 4, entry = c.piles.map(p => p.length);
+        placeStalks(stalkPos(c, "bundle"));
+        setTimeout(() => { c.div = 0; c.pool = [...Array(49).keys()]; c.piles = []; finishLine(d, value, entry); placeStalks(stalkPos(c, "bundle")); castBusy = false; }, slow ? 700 : 250);
+      } else { placeStalks(stalkPos(c, "bundle")); save(); refreshCast(); castBusy = false; }
+    }, T[1]);
+  }
+
+  /* Three coins: the inscribed side counts 2 (yin), the plain side 3 (yang). */
+  function coinSVG(face) {
+    const marks = face === 2 ? `<g class="cm"><rect x="27" y="11" width="6" height="9" rx="1"/><rect x="27" y="40" width="6" height="9" rx="1"/><rect x="11" y="27" width="9" height="6" rx="1"/><rect x="40" y="27" width="9" height="6" rx="1"/></g>` : "";
+    return `<svg viewBox="0 0 60 60" width="68" height="68"><circle cx="30" cy="30" r="28" class="cf"/><circle cx="30" cy="30" r="23.5" class="cr"/><rect x="23" y="23" width="14" height="14" rx="1.5" class="ch"/>${marks}</svg>`;
+  }
+  function tossCoins() {
+    const d = db.draft, c = castOf(d); if (castBusy || c.line >= 6) return;
+    castBusy = true; haptic(8);
+    const faces = [0, 0, 0].map(() => rnd(2) ? 3 : 2), coins = document.querySelectorAll("#coins .coin");
+    coins.forEach((el, i) => { el.classList.remove("spin"); void el.offsetWidth; el.style.animationDuration = 700 + i * 140 + "ms"; el.classList.add("spin"); });
+    setTimeout(() => {
+      coins.forEach((el, i) => { el.innerHTML = coinSVG(faces[i]); el.classList.remove("spin"); });
+      finishLine(d, faces.reduce((a, b) => a + b, 0), faces); castBusy = false;
+    }, 1000);
+  }
+  let lastShake = 0;
+  addEventListener("devicemotion", e => {
+    if (!$("#coins")) return; const a = e.accelerationIncludingGravity; if (!a) return;
+    const g = Math.hypot(a.x || 0, a.y || 0, a.z || 0), now = Date.now();
+    if (g > 24 && now - lastShake > 1400) { lastShake = now; tossCoins(); }
+  });
+
   /* ---------- A reading ---------- */
   const viewOpen = new Set();
   function emphasis(lines, n, m) {
@@ -859,6 +1001,10 @@
         <p class="small center" style="margin:6px 0 0"><span class="seal-dot"></span>${em.text} <span class="muted">(Zhu Xi's rule; trust your own sense.)</span></p>
         <p class="small center" style="margin:6px 0 0"><a class="link" href="#/guide">How to read a hexagram →</a></p>
       </div>
+      ${r.cast ? `<details style="margin-top:12px"><summary class="small">How it was cast · ${r.cast.m === "yarrow" ? "yarrow stalks" : "three coins"}</summary>
+        <div class="card flat" style="margin-top:8px;padding:6px 18px">${[5, 4, 3, 2, 1, 0].map(i => `<div class="row between small" style="padding:8px 0;border-bottom:1px solid var(--line)">
+          <span><b>Line ${i + 1}</b> · ${r.lines[i]} · ${LINE_NAME[r.lines[i]]}</span>
+          <span class="muted">${r.cast.m === "yarrow" ? `set aside ${r.cast.log[i].join(", ")}` : `coins ${r.cast.log[i].join(" + ")}`}</span></div>`).join("")}</div></details>` : ""}
       ${r.sit ? `<details style="margin-top:12px"><summary class="small">The situation I described</summary>${relField(id, "sit", "What was alive", "")}</details>` : ""}
 
       ${S("First impression")}
@@ -1314,7 +1460,17 @@
     const a = el.dataset.act, d = el.dataset;
     if (a === "setline") { db.draft.lines[+d.i] = +d.v; db.draft.ink = []; save(); rerender(); }
     else if (a === "clearlines") { db.draft.lines = [null, null, null, null, null, null]; db.draft.ink = []; save(); rerender(); }
-    else if (a === "buildmode") { db.draft.mode = d.m; if (d.m === "draw") db.draft.lines = inkLines(readInk(db.draft.ink || [])); save(); rerender(); }
+    else if (a === "buildmode") {
+      const dr = db.draft; if (dr.mode === d.m || castBusy) return;
+      if (dr.lines.some(v => v != null) && !confirm("Start the hexagram again with this method? The lines so far will be cleared.")) return;
+      dr.mode = d.m; dr.lines = [null, null, null, null, null, null]; dr.ink = []; dr.cast = null; save(); rerender();
+    }
+    else if (a === "castreset") { if (castBusy) return; const dr = db.draft; if (dr.lines.some(v => v != null) && !confirm("Start the cast over?")) return; dr.lines = [null, null, null, null, null, null]; dr.cast = null; save(); rerender(); }
+    else if (a === "slowcast") { db.settings.slowCast = el.checked; save(); }
+    else if (a === "toss") {
+      if (window.DeviceMotionEvent && DeviceMotionEvent.requestPermission && !window.__motionAsked) { window.__motionAsked = true; DeviceMotionEvent.requestPermission().catch(() => {}); }
+      tossCoins();
+    }
     else if (a === "inkundo") { db.draft.ink.pop(); $("#inkpad").repaint(); inkChanged(); }
     else if (a === "inkclear") { if (!db.draft.ink.length || confirm("Clear the whole drawing?")) { db.draft.ink = []; $("#inkpad").repaint(); inkChanged(); } }
     else if (a === "numcode") {
@@ -1324,15 +1480,12 @@
     } else if (a === "hexnum") {
       const k = parseInt($("#hexnum").value, 10); if (!(k >= 1 && k <= 64)) return toast("A number from 1 to 64");
       db.draft.lines = [...hx(k).bits].map(b => b === "1" ? 7 : 8); db.draft.ink = []; save(); rerender(); toast("Tap 6 or 9 on any line that moves");
-    } else if (a === "cast") {
-      db.draft.lines = [null, null, null, null, null, null]; db.draft.ink = []; rerender();
-      for (let i = 0; i < 6; i++) { await new Promise(r => setTimeout(r, 380)); db.draft.lines[i] = randLine(d.m); rerender(); }
-      if (!db.draft.method) db.draft.method = d.m === "coins" ? "Three coins (app)" : "Yarrow odds (app)";
-      save(); rerender();
     } else if (a === "begin") {
       const dr = db.draft; if (dr.lines.some(v => v == null)) return;
-      const r = { id: uid(), at: Date.now(), q: dr.q, sit: dr.sit, method: dr.method, lines: dr.lines, rel: {}, back: {} };
-      if (dr.mode !== "tap" && dr.ink && dr.ink.length) r.ink = dr.ink;
+      const auto = { yarrow: "Yarrow stalks", coins: "Three coins" }[dr.mode];
+      const r = { id: uid(), at: Date.now(), q: dr.q, sit: dr.sit, method: auto || dr.method, lines: dr.lines, rel: {}, back: {} };
+      if (dr.mode === "draw" && dr.ink && dr.ink.length) r.ink = dr.ink;
+      if (auto && dr.cast) r.cast = { m: dr.mode, log: dr.cast.log };
       db.readings.push(r); db.draft = null; markDay(); save(true); location.hash = "#/r/" + r.id;
     } else if (a === "alllines") { viewOpen.has(d.id) ? viewOpen.delete(d.id) : viewOpen.add(d.id); rerender(); }
     else if (a === "backin") { const r = getReading(d.id); r.backDays = +d.d; r.backAt = today0() + (+d.d) * DAY; save(); rerender(); }
