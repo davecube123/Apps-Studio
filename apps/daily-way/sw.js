@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "daily-way-v3";
+const VERSION = "daily-way-v4";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./data/tao-te-ching.json", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2"];
 

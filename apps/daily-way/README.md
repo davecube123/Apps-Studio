@@ -4,13 +4,13 @@ A 20-minute daily practice towards mastery of four classics, the **Tao Te Ching*
 **The Secret of the Golden Flower** and the **Chuang Tzu**, and towards living their shared teaching.
 Apple-style minimalism, offline, private.
 
-## The daily session (≈20 min)
+## The daily session (about 20 min, never rushed)
 
 | Step | Time | What you do | Why |
 | --- | --- | --- | --- |
 | Arrive | 1 | Three slow breaths; today's *thread* (an idea that runs through all four books) | Settles attention; primes what to look for |
 | Recall | 4 | Spaced-repetition cards from your captures, threads and hexagrams, mixed | Testing effect (Roediger & Karpicke, 2006); spacing (Cepeda et al., 2006); interleaving (Rohrer & Taylor, 2007) |
-| Read | 5 | Today's chapter on a weekly rhythm across the books; Legge's Tao Te Ching is built in, others point to your edition, with a 5-min timer | Interleaving; slow, repeated reading |
+| Read | unhurried | Today's chapter on a weekly rhythm across the books; Legge's Tao Te Ching is built in, others point to your edition. No clock: **pause** at a natural stopping point (for the I Ching, tap Judgment / Image / Line 1–6), note where, and continue **tomorrow** or on the book's usual day | Interleaving; slow, deep reading over coverage |
 | Capture | 3 | One passage, in your own words, plus the question it raises, tagged to threads | Generation effect (Slamecka & Graf, 1978); elaborative interrogation (Dunlosky et al., 2013) |
 | Connect | 2 | Today's passage beside one from a *different* book: what do they say to each other? | Integration across sources (Wiley & Voss, 1999) |
 | Sit | 4 | "Circulating the light" (Golden Flower), with a breathing guide, bell and screen kept awake | Brief daily meditation (Zeidan et al., 2010; Tang et al., 2015) |
