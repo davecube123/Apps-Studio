@@ -14,6 +14,7 @@ Apple-style minimalism, offline, private.
 | Capture | 3 | One passage, in your own words, plus the question it raises, tagged to threads | Generation effect (Slamecka & Graf, 1978); elaborative interrogation (Dunlosky et al., 2013) |
 | Connect | 2 | Today's passage beside one from a *different* book: what do they say to each other? | Integration across sources (Wiley & Voss, 1999) |
 | Sit | 4 | "Circulating the light" (Golden Flower), with a breathing guide, bell and screen kept awake | Brief daily meditation (Zeidan et al., 2010; Tang et al., 2015) |
+| …or **Bring it to practice** | 1 | If you already keep a meditation practice (Settings → Practice → *My own practice*), no extra sitting: today's line gets a bridge into each of your practices, e.g. trataka (circulating the light), death meditation (Chuang Tzu, Tao Te Ching 33), breathwork (fine, even breath; each exhale a return). One tap fills the Practice ring; the evening asks what the line became in your practice. | Habit stacking (Fogg, 2019; Gardner et al., 2012); transfer (Perkins & Salomon, 1992) |
 | Carry | 1 | "When ___, I will ___" for the day | Implementation intentions (Gollwitzer & Sheeran, 2006) |
 | Evening | 2 | Did you live it? What did you notice? What would you tell a friend? | Reflection (Di Stefano et al., 2014); self-distancing (Kross & Ayduk, 2011) |
 
