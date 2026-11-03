@@ -26,7 +26,7 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 - **Go to page** and the **scrubber**.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.
-- **Continue reading** card at the top of the Library.
+- **Library:** three columns of identical book tiles (any cover shape fits; landscape covers shown whole), most recently opened at the top left, with a search box for titles and authors.
 
 ## Quoting
 

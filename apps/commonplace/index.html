@@ -77,22 +77,23 @@
     .search svg { width: 18px; height: 18px; stroke: var(--label3); fill: none; stroke-width: 2; flex: none; }
 
     /* Library */
-    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 26px 18px; margin-top: 20px; }
-    @media (max-width: 420px) { .shelf { grid-template-columns: repeat(2, 1fr); } }
+    .shelf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 14px; margin-top: 16px; align-items: start; }
+    @media (min-width: 700px) { .shelf { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 20px; } }
     .book { cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
-    .cover { aspect-ratio: 2 / 3; border-radius: 4px 9px 9px 4px; overflow: hidden; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,.12), 0 12px 28px rgba(0,0,0,.16);
+    .cover { container-type: inline-size; aspect-ratio: 2 / 3; width: 100%; height: auto; border-radius: 4px 9px 9px 4px; overflow: hidden; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,.12), 0 12px 28px rgba(0,0,0,.16);
              transition: transform .3s var(--spring); background: #444; }
     .book:active .cover { transform: scale(.97); }
-    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .cover img.wide { object-fit: contain; object-position: center; background: #fff; }
     .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.18), rgba(255,255,255,.08) 4%, transparent 9%); pointer-events: none; }
-    .gen { position: absolute; inset: 0; padding: 18% 12% 12%; display: flex; flex-direction: column; justify-content: space-between; color: #fbf6ec; }
-    .gen b { font: 600 19px/1.15 var(--serif); letter-spacing: -.005em; }
-    .gen i { font: italic 13px var(--serif); opacity: .85; }
-    .gen hr { border: 0; border-top: 1px solid rgba(255,255,255,.4); width: 30%; margin: 10px 0; }
-    .book .t { font: 600 14px/1.25 var(--sans); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .book .m { font-size: 12.5px; color: var(--label2); }
+    .gen { position: absolute; inset: 0; padding: 16% 11% 11%; display: flex; flex-direction: column; justify-content: space-between; color: #fbf6ec; }
+    .gen b { font: 600 13cqw/1.15 var(--serif); letter-spacing: -.005em; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+    .gen i { font: italic 8.5cqw var(--serif); opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gen hr { border: 0; border-top: 1px solid rgba(255,255,255,.4); width: 30%; margin: 7cqw 0; }
+    .book .t { font: 600 13px/1.25 var(--sans); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .book .m { font-size: 11.5px; color: var(--label2); }
     .book .bar { height: 3px; border-radius: 3px; background: var(--fill); overflow: hidden; } .book .bar i { display: block; height: 100%; background: var(--tint); }
-    .add { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label2); cursor: pointer; font-size: 14px; }
+    .add { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label2); cursor: pointer; font-size: 13px; padding: 6px; }
     .empty { text-align: center; padding: 50px 20px; }
 
     /* Quotes */
@@ -205,12 +206,6 @@
     #qbar button { border: 0; background: none; color: #fff; font: 600 14.5px var(--sans); padding: 10px 14px; border-radius: 999px; cursor: pointer; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
     #qbar button.main { background: var(--tint); }
 
-    /* Continue reading */
-    .hero { display: flex; gap: 16px; align-items: center; background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); margin-top: 14px; cursor: pointer; }
-    .hero .cover { width: 76px; flex: none; }
-    .hero .gen { padding: 14% 10% 10%; } .hero .gen b { font-size: 11.5px; } .hero .gen i { font-size: 8.5px; } .hero .gen hr { margin: 5px 0; }
-    .hero .bar { height: 4px; border-radius: 4px; background: var(--fill); overflow: hidden; margin: 8px 0 6px; } .hero .bar i { display: block; height: 100%; background: var(--tint); }
-
     /* Sheets */
     .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.35); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
     .sheet { width: min(600px, 100%); background: var(--bg); color: var(--label); border-radius: 16px 16px 0 0; padding: 8px 18px calc(env(safe-area-inset-bottom) + 18px); max-height: 90vh; overflow: auto; animation: sheetup .38s var(--ease) both; }
@@ -268,7 +263,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "4", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "5", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -491,7 +486,7 @@
   const COVERS = [["#2d3a5a", "#16203a"], ["#6b2f2a", "#3d1714"], ["#2f5246", "#15302a"], ["#7a5a2a", "#4a3312"], ["#4b3b63", "#271c38"], ["#3a4a52", "#1b262c"], ["#7a3d55", "#43182c"]];
   function hash(s) { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
   function coverHTML(b) {
-    if (b.cover) return `<div class="cover"><img src="${b.cover}" alt=""></div>`;
+    if (b.cover) return `<div class="cover"><img src="${b.cover}" alt="" onload="if(this.naturalWidth>this.naturalHeight)this.classList.add('wide')"></div>`; // landscape covers are shown whole
     const [a, z] = COVERS[hash(b.title) % COVERS.length];
     return `<div class="cover" style="background:linear-gradient(160deg,${a},${z})"><div class="gen"><div><b>${esc(b.title)}</b><hr></div><i>${esc(b.author || "")}</i></div></div>`;
   }
@@ -512,22 +507,27 @@
 
   /* ---------- Library ---------- */
   const pctRead = b => Math.min(100, Math.round(curPage(b) / totalPages(b) * 100));
+  // Most recently opened first (top left); books never opened follow, newest added first.
+  const shelfOrder = () => [...library].sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0) || b.addedAt - a.addedAt);
+  let libQ = "";
+  function shelfHTML() {
+    const q = libQ.trim().toLowerCase(), qn = id => quotes.filter(x => x.book === id).length;
+    const books = shelfOrder().filter(b => !q || `${b.title} ${b.author}`.toLowerCase().includes(q));
+    if (!books.length) return `<p class="sub" style="grid-column:1/-1;text-align:center;margin-top:24px">No book matches “${esc(libQ.trim())}”.</p>`;
+    return books.map(b => `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
+        <div><div class="t">${esc(b.title)}</div><div class="m">${b.lastAt ? `${pctRead(b)}%` : "New"}${qn(b.id) ? ` · ${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"}` : ""}</div></div></div>`).join("")
+      + (q ? "" : `<div class="add" data-act="import"><div><div style="font-size:26px;line-height:1">+</div>Add a book<div class="fine" style="font-size:11px">EPUB · PDF · TXT</div></div></div>`);
+  }
   function viewLibrary() {
-    const books = [...library].sort((a, b) => (b.lastAt || b.addedAt) - (a.lastAt || a.addedAt));
-    const qn = id => quotes.filter(q => q.book === id).length, cur = books.find(b => b.lastAt);
     return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
-      ${cur ? `<div class="hero" data-act="open" data-id="${cur.id}">${coverHTML(cur)}<div class="grow"><div class="caps">Continue reading</div><h3 style="margin-top:4px">${esc(cur.title)}</h3>
-          <div class="bar"><i style="width:${pctRead(cur)}%"></i></div><div class="fine">Page ${curPage(cur)} of ${totalPages(cur)} · ${pctRead(cur)}%</div></div>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--label3)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></div>` : ""}
-      ${books.length ? `<div class="shelf">${books.map(b => `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
-          <div><div class="t">${esc(b.title)}</div><div class="m">${qn(b.id) ? `${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"} · ` : ""}${b.lastAt ? `${pctRead(b)}%` : "New"}</div></div></div>`).join("")}
-        <div class="add" data-act="import"><div><div style="font-size:30px;line-height:1">+</div>Add a book<div class="fine">EPUB · PDF · TXT</div></div></div></div>
-        <p class="fine" style="text-align:center;margin-top:18px">Press and hold a book for its options.</p>`
+      ${library.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="libsearch" placeholder="Search your books" value="${esc(libQ)}" autocomplete="off"></div>
+        <div class="shelf" id="shelf">${shelfHTML()}</div>
+        <p class="fine" style="text-align:center;margin-top:22px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
           <p class="sub">Add an EPUB, a PDF with selectable text, or a plain-text book. It stays on this device.</p>
           <div class="row" style="justify-content:center;margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="import">Add a book</button><button class="btn gray" data-act="sample">Try a sample</button></div>
           <p class="fine" style="margin-top:14px">The sample is the Tao Te Ching in James Legge's public-domain translation.</p></div>`}
-      <p class="fine" style="text-align:center;margin-top:28px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
+      <p class="fine" style="text-align:center;margin-top:18px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
   }
   const needsReimport = b => (b.kind === "pdf" && !b.hasFile) || (b.kind === "epub" && !b.toc);
   function bookSheet(id) {
@@ -1212,10 +1212,10 @@
   });
   // Long-press (or right-click) a book for its options.
   let pressT;
-  document.addEventListener("contextmenu", e => { const b = e.target.closest(".book[data-id], .hero[data-id]"); if (b) { e.preventDefault(); bookSheet(b.dataset.id); } });
-  document.addEventListener("pointerdown", e => { const b = e.target.closest(".book[data-id], .hero[data-id]"); if (!b) return; pressT = setTimeout(() => { pressT = "fired"; bookSheet(b.dataset.id); }, 550); });
+  document.addEventListener("contextmenu", e => { const b = e.target.closest(".book[data-id]"); if (b) { e.preventDefault(); bookSheet(b.dataset.id); } });
+  document.addEventListener("pointerdown", e => { const b = e.target.closest(".book[data-id]"); if (!b) return; pressT = setTimeout(() => { pressT = "fired"; bookSheet(b.dataset.id); }, 550); });
   document.addEventListener("pointerup", () => { if (pressT !== "fired") clearTimeout(pressT); setTimeout(() => { if (pressT === "fired") pressT = null; }, 0); }, true);
-  document.addEventListener("click", e => { if (pressT === "fired" && e.target.closest(".book, .hero")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  document.addEventListener("click", e => { if (pressT === "fired" && e.target.closest(".book")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
   document.addEventListener("keydown", e => {
     if (e.target.id === "newtag" && (e.key === "Enter" || e.key === ",")) { e.preventDefault(); addTag(e.target.value); return; }
     if (e.target.id === "gopage" && e.key === "Enter") { e.preventDefault(); $("[data-act=gopage]").click(); return; }
@@ -1224,6 +1224,7 @@
     if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); turn(1); } else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); turn(-1); }
   });
   document.addEventListener("input", e => {
+    if (e.target.id === "libsearch") { libQ = e.target.value; $("#shelf").innerHTML = shelfHTML(); }
     if (e.target.id === "qsearch") { qFilter.q = e.target.value; $("#qlist").innerHTML = filtered().map(qcard).join("") || `<p class="sub" style="text-align:center;margin-top:30px">Nothing matches.</p>`; }
     if (e.target.id === "bsearch") { clearTimeout(searchT); const v = e.target.value; searchT = setTimeout(() => runSearch(v), 220); }
     if (e.target.id === "scrub") { const v = +e.target.value; e.target.style.setProperty("--pct", (v - 1) / Math.max(1, +e.target.max - 1) * 100 + "%"); $("#lbl2").textContent = `Go to page ${v} of ${e.target.max}`; }
