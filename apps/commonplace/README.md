@@ -43,6 +43,17 @@ EPUB and text books get **stable pages** of 1,600 characters: page numbers never
 device, and the footer shows "Pages 12–13" when a screen spans two. Reflowable quotes are anchored by
 chapter, paragraph and character offsets.
 
+## Robustness
+
+- The app never zooms out (`minimum-scale=1`) and nothing can overflow sideways; PDF pages size
+  themselves to the screen, so rotating keeps everything at full size and returns to the same page.
+- PDF canvases are capped at about 4 million pixels and at most 10 pages stay drawn, to keep memory
+  low on phones; a page still being drawn is cancelled before it is redrawn.
+- Pages are measured only after the book font (all four faces) has loaded, and line boxes include
+  their leading, so no line spills at a page edge.
+- The phone's Back button closes an open panel first; your place is saved when the app goes to the
+  background; the status bar takes the reading theme's colour; DRM-protected EPUBs say so.
+
 ## Formats
 
 EPUB (DRM-free), PDF with selectable text, TXT and Markdown. Not supported: Kindle formats (MOBI,
