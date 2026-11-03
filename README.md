@@ -78,3 +78,4 @@ Live at **https://davecube123.github.io/Apps-Studio/**
 | [Little Pages](apps/little-pages/) | Read your own EPUB/PDF/TXT books, with habit-building features grounded in behaviour science. Installable PWA. |
 | [My I Ching](apps/i-ching-book/) ([open](https://davecube123.github.io/Apps-Studio/apps/i-ching-book/)) | Learn the 64 hexagrams by writing your own Book of Changes: readings, reflections, spaced practice, printable book. Installable PWA. |
 | [Daily Way](apps/daily-way/) ([open](https://davecube123.github.io/Apps-Studio/apps/daily-way/)) | A 20-minute daily practice with the Tao Te Ching, I Ching, Golden Flower and Chuang Tzu: recall, read, capture, connect, sit, carry. Installable PWA. |
+| [Commonplace](apps/commonplace/) ([open](https://davecube123.github.io/Apps-Studio/apps/commonplace/)) | A beautiful reader for your own books: quote passages with tags and notes, then open any quote at its exact page. Installable PWA. |

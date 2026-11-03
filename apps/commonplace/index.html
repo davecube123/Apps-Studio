@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121318" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Commonplace">
+  <link rel="preload" href="fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Commonplace</title>
+  <style>
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader.woff2) format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader-italic.woff2) format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+    :root {
+      --bg: #f5f2ec; --card: #fffdf9; --label: #1b1a17; --label2: rgba(40,35,25,.6); --label3: rgba(40,35,25,.32);
+      --sep: rgba(40,35,25,.12); --fill: rgba(40,35,25,.06); --tint: #b5652d; --tint-soft: rgba(181,101,45,.12);
+      --page: #fbf8f2; --ink: #22201b;
+      --c1: rgba(233,180,60,.38); --c2: rgba(232,120,130,.32); --c3: rgba(110,180,130,.34); --c4: rgba(100,160,230,.32);
+      --c1s: #d9a227; --c2s: #d9707c; --c3s: #5fa877; --c4s: #5b97d8;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --serif: "Newsreader", "New York", ui-serif, Georgia, serif;
+      --ease: cubic-bezier(.2,.8,.2,1); --spring: cubic-bezier(.3,1.3,.5,1);
+      --shadow: 0 1px 2px rgba(40,30,10,.06), 0 8px 24px rgba(40,30,10,.07);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="sepia"]) {
+      --bg: #121318; --card: #1c1d23; --label: #f1ede6; --label2: rgba(241,237,230,.62); --label3: rgba(241,237,230,.3); --sep: rgba(241,237,230,.1);
+      --fill: rgba(241,237,230,.07); --tint: #e0955a; --tint-soft: rgba(224,149,90,.15); --page: #16171c; --ink: #e9e4da;
+      --c1: rgba(233,180,60,.3); --c2: rgba(232,120,130,.28); --c3: rgba(110,180,130,.28); --c4: rgba(100,160,230,.28); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark; } }
+    :root[data-theme="dark"] {
+      --bg: #121318; --card: #1c1d23; --label: #f1ede6; --label2: rgba(241,237,230,.62); --label3: rgba(241,237,230,.3); --sep: rgba(241,237,230,.1);
+      --fill: rgba(241,237,230,.07); --tint: #e0955a; --tint-soft: rgba(224,149,90,.15); --page: #16171c; --ink: #e9e4da;
+      --c1: rgba(233,180,60,.3); --c2: rgba(232,120,130,.28); --c3: rgba(110,180,130,.28); --c4: rgba(100,160,230,.28); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark; }
+    :root[data-theme="sepia"] { --bg: #efe5d2; --card: #f7efdf; --page: #f4ead6; --ink: #3b2f22; --label: #3b2f22; --sep: rgba(80,60,30,.15); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--bg); }
+    body { margin: 0; background: var(--bg); color: var(--label); font: 17px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+    main { max-width: 760px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 100px); }
+    h1 { font: 700 34px/1.12 var(--sans); letter-spacing: .005em; margin: 6px 0 4px; }
+    h2 { font: 700 22px/1.2 var(--sans); margin: 0; }
+    h3 { font: 600 17px/1.3 var(--sans); margin: 0; }
+    p { margin: .35em 0; }
+    a { color: var(--tint); text-decoration: none; }
+    .sub { color: var(--label2); } .fine { font-size: 13px; color: var(--label2); }
+    .caps { font: 600 12px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--label2); }
+    .serif { font-family: var(--serif); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .hide { display: none !important; }
+    .view.enter > * { animation: rise .4s var(--ease) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    .btn { appearance: none; border: 0; border-radius: 12px; min-height: 46px; padding: 12px 18px; font: 600 16px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+           background: var(--tint); color: #fff; transition: transform .2s var(--spring); }
+    .btn:active { transform: scale(.96); }
+    .btn.gray { background: var(--fill); color: var(--label); } .btn.plain { background: none; color: var(--tint); }
+    .btn.sm { min-height: 34px; padding: 7px 14px; font-size: 14px; border-radius: 999px; }
+    .btn.block { width: 100%; }
+    .icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--fill); color: var(--label); display: grid; place-items: center; cursor: pointer; flex: none; }
+    .icon-btn svg, .tb svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .chip { border: 0; background: var(--fill); color: var(--label); border-radius: 999px; padding: 6px 12px; font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; transition: all .2s var(--ease); }
+    .chip.on { background: var(--label); color: var(--bg); }
+    .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .chips.scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 2px 18px; } .chips.scroll::-webkit-scrollbar { display: none; }
+    .seg { display: flex; background: var(--fill); border-radius: 10px; padding: 3px; }
+    .seg button { flex: 1; border: 0; background: none; color: var(--label); font: 500 14px var(--sans); padding: 8px 4px; border-radius: 8px; cursor: pointer; }
+    .seg button.on { background: var(--card); box-shadow: 0 2px 6px rgba(0,0,0,.1); font-weight: 600; }
+    input[type=text], input[type=search], textarea { width: 100%; border: 0; outline: 0; background: transparent; color: var(--label); font: 17px/1.45 var(--sans); resize: none; padding: 0; }
+    .field { background: var(--card); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+    .field label { display: block; font: 600 12px var(--sans); color: var(--label2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .search { background: var(--fill); border-radius: 12px; padding: 10px 14px; display: flex; gap: 8px; align-items: center; }
+    .search svg { width: 18px; height: 18px; stroke: var(--label3); fill: none; stroke-width: 2; flex: none; }
+
+    /* Library */
+    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 26px 18px; margin-top: 20px; }
+    @media (max-width: 420px) { .shelf { grid-template-columns: repeat(2, 1fr); } }
+    .book { cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+    .cover { aspect-ratio: 2 / 3; border-radius: 4px 9px 9px 4px; overflow: hidden; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,.12), 0 12px 28px rgba(0,0,0,.16);
+             transition: transform .3s var(--spring); background: #444; }
+    .book:active .cover { transform: scale(.97); }
+    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.18), rgba(255,255,255,.08) 4%, transparent 9%); pointer-events: none; }
+    .gen { position: absolute; inset: 0; padding: 18% 12% 12%; display: flex; flex-direction: column; justify-content: space-between; color: #fbf6ec; }
+    .gen b { font: 600 19px/1.15 var(--serif); letter-spacing: -.005em; }
+    .gen i { font: italic 13px var(--serif); opacity: .85; }
+    .gen hr { border: 0; border-top: 1px solid rgba(255,255,255,.4); width: 30%; margin: 10px 0; }
+    .book .t { font: 600 14px/1.25 var(--sans); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .book .m { font-size: 12.5px; color: var(--label2); }
+    .book .bar { height: 3px; border-radius: 3px; background: var(--fill); overflow: hidden; } .book .bar i { display: block; height: 100%; background: var(--tint); }
+    .add { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label2); cursor: pointer; font-size: 14px; }
+    .empty { text-align: center; padding: 50px 20px; }
+
+    /* Quotes */
+    .qcard { background: var(--card); border-radius: 16px; padding: 18px 18px 14px; box-shadow: var(--shadow); position: relative; cursor: pointer; transition: transform .25s var(--spring); border-left: 4px solid var(--c1s); }
+    .qcard:active { transform: scale(.985); }
+    .qcard + .qcard { margin-top: 12px; }
+    .qcard .qt { font: 400 19px/1.5 var(--serif); color: var(--label); white-space: pre-wrap; padding-right: 26px; }
+    .qcard .qt::before { content: "“"; } .qcard .qt::after { content: "”"; }
+    .qcard .note { margin-top: 10px; color: var(--label2); font-size: 15px; white-space: pre-wrap; }
+    .qcard .meta { margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--label2); }
+    .qcard .meta .go { margin-left: auto; color: var(--tint); font-weight: 600; white-space: nowrap; }
+    .tag { background: var(--fill); border-radius: 999px; padding: 2px 9px; font-size: 12.5px; color: var(--label); }
+    .qcard .edit { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--label3); cursor: pointer; font-size: 18px; }
+
+    /* Tab bar */
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 6px 8px calc(env(safe-area-inset-bottom) + 4px);
+               background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.6) blur(20px); -webkit-backdrop-filter: saturate(1.6) blur(20px); border-top: .5px solid var(--sep); }
+    nav.tabs .inner { display: flex; width: 100%; max-width: 420px; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--label2); font: 500 10.5px var(--sans); padding: 3px 0; }
+    nav.tabs a svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--tint); }
+    body.reading nav.tabs, body.reading main { display: none; }
+
+    /* Reader */
+    #reader { display: none; min-height: 100vh; background: var(--page); color: var(--ink); }
+    body.reading #reader { display: block; }
+    .rbar { position: fixed; top: 0; left: 0; right: 0; z-index: 30; padding: calc(env(safe-area-inset-top) + 8px) 12px 8px; display: flex; align-items: center; gap: 8px;
+            background: color-mix(in srgb, var(--page) 86%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: .5px solid var(--sep);
+            transition: transform .3s var(--ease), opacity .3s; }
+    .rbar .ttl { flex: 1; min-width: 0; text-align: center; font: 600 15px var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+    .tb { width: 40px; height: 40px; border: 0; background: none; color: var(--ink); border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; }
+    .tb:active { background: var(--fill); }
+    body.calm .rbar { transform: translateY(-100%); opacity: 0; } body.calm .rfoot { opacity: 0; }
+    .rfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 8px 18px calc(env(safe-area-inset-bottom) + 10px); text-align: center; font: 500 12px var(--sans); color: var(--label2);
+             background: linear-gradient(transparent, var(--page) 40%); transition: opacity .3s; pointer-events: none; }
+    .rfoot .prog { height: 2px; background: var(--fill); border-radius: 2px; margin: 0 auto 6px; max-width: 420px; overflow: hidden; } .rfoot .prog i { display: block; height: 100%; background: var(--tint); }
+    article { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 80px) 26px calc(env(safe-area-inset-bottom) + 120px); font-family: var(--rfont, var(--serif)); font-size: var(--rsize, 20px); line-height: var(--rline, 1.65); }
+    article h2.ch { font: 500 1.5em/1.2 var(--serif); text-align: center; margin: 10px 0 34px; letter-spacing: -.005em; }
+    article p { margin: 0 0 .9em; text-align: var(--ralign, left); hyphens: auto; -webkit-hyphens: auto; }
+    article .pg { display: flex; align-items: center; gap: 12px; margin: 1.4em 0 1.2em; font: 500 11px var(--sans); letter-spacing: .1em; color: var(--label3); user-select: none; -webkit-user-select: none; }
+    article .pg::before, article .pg::after { content: ""; flex: 1; border-top: .5px solid var(--sep); }
+    article mark { color: inherit; background: var(--c1); border-radius: 3px; padding: .05em 0; cursor: pointer; transition: box-shadow .3s; }
+    article mark.c2 { background: var(--c2); } article mark.c3 { background: var(--c3); } article mark.c4 { background: var(--c4); }
+    article mark.note { text-decoration: underline dotted var(--label3); text-underline-offset: 4px; }
+    article mark.pulse { animation: pulse 1.8s ease 2; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 40% { box-shadow: 0 0 0 6px var(--c1); } }
+    article ::selection { background: var(--tint-soft); }
+    .nextch { margin: 50px 0 0; text-align: center; }
+    #qbar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 22px); transform: translateX(-50%) translateY(120%); z-index: 40; display: flex; gap: 4px; padding: 6px;
+            background: #1d1c1a; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.3); transition: transform .3s var(--spring), visibility 0s .3s; visibility: hidden; }
+    #qbar { transform: translateX(-50%) translateY(calc(100% + 60px)); }
+    #qbar.on { transform: translateX(-50%) translateY(0); visibility: visible; transition: transform .3s var(--spring); }
+    body:not(.reading) #qbar { display: none; }
+    #qbar button { border: 0; background: none; color: #fff; font: 600 15px var(--sans); padding: 10px 16px; border-radius: 999px; cursor: pointer; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+    #qbar button.main { background: var(--tint); }
+
+    /* Sheets */
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.35); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
+    .sheet { width: min(600px, 100%); background: var(--bg); color: var(--label); border-radius: 16px 16px 0 0; padding: 8px 18px calc(env(safe-area-inset-bottom) + 18px); max-height: 90vh; overflow: auto; animation: sheetup .38s var(--ease) both; }
+    .sheet .grab { width: 36px; height: 5px; border-radius: 5px; background: var(--label3); margin: 0 auto 14px; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .colors { display: flex; gap: 12px; } .colors button { width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer; box-shadow: inset 0 0 0 2px rgba(0,0,0,.06); }
+    .colors button.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--label); }
+    .toc a { display: flex; gap: 10px; padding: 13px 4px; border-bottom: .5px solid var(--sep); color: var(--label); }
+    .toc a.cur { color: var(--tint); font-weight: 600; } .toc a span { color: var(--label3); font-size: 13px; margin-left: auto; white-space: nowrap; }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); background: #1d1c1a; color: #fff; padding: 11px 18px; border-radius: 999px; font: 600 14px var(--sans);
+             z-index: 90; animation: rise .3s var(--ease) both; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
+    .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 10px); transform: translateX(-50%); z-index: 95; border: 0; background: var(--tint); color: #fff; padding: 10px 18px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; }
+    .group { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .cell { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 16px; color: var(--label); width: 100%; border: 0; background: var(--card); font: inherit; text-align: left; cursor: pointer; position: relative; }
+    .cell + .cell::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: .5px solid var(--sep); }
+    .ghead { margin: 24px 4px 8px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <div id="reader">
+    <div class="rbar">
+      <button class="tb" data-act="close" aria-label="Back to library"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="tb" data-act="toc" aria-label="Contents"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+      <div class="ttl" id="rtitle"></div>
+      <button class="tb" data-act="bookquotes" aria-label="Quotes from this book"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg></button>
+      <button class="tb" data-act="type" aria-label="Text settings"><svg viewBox="0 0 24 24"><path d="M4 18L9 6l5 12M5.8 14h6.4M15 18l3-7 3 7M15.9 16h4.2"/></svg></button>
+    </div>
+    <article id="text"></article>
+    <div class="rfoot"><div class="prog"><i id="rprog"></i></div><span id="rpage"></span></div>
+  </div>
+  <div id="qbar"><button class="main" data-act="quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quote</button><button data-act="copysel">Copy</button></div>
+  <nav class="tabs"><div class="inner">
+    <a href="#/" data-tab="library"><svg viewBox="0 0 24 24"><path d="M4 19.5V5a1 1 0 0 1 1-1h4v16H5a1 1 0 0 1-1-.5zM9 4h4v16H9zM14.5 5.2l3.6-1 3.4 14.4-3.6 1z"/></svg>Library</a>
+    <a href="#/quotes" data-tab="quotes"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quotes</a>
+    <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Settings</a>
+  </div></nav>
+  <input type="file" id="file" accept=".epub,.pdf,.txt,.md,.markdown,application/epub+zip,application/pdf,text/plain" multiple hidden>
+
+  <script>
+  "use strict";
+  /* =====================================================================
+     Commonplace: a reader for your own books that keeps the passages you
+     quote, with tags and notes, and opens each one at its exact place.
+     Books, quotes and notes stay on this device (IndexedDB).
+     ===================================================================== */
+  const APP_VERSION = "1", APP_DATE = "3 Nov 2026";
+  const $ = s => document.querySelector(s), DAY = 864e5;
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const clean = s => String(s || "").replace(/\s+/g, " ").trim();
+  const wc = s => (String(s).match(/\S+/g) || []).length;
+  const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  function toast(m, ms = 2400) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+  const haptic = (ms = 8) => { if (navigator.vibrate && navigator.userActivation?.hasBeenActive) try { navigator.vibrate(ms); } catch (e) {} };
+
+  /* ---------- Storage: IndexedDB key/value ---------- */
+  const DBN = "commonplace", STORE = "kv";
+  let idbP;
+  const idb = () => idbP ||= new Promise((res, rej) => { const r = indexedDB.open(DBN, 1); r.onupgradeneeded = () => r.result.createObjectStore(STORE); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function dbGet(k) { try { const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction(STORE).objectStore(STORE).get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); } catch (e) { return undefined; } }
+  async function dbSet(k, v) { try { const db = await idb(); await new Promise((res, rej) => { const tx = db.transaction(STORE, "readwrite"); tx.objectStore(STORE).put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); } catch (e) { toast("Couldn't save. Is storage full?"); } }
+  async function dbDel(k) { try { const db = await idb(); await new Promise(res => { const tx = db.transaction(STORE, "readwrite"); tx.objectStore(STORE).delete(k); tx.oncomplete = res; tx.onerror = res; }); } catch (e) {} }
+  if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+
+  let library = [], quotes = [];
+  const SKEY = "commonplace-settings";
+  const settings = Object.assign({ theme: "auto", size: 20, font: "serif", line: 1.65, align: "left" }, (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} };
+  const saveLib = () => dbSet("library", library);
+  const saveQuotes = () => dbSet("quotes", quotes);
+
+  /* ---------- Pages ----------
+     PDFs keep their printed page numbers. Reflowable books (EPUB, text) get stable pages:
+     one page per 1,600 characters of text, so "p. 47" always means the same place,
+     whatever the font size or screen. */
+  const CPP = 1600;
+  function pageAt(meta, ch, p, s = 0) {
+    const c = meta.chapters[ch]; if (!c) return 1;
+    if (c.pg) return c.pg[Math.min(p, c.pg.length - 1)] || 1;
+    let off = c.start; for (let i = 0; i < p && i < c.plens.length; i++) off += c.plens[i] + 1;
+    return Math.floor((off + s) / CPP) + 1;
+  }
+  const totalPages = meta => meta.pages || Math.max(1, Math.ceil(meta.chars / CPP));
+
+  /* ---------- Parsing: EPUB, PDF, TXT/Markdown (adapted from Little Pages) ---------- */
+  const BLOCKS = "p,h1,h2,h3,h4,h5,h6,li,blockquote,dd,pre";
+  function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("couldn't load a reader component (are you online?)")); document.head.appendChild(s); }); }
+  let jszipP, pdfP;
+  const needJSZip = () => window.JSZip ? Promise.resolve() : (jszipP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js").catch(e => { jszipP = null; throw e; }));
+  const needPdf = () => window.pdfjsLib ? Promise.resolve() : (pdfP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js").then(() => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; }).catch(e => { pdfP = null; throw e; }));
+  async function shrinkImage(blob, width = 400) {
+    try { const img = await createImageBitmap(blob), c = document.createElement("canvas"); c.width = width; c.height = Math.round(img.height * width / img.width);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c.toDataURL("image/jpeg", .82); } catch (e) { return null; }
+  }
+  async function parseEpub(file) {
+    await needJSZip();
+    const zip = await JSZip.loadAsync(file);
+    const text = p => { const f = zip.file(p); if (!f) throw new Error("missing " + p); return f.async("text"); };
+    const xml = s => new DOMParser().parseFromString(s, "application/xml");
+    const opfPath = xml(await text("META-INF/container.xml")).querySelector("rootfile").getAttribute("full-path");
+    const opf = xml(await text(opfPath));
+    const resolve = href => decodeURIComponent(new URL(href, "http://x/" + opfPath).pathname.slice(1));
+    const meta = n => clean(opf.getElementsByTagNameNS("*", n)[0]?.textContent || "");
+    const items = {};
+    for (const it of opf.getElementsByTagNameNS("*", "item")) items[it.getAttribute("id")] = { href: it.getAttribute("href"), props: it.getAttribute("properties") || "", type: it.getAttribute("media-type") || "" };
+    let cover = null;
+    const coverId = Object.keys(items).find(id => items[id].props.includes("cover-image")) || [...opf.getElementsByTagNameNS("*", "meta")].find(m => m.getAttribute("name") === "cover")?.getAttribute("content");
+    if (coverId && items[coverId] && items[coverId].type.startsWith("image")) { const f = zip.file(resolve(items[coverId].href)); if (f) cover = await shrinkImage(await f.async("blob")); }
+    const spine = [...opf.getElementsByTagNameNS("*", "itemref")].map(r => items[r.getAttribute("idref")]?.href).filter(Boolean);
+    const docs = [];
+    for (const href of spine) {
+      let html; try { html = await text(resolve(href)); } catch (e) { continue; }
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
+      let paras = els.map(el => clean(el.textContent)).filter(Boolean);
+      if (!paras.length) paras = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean);
+      const h = doc.body.querySelector("h1,h2,h3"); docs.push({ paras, heading: h ? clean(h.textContent) : "" });
+    }
+    const freq = new Map(); for (const d of docs) for (const p of new Set(d.paras)) freq.set(p, (freq.get(p) || 0) + 1);
+    const limit = Math.max(3, docs.length * .25), chapters = [];
+    for (const d of docs) {
+      let paras = d.paras.filter(p => freq.get(p) < limit); if (wc(paras.join(" ")) < 25) continue;
+      let title = d.heading && d.heading.length <= 120 ? d.heading : "";
+      if (title && paras[0] === title) paras = paras.slice(1); else if (!title && paras[0].length <= 80 && paras.length > 1) { title = paras[0]; paras = paras.slice(1); }
+      chapters.push({ title: title || `Section ${chapters.length + 1}`, paras });
+    }
+    if (!chapters.length) throw new Error("no readable text found");
+    return { kind: "epub", title: meta("title") || file.name.replace(/\.epub$/i, ""), author: meta("creator"), cover, chapters };
+  }
+  async function parsePdf(file) {
+    await needPdf();
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const info = (await pdf.getMetadata().catch(() => null))?.info || {};
+    const pages = [];
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const tc = await (await pdf.getPage(n)).getTextContent(), lines = []; let cur = "";
+      for (const it of tc.items) { cur += it.str; if (it.hasEOL) { lines.push(cur.trim()); cur = ""; } }
+      if (cur.trim()) lines.push(cur.trim());
+      const avg = lines.reduce((a, l) => a + l.length, 0) / (lines.length || 1), paras = []; let buf = "";
+      for (const l of lines) { if (!l) { if (buf) { paras.push(buf); buf = ""; } continue; }
+        buf = buf ? (buf.endsWith("-") ? buf.slice(0, -1) + l : buf + " " + l) : l;
+        if (l.length < avg * .72 && /[.!?:"”’)]$/.test(l)) { paras.push(buf); buf = ""; } }
+      if (buf) paras.push(buf);
+      pages.push(paras.map(clean).filter(p => p && !/^\d{1,4}$/.test(p)));
+    }
+    // Keep the printed page of every paragraph; group pages into readable sections.
+    const per = pdf.numPages > 60 ? 10 : 5, chapters = [];
+    for (let i = 0; i < pages.length; i += per) {
+      const paras = [], pg = [];
+      pages.slice(i, i + per).forEach((ps, k) => ps.forEach(p => { paras.push(p); pg.push(i + k + 1); }));
+      if (wc(paras.join(" ")) < 10) continue;
+      chapters.push({ title: `Pages ${i + 1}–${Math.min(i + per, pages.length)}`, paras, pg });
+    }
+    if (!chapters.length) throw new Error("this PDF has no selectable text (it may be scanned images)");
+    return { kind: "pdf", title: clean(info.Title || "") || file.name.replace(/\.pdf$/i, ""), author: clean(info.Author || ""), cover: null, chapters, pages: pdf.numPages };
+  }
+  async function parseText(file) {
+    const raw = (await file.text()).replace(/\r/g, ""), blocks = /\n\s*\n/.test(raw) ? raw.split(/\n\s*\n/) : raw.split("\n");
+    const heading = /^(#{1,2}\s+.+|(chapter|part|book|prologue|epilogue)\b.{0,80})$/i, chapters = []; let cur = null;
+    for (let b of blocks) { b = b.trim(); if (!b) continue; const first = b.split("\n")[0].trim();
+      if (heading.test(first)) { cur = { title: first.replace(/^#+\s*/, ""), paras: [] }; chapters.push(cur); const rest = b.split("\n").slice(1).join(" ").trim(); if (rest) cur.paras.push(clean(rest)); }
+      else { if (!cur) { cur = { title: "Beginning", paras: [] }; chapters.push(cur); } cur.paras.push(clean(b.replace(/^#+\s*/, ""))); } }
+    let out = chapters.filter(c => c.paras.length);
+    if (out.length <= 1) { const all = out[0]?.paras || []; out = []; let part = null, w = 0;
+      for (const p of all) { if (!part || w > 3000) { part = { title: `Part ${out.length + 1}`, paras: [] }; out.push(part); w = 0; } part.paras.push(p); w += wc(p); } }
+    if (!out.length) throw new Error("the file is empty");
+    return { kind: "text", title: file.name.replace(/\.(txt|md|markdown)$/i, ""), author: "", cover: null, chapters: out };
+  }
+  async function addParsed(parsed) {
+    const id = uid("b"), chapters = parsed.chapters.map(c => ({ title: c.title, paras: c.paras, ...(c.pg ? { pg: c.pg } : {}) }));
+    let start = 0;
+    const meta = { id, kind: parsed.kind, title: parsed.title, author: parsed.author || "", cover: parsed.cover, addedAt: Date.now(), lastAt: 0, pos: { ch: 0, p: 0 }, pages: parsed.pages || 0,
+      chapters: chapters.map(c => { const plens = c.paras.map(p => p.length), m = { title: c.title, start, plens, ...(c.pg ? { pg: c.pg } : {}) }; start += plens.reduce((a, x) => a + x + 1, 0); return m; }) };
+    meta.chars = start;
+    await dbSet("content:" + id, chapters); library.push(meta); await saveLib(); return meta;
+  }
+  async function importFiles(files) {
+    let last = null;
+    for (const f of [...files]) {
+      toast(`Opening ${f.name}…`, 30000);
+      try { const n = f.name.toLowerCase(); last = await addParsed(n.endsWith(".epub") ? await parseEpub(f) : n.endsWith(".pdf") ? await parsePdf(f) : await parseText(f)); }
+      catch (e) { console.error(e); toast(`Couldn't open ${f.name}: ${e.message}`, 5000); await new Promise(r => setTimeout(r, 1500)); }
+    }
+    document.querySelectorAll(".toast").forEach(t => t.remove());
+    if (last) { toast(`Added “${last.title}”`); render(); }
+  }
+  async function addSample() {
+    toast("Adding the sample…");
+    const j = await fetch("data/sample-tao-te-ching.json").then(r => r.json());
+    await addParsed({ kind: "text", title: j.title, author: j.author, cover: null, chapters: j.chapters }); render();
+  }
+
+  /* ---------- Generated covers ---------- */
+  const COVERS = [["#2d3a5a", "#16203a"], ["#6b2f2a", "#3d1714"], ["#2f5246", "#15302a"], ["#7a5a2a", "#4a3312"], ["#4b3b63", "#271c38"], ["#3a4a52", "#1b262c"], ["#7a3d55", "#43182c"]];
+  function hash(s) { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+  function coverHTML(b) {
+    if (b.cover) return `<div class="cover"><img src="${b.cover}" alt=""></div>`;
+    const [a, z] = COVERS[hash(b.title) % COVERS.length];
+    return `<div class="cover" style="background:linear-gradient(160deg,${a},${z})"><div class="gen"><div><b>${esc(b.title)}</b><hr></div><i>${esc(b.author || "")}</i></div></div>`;
+  }
+
+  /* ---------- Routing ---------- */
+  let lastHash = "";
+  function render() {
+    const h = location.hash || "#/";
+    if (h.startsWith("#/read/")) return openFromHash(h);
+    document.body.classList.remove("reading", "calm"); hideQbar();
+    const tab = h.startsWith("#/quotes") ? "quotes" : h.startsWith("#/settings") ? "settings" : "library";
+    const html = tab === "quotes" ? viewQuotes() : tab === "settings" ? viewSettings() : viewLibrary();
+    const isNav = h !== lastHash; $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
+    document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+    if (isNav) scrollTo(0, 0); lastHash = h;
+  }
+  addEventListener("hashchange", render);
+
+  /* ---------- Library ---------- */
+  function viewLibrary() {
+    const books = [...library].sort((a, b) => (b.lastAt || b.addedAt) - (a.lastAt || a.addedAt));
+    const qn = id => quotes.filter(q => q.book === id).length;
+    return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      ${books.length ? `<div class="shelf">${books.map(b => { const pct = Math.round(pageAt(b, b.pos.ch, b.pos.p) / totalPages(b) * 100);
+        return `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? Math.min(100, pct) : 0}%"></i></div>
+          <div><div class="t">${esc(b.title)}</div><div class="m">${qn(b.id) ? `${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"} · ` : ""}${b.lastAt ? `p. ${pageAt(b, b.pos.ch, b.pos.p)} of ${totalPages(b)}` : "New"}</div></div></div>`; }).join("")}
+        <div class="add" data-act="import"><div><div style="font-size:30px;line-height:1">+</div>Add a book<div class="fine">EPUB · PDF · TXT</div></div></div></div>`
+      : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
+          <p class="sub">Add an EPUB, a PDF with selectable text, or a plain-text book. It stays on this device.</p>
+          <div class="row" style="justify-content:center;margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="import">Add a book</button><button class="btn gray" data-act="sample">Try a sample</button></div>
+          <p class="fine" style="margin-top:14px">The sample is the Tao Te Ching in James Legge's public-domain translation.</p></div>`}
+      <p class="fine" style="text-align:center;margin-top:34px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+  function bookSheet(id) {
+    const b = library.find(x => x.id === id), n = quotes.filter(q => q.book === id).length;
+    sheet(`<div class="row" style="gap:14px"><div style="width:64px">${coverHTML(b)}</div><div class="grow"><h2>${esc(b.title)}</h2><div class="sub">${esc(b.author)}</div><div class="fine">${totalPages(b)} pages · ${n} quote${n === 1 ? "" : "s"}</div></div></div>
+      <div class="group" style="margin-top:18px">
+        <button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>
+        <button class="cell" data-act="gofilter" data-id="${id}"><span class="grow">Quotes from this book</span></button>
+        <button class="cell" data-act="delbook" data-id="${id}"><span class="grow" style="color:#d6453d">Remove from library</span></button></div>`);
+  }
+
+  /* ---------- Quotes collection ---------- */
+  let qFilter = { book: "", tag: "", q: "", sort: "new" };
+  const allTags = () => [...new Set(quotes.flatMap(q => q.tags || []))].sort((a, b) => a.localeCompare(b));
+  function filtered() {
+    const s = qFilter.q.toLowerCase();
+    let list = quotes.filter(q => (!qFilter.book || q.book === qFilter.book) && (!qFilter.tag || q.tags?.includes(qFilter.tag))
+      && (!s || [q.text, q.note, ...(q.tags || []), library.find(b => b.id === q.book)?.title].join(" ").toLowerCase().includes(s)));
+    list.sort(qFilter.sort === "book" ? (a, b) => (a.book === b.book ? a.ch - b.ch || a.p - b.p || a.s - b.s : a.book.localeCompare(b.book)) : (a, b) => b.at - a.at);
+    return list;
+  }
+  function qcard(q) {
+    const b = library.find(x => x.id === q.book), ch = b?.chapters[q.ch];
+    return `<div class="qcard" data-act="goto" data-q="${q.id}" style="border-left-color:var(--c${q.color || 1}s)">
+      <button class="edit" data-act="editq" data-q="${q.id}" aria-label="Edit quote">•••</button>
+      <div class="qt">${esc(q.text)}</div>${q.note ? `<div class="note">${esc(q.note)}</div>` : ""}
+      <div class="meta"><span><b style="color:var(--label)">${esc(b ? b.title : "Book removed")}</b>${b ? ` · p. ${q.page}` : ""}${ch && b.kind !== "pdf" ? ` · ${esc(ch.title)}` : ""}</span>
+        ${(q.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}${b ? `<span class="go">Open at p. ${q.page} →</span>` : ""}</div></div>`;
+  }
+  function viewQuotes() {
+    const list = filtered(), tags = allTags(), books = library.filter(b => quotes.some(q => q.book === b.id));
+    return `<div class="row between"><h1>Quotes</h1>${quotes.length ? `<button class="btn gray sm" data-act="export">Export</button>` : ""}</div>
+      ${quotes.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="qsearch" placeholder="Search quotes, notes, tags" value="${esc(qFilter.q)}"></div>
+        <div class="chips scroll" style="margin-top:12px"><button class="chip ${!qFilter.book ? "on" : ""}" data-act="fbook" data-v="">All books</button>${books.map(b => `<button class="chip ${qFilter.book === b.id ? "on" : ""}" data-act="fbook" data-v="${b.id}">${esc(b.title)}</button>`).join("")}</div>
+        ${tags.length ? `<div class="chips scroll" style="margin-top:8px">${tags.map(t => `<button class="chip ${qFilter.tag === t ? "on" : ""}" data-act="ftag" data-v="${esc(t)}">#${esc(t)} <span style="opacity:.55">${quotes.filter(q => q.tags?.includes(t)).length}</span></button>`).join("")}</div>` : ""}
+        <div class="row between" style="margin:16px 2px 10px"><span class="fine">${list.length} quote${list.length === 1 ? "" : "s"}</span>
+          <div class="seg" style="width:190px"><button class="${qFilter.sort === "new" ? "on" : ""}" data-act="sort" data-v="new">Newest</button><button class="${qFilter.sort === "book" ? "on" : ""}" data-act="sort" data-v="book">In order</button></div></div>
+        <div id="qlist">${list.map(qcard).join("") || `<p class="sub" style="text-align:center;margin-top:30px">Nothing matches.</p>`}</div>`
+      : `<div class="empty"><div style="font-size:50px;font-family:var(--serif)">“ ”</div><h2 style="margin-top:8px">Your commonplace book</h2>
+          <p class="sub">While reading, select any passage and tap <b>Quote</b>. Add tags and a note. Every quote gathers here, and tapping one opens the book at that exact place.</p></div>`}`;
+  }
+
+  /* ---------- Settings ---------- */
+  function viewSettings() {
+    return `<h1>Settings</h1>
+      <div class="ghead caps">Reading</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="ghead caps">Your data</div><div class="group">
+        <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
+        <button class="cell" data-act="backup"><span class="grow">Back up quotes and notes (.json)</span></button>
+        <label class="cell"><span class="grow">Restore quotes from a backup…</span><input type="file" id="restore" accept=".json,application/json" hidden></label>
+        ${isStandalone() ? "" : `<button class="cell" data-act="installsheet"><span class="grow" style="color:var(--tint)">Install the app</span></button>`}</div>
+      <p class="fine" style="margin:8px 4px">Books, quotes and notes stay on this device. A backup holds your quotes and notes; add the books again on a new device and the quotes reconnect to them by title.</p>
+      <div class="ghead caps">About pages</div><p class="fine" style="margin:0 4px">PDFs show their printed page numbers. EPUB and text books have no fixed pages, so Commonplace uses stable pages of about 1,600 characters: a quote's page stays the same whatever the font size or device.</p>
+      <p class="fine" style="text-align:center;margin-top:30px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+
+  /* ---------- The reader ---------- */
+  let R = null; // { meta, content, ch }
+  function applyReaderStyle() {
+    const a = $("#text"); a.style.setProperty("--rsize", settings.size + "px"); a.style.setProperty("--rline", settings.line);
+    a.style.setProperty("--rfont", settings.font === "sans" ? "var(--sans)" : "var(--serif)"); a.style.setProperty("--ralign", settings.align);
+  }
+  function applyTheme() { settings.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = settings.theme); }
+  applyTheme();
+  async function openBook(id, at) {
+    const meta = library.find(b => b.id === id); if (!meta) { toast("That book is no longer in your library"); location.hash = "#/"; return; }
+    const content = R?.meta.id === id ? R.content : await dbGet("content:" + id);
+    if (!content) { toast("Couldn't open the book"); return; }
+    R = { meta, content, ch: 0 };
+    document.body.classList.add("reading"); document.body.classList.remove("calm");
+    $("#rtitle").textContent = meta.title; applyReaderStyle();
+    const target = at || meta.pos || { ch: 0, p: 0 };
+    renderChapter(Math.min(target.ch, content.length - 1));
+    requestAnimationFrame(() => {
+      if (at?.q) { const m = document.querySelector(`#text mark[data-q="${at.q}"]`); if (m) { m.scrollIntoView({ block: "center" }); document.querySelectorAll(`#text mark[data-q="${at.q}"]`).forEach(x => x.classList.add("pulse")); } }
+      else { const el = $(`#text p[data-i="${target.p || 0}"]`); if (el && target.p) el.scrollIntoView({ block: "start" }); scrollBy(0, target.p ? -90 : 0); }
+      updateFoot();
+    });
+    meta.lastAt = Date.now(); saveLib();
+  }
+  function openFromHash(h) {
+    const [, , id, ch, p, q] = h.split("/"); // #/read/<id>/<ch>/<p>/<quote>
+    openBook(id, ch != null ? { ch: +ch, p: +p || 0, q } : null);
+  }
+  function paraHTML(text, i, marks) {
+    if (!marks.length) return `<p data-i="${i}">${esc(text)}</p>`;
+    const cuts = new Set([0, text.length]); marks.forEach(m => { cuts.add(m.s); cuts.add(m.e); });
+    const pts = [...cuts].filter(x => x >= 0 && x <= text.length).sort((a, b) => a - b); let out = "";
+    for (let k = 0; k < pts.length - 1; k++) {
+      const a = pts[k], b = pts[k + 1], seg = esc(text.slice(a, b)), m = [...marks].reverse().find(m => m.s <= a && m.e >= b);
+      out += m ? `<mark class="c${m.q.color || 1}${m.q.note ? " note" : ""}" data-q="${m.q.id}">${seg}</mark>` : seg;
+    }
+    return `<p data-i="${i}">${out}</p>`;
+  }
+  function renderChapter(ch) {
+    const { meta, content } = R, c = content[ch]; R.ch = ch;
+    const qs = quotes.filter(q => q.book === meta.id && q.ch === ch);
+    let html = `<h2 class="ch">${esc(c.title)}</h2>`, lastPg = pageAt(meta, ch, 0);
+    if (ch === 0 || meta.kind === "pdf") html = `<div class="pg" data-pg="${lastPg}">${meta.kind === "pdf" ? "PAGE" : "P."} ${lastPg}</div>` + html;
+    c.paras.forEach((t, i) => {
+      const pg = pageAt(meta, ch, i);
+      if (pg !== lastPg) { html += `<div class="pg" data-pg="${pg}">${meta.kind === "pdf" ? "PAGE" : "P."} ${pg}</div>`; lastPg = pg; }
+      const marks = qs.filter(q => i >= q.p && i <= q.p2).map(q => ({ q, s: i === q.p ? q.s : 0, e: i === q.p2 ? q.e : t.length }));
+      html += paraHTML(t, i, marks);
+    });
+    html += `<div class="nextch">${ch < content.length - 1 ? `<button class="btn" data-act="nextch">${esc(content[ch + 1].title)} →</button>` : `<p class="sub serif" style="font-size:20px;font-style:italic">The end.</p>`}
+      ${ch > 0 ? `<p><button class="btn plain sm" data-act="prevch">← ${esc(content[ch - 1].title)}</button></p>` : ""}</div>`;
+    $("#text").innerHTML = html; scrollTo(0, 0);
+  }
+  function topPara() {
+    const ps = document.querySelectorAll("#text p[data-i]"); for (const p of ps) if (p.getBoundingClientRect().bottom > 90) return +p.dataset.i; return 0;
+  }
+  let footT;
+  function updateFoot() {
+    if (!R) return; const p = topPara(), pg = pageAt(R.meta, R.ch, p), tot = totalPages(R.meta);
+    $("#rpage").textContent = `Page ${pg} of ${tot} · ${R.content[R.ch].title}`; $("#rprog").style.width = Math.min(100, pg / tot * 100) + "%";
+    clearTimeout(footT); footT = setTimeout(() => { R.meta.pos = { ch: R.ch, p }; saveLib(); }, 600);
+  }
+  let lastY = 0;
+  addEventListener("scroll", () => { if (!document.body.classList.contains("reading")) return; const y = scrollY;
+    if (Math.abs(y - lastY) > 12) { document.body.classList.toggle("calm", y > lastY && y > 120); lastY = y; } updateFoot(); }, { passive: true });
+
+  /* Selecting a passage → the Quote bar */
+  function selInfo() {
+    const s = getSelection(); if (!s || s.isCollapsed || !s.rangeCount) return null;
+    const r = s.getRangeAt(0), text = $("#text"); if (!text.contains(r.commonAncestorContainer)) return null;
+    const pOf = n => (n.nodeType === 1 ? n : n.parentElement)?.closest("p[data-i]");
+    let sp = pOf(r.startContainer), ep = pOf(r.endContainer);
+    if (!sp || !ep) { const all = [...text.querySelectorAll("p[data-i]")].filter(p => r.intersectsNode(p)); sp ||= all[0]; ep ||= all[all.length - 1]; } // selection began or ended on a heading or page marker
+    if (!sp || !ep) return null;
+    const off = (p, node, o) => { if (!p.contains(node)) return node.compareDocumentPosition?.(p) & Node.DOCUMENT_POSITION_FOLLOWING ? 0 : p.textContent.length; const rr = document.createRange(); rr.setStart(p, 0); rr.setEnd(node, o); return rr.toString().length; };
+    let a = { p: +sp.dataset.i, s: off(sp, r.startContainer, r.startOffset) }, b = { p: +ep.dataset.i, e: off(ep, r.endContainer, r.endOffset) };
+    const paras = R.content[R.ch].paras;
+    // trim spaces at the edges, like a careful hand
+    while (a.s < paras[a.p].length && /\s/.test(paras[a.p][a.s])) a.s++;
+    while (b.e > 0 && /\s/.test(paras[b.p][b.e - 1])) b.e--;
+    if (a.p === b.p && b.e <= a.s) return null;
+    const text2 = a.p === b.p ? paras[a.p].slice(a.s, b.e) : [paras[a.p].slice(a.s), ...paras.slice(a.p + 1, b.p), paras[b.p].slice(0, b.e)].join("\n");
+    return { ch: R.ch, p: a.p, s: a.s, p2: b.p, e: b.e, text: text2.trim() };
+  }
+  let selT;
+  document.addEventListener("selectionchange", () => { clearTimeout(selT); selT = setTimeout(() => { const i = document.body.classList.contains("reading") ? selInfo() : null; $("#qbar").classList.toggle("on", !!i); }, 120); });
+  const hideQbar = () => $("#qbar").classList.remove("on");
+
+  /* Quote sheet: new or edit */
+  function sheet(html) {
+    document.querySelector(".sheet-back")?.remove();
+    const back = document.createElement("div"); back.className = "sheet-back"; back.innerHTML = `<div class="sheet"><div class="grab"></div>${html}</div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back); return back;
+  }
+  let draft = null;
+  function quoteSheet(q) {
+    draft = q.id ? { ...q, tags: [...(q.tags || [])] } : q;
+    const tags = [...new Set([...allTags(), ...draft.tags])], b = library.find(x => x.id === draft.book);
+    sheet(`<div class="row between"><h2>${q.id ? "Quote" : "New quote"}</h2><span class="fine">${esc(b?.title || "")} · p. ${draft.page}</span></div>
+      <p class="serif" style="font-size:19px;line-height:1.5;margin:14px 0;white-space:pre-wrap;border-left:3px solid var(--c${draft.color}s);padding-left:12px" id="qprev">“${esc(draft.text)}”</p>
+      <div class="colors" style="margin-bottom:16px">${[1, 2, 3, 4].map(c => `<button class="${draft.color === c ? "on" : ""}" data-act="qcolor" data-v="${c}" style="background:var(--c${c}s)" aria-label="Colour ${c}"></button>`).join("")}</div>
+      <div class="field"><label>Tags</label><div class="chips" id="qtags">${tagChips(tags)}</div>
+        <input type="text" id="newtag" placeholder="Add a tag and press Enter" style="margin-top:10px;font-size:15px" autocomplete="off" autocapitalize="none"></div>
+      <div class="field" style="margin-top:10px"><label>Note</label><textarea id="qnote" rows="3" placeholder="Why it matters, what it reminds you of…">${esc(draft.note || "")}</textarea></div>
+      <div class="row" style="margin-top:16px">${q.id ? `<button class="btn gray" data-act="delq" style="color:#d6453d">Delete</button>` : ""}<button class="btn grow" data-act="saveq">${q.id ? "Save" : "Save quote"}</button></div>
+      ${q.id ? `<button class="btn plain block" data-act="gotoq">Open at p. ${draft.page} →</button>` : ""}`);
+  }
+  const tagChips = tags => tags.map(t => `<button class="chip ${draft.tags.includes(t) ? "on" : ""}" data-act="qtag" data-v="${esc(t)}">#${esc(t)}</button>`).join("") || `<span class="fine">No tags yet.</span>`;
+  function addTag(v) {
+    v = v.trim().replace(/^#/, "").replace(/\s+/g, "-").toLowerCase(); if (!v) return;
+    if (!draft.tags.includes(v)) draft.tags.push(v);
+    $("#qtags").innerHTML = tagChips([...new Set([...allTags(), ...draft.tags])]); $("#newtag").value = "";
+  }
+
+  /* ---------- Export & backup ---------- */
+  function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+  function exportMd() {
+    const list = filtered(); let md = `# Commonplace\n\n`;
+    for (const b of library.filter(b => list.some(q => q.book === b.id))) {
+      md += `## ${b.title}${b.author ? ` · ${b.author}` : ""}\n\n`;
+      for (const q of list.filter(q => q.book === b.id).sort((x, y) => x.ch - y.ch || x.p - y.p || x.s - y.s))
+        md += `> ${q.text.replace(/\n/g, "\n> ")}\n>\n> p. ${q.page}${q.tags?.length ? " · " + q.tags.map(t => "#" + t).join(" ") : ""}\n\n${q.note ? q.note + "\n\n" : ""}`;
+    }
+    download("commonplace-quotes.md", md, "text/markdown");
+  }
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const SNOOZE = "commonplace-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn block" data-act="install">Install Commonplace</button>`;
+    const step = (n, t) => `<div class="cell" style="cursor:default"><span style="width:26px;height:26px;border-radius:8px;background:var(--tint-soft);color:var(--tint);font:700 13px var(--sans);display:grid;place-items:center;flex:none">${n}</span><span>${t}</span></div>`;
+    if (isIOS) return `<div class="group">${step(1, "Tap <b>Share</b> in Safari's toolbar")}${step(2, "Tap <b>Add to Home Screen</b>, then <b>Add</b>")}</div>`;
+    if (/android/i.test(navigator.userAgent)) return `<div class="group">${step(1, "Tap the <b>⋮</b> menu at the top right of Chrome")}${step(2, "Tap <b>Install app</b> (or <b>Add to Home screen</b>)")}</div>`;
+    return `<div class="group">${step(1, "Click the <b>install</b> icon at the right of the address bar")}${step(2, "or choose <b>Install Commonplace</b> in the browser menu")}</div>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || document.querySelector(".sheet-back") || (!force && snoozed())) return;
+    sheet(`<div class="row" style="gap:14px;margin-bottom:12px"><img src="icons/icon-192.png" width="60" height="60" style="border-radius:14px" alt=""><div><div class="fine">Free · works offline · private</div><h2>Install Commonplace</h2></div></div>
+      <p class="sub">Keep your books and quotes one tap away, full screen, like any app. Everything stays on this device.</p><div id="installbody" style="margin-top:12px">${installBody()}</div>
+      <button class="btn plain block" data-act="later">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#installbody"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { document.querySelector(".sheet-back")?.remove(); toast("Installed. Open it from your home screen."); });
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", async e => {
+    const m = e.target.closest("#text mark[data-q]");
+    if (m && getSelection().isCollapsed) { const q = quotes.find(x => x.id === m.dataset.q); if (q) quoteSheet(q); return; }
+    const el = e.target.closest("[data-act]");
+    // A plain tap on the page shows or hides the reader's controls, as in most reading apps.
+    if (!el) { if (e.target.closest("#text") && getSelection().isCollapsed) document.body.classList.toggle("calm"); return; }
+    const a = el.dataset.act, d = el.dataset; haptic(5);
+    if (a === "import") $("#file").click();
+    else if (a === "sample") addSample().catch(() => toast("Couldn't load the sample"));
+    else if (a === "open") { document.querySelector(".sheet-back")?.remove(); location.hash = "#/read/" + d.id; }
+    else if (a === "close") { getSelection().removeAllRanges(); location.hash = "#/"; }
+    else if (a === "nextch") { renderChapter(R.ch + 1); updateFoot(); }
+    else if (a === "prevch") { renderChapter(R.ch - 1); updateFoot(); }
+    else if (a === "toc") {
+      const { meta, content } = R;
+      const s = sheet(`<h2 style="margin-bottom:6px">${esc(meta.title)}</h2><div class="toc">${content.map((c, i) => `<a href="#" data-act="toch" data-i="${i}" class="${i === R.ch ? "cur" : ""}">${esc(c.title)}<span>p. ${pageAt(meta, i, 0)}</span></a>`).join("")}</div>`);
+      s.querySelector(".toc a.cur")?.scrollIntoView({ block: "center" });
+    }
+    else if (a === "toch") { e.preventDefault(); document.querySelector(".sheet-back")?.remove(); renderChapter(+d.i); updateFoot(); }
+    else if (a === "type") {
+      sheet(`<h2 style="margin-bottom:14px">Text</h2>
+        <div class="row" style="gap:8px"><button class="btn gray grow" data-act="size" data-v="-1" style="font-size:15px">A−</button><button class="btn gray grow" data-act="size" data-v="1" style="font-size:20px">A+</button></div>
+        <div class="ghead caps" style="margin-left:0">Font</div><div class="seg">${[["serif", "Serif"], ["sans", "Sans"]].map(([k, l]) => `<button class="${settings.font === k ? "on" : ""}" data-act="font" data-v="${k}">${l}</button>`).join("")}</div>
+        <div class="ghead caps" style="margin-left:0">Spacing</div><div class="seg">${[[1.45, "Tight"], [1.65, "Normal"], [1.9, "Loose"]].map(([k, l]) => `<button class="${settings.line === k ? "on" : ""}" data-act="line" data-v="${k}">${l}</button>`).join("")}</div>
+        <div class="ghead caps" style="margin-left:0">Theme</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+        <div class="ghead caps" style="margin-left:0">Alignment</div><div class="seg">${[["left", "Left"], ["justify", "Justified"]].map(([k, l]) => `<button class="${settings.align === k ? "on" : ""}" data-act="align" data-v="${k}">${l}</button>`).join("")}</div>`);
+    }
+    else if (["size", "font", "line", "align"].includes(a)) {
+      const p = topPara();
+      if (a === "size") settings.size = Math.max(14, Math.min(30, settings.size + +d.v)); else settings[a] = a === "line" ? +d.v : d.v;
+      saveSettings(); applyReaderStyle(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el && a !== "size"));
+      $(`#text p[data-i="${p}"]`)?.scrollIntoView({ block: "start" }); scrollBy(0, -90);
+    }
+    else if (a === "theme") { settings.theme = d.v; saveSettings(); applyTheme(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
+    else if (a === "bookquotes") { qFilter = { book: R.meta.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; }
+    else if (a === "quote") {
+      const i = selInfo(); if (!i) return;
+      quoteSheet({ ...i, book: R.meta.id, page: pageAt(R.meta, i.ch, i.p, i.s), color: settings.lastColor || 1, tags: [], note: "" });
+    }
+    else if (a === "copysel") { const t = getSelection().toString(); try { await navigator.clipboard.writeText(t); toast("Copied"); } catch (err) { toast("Couldn't copy"); } }
+    else if (a === "qcolor") { draft.color = +d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); $("#qprev").style.borderLeftColor = `var(--c${draft.color}s)`; }
+    else if (a === "qtag") { const t = d.v; draft.tags.includes(t) ? draft.tags.splice(draft.tags.indexOf(t), 1) : draft.tags.push(t); el.classList.toggle("on"); }
+    else if (a === "saveq") {
+      addTag($("#newtag").value); draft.note = $("#qnote").value.trim();
+      if (draft.id) { Object.assign(quotes.find(q => q.id === draft.id), draft, { edited: Date.now() }); }
+      else { draft.id = uid("q"); draft.at = Date.now(); quotes.push(draft); settings.lastColor = draft.color; saveSettings(); getSelection().removeAllRanges(); hideQbar(); }
+      await saveQuotes(); document.querySelector(".sheet-back")?.remove(); toast(draft.at > Date.now() - 2000 ? "Quoted" : "Saved");
+      if (document.body.classList.contains("reading")) { const y = scrollY; renderChapter(R.ch); scrollTo(0, y); } else render();
+    }
+    else if (a === "delq") { if (!confirm("Delete this quote and its note?")) return; quotes = quotes.filter(q => q.id !== draft.id); await saveQuotes(); document.querySelector(".sheet-back")?.remove();
+      if (document.body.classList.contains("reading")) { const y = scrollY; renderChapter(R.ch); scrollTo(0, y); } else render(); }
+    else if (a === "goto" || a === "gotoq") {
+      if (a === "goto" && e.target.closest(".edit")) return;
+      const q = quotes.find(x => x.id === (d.q || draft?.id)); if (!q || !library.some(b => b.id === q.book)) return toast("That book is no longer in your library");
+      document.querySelector(".sheet-back")?.remove();
+      if (document.body.classList.contains("reading") && R?.meta.id === q.book) { if (R.ch !== q.ch) renderChapter(q.ch); openBook(q.book, { ch: q.ch, p: q.p, q: q.id }); }
+      else location.hash = `#/read/${q.book}/${q.ch}/${q.p}/${q.id}`;
+    }
+    else if (a === "editq") { e.stopPropagation(); const q = quotes.find(x => x.id === d.q); if (q) quoteSheet(q); }
+    else if (a === "fbook") { qFilter.book = d.v; render(); } else if (a === "ftag") { qFilter.tag = qFilter.tag === d.v ? "" : d.v; render(); } else if (a === "sort") { qFilter.sort = d.v; render(); }
+    else if (a === "gofilter") { document.querySelector(".sheet-back")?.remove(); qFilter = { book: d.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; render(); }
+    else if (a === "delbook") { const b = library.find(x => x.id === d.id), n = quotes.filter(q => q.book === d.id).length;
+      if (!confirm(`Remove “${b.title}”?${n ? ` Its ${n} quote${n === 1 ? "" : "s"} stay in your collection.` : ""}`)) return;
+      library = library.filter(x => x.id !== d.id); await saveLib(); await dbDel("content:" + d.id); document.querySelector(".sheet-back")?.remove(); render(); }
+    else if (a === "export") exportMd();
+    else if (a === "backup") download(`commonplace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "commonplace", v: 1, quotes, books: library.map(b => ({ id: b.id, title: b.title, author: b.author })) }, null, 1), "application/json");
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "later") { document.querySelector(".sheet-back")?.remove(); try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (err) {} }
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => document.querySelector(".sheet-back")?.remove()).catch(() => {}); }
+  });
+  // Long-press (or right-click) a book for its options.
+  let pressT;
+  document.addEventListener("contextmenu", e => { const b = e.target.closest(".book[data-id]"); if (b) { e.preventDefault(); bookSheet(b.dataset.id); } });
+  document.addEventListener("pointerdown", e => { const b = e.target.closest(".book[data-id]"); if (!b) return; pressT = setTimeout(() => { pressT = "fired"; bookSheet(b.dataset.id); }, 550); });
+  document.addEventListener("pointerup", e => { if (pressT === "fired") { e.preventDefault(); e.stopPropagation(); } clearTimeout(pressT); setTimeout(() => (pressT = null), 0); }, true);
+  document.addEventListener("click", e => { if (pressT === "fired" && e.target.closest(".book")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  document.addEventListener("keydown", e => { if (e.target.id === "newtag" && (e.key === "Enter" || e.key === ",")) { e.preventDefault(); addTag(e.target.value); } });
+  document.addEventListener("input", e => { if (e.target.id === "qsearch") { qFilter.q = e.target.value; $("#qlist").innerHTML = filtered().map(qcard).join("") || `<p class="sub" style="text-align:center;margin-top:30px">Nothing matches.</p>`; } });
+  document.addEventListener("change", async e => {
+    if (e.target.id === "file" && e.target.files.length) { await importFiles(e.target.files); e.target.value = ""; }
+    if (e.target.id === "restore" && e.target.files[0]) {
+      try { const j = JSON.parse(await e.target.files[0].text()); if (j.app !== "commonplace" || !Array.isArray(j.quotes)) throw 0;
+        // reconnect quotes to books by id, or by title for books added again on a new device
+        const map = {}; for (const ob of j.books || []) { const nb = library.find(b => b.id === ob.id) || library.find(b => b.title === ob.title); if (nb) map[ob.id] = nb.id; }
+        let added = 0; for (const q of j.quotes) { if (quotes.some(x => x.id === q.id)) continue; quotes.push({ ...q, book: map[q.book] || q.book }); added++; }
+        await saveQuotes(); toast(`Restored ${added} quote${added === 1 ? "" : "s"}`); render();
+      } catch (err) { toast("That isn't a Commonplace backup"); }
+      e.target.value = "";
+    }
+  });
+
+  /* ---------- Start ---------- */
+  (async () => {
+    library = (await dbGet("library")) || []; quotes = (await dbGet("quotes")) || [];
+    render(); setTimeout(() => showInstall(false), 1800);
+  })();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+  </script>
+</body>
+</html>
