@@ -216,6 +216,18 @@
     .toc a { display: flex; gap: 10px; padding: 12px 4px; border-bottom: .5px solid var(--sep); color: var(--label); align-items: baseline; }
     .toc a.l0 { font-weight: 600; } .toc a.l1 { padding-left: 20px; } .toc a.l2 { padding-left: 38px; font-size: 15px; } .toc a.l3 { padding-left: 54px; font-size: 15px; color: var(--label2); }
     .toc a.cur { color: var(--tint); } .toc a span { color: var(--label3); font-size: 13px; margin-left: auto; white-space: nowrap; font-weight: 400; }
+    /* Collapsible contents: a row per entry, a chevron where it has sections inside */
+    .trow { display: flex; align-items: center; border-bottom: .5px solid var(--sep); min-height: 48px; }
+    .trow a { flex: 1; min-width: 0; display: flex; gap: 10px; align-items: baseline; padding: 12px 4px; color: var(--label); }
+    .trow a span { color: var(--label3); font-size: 13px; margin-left: auto; white-space: nowrap; font-weight: 400; }
+    .trow.l0 a { font-weight: 600; } .trow.l1 a { padding-left: 20px; } .trow.l2 a { padding-left: 38px; font-size: 15px; } .trow.l3 a { padding-left: 54px; font-size: 15px; color: var(--label2); }
+    .trow.cur a, .trow.cur a span { color: var(--tint); }
+    .trow .tg { width: 40px; height: 40px; border: 0; background: none; color: var(--label2); cursor: pointer; display: grid; place-items: center; flex: none; border-radius: 50%; }
+    .trow .tg:active { background: var(--fill); }
+    .trow .tg svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; transition: transform .2s var(--ease); }
+    .trow.open .tg svg { transform: rotate(180deg); }
+    .trow .tg.none { visibility: hidden; }
+    .tocbar { display: flex; justify-content: flex-end; margin: -2px 0 2px; }
     .res { display: block; padding: 12px 4px; border-bottom: .5px solid var(--sep); color: var(--label); }
     .res .sn { font: 16px/1.45 var(--serif); } .res .sn b { background: var(--tint-soft); color: var(--label); font-weight: 600; border-radius: 3px; padding: 0 2px; }
     .res .fine { margin-top: 3px; }
@@ -263,7 +275,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "5", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "6", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -784,6 +796,10 @@
     const r = document.createRange(); r.setStart(pEl, 0); try { r.setEnd(node, off); } catch (e) { return null; }
     return { ch: R.ch, p: +pEl.dataset.i, s: (+pEl.dataset.off || 0) + r.toString().length };
   }
+  function midLoc() {
+    if (paged()) { const f = $("#frame").getBoundingClientRect(); for (const dy of [0, 40, -40, 80]) { const hit = locAtPoint(f.left + R.W / 2, f.top + f.height / 2 + dy); if (hit) return hit; } return null; }
+    const t = $("#text").getBoundingClientRect(); for (const dy of [0, 30, -30, 60, -60]) { const hit = locAtPoint(t.left + t.width / 2, innerHeight / 2 + dy); if (hit) return hit; } return null;
+  }
   function screenEndLoc() {
     if (paged()) { const f = $("#frame").getBoundingClientRect(), m = Math.min(settings.margin, R.W / 6); return locAtPoint(f.left + R.W - m - 4, f.bottom - 10); }
     const t = $("#text").getBoundingClientRect(); return locAtPoint(t.right - Math.min(settings.margin, 40) - 6, innerHeight - 70);
@@ -1041,16 +1057,36 @@
 
   /* Contents · Bookmarks · Quotes */
   let panelTab = "toc";
+  // Collapsible contents. R.tocOpen holds the entries whose sections are showing; the path to where you
+  // are reading opens by itself, so you always see your place.
+  const tocKids = (toc, i) => (toc[i + 1]?.level || 0) > (toc[i].level || 0);
+  const allOpen = toc => toc.every((e, i) => !tocKids(toc, i) || R.tocOpen.has(i));
+  function tocRows(toc, cur, pageOf) {
+    const out = [], stack = []; // stack of [level, open] for the entries above the current one
+    toc.forEach((e, i) => {
+      const lv = e.level || 0; while (stack.length && stack[stack.length - 1][0] >= lv) stack.pop();
+      const shown = stack.every(([, open]) => open), kids = tocKids(toc, i), open = R.tocOpen.has(i);
+      if (shown) out.push(`<div class="trow l${Math.min(3, lv)}${i === cur ? " cur" : ""}${open ? " open" : ""}"><a href="#" data-act="tocgo" data-i="${i}">${esc(e.title)}<span>${pageOf(e)}</span></a>
+        <button class="tg${kids ? "" : " none"}" data-act="toctog" data-i="${i}" aria-label="${open ? "Hide" : "Show"} sections" aria-expanded="${open}"${kids ? "" : ' tabindex="-1"'}><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>`);
+      stack.push([lv, open]);
+    });
+    return out.join("");
+  }
   function contentsSheet() {
     const m = R.meta, tot = totalPages(m), pdf = R.mode === "pdf";
     const toc = (m.toc?.length ? m.toc : (pdf ? [] : R.content.map((c, i) => ({ title: c.title, level: 0, ch: i, p: 0 }))));
     const here = pdf ? pdfCurrent() : currentLoc(), pageOf = e => pdf ? e.page : pageAt(m, e.ch, e.p);
     const herePage = pdf ? here : pageAt(m, here.ch, here.p, here.s || 0);
-    let cur = -1; toc.forEach((e, i) => { if (pdf ? e.page <= here : (e.ch < here.ch || (e.ch === here.ch && e.p <= here.p))) cur = i; });
+    // The section you are looking at is judged from the middle of the screen, not its first line.
+    const look = pdf ? here : (midLoc() || here);
+    let cur = -1; toc.forEach((e, i) => { if (pdf ? e.page <= look : (e.ch < look.ch || (e.ch === look.ch && e.p <= look.p))) cur = i; });
+    if (!R.tocOpen) { R.tocOpen = new Set(); for (let i = cur, lv = toc[cur]?.level || 0; i > 0; i--) if ((toc[i - 1].level || 0) < lv) { R.tocOpen.add(i - 1); lv = toc[i - 1].level || 0; } }
+    R.tocView = { toc, cur, pageOf };
     const bms = [...(m.bookmarks || [])].sort((a, b) => a.page - b.page), qs = quotes.filter(q => q.book === m.id).sort((a, b) => { const x = qOrder(a), y = qOrder(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; });
     const body = panelTab === "toc"
       ? `<div class="gotopage"><span class="sub grow">Go to page</span><input type="number" id="gopage" min="1" max="${tot}" placeholder="${herePage}" inputmode="numeric"><span class="fine">of ${tot}</span><button class="btn sm" data-act="gopage">Go</button></div>
-         ${toc.length ? `<div class="toc">${toc.map((e, i) => `<a href="#" data-act="tocgo" data-i="${i}" class="l${Math.min(3, e.level || 0)} ${i === cur ? "cur" : ""}">${esc(e.title)}<span>${pageOf(e)}</span></a>`).join("")}</div>`
+         ${toc.length ? `${toc.some((e, i) => (toc[i + 1]?.level || 0) > (e.level || 0)) ? `<div class="tocbar"><button class="btn plain sm" data-act="tocall">${allOpen(toc) ? "Collapse all" : "Expand all"}</button></div>` : ""}
+           <div class="toc" id="toclist">${tocRows(toc, cur, pageOf)}</div>`
            : `<p class="sub" style="text-align:center;margin-top:24px">This PDF has no table of contents. Use Go to page, the slider, or search.</p>`}
          ${needsReimport(m) ? `<p class="fine" style="margin-top:12px">Re-import this book from the Library (press and hold it) for its full table of contents.</p>` : ""}`
       : panelTab === "bm"
@@ -1059,7 +1095,7 @@
       : (qs.length ? `<div class="toc">${qs.map(q => `<a href="#" data-act="qgo" data-q="${q.id}" style="border-left:3px solid var(--c${q.color || 1}s);padding-left:10px"><span class="grow serif" style="margin:0;color:var(--label);font-size:16px;white-space:normal">${esc(q.text.slice(0, 160))}${q.text.length > 160 ? "…" : ""}</span><span>p. ${q.page}</span></a>`).join("")}</div>`
         : `<p class="sub" style="text-align:center;margin-top:24px">Select a passage and tap Quote.</p>`);
     const s = sheet(`<div class="seg" style="margin-bottom:10px">${[["toc", "Contents"], ["bm", "Bookmarks"], ["q", "Quotes"]].map(([k, l]) => `<button class="${panelTab === k ? "on" : ""}" data-act="ptab" data-v="${k}">${l}</button>`).join("")}</div>${body}`);
-    s.querySelector(".toc a.cur")?.scrollIntoView({ block: "center" });
+    (s.querySelector(".trow.cur") || s.querySelector(".toc a.cur"))?.scrollIntoView({ block: "center" });
   }
   function goLoc(t) { closeSheet(); if (R.mode === "pdf") return goPdf(t); if (t.ch !== R.ch || t.find) renderChapter(t.ch, t.find ? t : null); goTo(t); }
 
@@ -1165,6 +1201,12 @@
     else if (a === "nextch") { renderChapter(R.ch + 1); goTo({ p: 0 }); }
     else if (a === "toc") { panelTab = "toc"; contentsSheet(); }
     else if (a === "ptab") { panelTab = d.v; contentsSheet(); }
+    else if (a === "toctog" || a === "tocall") {
+      const { toc, cur, pageOf } = R.tocView;
+      if (a === "toctog") { const i = +d.i; R.tocOpen.has(i) ? R.tocOpen.delete(i) : R.tocOpen.add(i); }
+      else if (allOpen(toc)) R.tocOpen.clear(); else toc.forEach((x, i) => tocKids(toc, i) && R.tocOpen.add(i));
+      $("#toclist").innerHTML = tocRows(toc, cur, pageOf); const all = $("[data-act=tocall]"); if (all) all.textContent = allOpen(toc) ? "Collapse all" : "Expand all";
+    }
     else if (a === "tocgo") { e.preventDefault(); const m = R.meta, t = (m.toc?.length ? m.toc : R.content.map((c, i) => ({ ch: i, p: 0 })))[+d.i]; goLoc(R.mode === "pdf" ? { page: t.page } : { ch: t.ch, p: t.p }); }
     else if (a === "gopage") { const v = +$("#gopage").value; if (v) { closeSheet(); goToPage(v); } }
     else if (a === "bmgo") { e.preventDefault(); if (e.target.closest("[data-act=bmdel]")) return; const b = R.meta.bookmarks[+d.i]; goLoc(R.mode === "pdf" ? { page: b.page } : { ch: b.ch, p: b.p, s: b.s || 0, pin: b.page }); }
