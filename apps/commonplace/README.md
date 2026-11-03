@@ -7,8 +7,14 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 
 - **PDFs show their original pages** (rendered with pdf.js, crisp at any pixel density), in a continuous
   scroll with printed page numbers and a selectable text layer. Dark and sepia themes tint the pages.
-- **EPUB and text are laid out as pages you turn:** tap the right or left edge, or swipe (the page
-  follows your finger); tap the middle to show or hide the controls. Scroll mode is a setting.
+- **EPUB and text are laid out as real pages, one under the other** (the default, as in ReadEra's
+  vertical mode): each page is one screen tall with a clear line between pages, a paragraph that
+  doesn't fit continues on the next page (cut between lines, never through one, hyphens kept), and
+  every page shows its number in the chapter. Paragraphs are justified and indented by default
+  (Aa → Paragraphs: Indented / Spaced). Each piece of a split paragraph keeps the paragraph's index
+  and starting character, so quotes, search, bookmarks and jumps stay exact across page breaks.
+- **Pages ↔** turns pages sideways instead: tap the right or left edge, or swipe (the page follows your
+  finger); tap the middle to show or hide the controls. **Scroll** is a continuous column.
 - Newsreader serif (bundled, OFL) or sans; size, line spacing, margins, alignment; light / sepia / dark.
 - Footer: chapter, page, a page scrubber, and "minutes left in chapter" (or pages left in a PDF);
   a faint page number stays when the controls are hidden. Arrow keys and Space turn pages on a keyboard.

@@ -160,6 +160,18 @@
     #text ::selection, .textLayer ::selection { background: color-mix(in srgb, var(--tint) 28%, transparent); }
     .endch { text-align: center; padding-top: 1.5em; break-inside: avoid; }
 
+    /* Paragraph styles */
+    #text.indent p:not(.k-h):not(.k-l):not(.k-b) { text-indent: 1.5em; margin-bottom: .3em; }
+    #text.indent h2.ch + p, #text.indent p.k-h + p, #text.indent .pg + p { text-indent: 0; }
+    #text p.brk { margin-bottom: 0 !important; } #text.just p.brk { text-align-last: justify; }
+    #text p.cont { text-indent: 0 !important; } #text p.hy::after { content: "-"; }
+    /* Vertical pages (ReadEra): the chapter cut into real pages, one under the other */
+    #flow.vpages #text { padding: 0; }
+    #flow.vpages .vpage { position: relative; border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); overflow: hidden; }
+    #flow.vpages .vpage .in { margin: 0 auto; height: 100%; overflow: hidden; box-sizing: border-box; }
+    #flow.vpages .vpage .vno { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 500 10.5px var(--sans); color: var(--label3); }
+    #flow.vpages #text .pg { display: none; }
+    #flow.vpages .endch { padding-top: .6em; }
     /* Scroll mode */
     #flow.scroll #text { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 76px) var(--m, 26px) calc(env(safe-area-inset-bottom) + 110px); }
     /* Page mode: the chapter is laid out in screen-sized columns and slid sideways */
@@ -255,7 +267,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "2", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "3", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -275,7 +287,9 @@
 
   let library = [], quotes = [];
   const SKEY = "commonplace-settings";
-  const settings = Object.assign({ theme: "auto", size: 20, font: "serif", line: 1.62, align: "left", margin: 26, flow: "pages" }, (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  const settings = Object.assign({ theme: "auto", size: 20, font: "serif", line: 1.62, align: "justify", margin: 26, flow: "vpages", indent: true }, (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  // Version 3 makes ReadEra-style vertical pages, justified and indented, the look for everyone once.
+  if (!settings.v3) { Object.assign(settings, { v3: true, flow: "vpages", align: "justify", indent: true }); try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} }
   const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} };
   const saveLib = () => dbSet("library", library);
   const saveQuotes = () => dbSet("quotes", quotes);
@@ -557,7 +571,8 @@
   function viewSettings() {
     return `<h1>Settings</h1>
       <div class="ghead caps">Appearance</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
-      <div class="ghead caps">EPUB and text books</div><div class="seg">${[["pages", "Turn pages"], ["scroll", "Scroll"]].map(([k, l]) => `<button class="${settings.flow === k ? "on" : ""}" data-act="flow" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="ghead caps">EPUB and text books</div><div class="seg">${[["vpages", "Pages ↕"], ["pages", "Pages ↔"], ["scroll", "Scroll"]].map(([k, l]) => `<button class="${settings.flow === k ? "on" : ""}" data-act="flow" data-v="${k}">${l}</button>`).join("")}</div>
+      <p class="fine" style="margin:8px 4px">Pages ↕: real pages, one under the other, as in ReadEra. Pages ↔: tap or swipe to turn.</p>
       <p class="fine" style="margin:8px 4px">PDFs always show their original pages.</p>
       <div class="ghead caps">Your data</div><div class="group">
         <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
@@ -580,6 +595,7 @@
   function applyReaderStyle() {
     const a = $("#text"); a.style.setProperty("--rsize", settings.size + "px"); a.style.setProperty("--rline", settings.line);
     a.style.setProperty("--rfont", settings.font === "sans" ? "var(--sans)" : "var(--serif)"); a.style.setProperty("--ralign", settings.align); $("#flow").style.setProperty("--m", settings.margin + "px");
+    a.classList.toggle("indent", settings.indent !== false); a.classList.toggle("just", settings.align === "justify");
   }
   function quoteAt(q) {
     const m = library.find(b => b.id === q.book);
@@ -614,9 +630,11 @@
 
   /* ---------- Reflowable books: pages you turn, or scroll ---------- */
   const paged = () => R?.mode === "flow" && settings.flow === "pages";
+  const vpaged = () => R?.mode === "flow" && settings.flow === "vpages";
+  const flowClass = () => settings.flow === "pages" ? "paged" : settings.flow === "vpages" ? "vpages" : "scroll";
   function openFlow(at) {
     R.mode = "flow"; $("#pdfv").hidden = true; $("#flow").hidden = false;
-    $("#flow").className = settings.flow === "pages" ? "paged" : "scroll"; applyReaderStyle();
+    $("#flow").className = flowClass(); applyReaderStyle();
     const t = at || R.meta.pos || { ch: 0, p: 0 };
     renderChapter(Math.max(0, Math.min(t.ch || 0, R.content.length - 1)), t.find ? t : null);
     goTo(t);
@@ -650,7 +668,57 @@
     });
     html += `<div class="endch">${ch < content.length - 1 ? (paged() ? `<p class="fine">End of chapter · next: ${esc(content[ch + 1].title)}</p>` : `<button class="btn" data-act="nextch">${esc(content[ch + 1].title)} →</button>`) : `<p class="sub serif" style="font-size:20px;font-style:italic">The end.</p>`}<span id="endmark"></span></div>`;
     $("#text").innerHTML = html;
-    if (paged()) layoutPaged(); else scrollTo(0, 0);
+    if (paged()) layoutPaged(); else { if (vpaged()) paginateV(); scrollTo(0, 0); }
+  }
+  /* Vertical pages: fill each screen-tall page with the chapter's blocks; a paragraph that doesn't fit
+     is cut at the start of its first overflowing line and continues on the next page. Each piece keeps
+     the paragraph's index (data-i) and its starting character (data-off), so quotes stay exact. */
+  function paginateV() {
+    const text = $("#text"), blocks = [...text.children]; text.replaceChildren();
+    const H = innerHeight, W = Math.min(innerWidth, 720), m = Math.min(settings.margin, W / 6), PT = 58, PB = 36;
+    R.vH = H; R.vW = innerWidth; let page, inner, limit, n = 0;
+    const newPage = () => { page = document.createElement("div"); page.className = "vpage"; page.style.height = H + "px";
+      inner = document.createElement("div"); inner.className = "in"; Object.assign(inner.style, { maxWidth: W + "px", padding: `${PT}px ${m}px ${PB}px` });
+      page.append(inner); text.append(page); n++; limit = inner.getBoundingClientRect().top + H - PB; };
+    const heading = el => el.matches("h2.ch, p.k-h");
+    newPage();
+    const queue = blocks;
+    while (queue.length) {
+      const el = queue.shift(); inner.append(el);
+      const b = el.getBoundingClientRect().bottom;
+      if (b <= limit + .5) { // fits; but a heading never sits alone at the foot of a page
+        if (heading(el) && queue.length && b > limit - H * .14 && inner.firstElementChild !== el) { el.remove(); newPage(); inner.append(el); }
+        continue;
+      }
+      if (el.matches("p[data-i]")) { const c = firstOverflowChar(el, limit); if (c > 0) { queue.unshift(splitPara(el, c)); newPage(); continue; } }
+      if (inner.firstElementChild !== el) { el.remove(); newPage(); queue.unshift(el); continue; }
+      if (queue.length) newPage(); // taller than a page on its own: let it be clipped rather than loop
+    }
+    if (!inner.firstElementChild) { page.remove(); n--; }
+    [...text.children].forEach((pg, i) => { const no = document.createElement("div"); no.className = "vno"; no.textContent = `${i + 1} / ${n}`; pg.append(no); });
+    R.vpages = n;
+  }
+  function textNodes(el) { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), out = []; let x; while ((x = w.nextNode())) out.push(x); return out; }
+  function charBottom(nodes, c) { // bottom edge of the line holding character c (skipping invisible whitespace)
+    let acc = 0;
+    for (const t of nodes) { if (c < acc + t.data.length) { const r = document.createRange(); r.setStart(t, c - acc); r.setEnd(t, c - acc + 1); const rs = r.getClientRects(); return rs.length ? rs[rs.length - 1].bottom : null; } acc += t.data.length; }
+    return null;
+  }
+  function firstOverflowChar(p, limit) {
+    const nodes = textNodes(p), L = nodes.reduce((a, t) => a + t.data.length, 0); let lo = 0, hi = L;
+    const over = c => { for (let k = c; k < Math.min(L, c + 4); k++) { const b = charBottom(nodes, k); if (b != null) return b > limit + .5; } return false; };
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (over(mid)) hi = mid; else lo = mid + 1; }
+    return lo >= L ? -1 : lo;
+  }
+  function splitPara(p, c) {
+    const nodes = textNodes(p); let acc = 0, node = null, off = 0;
+    for (const t of nodes) { if (c < acc + t.data.length) { node = t; off = c - acc; break; } acc += t.data.length; }
+    const before = p.textContent[c - 1] || "", at = p.textContent[c] || "";
+    const r = document.createRange(); r.setStart(node, off); r.setEnd(p, p.childNodes.length);
+    const tail = p.cloneNode(false); tail.append(r.extractContents()); tail.dataset.off = (+p.dataset.off || 0) + c; tail.classList.add("cont");
+    tail.classList.remove("brk", "hy"); p.classList.add("brk"); if (/\p{L}/u.test(before) && /\p{L}/u.test(at)) p.classList.add("hy"); // a word cut by hyphenation keeps its hyphen
+    p.querySelectorAll("mark:empty, span:empty").forEach(x => x.remove()); tail.querySelectorAll("mark:empty, span:empty").forEach(x => x.remove());
+    return tail;
   }
   function layoutPaged() {
     const flow = $("#flow"), frame = $("#frame"), text = $("#text"), W = Math.min(flow.clientWidth, 720), m = Math.min(settings.margin, W / 6);
@@ -672,9 +740,12 @@
   }
   function goTo(t) {
     const sel = t?.q ? `#text mark[data-q="${t.q}"]` : t?.find ? "#text .find" : `#text p[data-i="${t?.p || 0}"]`; let el = $(sel);
-    if (el && !t.q && !t.find && t.s > 0) el = charRange(el, t.s) || el; // an exact character, not just its paragraph
+    if (el && !t.q && !t.find && t.s > 0) { // an exact character, not just its paragraph (in whichever piece of it holds that character)
+      const piece = [...document.querySelectorAll(`#text p[data-i="${t.p}"]`)].filter(x => (+x.dataset.off || 0) <= t.s).pop() || el;
+      el = charRange(piece, t.s - (+piece.dataset.off || 0)) || piece; }
     R.quietUntil = Date.now() + 900; R.forcePage = t?.pin || 0; R.pinUntil = Date.now() + 700;
     if (paged()) { setPage(t?.last ? R.pages - 1 : el ? pageOfEl(el) : 0, false); }
+    else if (vpaged() && el) { const pg = (el.startContainer ? el.startContainer.parentElement : el).closest(".vpage"); scrollTo(0, pg.offsetTop + $("#flow").offsetTop); updateFoot(); }
     else { const top = el?.getBoundingClientRect().top;
       if (el && (t.q || t.find)) scrollTo(0, scrollY + top - innerHeight * .4); else if (el && (t.p || t.s)) scrollTo(0, scrollY + top - 92); else scrollTo(0, 0); updateFoot(); }
     if (t?.q) document.querySelectorAll(`#text mark[data-q="${t.q}"]`).forEach(m => m.classList.add("pulse"));
@@ -692,7 +763,7 @@
     else if (document.caretRangeFromPoint) { const c = document.caretRangeFromPoint(x, y); node = c?.startContainer; off = c?.startOffset; }
     const pEl = node && (node.nodeType === 1 ? node : node.parentElement)?.closest?.("#text p[data-i]"); if (!pEl) return null;
     const r = document.createRange(); r.setStart(pEl, 0); try { r.setEnd(node, off); } catch (e) { return null; }
-    return { ch: R.ch, p: +pEl.dataset.i, s: r.toString().length };
+    return { ch: R.ch, p: +pEl.dataset.i, s: (+pEl.dataset.off || 0) + r.toString().length };
   }
   function screenEndLoc() {
     if (paged()) { const f = $("#frame").getBoundingClientRect(), m = Math.min(settings.margin, R.W / 6); return locAtPoint(f.left + R.W - m - 4, f.bottom - 10); }
@@ -702,6 +773,8 @@
     if (!R || R.mode !== "flow") return R?.meta.pos || { ch: 0, p: 0 };
     // The first character on screen, so page numbers and saved places are exact.
     if (paged()) { const f = $("#frame").getBoundingClientRect(), m = Math.min(settings.margin, R.W / 6), hit = locAtPoint(f.left + m + 3, f.top + 6); if (hit) return hit; }
+    else if (vpaged()) { for (const y of [70, 120, 200, 320]) { const inEl = [...document.querySelectorAll("#text .vpage .in")].find(x => { const r = x.getBoundingClientRect(); return r.top <= y && r.bottom > y; });
+        if (!inEl) continue; const r = inEl.getBoundingClientRect(), hit = locAtPoint(r.left + parseFloat(inEl.style.paddingLeft) + 3, Math.max(y, r.top + 58 + 6)); if (hit) return hit; } }
     else { const t = $("#text").getBoundingClientRect(), hit = locAtPoint(t.left + Math.min(settings.margin, 40) + 3, 96); if (hit) return hit; }
     const ps = document.querySelectorAll("#text p[data-i]");
     if (paged()) {
@@ -873,7 +946,7 @@
     let sp = pOf(r.startContainer), ep = pOf(r.endContainer);
     if (!sp || !ep) { const all = [...text.querySelectorAll("p[data-i]")].filter(p => r.intersectsNode(p)); sp ||= all[0]; ep ||= all[all.length - 1]; } // began or ended on a heading
     if (!sp || !ep) return null;
-    const off = (p, node, o) => { if (!p.contains(node)) return node.compareDocumentPosition?.(p) & Node.DOCUMENT_POSITION_FOLLOWING ? 0 : p.textContent.length; const rr = document.createRange(); rr.setStart(p, 0); rr.setEnd(node, o); return rr.toString().length; };
+    const off = (p, node, o) => { const base = +p.dataset.off || 0; if (!p.contains(node)) return base + (node.compareDocumentPosition?.(p) & Node.DOCUMENT_POSITION_FOLLOWING ? 0 : p.textContent.length); const rr = document.createRange(); rr.setStart(p, 0); rr.setEnd(node, o); return base + rr.toString().length; };
     let a = { p: +sp.dataset.i, s: off(sp, r.startContainer, r.startOffset) }, b = { p: +ep.dataset.i, e: off(ep, r.endContainer, r.endOffset) };
     const paras = R.content[R.ch].paras;
     while (a.s < paras[a.p].length && /\s/.test(paras[a.p][a.s])) a.s++;
@@ -985,15 +1058,16 @@
       <div class="ghead caps" style="margin-left:0">Line spacing</div>${seg("line", [[1.45, "Tight"], [1.62, "Normal"], [1.9, "Loose"]], settings.line)}
       <div class="ghead caps" style="margin-left:0">Margins</div>${seg("margin", [[16, "Narrow"], [26, "Normal"], [42, "Wide"]], settings.margin)}
       <div class="ghead caps" style="margin-left:0">Alignment</div>${seg("align", [["left", "Left"], ["justify", "Justified"]], settings.align)}
-      <div class="ghead caps" style="margin-left:0">Page turning</div>${seg("flow", [["pages", "Pages"], ["scroll", "Scroll"]], settings.flow)}` : `<p class="sub">PDFs show their original pages. Pinch to zoom.</p>`}
+      <div class="ghead caps" style="margin-left:0">Paragraphs</div>${seg("indent", [["1", "Indented"], ["0", "Spaced"]], settings.indent === false ? "0" : "1")}
+      <div class="ghead caps" style="margin-left:0">Layout</div>${seg("flow", [["vpages", "Pages ↕"], ["pages", "Pages ↔"], ["scroll", "Scroll"]], settings.flow)}` : `<p class="sub">PDFs show their original pages. Pinch to zoom.</p>`}
       <div class="ghead caps" style="margin-left:0">Theme</div>${seg("theme", [["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]], settings.theme)}`);
   }
   function relayout(fn) {
     if (!R || R.mode !== "flow") { fn?.(); return; }
-    const loc = currentLoc(); fn?.(); $("#flow").className = settings.flow === "pages" ? "paged" : "scroll"; applyReaderStyle(); renderChapter(R.ch); goTo(loc);
+    const loc = currentLoc(); fn?.(); $("#flow").className = flowClass(); applyReaderStyle(); renderChapter(R.ch); goTo(loc);
   }
   let rsT; addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => {
-    if (!R) return; if (R.mode === "flow") relayout(); else if (R.pdf && Math.abs(Math.min(innerWidth - 12, 920) - R.cssW) > 20) { const pg = pdfCurrent(); buildPdfPages(); goPdf({ page: pg }); } }, 200); });
+    if (!R) return; if (R.mode === "flow") { if (vpaged() && innerWidth === R.vW && Math.abs(innerHeight - R.vH) < 150) return; relayout(); } else if (R.pdf && Math.abs(Math.min(innerWidth - 12, 920) - R.cssW) > 20) { const pg = pdfCurrent(); buildPdfPages(); goPdf({ page: pg }); } }, 200); });
 
   /* ---------- Export & backup ---------- */
   function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
@@ -1064,8 +1138,8 @@
     else if (a === "resgo") { e.preventDefault(); const h = R.hits[+d.k]; goLoc(R.mode === "pdf" ? { page: pageAt(R.meta, h.ch, h.p), term: h.t.slice(h.s, h.e) } : { ch: h.ch, p: h.p, s: h.s, e: h.e, find: true }); }
     else if (a === "type") typeSheet();
     else if (a === "size") relayout(() => { settings.size = Math.max(14, Math.min(32, settings.size + +d.v)); saveSettings(); });
-    else if (["font", "line", "margin", "align", "flow"].includes(a)) {
-      const v = a === "line" || a === "margin" ? +d.v : d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el));
+    else if (["font", "line", "margin", "align", "flow", "indent"].includes(a)) {
+      const v = a === "line" || a === "margin" ? +d.v : a === "indent" ? d.v === "1" : d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el));
       if (reading()) relayout(() => { settings[a] = v; saveSettings(); }); else { settings[a] = v; saveSettings(); }
     }
     else if (a === "theme") { settings.theme = d.v; saveSettings(); applyTheme(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
