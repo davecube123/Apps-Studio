@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#121318" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,6 +38,7 @@
     :root[data-theme="sepia"] { --bg: #efe5d2; --card: #f7efdf; --page: #f4ead6; --ink: #3b2f22; --label: #3b2f22; --sep: rgba(80,60,30,.15); }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { background: var(--bg); }
+    html, body { overflow-x: clip; } /* nothing may ever stick out sideways: on phones that makes the browser zoom out */
     body { margin: 0; background: var(--bg); color: var(--label); font: 17px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
     main { max-width: 760px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 100px); }
     h1 { font: 700 34px/1.12 var(--sans); letter-spacing: .005em; margin: 6px 0 4px; }
@@ -130,7 +131,8 @@
              transition: transform .3s var(--ease), opacity .25s; }
     body.calm .rfoot { transform: translateY(100%); opacity: 0; pointer-events: none; }
     .rfoot .lbl { display: flex; justify-content: space-between; font: 500 12.5px var(--sans); color: var(--label2); margin-top: 4px; gap: 10px; }
-    .rfoot .lbl span:last-child { text-align: right; }
+    .rfoot .lbl span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rfoot .lbl span:last-child { text-align: right; flex: none; white-space: nowrap; }
     input[type=range].scrub { width: 100%; -webkit-appearance: none; appearance: none; background: transparent; height: 26px; margin: 0; }
     input[type=range].scrub::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: linear-gradient(var(--tint), var(--tint)) 0 / var(--pct, 0%) 100% no-repeat, var(--sep); }
     input[type=range].scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.3); margin-top: -7.5px; }
@@ -167,7 +169,7 @@
     #text p.cont { text-indent: 0 !important; } #text p.hy::after { content: "-"; }
     /* Vertical pages (ReadEra): the chapter cut into real pages, one under the other */
     #flow.vpages #text { padding: 0; }
-    #flow.vpages .vpage { position: relative; border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); overflow: hidden; }
+    #flow.vpages .vpage { contain: layout paint; position: relative; border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); overflow: hidden; }
     #flow.vpages .vpage .in { margin: 0 auto; height: 100%; overflow: hidden; box-sizing: border-box; }
     #flow.vpages .vpage .vno { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 500 10.5px var(--sans); color: var(--label3); }
     #flow.vpages #text .pg { display: none; }
@@ -184,12 +186,11 @@
 
     /* PDF: the original pages */
     #pdfv { padding: calc(env(safe-area-inset-top) + 64px) 0 calc(env(safe-area-inset-bottom) + 90px); }
-    .ppage { position: relative; margin: 0 auto 14px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 6px 18px rgba(0,0,0,.1); }
+    .ppage { position: relative; width: min(calc(100% - 12px), 920px); margin: 0 auto 14px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 6px 18px rgba(0,0,0,.1); }
     :root[data-theme="dark"] .ppage canvas { filter: invert(.92) hue-rotate(180deg); }
     @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="sepia"]) .ppage canvas { filter: invert(.92) hue-rotate(180deg); } }
     :root[data-theme="sepia"] .ppage canvas { filter: sepia(.35) brightness(.97); }
     .ppage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .ppage .pno { position: absolute; left: 0; right: 0; bottom: -13px; text-align: center; font: 500 10px var(--sans); color: var(--label3); }
     .hls { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
     .hls i { position: absolute; border-radius: 2px; background: var(--c1); mix-blend-mode: multiply; } .hls i.c2 { background: var(--c2); } .hls i.c3 { background: var(--c3); } .hls i.c4 { background: var(--c4); }
     .hls i.find { background: color-mix(in srgb, var(--tint) 30%, transparent); }
@@ -267,7 +268,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "3", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "4", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -332,6 +333,11 @@
     const zip = await JSZip.loadAsync(file);
     const text = p => { const f = zip.file(p); if (!f) throw new Error("missing " + p); return f.async("text"); };
     const xml = s => new DOMParser().parseFromString(s, "application/xml");
+    const enc = zip.file("META-INF/encryption.xml");
+    if (enc) { // font obfuscation is harmless; anything else means the book is copy-protected
+      const ex = xml(await enc.async("text")), algs = [...ex.getElementsByTagNameNS("*", "EncryptionMethod")].map(m => m.getAttribute("Algorithm") || "");
+      if (algs.length && !algs.every(a => /idpf\.org\/2008\/embedding|ns\.adobe\.com\/pdf\/enc#RC/.test(a))) throw new Error("this EPUB is copy-protected (DRM), so it can't be opened outside the store's own app");
+    }
     const opfPath = xml(await text("META-INF/container.xml")).querySelector("rootfile").getAttribute("full-path");
     const opf = xml(await text(opfPath));
     const rel = (href, base) => { const [p, frag] = href.split("#"); return { path: decodeURIComponent(new URL(p || base, "http://x/" + base).pathname.slice(1)), frag: frag ? decodeURIComponent(frag) : "" }; };
@@ -413,6 +419,7 @@
     const info = (await pdf.getMetadata().catch(() => null))?.info || {};
     const pages = [];
     for (let n = 1; n <= pdf.numPages; n++) {
+      if (pdf.numPages > 30 && n % 10 === 1) toast(`Reading ${file.name}: page ${n} of ${pdf.numPages}…`, 60000);
       const tc = await (await pdf.getPage(n)).getTextContent(), lines = []; let cur = "";
       for (const it of tc.items) { cur += it.str; if (it.hasEOL) { lines.push(cur.trim()); cur = ""; } }
       if (cur.trim()) lines.push(cur.trim());
@@ -590,7 +597,12 @@
      ===================================================================== */
   let R = null; // { meta, content, mode: "flow" | "pdf", ch, page, pages, W, pdf, n, … }
   const reading = () => document.body.classList.contains("reading");
-  function applyTheme() { settings.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = settings.theme); }
+  function applyTheme() { settings.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = settings.theme); setBarColor(); }
+  function setBarColor() { // the phone's status bar takes the colour of the screen beneath it
+    const c = getComputedStyle(document.documentElement).getPropertyValue(reading() ? "--page" : "--bg").trim();
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.removeAttribute("media"); m.content = c; });
+  }
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => setBarColor());
   applyTheme();
   function applyReaderStyle() {
     const a = $("#text"); a.style.setProperty("--rsize", settings.size + "px"); a.style.setProperty("--rline", settings.line);
@@ -607,9 +619,9 @@
     const content = R?.meta.id === id ? R.content : await dbGet("content:" + id);
     if (!content) { toast("Couldn't open the book"); return; }
     if (!R) R = { meta, content };
-    document.body.classList.add("reading"); document.body.classList.remove("calm"); hideQbar();
+    document.body.classList.add("reading"); document.body.classList.remove("calm"); hideQbar(); setBarColor();
     $("#rtitle").textContent = meta.title; document.querySelector(".banner")?.remove();
-    if (isPdfView(meta)) await openPdf(at); else openFlow(at);
+    if (isPdfView(meta)) await openPdf(at); else await openFlow(at); if (!R) return;
     meta.lastAt = Date.now(); saveLib(); markBookmark();
   }
   function openFromHash(h) {
@@ -619,8 +631,10 @@
   }
   function closeReader() {
     if (R) { savePos(true); R.io?.disconnect(); try { R.pdf?.destroy(); } catch (e) {} R.closed = true; R = null; }
-    document.body.classList.remove("reading", "calm"); hideQbar(); $("#text").innerHTML = ""; $("#pdfv").innerHTML = ""; document.querySelector(".banner")?.remove();
+    document.body.classList.remove("reading", "calm"); hideQbar(); $("#text").innerHTML = ""; $("#pdfv").innerHTML = ""; document.querySelector(".banner")?.remove(); setBarColor();
   }
+  addEventListener("pagehide", () => savePos(true));
+  document.addEventListener("visibilitychange", () => { if (document.hidden) savePos(true); });
   let posT;
   function savePos(now) {
     if (!R) return; clearTimeout(posT);
@@ -632,8 +646,11 @@
   const paged = () => R?.mode === "flow" && settings.flow === "pages";
   const vpaged = () => R?.mode === "flow" && settings.flow === "vpages";
   const flowClass = () => settings.flow === "pages" ? "paged" : settings.flow === "vpages" ? "vpages" : "scroll";
-  function openFlow(at) {
+  const fontsReady = () => settings.font === "sans" || !document.fonts?.load ? Promise.resolve() :
+    Promise.race([Promise.all(["400", "italic 400", "600", "italic 600"].map(w => document.fonts.load(`${w} 20px Newsreader`))), new Promise(r => setTimeout(r, 2500))]).catch(() => {});
+  async function openFlow(at) {
     R.mode = "flow"; $("#pdfv").hidden = true; $("#flow").hidden = false;
+    await fontsReady(); if (!R) return; // pages are measured with the real font, or lines would spill at page edges
     $("#flow").className = flowClass(); applyReaderStyle();
     const t = at || R.meta.pos || { ch: 0, p: 0 };
     renderChapter(Math.max(0, Math.min(t.ch || 0, R.content.length - 1)), t.find ? t : null);
@@ -674,7 +691,7 @@
      is cut at the start of its first overflowing line and continues on the next page. Each piece keeps
      the paragraph's index (data-i) and its starting character (data-off), so quotes stay exact. */
   function paginateV() {
-    const text = $("#text"), blocks = [...text.children]; text.replaceChildren();
+    const text = $("#text"), blocks = [...text.children].filter(el => !el.classList.contains("pg")); text.replaceChildren(); // scroll-mode page markers aren't needed here
     const H = innerHeight, W = Math.min(innerWidth, 720), m = Math.min(settings.margin, W / 6), PT = 58, PB = 36;
     R.vH = H; R.vW = innerWidth; let page, inner, limit, n = 0;
     const newPage = () => { page = document.createElement("div"); page.className = "vpage"; page.style.height = H + "px";
@@ -706,7 +723,9 @@
   }
   function firstOverflowChar(p, limit) {
     const nodes = textNodes(p), L = nodes.reduce((a, t) => a + t.data.length, 0); let lo = 0, hi = L;
-    const over = c => { for (let k = c; k < Math.min(L, c + 4); k++) { const b = charBottom(nodes, k); if (b != null) return b > limit + .5; } return false; };
+    // A line box reaches below its glyphs by half the extra line spacing; count it, or lines spill by a pixel or two.
+    let lead = 0; { const r = document.createRange(), t = nodes[0]; if (t) { r.setStart(t, 0); r.setEnd(t, 1); const g = r.getClientRects()[0], lh = parseFloat(getComputedStyle(p).lineHeight); if (g && lh) lead = Math.max(0, (lh - g.height) / 2); } }
+    const over = c => { for (let k = c; k < Math.min(L, c + 4); k++) { const b = charBottom(nodes, k); if (b != null) return b + lead > limit + .5; } return false; };
     while (lo < hi) { const mid = (lo + hi) >> 1; if (over(mid)) hi = mid; else lo = mid + 1; }
     return lo >= L ? -1 : lo;
   }
@@ -803,7 +822,7 @@
   }
   function updateFoot() {
     if (!R) return; const tot = totalPages(R.meta); let pg, left = "", title = "";
-    if (R.mode === "pdf") { pg = pdfCurrent(); const e = [...(R.meta.toc || [])].reverse().find(t => t.page <= pg); title = e?.title || R.meta.title; left = `${R.n - pg} page${R.n - pg === 1 ? "" : "s"} left`; }
+    if (R.mode === "pdf") { pg = pdfCurrent(); if (innerWidth === R.pdfW) R.lastPage = pg; /* not while the screen is rotating */ const e = [...(R.meta.toc || [])].reverse().find(t => t.page <= pg); title = e?.title || R.meta.title; left = `${R.n - pg} page${R.n - pg === 1 ? "" : "s"} left`; }
     else {
       const loc = currentLoc(), c = R.content[loc.ch]; pg = R.forcePage || pageAt(R.meta, loc.ch, loc.p, loc.s || 0); title = chapterTitleAt(loc);
       // A screen often holds the end of one stable page and the start of the next: say so.
@@ -815,6 +834,7 @@
     $("#scrub").max = tot; $("#scrub").value = pg; $("#scrub").style.setProperty("--pct", (pg - 1) / Math.max(1, tot - 1) * 100 + "%");
     const lab = R.mode === "pdf" ? `Page ${pg}` : R.pageLabel;
     $("#lbl1").textContent = title; $("#lbl2").textContent = `${lab} of ${tot} · ${left}`; $("#pnum").textContent = lab.replace(/^Pages? /, "");
+    $("#pnum").style.display = vpaged() ? "none" : ""; // vertical pages carry their own number
   }
   function goToPage(n) {
     const tot = totalPages(R.meta); n = Math.max(1, Math.min(tot, n | 0));
@@ -857,8 +877,8 @@
     goPdf(at || { page: R.meta.pos?.page || 1 });
   }
   function buildPdfPages() {
-    const v = $("#pdfv"); R.cssW = Math.min(innerWidth - 12, 920); R.rendered = new Map();
-    v.innerHTML = Array.from({ length: R.n }, (_, i) => `<div class="ppage" data-n="${i + 1}" style="width:${R.cssW}px;height:${Math.round(R.cssW * R.ratio)}px"><canvas></canvas><div class="hls"></div><div class="textLayer"></div><div class="pno">${i + 1}</div></div>`).join("");
+    const v = $("#pdfv"); R.rendered = new Map(); R.pdfW = innerWidth;
+    v.innerHTML = Array.from({ length: R.n }, (_, i) => `<div class="ppage" data-n="${i + 1}" style="aspect-ratio:1 / ${R.ratio}"><canvas></canvas><div class="hls"></div><div class="textLayer"></div></div>`).join("");
     R.io?.disconnect();
     R.io = new IntersectionObserver(es => es.forEach(en => en.isIntersecting && renderPdfPage(+en.target.dataset.n)), { rootMargin: "1400px 0px" });
     v.querySelectorAll(".ppage").forEach(p => R.io.observe(p));
@@ -868,11 +888,16 @@
     if (!R?.pdf || R.rendered.has(n)) return R?.rendered.get(n);
     const job = (async () => {
       const page = await R.pdf.getPage(n), div = pdfDiv(n); if (!div || R.closed) return;
-      const vp1 = page.getViewport({ scale: 1 }), scale = R.cssW / vp1.width, viewport = page.getViewport({ scale }), h = Math.round(viewport.height);
-      if (div.offsetHeight !== h) { const above = div.getBoundingClientRect().bottom < 0, d = h - div.offsetHeight; div.style.height = h + "px"; if (above) scrollBy(0, d); }
-      const dpr = Math.min(devicePixelRatio || 1, 2.5), cv = div.querySelector("canvas");
+      const vp1 = page.getViewport({ scale: 1 }), h0 = div.offsetHeight, above = div.getBoundingClientRect().bottom < 0;
+      div.style.aspectRatio = `${vp1.width} / ${vp1.height}`; if (above && div.offsetHeight !== h0) scrollBy(0, div.offsetHeight - h0); // keep the view still
+      const scale = div.clientWidth / vp1.width, viewport = page.getViewport({ scale });
+      // Sharp, but never more than ~4 million pixels a page: big canvases crash phones.
+      const dpr = Math.min(devicePixelRatio || 1, 2.5, Math.sqrt(4.2e6 / (viewport.width * viewport.height))), cv = div.querySelector("canvas");
+      try { div._task?.cancel(); } catch (e) {}
       cv.width = Math.round(viewport.width * dpr); cv.height = Math.round(viewport.height * dpr);
-      await page.render({ canvasContext: cv.getContext("2d"), viewport, transform: [dpr, 0, 0, dpr, 0, 0] }).promise;
+      try { div._task?.cancel(); } catch (e) {} // a rotation can redraw a page that is still being drawn
+      const task = div._task = page.render({ canvasContext: cv.getContext("2d"), viewport, transform: [dpr, 0, 0, dpr, 0, 0] });
+      try { await task.promise; } catch (e) { if (e?.name === "RenderingCancelledException") return; throw e; } finally { if (div._task === task) div._task = null; }
       const tl = div.querySelector(".textLayer"); tl.replaceChildren(); tl.style.setProperty("--scale-factor", scale);
       await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport, textDivs: [] }).promise;
       drawHls(n); resolvePending(n); trimRendered(n);
@@ -880,8 +905,8 @@
     R.rendered.set(n, job); return job;
   }
   function trimRendered(near) {
-    if (R.rendered.size <= 16) return;
-    for (const n of [...R.rendered.keys()].sort((a, b) => Math.abs(b - near) - Math.abs(a - near)).slice(0, R.rendered.size - 16)) {
+    if (R.rendered.size <= 10) return;
+    for (const n of [...R.rendered.keys()].sort((a, b) => Math.abs(b - near) - Math.abs(a - near)).slice(0, R.rendered.size - 10)) {
       const d = pdfDiv(n); if (!d) continue; const cv = d.querySelector("canvas"); cv.width = cv.height = 0; d.querySelector(".textLayer").replaceChildren(); R.rendered.delete(n);
     }
   }
@@ -972,12 +997,21 @@
   addEventListener("scroll", () => { if (!reading() || paged()) return; if (R && Date.now() > (R.pinUntil || 0)) R.forcePage = 0; updateFoot(); savePos(); markBookmark(); }, { passive: true });
 
   /* ---------- Sheets ---------- */
+  // A panel gets its own history entry, so the phone's Back button closes the panel instead of leaving.
+  let sheetEntry = false, afterBack = null;
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual"; // stepping back out of a panel must not undo a jump
   function sheet(html) {
     document.querySelector(".sheet-back")?.remove();
     const back = document.createElement("div"); back.className = "sheet-back"; back.innerHTML = `<div class="sheet"><div class="grab"></div>${html}</div>`;
-    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back); return back;
+    back.addEventListener("click", e => { if (e.target === back) closeSheet(); }); document.body.appendChild(back);
+    if (!sheetEntry) { history.pushState({ sheet: 1 }, ""); sheetEntry = true; }
+    return back;
   }
-  const closeSheet = () => document.querySelector(".sheet-back")?.remove();
+  function closeSheet(then) {
+    document.querySelector(".sheet-back")?.remove();
+    if (sheetEntry) { sheetEntry = false; afterBack = then || null; history.back(); } else then?.();
+  }
+  addEventListener("popstate", () => { if (sheetEntry) { sheetEntry = false; document.querySelector(".sheet-back")?.remove(); } if (afterBack) { const f = afterBack; afterBack = null; f(); } });
 
   /* The quote sheet: new or edit */
   let draft = null;
@@ -1066,8 +1100,11 @@
     if (!R || R.mode !== "flow") { fn?.(); return; }
     const loc = currentLoc(); fn?.(); $("#flow").className = flowClass(); applyReaderStyle(); renderChapter(R.ch); goTo(loc);
   }
+  document.fonts?.addEventListener?.("loadingdone", () => { if (R?.mode === "flow" && (paged() || vpaged())) relayout(); });
   let rsT; addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => {
-    if (!R) return; if (R.mode === "flow") { if (vpaged() && innerWidth === R.vW && Math.abs(innerHeight - R.vH) < 150) return; relayout(); } else if (R.pdf && Math.abs(Math.min(innerWidth - 12, 920) - R.cssW) > 20) { const pg = pdfCurrent(); buildPdfPages(); goPdf({ page: pg }); } }, 200); });
+    if (!R) return; if (R.mode === "flow") { if (vpaged() && innerWidth === R.vW && Math.abs(innerHeight - R.vH) < 150) return; relayout(); }
+    else if (R.pdf && innerWidth !== R.pdfW) { // pages already resized themselves; redraw them sharp at the new width
+      const pg = R.lastPage || pdfCurrent(); R.pdfW = innerWidth; R.rendered = new Map(); goPdf({ page: pg }); R.io.disconnect(); $("#pdfv").querySelectorAll(".ppage").forEach(x => R.io.observe(x)); } }, 200); });
 
   /* ---------- Export & backup ---------- */
   function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
@@ -1121,9 +1158,9 @@
     if (!el) return;
     const a = el.dataset.act, d = el.dataset; if (el.tagName === "BUTTON") haptic();
     if (a === "import") { replaceId = null; $("#file").click(); }
-    else if (a === "reimport") { replaceId = d.id; closeSheet(); $("#file").click(); }
+    else if (a === "reimport") { replaceId = d.id; $("#file").click(); closeSheet(); } // the file picker must open within the tap
     else if (a === "sample") addSample().catch(() => toast("Couldn't load the sample"));
-    else if (a === "open") { closeSheet(); location.hash = "#/read/" + d.id; }
+    else if (a === "open") closeSheet(() => { location.hash = "#/read/" + d.id; });
     else if (a === "close") { getSelection().removeAllRanges(); location.hash = "#/"; }
     else if (a === "nextch") { renderChapter(R.ch + 1); goTo({ p: 0 }); }
     else if (a === "toc") { panelTab = "toc"; contentsSheet(); }
@@ -1159,11 +1196,11 @@
     else if (a === "goto" || a === "gotoq") {
       if (a === "goto" && e.target.closest(".edit")) return;
       const q = quotes.find(x => x.id === (d.q || draft?.id)); if (!q || !library.some(b => b.id === q.book)) return toast("That book is no longer in your library");
-      closeSheet(); const h = `#/read/${q.book}/q/${q.id}`; if (location.hash === h) openFromHash(h); else location.hash = h;
+      const h = `#/read/${q.book}/q/${q.id}`; closeSheet(() => { if (location.hash === h) openFromHash(h); else location.hash = h; });
     }
     else if (a === "editq") { e.stopPropagation(); const q = quotes.find(x => x.id === d.q); if (q) quoteSheet(q); }
     else if (a === "fbook") { qFilter.book = d.v; render(); } else if (a === "ftag") { qFilter.tag = qFilter.tag === d.v ? "" : d.v; render(); } else if (a === "sort") { qFilter.sort = d.v; render(); }
-    else if (a === "gofilter") { closeSheet(); qFilter = { book: d.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; render(); }
+    else if (a === "gofilter") { qFilter = { book: d.id, tag: "", q: "", sort: "book" }; closeSheet(() => { location.hash = "#/quotes"; render(); }); }
     else if (a === "delbook") { const b = library.find(x => x.id === d.id), n = quotes.filter(q => q.book === d.id).length;
       if (!confirm(`Remove “${b.title}”?${n ? ` Its ${n} quote${n === 1 ? "" : "s"} stay in your collection.` : ""}`)) return;
       library = library.filter(x => x.id !== d.id); await saveLib(); await dbDel("content:" + d.id); await dbDel("file:" + d.id); closeSheet(); render(); }
