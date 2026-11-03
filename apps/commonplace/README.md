@@ -25,6 +25,7 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
   nested and linked mid-chapter; PDF bookmarks (outline). Each entry shows its page. The contents collapse:
   entries with sections inside have a chevron, the path to where you are reading opens by itself (the
   current section is judged from the middle of the screen), and Expand all / Collapse all sits on top.
+  The panel drops down from the top of the screen and its list starts at the beginning of the book.
 - **Go to page** and the **scrubber**.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.

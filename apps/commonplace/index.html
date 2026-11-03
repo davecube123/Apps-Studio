@@ -211,6 +211,10 @@
     .sheet { width: min(600px, 100%); background: var(--bg); color: var(--label); border-radius: 16px 16px 0 0; padding: 8px 18px calc(env(safe-area-inset-bottom) + 18px); max-height: 90vh; overflow: auto; animation: sheetup .38s var(--ease) both; }
     .sheet .grab { width: 36px; height: 5px; border-radius: 5px; background: var(--label3); margin: 0 auto 14px; }
     @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    /* A panel that drops down from the top (the contents) */
+    .sheet-back.top { align-items: flex-start; }
+    .sheet-back.top .sheet { border-radius: 0 0 16px 16px; padding-top: calc(env(safe-area-inset-top) + 10px); max-height: 88vh; animation: sheetdown .34s var(--ease) both; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+    @keyframes sheetdown { from { transform: translateY(-100%); } to { transform: none; } }
     .colors { display: flex; gap: 12px; } .colors button { width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer; box-shadow: inset 0 0 0 2px rgba(0,0,0,.06); }
     .colors button.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--label); }
     .toc a { display: flex; gap: 10px; padding: 12px 4px; border-bottom: .5px solid var(--sep); color: var(--label); align-items: baseline; }
@@ -275,7 +279,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "6", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "7", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -1016,9 +1020,11 @@
   // A panel gets its own history entry, so the phone's Back button closes the panel instead of leaving.
   let sheetEntry = false, afterBack = null;
   if ("scrollRestoration" in history) history.scrollRestoration = "manual"; // stepping back out of a panel must not undo a jump
-  function sheet(html) {
-    document.querySelector(".sheet-back")?.remove();
-    const back = document.createElement("div"); back.className = "sheet-back"; back.innerHTML = `<div class="sheet"><div class="grab"></div>${html}</div>`;
+  function sheet(html, opts = {}) {
+    const open = document.querySelector(".sheet-back");
+    if (opts.top && open?.classList.contains("top")) { open.querySelector(".sheet").innerHTML = html; return open; } // switching tabs: no new animation
+    open?.remove();
+    const back = document.createElement("div"); back.className = "sheet-back" + (opts.top ? " top" : ""); back.innerHTML = `<div class="sheet">${opts.top ? "" : `<div class="grab"></div>`}${html}</div>`;
     back.addEventListener("click", e => { if (e.target === back) closeSheet(); }); document.body.appendChild(back);
     if (!sheetEntry) { history.pushState({ sheet: 1 }, ""); sheetEntry = true; }
     return back;
@@ -1094,8 +1100,10 @@
         : `<p class="sub" style="text-align:center;margin-top:24px">Tap the ribbon at the top to bookmark a page.</p>`)
       : (qs.length ? `<div class="toc">${qs.map(q => `<a href="#" data-act="qgo" data-q="${q.id}" style="border-left:3px solid var(--c${q.color || 1}s);padding-left:10px"><span class="grow serif" style="margin:0;color:var(--label);font-size:16px;white-space:normal">${esc(q.text.slice(0, 160))}${q.text.length > 160 ? "…" : ""}</span><span>p. ${q.page}</span></a>`).join("")}</div>`
         : `<p class="sub" style="text-align:center;margin-top:24px">Select a passage and tap Quote.</p>`);
-    const s = sheet(`<div class="seg" style="margin-bottom:10px">${[["toc", "Contents"], ["bm", "Bookmarks"], ["q", "Quotes"]].map(([k, l]) => `<button class="${panelTab === k ? "on" : ""}" data-act="ptab" data-v="${k}">${l}</button>`).join("")}</div>${body}`);
-    (s.querySelector(".trow.cur") || s.querySelector(".toc a.cur"))?.scrollIntoView({ block: "center" });
+    // The panel drops down from the top, and its list starts at the beginning of the book.
+    const s = sheet(`<div class="row" style="margin-bottom:10px;gap:8px"><button class="tb" data-act="closepanel" aria-label="Close" style="margin-left:-8px"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="seg grow">${[["toc", "Contents"], ["bm", "Bookmarks"], ["q", "Quotes"]].map(([k, l]) => `<button class="${panelTab === k ? "on" : ""}" data-act="ptab" data-v="${k}">${l}</button>`).join("")}</div></div>${body}`, { top: true });
+    s.querySelector(".sheet").scrollTop = 0;
   }
   function goLoc(t) { closeSheet(); if (R.mode === "pdf") return goPdf(t); if (t.ch !== R.ch || t.find) renderChapter(t.ch, t.find ? t : null); goTo(t); }
 
@@ -1201,6 +1209,7 @@
     else if (a === "nextch") { renderChapter(R.ch + 1); goTo({ p: 0 }); }
     else if (a === "toc") { panelTab = "toc"; contentsSheet(); }
     else if (a === "ptab") { panelTab = d.v; contentsSheet(); }
+    else if (a === "closepanel") closeSheet();
     else if (a === "toctog" || a === "tocall") {
       const { toc, cur, pageOf } = R.tocView;
       if (a === "toctog") { const i = +d.i; R.tocOpen.has(i) ? R.tocOpen.delete(i) : R.tocOpen.add(i); }
