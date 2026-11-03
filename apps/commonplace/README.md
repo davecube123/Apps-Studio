@@ -22,7 +22,9 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 ## Finding your way
 
 - **The book's own table of contents:** EPUB 3 nav or EPUB 2 NCX, with parts, chapters and sections
-  nested and linked mid-chapter; PDF bookmarks (outline). Each entry shows its page.
+  nested and linked mid-chapter; PDF bookmarks (outline). Each entry shows its page. The contents collapse:
+  entries with sections inside have a chevron, the path to where you are reading opens by itself (the
+  current section is judged from the middle of the screen), and Expand all / Collapse all sits on top.
 - **Go to page** and the **scrubber**.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.
