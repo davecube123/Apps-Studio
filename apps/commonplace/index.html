@@ -69,7 +69,7 @@
     .seg { display: flex; background: var(--fill); border-radius: 10px; padding: 3px; }
     .seg button { flex: 1; border: 0; background: none; color: var(--label); font: 500 14px var(--sans); padding: 8px 4px; border-radius: 8px; cursor: pointer; }
     .seg button.on { background: var(--card); box-shadow: 0 2px 6px rgba(0,0,0,.1); font-weight: 600; }
-    input[type=text], input[type=search], textarea { width: 100%; border: 0; outline: 0; background: transparent; color: var(--label); font: 17px/1.45 var(--sans); resize: none; padding: 0; }
+    input[type=text], input[type=search], input[type=number], textarea { width: 100%; border: 0; outline: 0; background: transparent; color: var(--label); font: 17px/1.45 var(--sans); resize: none; padding: 0; }
     .field { background: var(--card); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
     .field label { display: block; font: 600 12px var(--sans); color: var(--label2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
     .search { background: var(--fill); border-radius: 12px; padding: 10px 14px; display: flex; gap: 8px; align-items: center; }
@@ -115,38 +115,88 @@
     nav.tabs a.on { color: var(--tint); }
     body.reading nav.tabs, body.reading main { display: none; }
 
-    /* Reader */
+    /* Reader (shared) */
     #reader { display: none; min-height: 100vh; background: var(--page); color: var(--ink); }
-    body.reading #reader { display: block; }
-    .rbar { position: fixed; top: 0; left: 0; right: 0; z-index: 30; padding: calc(env(safe-area-inset-top) + 8px) 12px 8px; display: flex; align-items: center; gap: 8px;
-            background: color-mix(in srgb, var(--page) 86%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: .5px solid var(--sep);
-            transition: transform .3s var(--ease), opacity .3s; }
-    .rbar .ttl { flex: 1; min-width: 0; text-align: center; font: 600 15px var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
-    .tb { width: 40px; height: 40px; border: 0; background: none; color: var(--ink); border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; }
-    .tb:active { background: var(--fill); }
-    body.calm .rbar { transform: translateY(-100%); opacity: 0; } body.calm .rfoot { opacity: 0; }
-    .rfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 8px 18px calc(env(safe-area-inset-bottom) + 10px); text-align: center; font: 500 12px var(--sans); color: var(--label2);
-             background: linear-gradient(transparent, var(--page) 40%); transition: opacity .3s; pointer-events: none; }
-    .rfoot .prog { height: 2px; background: var(--fill); border-radius: 2px; margin: 0 auto 6px; max-width: 420px; overflow: hidden; } .rfoot .prog i { display: block; height: 100%; background: var(--tint); }
-    article { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 80px) 26px calc(env(safe-area-inset-bottom) + 120px); font-family: var(--rfont, var(--serif)); font-size: var(--rsize, 20px); line-height: var(--rline, 1.65); }
-    article h2.ch { font: 500 1.5em/1.2 var(--serif); text-align: center; margin: 10px 0 34px; letter-spacing: -.005em; }
-    article p { margin: 0 0 .9em; text-align: var(--ralign, left); hyphens: auto; -webkit-hyphens: auto; }
-    article .pg { display: flex; align-items: center; gap: 12px; margin: 1.4em 0 1.2em; font: 500 11px var(--sans); letter-spacing: .1em; color: var(--label3); user-select: none; -webkit-user-select: none; }
-    article .pg::before, article .pg::after { content: ""; flex: 1; border-top: .5px solid var(--sep); }
-    article mark { color: inherit; background: var(--c1); border-radius: 3px; padding: .05em 0; cursor: pointer; transition: box-shadow .3s; }
-    article mark.c2 { background: var(--c2); } article mark.c3 { background: var(--c3); } article mark.c4 { background: var(--c4); }
-    article mark.note { text-decoration: underline dotted var(--label3); text-underline-offset: 4px; }
-    article mark.pulse { animation: pulse 1.8s ease 2; }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 40% { box-shadow: 0 0 0 6px var(--c1); } }
-    article ::selection { background: var(--tint-soft); }
-    .nextch { margin: 50px 0 0; text-align: center; }
-    #qbar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 22px); transform: translateX(-50%) translateY(120%); z-index: 40; display: flex; gap: 4px; padding: 6px;
-            background: #1d1c1a; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.3); transition: transform .3s var(--spring), visibility 0s .3s; visibility: hidden; }
-    #qbar { transform: translateX(-50%) translateY(calc(100% + 60px)); }
+    body.reading #reader { display: block; } body.reading { background: var(--page); }
+    .rbar { position: fixed; top: 0; left: 0; right: 0; z-index: 30; padding: calc(env(safe-area-inset-top) + 6px) 8px 6px; display: flex; align-items: center; gap: 2px;
+            background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5);
+            border-bottom: .5px solid var(--sep); transition: transform .3s var(--ease), opacity .25s; }
+    .rbar .ttl { flex: 1; min-width: 0; text-align: center; font: 600 15px var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); padding: 0 4px; }
+    .tb { width: 42px; height: 42px; border: 0; background: none; color: var(--ink); border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none; }
+    .tb:active { background: var(--fill); } .tb.on svg { fill: var(--tint); stroke: var(--tint); }
+    body.calm .rbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+    .rfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 10px 20px calc(env(safe-area-inset-bottom) + 10px);
+             background: color-mix(in srgb, var(--page) 90%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: .5px solid var(--sep);
+             transition: transform .3s var(--ease), opacity .25s; }
+    body.calm .rfoot { transform: translateY(100%); opacity: 0; pointer-events: none; }
+    .rfoot .lbl { display: flex; justify-content: space-between; font: 500 12.5px var(--sans); color: var(--label2); margin-top: 4px; gap: 10px; }
+    .rfoot .lbl span:last-child { text-align: right; }
+    input[type=range].scrub { width: 100%; -webkit-appearance: none; appearance: none; background: transparent; height: 26px; margin: 0; }
+    input[type=range].scrub::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: linear-gradient(var(--tint), var(--tint)) 0 / var(--pct, 0%) 100% no-repeat, var(--sep); }
+    input[type=range].scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.3); margin-top: -7.5px; }
+    input[type=range].scrub::-moz-range-track { height: 3px; border-radius: 3px; background: var(--sep); } input[type=range].scrub::-moz-range-progress { height: 3px; background: var(--tint); }
+    input[type=range].scrub::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    #pnum { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 25; text-align: center; font: 500 11.5px var(--sans); color: var(--label3);
+            pointer-events: none; opacity: 0; transition: opacity .3s; font-variant-numeric: tabular-nums; }
+    body.calm #pnum { opacity: 1; }
+    .banner { position: fixed; left: 12px; right: 12px; top: calc(env(safe-area-inset-top) + 62px); z-index: 29; background: var(--card); color: var(--label); border-radius: 12px; padding: 10px 14px;
+              font-size: 14px; box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
+
+    /* Reflowable text: shared typography */
+    #text { font-family: var(--rfont, var(--serif)); font-size: var(--rsize, 20px); line-height: var(--rline, 1.62); color: var(--ink); }
+    #text h2.ch { font: 500 1.45em/1.2 var(--serif); text-align: center; margin: .4em 0 1.4em; letter-spacing: -.005em; break-after: avoid; }
+    #text p { margin: 0 0 .85em; text-align: var(--ralign, left); hyphens: auto; -webkit-hyphens: auto; orphans: 2; widows: 2; }
+    #text p.k-h { font: 600 1.08em/1.3 var(--sans); margin: 1.4em 0 .6em; break-after: avoid; text-align: left; }
+    #text p.k-b { margin-left: 1.2em; font-style: italic; } #text p.k-l { margin-left: 1em; text-indent: -.8em; padding-left: .8em; }
+    #text p.k-l::before { content: "•"; display: inline-block; width: .8em; }
+    #text .pg { display: flex; align-items: center; gap: 12px; margin: 1.4em 0 1.2em; font: 500 11px var(--sans); letter-spacing: .1em; color: var(--label3); user-select: none; -webkit-user-select: none; }
+    #text .pg::before, #text .pg::after { content: ""; flex: 1; border-top: .5px solid var(--sep); }
+    #text mark { color: inherit; background: var(--c1); border-radius: 3px; padding: .05em 0; cursor: pointer; }
+    #text mark.c2 { background: var(--c2); } #text mark.c3 { background: var(--c3); } #text mark.c4 { background: var(--c4); }
+    #text mark.note { text-decoration: underline dotted var(--label3); text-underline-offset: 4px; }
+    #text .find { background: var(--tint-soft); box-shadow: 0 0 0 2px var(--tint-soft); border-radius: 3px; }
+    .pulse { animation: pulse 1.8s ease 2; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 40% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--tint) 35%, transparent); } }
+    #text ::selection, .textLayer ::selection { background: color-mix(in srgb, var(--tint) 28%, transparent); }
+    .endch { text-align: center; padding-top: 1.5em; break-inside: avoid; }
+
+    /* Scroll mode */
+    #flow.scroll #text { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 76px) var(--m, 26px) calc(env(safe-area-inset-bottom) + 110px); }
+    /* Page mode: the chapter is laid out in screen-sized columns and slid sideways */
+    #flow.paged { position: fixed; top: calc(env(safe-area-inset-top) + 62px); bottom: calc(env(safe-area-inset-bottom) + 40px); left: 0; right: 0; overflow: hidden; touch-action: pinch-zoom; }
+    #flow.paged #frame { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); overflow: hidden; }
+    #flow.paged #text { height: 100%; column-fill: auto; will-change: transform; }
+    #flow.paged #text.anim { transition: transform .32s cubic-bezier(.25,.8,.25,1); }
+    #flow.paged #text .pg { display: none; }
+    #flow.paged #text img { max-height: 100%; }
+
+    /* PDF: the original pages */
+    #pdfv { padding: calc(env(safe-area-inset-top) + 64px) 0 calc(env(safe-area-inset-bottom) + 90px); }
+    .ppage { position: relative; margin: 0 auto 14px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 6px 18px rgba(0,0,0,.1); }
+    :root[data-theme="dark"] .ppage canvas { filter: invert(.92) hue-rotate(180deg); }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="sepia"]) .ppage canvas { filter: invert(.92) hue-rotate(180deg); } }
+    :root[data-theme="sepia"] .ppage canvas { filter: sepia(.35) brightness(.97); }
+    .ppage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .ppage .pno { position: absolute; left: 0; right: 0; bottom: -13px; text-align: center; font: 500 10px var(--sans); color: var(--label3); }
+    .hls { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+    .hls i { position: absolute; border-radius: 2px; background: var(--c1); mix-blend-mode: multiply; } .hls i.c2 { background: var(--c2); } .hls i.c3 { background: var(--c3); } .hls i.c4 { background: var(--c4); }
+    .hls i.find { background: color-mix(in srgb, var(--tint) 30%, transparent); }
+    .textLayer { position: absolute; inset: 0; overflow: hidden; opacity: 1; line-height: 1; text-align: initial; -webkit-text-size-adjust: none; text-size-adjust: none; forced-color-adjust: none; transform-origin: 0 0; z-index: 2; }
+    .textLayer span, .textLayer br { color: transparent; position: absolute; white-space: pre; cursor: text; transform-origin: 0% 0%; }
+    .textLayer .endOfContent { display: block; position: absolute; inset: 100% 0 0; z-index: -1; cursor: default; user-select: none; }
+
+    #qbar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 70px); z-index: 40; display: flex; gap: 2px; padding: 5px;
+            background: #1d1c1a; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.3); visibility: hidden; transform: translateX(-50%) translateY(calc(100% + 90px)); transition: transform .3s var(--spring), visibility 0s .3s; }
     #qbar.on { transform: translateX(-50%) translateY(0); visibility: visible; transition: transform .3s var(--spring); }
     body:not(.reading) #qbar { display: none; }
-    #qbar button { border: 0; background: none; color: #fff; font: 600 15px var(--sans); padding: 10px 16px; border-radius: 999px; cursor: pointer; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+    #qbar button { border: 0; background: none; color: #fff; font: 600 14.5px var(--sans); padding: 10px 14px; border-radius: 999px; cursor: pointer; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
     #qbar button.main { background: var(--tint); }
+
+    /* Continue reading */
+    .hero { display: flex; gap: 16px; align-items: center; background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); margin-top: 14px; cursor: pointer; }
+    .hero .cover { width: 76px; flex: none; }
+    .hero .gen { padding: 14% 10% 10%; } .hero .gen b { font-size: 11.5px; } .hero .gen i { font-size: 8.5px; } .hero .gen hr { margin: 5px 0; }
+    .hero .bar { height: 4px; border-radius: 4px; background: var(--fill); overflow: hidden; margin: 8px 0 6px; } .hero .bar i { display: block; height: 100%; background: var(--tint); }
 
     /* Sheets */
     .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.35); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
@@ -155,8 +205,14 @@
     @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
     .colors { display: flex; gap: 12px; } .colors button { width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer; box-shadow: inset 0 0 0 2px rgba(0,0,0,.06); }
     .colors button.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--label); }
-    .toc a { display: flex; gap: 10px; padding: 13px 4px; border-bottom: .5px solid var(--sep); color: var(--label); }
-    .toc a.cur { color: var(--tint); font-weight: 600; } .toc a span { color: var(--label3); font-size: 13px; margin-left: auto; white-space: nowrap; }
+    .toc a { display: flex; gap: 10px; padding: 12px 4px; border-bottom: .5px solid var(--sep); color: var(--label); align-items: baseline; }
+    .toc a.l0 { font-weight: 600; } .toc a.l1 { padding-left: 20px; } .toc a.l2 { padding-left: 38px; font-size: 15px; } .toc a.l3 { padding-left: 54px; font-size: 15px; color: var(--label2); }
+    .toc a.cur { color: var(--tint); } .toc a span { color: var(--label3); font-size: 13px; margin-left: auto; white-space: nowrap; font-weight: 400; }
+    .res { display: block; padding: 12px 4px; border-bottom: .5px solid var(--sep); color: var(--label); }
+    .res .sn { font: 16px/1.45 var(--serif); } .res .sn b { background: var(--tint-soft); color: var(--label); font-weight: 600; border-radius: 3px; padding: 0 2px; }
+    .res .fine { margin-top: 3px; }
+    .gotopage { display: flex; gap: 8px; align-items: center; background: var(--fill); border-radius: 12px; padding: 8px 8px 8px 14px; margin: 4px 0 10px; }
+    .gotopage input { width: 70px; font: 600 17px var(--sans); text-align: right; -moz-appearance: textfield; } .gotopage input::-webkit-inner-spin-button { display: none; }
     .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); background: #1d1c1a; color: #fff; padding: 11px 18px; border-radius: 999px; font: 600 14px var(--sans);
              z-index: 90; animation: rise .3s var(--ease) both; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
     .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 10px); transform: translateX(-50%); z-index: 95; border: 0; background: var(--tint); color: #fff; padding: 10px 18px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; }
@@ -172,15 +228,18 @@
   <div id="reader">
     <div class="rbar">
       <button class="tb" data-act="close" aria-label="Back to library"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="tb" data-act="toc" aria-label="Contents"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+      <button class="tb" data-act="toc" aria-label="Contents, bookmarks and quotes"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
       <div class="ttl" id="rtitle"></div>
-      <button class="tb" data-act="bookquotes" aria-label="Quotes from this book"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg></button>
+      <button class="tb" data-act="search" aria-label="Search in the book"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
       <button class="tb" data-act="type" aria-label="Text settings"><svg viewBox="0 0 24 24"><path d="M4 18L9 6l5 12M5.8 14h6.4M15 18l3-7 3 7M15.9 16h4.2"/></svg></button>
+      <button class="tb" data-act="bookmark" id="bmbtn" aria-label="Bookmark this page"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"/></svg></button>
     </div>
-    <article id="text"></article>
-    <div class="rfoot"><div class="prog"><i id="rprog"></i></div><span id="rpage"></span></div>
+    <div id="flow" class="paged"><div id="frame"><article id="text"></article></div></div>
+    <div id="pdfv" hidden></div>
+    <div class="rfoot"><input type="range" class="scrub" id="scrub" min="1" max="1" value="1" aria-label="Go to page"><div class="lbl"><span id="lbl1"></span><span id="lbl2"></span></div></div>
+    <div id="pnum"></div>
   </div>
-  <div id="qbar"><button class="main" data-act="quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quote</button><button data-act="copysel">Copy</button></div>
+  <div id="qbar"><button class="main" data-act="quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quote</button><button data-act="copysel">Copy</button><button data-act="lookup">Look up</button></div>
   <nav class="tabs"><div class="inner">
     <a href="#/" data-tab="library"><svg viewBox="0 0 24 24"><path d="M4 19.5V5a1 1 0 0 1 1-1h4v16H5a1 1 0 0 1-1-.5zM9 4h4v16H9zM14.5 5.2l3.6-1 3.4 14.4-3.6 1z"/></svg>Library</a>
     <a href="#/quotes" data-tab="quotes"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quotes</a>
@@ -193,16 +252,17 @@
   /* =====================================================================
      Commonplace: a reader for your own books that keeps the passages you
      quote, with tags and notes, and opens each one at its exact place.
-     Books, quotes and notes stay on this device (IndexedDB).
+     PDFs show their original pages; EPUB and text are laid out as pages
+     you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "1", APP_DATE = "3 Nov 2026";
+  const APP_VERSION = "2", APP_DATE = "3 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
   const wc = s => (String(s).match(/\S+/g) || []).length;
   const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   function toast(m, ms = 2400) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
-  const haptic = (ms = 8) => { if (navigator.vibrate && navigator.userActivation?.hasBeenActive) try { navigator.vibrate(ms); } catch (e) {} };
+  const haptic = (ms = 6) => { if (navigator.vibrate && navigator.userActivation?.hasBeenActive) try { navigator.vibrate(ms); } catch (e) {} };
 
   /* ---------- Storage: IndexedDB key/value ---------- */
   const DBN = "commonplace", STORE = "kv";
@@ -215,16 +275,16 @@
 
   let library = [], quotes = [];
   const SKEY = "commonplace-settings";
-  const settings = Object.assign({ theme: "auto", size: 20, font: "serif", line: 1.65, align: "left" }, (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  const settings = Object.assign({ theme: "auto", size: 20, font: "serif", line: 1.62, align: "left", margin: 26, flow: "pages" }, (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
   const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} };
   const saveLib = () => dbSet("library", library);
   const saveQuotes = () => dbSet("quotes", quotes);
 
   /* ---------- Pages ----------
-     PDFs keep their printed page numbers. Reflowable books (EPUB, text) get stable pages:
-     one page per 1,600 characters of text, so "p. 47" always means the same place,
-     whatever the font size or screen. */
+     PDFs keep their printed page numbers. Reflowable books (EPUB, text) get stable pages of
+     1,600 characters, so "p. 47" always means the same place whatever the font size or screen. */
   const CPP = 1600;
+  const isPdfView = m => m.kind === "pdf" && m.hasFile;
   function pageAt(meta, ch, p, s = 0) {
     const c = meta.chapters[ch]; if (!c) return 1;
     if (c.pg) return c.pg[Math.min(p, c.pg.length - 1)] || 1;
@@ -232,9 +292,18 @@
     return Math.floor((off + s) / CPP) + 1;
   }
   const totalPages = meta => meta.pages || Math.max(1, Math.ceil(meta.chars / CPP));
+  // The paragraph where a stable page begins (for "go to page" and the scrubber).
+  function locOfPage(meta, page) {
+    const target = (page - 1) * CPP;
+    for (let ch = meta.chapters.length - 1; ch >= 0; ch--) { const c = meta.chapters[ch]; if (c.start > target) continue;
+      let off = c.start; for (let p = 0; p < c.plens.length; p++) { if (off + c.plens[p] >= target) return { ch, p, s: Math.max(0, target - off) }; off += c.plens[p] + 1; } return { ch, p: Math.max(0, c.plens.length - 1), s: 0 }; }
+    return { ch: 0, p: 0 };
+  }
+  const curPage = m => isPdfView(m) ? (m.pos.page || 1) : pageAt(m, m.pos.ch || 0, m.pos.p || 0);
 
-  /* ---------- Parsing: EPUB, PDF, TXT/Markdown (adapted from Little Pages) ---------- */
+  /* ---------- Parsing: EPUB, PDF, TXT/Markdown ---------- */
   const BLOCKS = "p,h1,h2,h3,h4,h5,h6,li,blockquote,dd,pre";
+  const KIND = { H1: "h", H2: "h", H3: "h", H4: "h", H5: "h", H6: "h", BLOCKQUOTE: "b", LI: "l" };
   function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("couldn't load a reader component (are you online?)")); document.head.appendChild(s); }); }
   let jszipP, pdfP;
   const needJSZip = () => window.JSZip ? Promise.resolve() : (jszipP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js").catch(e => { jszipP = null; throw e; }));
@@ -251,33 +320,78 @@
     const xml = s => new DOMParser().parseFromString(s, "application/xml");
     const opfPath = xml(await text("META-INF/container.xml")).querySelector("rootfile").getAttribute("full-path");
     const opf = xml(await text(opfPath));
-    const resolve = href => decodeURIComponent(new URL(href, "http://x/" + opfPath).pathname.slice(1));
+    const rel = (href, base) => { const [p, frag] = href.split("#"); return { path: decodeURIComponent(new URL(p || base, "http://x/" + base).pathname.slice(1)), frag: frag ? decodeURIComponent(frag) : "" }; };
+    const resolve = href => rel(href, opfPath).path;
     const meta = n => clean(opf.getElementsByTagNameNS("*", n)[0]?.textContent || "");
     const items = {};
     for (const it of opf.getElementsByTagNameNS("*", "item")) items[it.getAttribute("id")] = { href: it.getAttribute("href"), props: it.getAttribute("properties") || "", type: it.getAttribute("media-type") || "" };
     let cover = null;
     const coverId = Object.keys(items).find(id => items[id].props.includes("cover-image")) || [...opf.getElementsByTagNameNS("*", "meta")].find(m => m.getAttribute("name") === "cover")?.getAttribute("content");
     if (coverId && items[coverId] && items[coverId].type.startsWith("image")) { const f = zip.file(resolve(items[coverId].href)); if (f) cover = await shrinkImage(await f.async("blob")); }
+    const spineEl = opf.getElementsByTagNameNS("*", "spine")[0];
     const spine = [...opf.getElementsByTagNameNS("*", "itemref")].map(r => items[r.getAttribute("idref")]?.href).filter(Boolean);
+    // Paragraph extraction is unchanged from version 1, so quotes made then keep their anchors.
     const docs = [];
     for (const href of spine) {
-      let html; try { html = await text(resolve(href)); } catch (e) { continue; }
+      const path = resolve(href); let html; try { html = await text(path); } catch (e) { continue; }
       const doc = new DOMParser().parseFromString(html, "text/html");
       const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
-      let paras = els.map(el => clean(el.textContent)).filter(Boolean);
-      if (!paras.length) paras = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean);
-      const h = doc.body.querySelector("h1,h2,h3"); docs.push({ paras, heading: h ? clean(h.textContent) : "" });
+      let objs = els.map(el => ({ t: clean(el.textContent), k: KIND[el.tagName] || "p", el })).filter(o => o.t);
+      if (!objs.length) objs = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean).map(t => ({ t, k: "p", el: null }));
+      const h = doc.body.querySelector("h1,h2,h3"); docs.push({ path, doc, objs, heading: h ? clean(h.textContent) : "" });
     }
-    const freq = new Map(); for (const d of docs) for (const p of new Set(d.paras)) freq.set(p, (freq.get(p) || 0) + 1);
-    const limit = Math.max(3, docs.length * .25), chapters = [];
+    const freq = new Map(); for (const d of docs) for (const t of new Set(d.objs.map(o => o.t))) freq.set(t, (freq.get(t) || 0) + 1);
+    const limit = Math.max(3, docs.length * .25), chapters = [], docCh = new Map();
     for (const d of docs) {
-      let paras = d.paras.filter(p => freq.get(p) < limit); if (wc(paras.join(" ")) < 25) continue;
+      let objs = d.objs.filter(o => freq.get(o.t) < limit);
+      if (wc(objs.map(o => o.t).join(" ")) < 25) { docCh.set(d.path, { ch: chapters.length, objs: null }); continue; } // short doc: maps to the next chapter
       let title = d.heading && d.heading.length <= 120 ? d.heading : "";
-      if (title && paras[0] === title) paras = paras.slice(1); else if (!title && paras[0].length <= 80 && paras.length > 1) { title = paras[0]; paras = paras.slice(1); }
-      chapters.push({ title: title || `Section ${chapters.length + 1}`, paras });
+      if (title && objs[0].t === title) objs = objs.slice(1); else if (!title && objs[0].t.length <= 80 && objs.length > 1) { title = objs[0].t; objs = objs.slice(1); }
+      docCh.set(d.path, { ch: chapters.length, objs, doc: d.doc });
+      const c = { title: title || `Section ${chapters.length + 1}`, paras: objs.map(o => o.t) }, k = objs.map(o => o.k).join("");
+      if (/[^p]/.test(k)) c.k = k; chapters.push(c);
     }
     if (!chapters.length) throw new Error("no readable text found");
-    return { kind: "epub", title: meta("title") || file.name.replace(/\.epub$/i, ""), author: meta("creator"), cover, chapters };
+    // The book's own table of contents: EPUB 3 nav document, or EPUB 2 NCX.
+    const toc = [];
+    const target = (href, base) => {
+      const { path, frag } = rel(href, base), dc = docCh.get(path); if (!dc) return null;
+      const ch = Math.min(dc.ch, chapters.length - 1); if (!dc.objs || !frag) return { ch, p: 0 };
+      const el = dc.doc.getElementById(frag); if (!el) return { ch, p: 0 };
+      const i = dc.objs.findIndex(o => o.el && (o.el === el || el.contains(o.el) || (el.compareDocumentPosition(o.el) & Node.DOCUMENT_POSITION_FOLLOWING)));
+      return { ch, p: i < 0 ? Math.max(0, dc.objs.length - 1) : i };
+    };
+    const navId = Object.keys(items).find(id => items[id].props.split(/\s+/).includes("nav"));
+    try {
+      if (navId) {
+        const base = resolve(items[navId].href), nd = new DOMParser().parseFromString(await text(base), "text/html");
+        const nav = [...nd.querySelectorAll("nav")].find(n => /toc/.test(n.getAttribute("epub:type") || n.getAttribute("type") || "")) || nd.querySelector("nav");
+        const walk = (ol, level) => { for (const li of ol?.children || []) { if (li.tagName !== "LI") continue; const a = li.querySelector(":scope > a, :scope > span > a"), sub = li.querySelector(":scope > ol");
+          if (a?.getAttribute("href")) { const t = target(a.getAttribute("href"), base); if (t) toc.push({ title: clean(a.textContent), level, ...t }); } if (sub) walk(sub, level + 1); } };
+        walk(nav?.querySelector("ol"), 0);
+      }
+      if (!toc.length) {
+        const ncxId = spineEl?.getAttribute("toc") || Object.keys(items).find(id => items[id].type === "application/x-dtbncx+xml");
+        if (ncxId && items[ncxId]) {
+          const base = resolve(items[ncxId].href), nx = xml(await text(base));
+          const walk = (parent, level) => { for (const np of parent.children) { if (np.localName !== "navPoint") continue;
+            const label = clean(np.getElementsByTagNameNS("*", "text")[0]?.textContent), src = np.getElementsByTagNameNS("*", "content")[0]?.getAttribute("src");
+            if (src) { const t = target(src, base); if (t) toc.push({ title: label, level, ...t }); } walk(np, level + 1); } };
+          const map = nx.getElementsByTagNameNS("*", "navMap")[0]; if (map) walk(map, 0);
+        }
+      }
+    } catch (e) { console.warn("contents", e); }
+    // A chapter whose opening has a contents entry takes that entry's title.
+    for (const t of toc) if (t.p === 0 && /^Section \d+$/.test(chapters[t.ch].title) && t.title) chapters[t.ch].title = t.title;
+    return { kind: "epub", title: meta("title") || file.name.replace(/\.epub$/i, ""), author: meta("creator"), cover, chapters, toc: toc.filter(t => t.title) };
+  }
+  async function pdfOutline(pdf) {
+    const out = [], ol = await pdf.getOutline().catch(() => null);
+    const walk = async (items, level) => { for (const it of items || []) {
+      try { let dest = it.dest; if (typeof dest === "string") dest = await pdf.getDestination(dest);
+        if (Array.isArray(dest) && dest[0]) { const page = (typeof dest[0] === "object" ? await pdf.getPageIndex(dest[0]) : dest[0]) + 1; out.push({ title: clean(it.title), level, page }); } } catch (e) {}
+      if (level < 3) await walk(it.items, level + 1); } };
+    await walk(ol, 0); return out.filter(t => t.title);
   }
   async function parsePdf(file) {
     await needPdf();
@@ -295,7 +409,6 @@
       if (buf) paras.push(buf);
       pages.push(paras.map(clean).filter(p => p && !/^\d{1,4}$/.test(p)));
     }
-    // Keep the printed page of every paragraph; group pages into readable sections.
     const per = pdf.numPages > 60 ? 10 : 5, chapters = [];
     for (let i = 0; i < pages.length; i += per) {
       const paras = [], pg = [];
@@ -304,42 +417,53 @@
       chapters.push({ title: `Pages ${i + 1}–${Math.min(i + per, pages.length)}`, paras, pg });
     }
     if (!chapters.length) throw new Error("this PDF has no selectable text (it may be scanned images)");
-    return { kind: "pdf", title: clean(info.Title || "") || file.name.replace(/\.pdf$/i, ""), author: clean(info.Author || ""), cover: null, chapters, pages: pdf.numPages };
+    return { kind: "pdf", title: clean(info.Title || "") || file.name.replace(/\.pdf$/i, ""), author: clean(info.Author || ""), cover: await pdfCover(pdf), chapters, pages: pdf.numPages, toc: await pdfOutline(pdf) };
+  }
+  async function pdfCover(pdf) {
+    try { const page = await pdf.getPage(1), vp = page.getViewport({ scale: 1 }), v = page.getViewport({ scale: 400 / vp.width }), c = document.createElement("canvas");
+      c.width = v.width; c.height = v.height; await page.render({ canvasContext: c.getContext("2d"), viewport: v }).promise; return c.toDataURL("image/jpeg", .8); } catch (e) { return null; }
   }
   async function parseText(file) {
     const raw = (await file.text()).replace(/\r/g, ""), blocks = /\n\s*\n/.test(raw) ? raw.split(/\n\s*\n/) : raw.split("\n");
     const heading = /^(#{1,2}\s+.+|(chapter|part|book|prologue|epilogue)\b.{0,80})$/i, chapters = []; let cur = null;
     for (let b of blocks) { b = b.trim(); if (!b) continue; const first = b.split("\n")[0].trim();
-      if (heading.test(first)) { cur = { title: first.replace(/^#+\s*/, ""), paras: [] }; chapters.push(cur); const rest = b.split("\n").slice(1).join(" ").trim(); if (rest) cur.paras.push(clean(rest)); }
-      else { if (!cur) { cur = { title: "Beginning", paras: [] }; chapters.push(cur); } cur.paras.push(clean(b.replace(/^#+\s*/, ""))); } }
+      if (heading.test(first)) { cur = { title: first.replace(/^#+\s*/, ""), level: /^##\s/.test(first) ? 1 : 0, paras: [] }; chapters.push(cur); const rest = b.split("\n").slice(1).join(" ").trim(); if (rest) cur.paras.push(clean(rest)); }
+      else { if (!cur) { cur = { title: "Beginning", level: 0, paras: [] }; chapters.push(cur); } cur.paras.push(clean(b.replace(/^#+\s*/, ""))); } }
     let out = chapters.filter(c => c.paras.length);
     if (out.length <= 1) { const all = out[0]?.paras || []; out = []; let part = null, w = 0;
-      for (const p of all) { if (!part || w > 3000) { part = { title: `Part ${out.length + 1}`, paras: [] }; out.push(part); w = 0; } part.paras.push(p); w += wc(p); } }
+      for (const p of all) { if (!part || w > 3000) { part = { title: `Part ${out.length + 1}`, level: 0, paras: [] }; out.push(part); w = 0; } part.paras.push(p); w += wc(p); } }
     if (!out.length) throw new Error("the file is empty");
-    return { kind: "text", title: file.name.replace(/\.(txt|md|markdown)$/i, ""), author: "", cover: null, chapters: out };
+    return { kind: "text", title: file.name.replace(/\.(txt|md|markdown)$/i, ""), author: "", cover: null, chapters: out.map(c => ({ title: c.title, paras: c.paras })), toc: out.map((c, i) => ({ title: c.title, level: c.level, ch: i, p: 0 })) };
   }
-  async function addParsed(parsed) {
-    const id = uid("b"), chapters = parsed.chapters.map(c => ({ title: c.title, paras: c.paras, ...(c.pg ? { pg: c.pg } : {}) }));
+  // Store a parsed book. With `id`, replaces an existing book's file and text but keeps its place, bookmarks and quotes.
+  async function addParsed(parsed, file, id) {
+    const old = id && library.find(b => b.id === id); id ||= uid("b");
+    const chapters = parsed.chapters.map(c => ({ title: c.title, paras: c.paras, ...(c.pg ? { pg: c.pg } : {}), ...(c.k ? { k: c.k } : {}) }));
     let start = 0;
-    const meta = { id, kind: parsed.kind, title: parsed.title, author: parsed.author || "", cover: parsed.cover, addedAt: Date.now(), lastAt: 0, pos: { ch: 0, p: 0 }, pages: parsed.pages || 0,
+    const meta = { id, kind: parsed.kind, title: parsed.title, author: parsed.author || "", cover: parsed.cover, addedAt: old?.addedAt || Date.now(), lastAt: old?.lastAt || 0,
+      pos: old?.pos || (parsed.kind === "pdf" ? { page: 1, y: 0 } : { ch: 0, p: 0 }), pages: parsed.pages || 0, toc: parsed.toc || [], bookmarks: old?.bookmarks || [], hasFile: !!file,
       chapters: chapters.map(c => { const plens = c.paras.map(p => p.length), m = { title: c.title, start, plens, ...(c.pg ? { pg: c.pg } : {}) }; start += plens.reduce((a, x) => a + x + 1, 0); return m; }) };
     meta.chars = start;
-    await dbSet("content:" + id, chapters); library.push(meta); await saveLib(); return meta;
+    if (parsed.kind === "pdf" && meta.pos.page == null) meta.pos = { page: old ? pageAt(old, old.pos.ch || 0, old.pos.p || 0) : 1, y: 0 };
+    await dbSet("content:" + id, chapters); if (file) await dbSet("file:" + id, file);
+    if (old) library[library.indexOf(old)] = meta; else library.push(meta);
+    await saveLib(); return meta;
   }
-  async function importFiles(files) {
+  const parseAny = f => { const n = f.name.toLowerCase(); return n.endsWith(".epub") ? parseEpub(f) : n.endsWith(".pdf") ? parsePdf(f) : parseText(f); };
+  async function importFiles(files, replaceId) {
     let last = null;
     for (const f of [...files]) {
-      toast(`Opening ${f.name}…`, 30000);
-      try { const n = f.name.toLowerCase(); last = await addParsed(n.endsWith(".epub") ? await parseEpub(f) : n.endsWith(".pdf") ? await parsePdf(f) : await parseText(f)); }
+      toast(`Opening ${f.name}…`, 60000);
+      try { last = await addParsed(await parseAny(f), f, replaceId); }
       catch (e) { console.error(e); toast(`Couldn't open ${f.name}: ${e.message}`, 5000); await new Promise(r => setTimeout(r, 1500)); }
     }
     document.querySelectorAll(".toast").forEach(t => t.remove());
-    if (last) { toast(`Added “${last.title}”`); render(); }
+    if (last) { toast(replaceId ? `Updated “${last.title}”` : `Added “${last.title}”`); render(); }
   }
   async function addSample() {
     toast("Adding the sample…");
     const j = await fetch("data/sample-tao-te-ching.json").then(r => r.json());
-    await addParsed({ kind: "text", title: j.title, author: j.author, cover: null, chapters: j.chapters }); render();
+    await addParsed({ kind: "text", title: j.title, author: j.author, cover: null, chapters: j.chapters, toc: j.chapters.map((c, i) => ({ title: c.title, level: 0, ch: i, p: 0 })) }, null); render();
   }
 
   /* ---------- Generated covers ---------- */
@@ -356,7 +480,7 @@
   function render() {
     const h = location.hash || "#/";
     if (h.startsWith("#/read/")) return openFromHash(h);
-    document.body.classList.remove("reading", "calm"); hideQbar();
+    closeReader();
     const tab = h.startsWith("#/quotes") ? "quotes" : h.startsWith("#/settings") ? "settings" : "library";
     const html = tab === "quotes" ? viewQuotes() : tab === "settings" ? viewSettings() : viewLibrary();
     const isNav = h !== lastHash; $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
@@ -366,41 +490,50 @@
   addEventListener("hashchange", render);
 
   /* ---------- Library ---------- */
+  const pctRead = b => Math.min(100, Math.round(curPage(b) / totalPages(b) * 100));
   function viewLibrary() {
     const books = [...library].sort((a, b) => (b.lastAt || b.addedAt) - (a.lastAt || a.addedAt));
-    const qn = id => quotes.filter(q => q.book === id).length;
+    const qn = id => quotes.filter(q => q.book === id).length, cur = books.find(b => b.lastAt);
     return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
-      ${books.length ? `<div class="shelf">${books.map(b => { const pct = Math.round(pageAt(b, b.pos.ch, b.pos.p) / totalPages(b) * 100);
-        return `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? Math.min(100, pct) : 0}%"></i></div>
-          <div><div class="t">${esc(b.title)}</div><div class="m">${qn(b.id) ? `${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"} · ` : ""}${b.lastAt ? `p. ${pageAt(b, b.pos.ch, b.pos.p)} of ${totalPages(b)}` : "New"}</div></div></div>`; }).join("")}
-        <div class="add" data-act="import"><div><div style="font-size:30px;line-height:1">+</div>Add a book<div class="fine">EPUB · PDF · TXT</div></div></div></div>`
+      ${cur ? `<div class="hero" data-act="open" data-id="${cur.id}">${coverHTML(cur)}<div class="grow"><div class="caps">Continue reading</div><h3 style="margin-top:4px">${esc(cur.title)}</h3>
+          <div class="bar"><i style="width:${pctRead(cur)}%"></i></div><div class="fine">Page ${curPage(cur)} of ${totalPages(cur)} · ${pctRead(cur)}%</div></div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--label3)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></div>` : ""}
+      ${books.length ? `<div class="shelf">${books.map(b => `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
+          <div><div class="t">${esc(b.title)}</div><div class="m">${qn(b.id) ? `${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"} · ` : ""}${b.lastAt ? `${pctRead(b)}%` : "New"}</div></div></div>`).join("")}
+        <div class="add" data-act="import"><div><div style="font-size:30px;line-height:1">+</div>Add a book<div class="fine">EPUB · PDF · TXT</div></div></div></div>
+        <p class="fine" style="text-align:center;margin-top:18px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
           <p class="sub">Add an EPUB, a PDF with selectable text, or a plain-text book. It stays on this device.</p>
           <div class="row" style="justify-content:center;margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="import">Add a book</button><button class="btn gray" data-act="sample">Try a sample</button></div>
           <p class="fine" style="margin-top:14px">The sample is the Tao Te Ching in James Legge's public-domain translation.</p></div>`}
-      <p class="fine" style="text-align:center;margin-top:34px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
+      <p class="fine" style="text-align:center;margin-top:28px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
   }
+  const needsReimport = b => (b.kind === "pdf" && !b.hasFile) || (b.kind === "epub" && !b.toc);
   function bookSheet(id) {
     const b = library.find(x => x.id === id), n = quotes.filter(q => q.book === id).length;
     sheet(`<div class="row" style="gap:14px"><div style="width:64px">${coverHTML(b)}</div><div class="grow"><h2>${esc(b.title)}</h2><div class="sub">${esc(b.author)}</div><div class="fine">${totalPages(b)} pages · ${n} quote${n === 1 ? "" : "s"}</div></div></div>
-      <div class="group" style="margin-top:18px">
+      ${needsReimport(b) ? `<p class="fine" style="margin:14px 2px 0">${b.kind === "pdf" ? "Added before version 2: re-import the file to see its original pages." : "Added before version 2: re-import the file for its full table of contents."} Your quotes and place are kept.</p>` : ""}
+      <div class="group" style="margin-top:16px">
         <button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>
         <button class="cell" data-act="gofilter" data-id="${id}"><span class="grow">Quotes from this book</span></button>
+        <button class="cell" data-act="reimport" data-id="${id}"><span class="grow">Re-import the file <span class="fine">(keeps quotes)</span></span></button>
         <button class="cell" data-act="delbook" data-id="${id}"><span class="grow" style="color:#d6453d">Remove from library</span></button></div>`);
   }
 
   /* ---------- Quotes collection ---------- */
   let qFilter = { book: "", tag: "", q: "", sort: "new" };
   const allTags = () => [...new Set(quotes.flatMap(q => q.tags || []))].sort((a, b) => a.localeCompare(b));
+  const qOrder = q => q.rects ? [q.page, q.rects[0]?.[1] || 0, 0] : [q.ch, q.p, q.s];
   function filtered() {
     const s = qFilter.q.toLowerCase();
     let list = quotes.filter(q => (!qFilter.book || q.book === qFilter.book) && (!qFilter.tag || q.tags?.includes(qFilter.tag))
       && (!s || [q.text, q.note, ...(q.tags || []), library.find(b => b.id === q.book)?.title].join(" ").toLowerCase().includes(s)));
-    list.sort(qFilter.sort === "book" ? (a, b) => (a.book === b.book ? a.ch - b.ch || a.p - b.p || a.s - b.s : a.book.localeCompare(b.book)) : (a, b) => b.at - a.at);
+    const cmp = (a, b) => { const x = qOrder(a), y = qOrder(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
+    list.sort(qFilter.sort === "book" ? (a, b) => (a.book === b.book ? cmp(a, b) : a.book.localeCompare(b.book)) : (a, b) => b.at - a.at);
     return list;
   }
   function qcard(q) {
-    const b = library.find(x => x.id === q.book), ch = b?.chapters[q.ch];
+    const b = library.find(x => x.id === q.book), ch = !q.rects && b?.chapters[q.ch];
     return `<div class="qcard" data-act="goto" data-q="${q.id}" style="border-left-color:var(--c${q.color || 1}s)">
       <button class="edit" data-act="editq" data-q="${q.id}" aria-label="Edit quote">•••</button>
       <div class="qt">${esc(q.text)}</div>${q.note ? `<div class="note">${esc(q.note)}</div>` : ""}
@@ -423,111 +556,357 @@
   /* ---------- Settings ---------- */
   function viewSettings() {
     return `<h1>Settings</h1>
-      <div class="ghead caps">Reading</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="ghead caps">Appearance</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="ghead caps">EPUB and text books</div><div class="seg">${[["pages", "Turn pages"], ["scroll", "Scroll"]].map(([k, l]) => `<button class="${settings.flow === k ? "on" : ""}" data-act="flow" data-v="${k}">${l}</button>`).join("")}</div>
+      <p class="fine" style="margin:8px 4px">PDFs always show their original pages.</p>
       <div class="ghead caps">Your data</div><div class="group">
         <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
-        <button class="cell" data-act="backup"><span class="grow">Back up quotes and notes (.json)</span></button>
-        <label class="cell"><span class="grow">Restore quotes from a backup…</span><input type="file" id="restore" accept=".json,application/json" hidden></label>
+        <button class="cell" data-act="backup"><span class="grow">Back up quotes, notes and bookmarks (.json)</span></button>
+        <label class="cell"><span class="grow">Restore from a backup…</span><input type="file" id="restore" accept=".json,application/json" hidden></label>
         ${isStandalone() ? "" : `<button class="cell" data-act="installsheet"><span class="grow" style="color:var(--tint)">Install the app</span></button>`}</div>
-      <p class="fine" style="margin:8px 4px">Books, quotes and notes stay on this device. A backup holds your quotes and notes; add the books again on a new device and the quotes reconnect to them by title.</p>
+      <p class="fine" style="margin:8px 4px">Books, quotes and notes stay on this device. A backup holds your quotes, notes and bookmarks; add the books again on a new device and they reconnect by title.</p>
       <div class="ghead caps">About pages</div><p class="fine" style="margin:0 4px">PDFs show their printed page numbers. EPUB and text books have no fixed pages, so Commonplace uses stable pages of about 1,600 characters: a quote's page stays the same whatever the font size or device.</p>
+      <div class="ghead caps">Gestures</div><p class="fine" style="margin:0 4px">Tap the right or left edge, or swipe, to turn the page. Tap the middle to show or hide the controls. Press and hold to select text, then tap Quote.</p>
       <p class="fine" style="text-align:center;margin-top:30px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
   }
 
-  /* ---------- The reader ---------- */
-  let R = null; // { meta, content, ch }
-  function applyReaderStyle() {
-    const a = $("#text"); a.style.setProperty("--rsize", settings.size + "px"); a.style.setProperty("--rline", settings.line);
-    a.style.setProperty("--rfont", settings.font === "sans" ? "var(--sans)" : "var(--serif)"); a.style.setProperty("--ralign", settings.align);
-  }
+  /* =====================================================================
+     The reader
+     ===================================================================== */
+  let R = null; // { meta, content, mode: "flow" | "pdf", ch, page, pages, W, pdf, n, … }
+  const reading = () => document.body.classList.contains("reading");
   function applyTheme() { settings.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = settings.theme); }
   applyTheme();
+  function applyReaderStyle() {
+    const a = $("#text"); a.style.setProperty("--rsize", settings.size + "px"); a.style.setProperty("--rline", settings.line);
+    a.style.setProperty("--rfont", settings.font === "sans" ? "var(--sans)" : "var(--serif)"); a.style.setProperty("--ralign", settings.align); $("#flow").style.setProperty("--m", settings.margin + "px");
+  }
+  function quoteAt(q) {
+    const m = library.find(b => b.id === q.book);
+    return m && isPdfView(m) ? { page: q.page, q: q.id, text: q.rects ? null : q.text } : { ch: q.ch, p: q.p, q: q.id };
+  }
   async function openBook(id, at) {
     const meta = library.find(b => b.id === id); if (!meta) { toast("That book is no longer in your library"); location.hash = "#/"; return; }
+    if (R && R.meta.id !== id) closeReader();
     const content = R?.meta.id === id ? R.content : await dbGet("content:" + id);
     if (!content) { toast("Couldn't open the book"); return; }
-    R = { meta, content, ch: 0 };
-    document.body.classList.add("reading"); document.body.classList.remove("calm");
-    $("#rtitle").textContent = meta.title; applyReaderStyle();
-    const target = at || meta.pos || { ch: 0, p: 0 };
-    renderChapter(Math.min(target.ch, content.length - 1));
-    requestAnimationFrame(() => {
-      if (at?.q) { const m = document.querySelector(`#text mark[data-q="${at.q}"]`); if (m) { m.scrollIntoView({ block: "center" }); document.querySelectorAll(`#text mark[data-q="${at.q}"]`).forEach(x => x.classList.add("pulse")); } }
-      else { const el = $(`#text p[data-i="${target.p || 0}"]`); if (el && target.p) el.scrollIntoView({ block: "start" }); scrollBy(0, target.p ? -90 : 0); }
-      updateFoot();
-    });
-    meta.lastAt = Date.now(); saveLib();
+    if (!R) R = { meta, content };
+    document.body.classList.add("reading"); document.body.classList.remove("calm"); hideQbar();
+    $("#rtitle").textContent = meta.title; document.querySelector(".banner")?.remove();
+    if (isPdfView(meta)) await openPdf(at); else openFlow(at);
+    meta.lastAt = Date.now(); saveLib(); markBookmark();
   }
   function openFromHash(h) {
-    const [, , id, ch, p, q] = h.split("/"); // #/read/<id>/<ch>/<p>/<quote>
-    openBook(id, ch != null ? { ch: +ch, p: +p || 0, q } : null);
+    const [, , id, kind, qid] = h.split("/"); // #/read/<id>  or  #/read/<id>/q/<quote>
+    const q = kind === "q" && quotes.find(x => x.id === qid);
+    openBook(id, q ? quoteAt(q) : null);
   }
-  function paraHTML(text, i, marks) {
-    if (!marks.length) return `<p data-i="${i}">${esc(text)}</p>`;
+  function closeReader() {
+    if (R) { savePos(true); R.io?.disconnect(); try { R.pdf?.destroy(); } catch (e) {} R.closed = true; R = null; }
+    document.body.classList.remove("reading", "calm"); hideQbar(); $("#text").innerHTML = ""; $("#pdfv").innerHTML = ""; document.querySelector(".banner")?.remove();
+  }
+  let posT;
+  function savePos(now) {
+    if (!R) return; clearTimeout(posT);
+    const f = () => { if (!R) return; R.meta.pos = R.mode === "pdf" ? { page: pdfCurrent() } : currentLoc(); saveLib(); };
+    now ? f() : (posT = setTimeout(f, 700));
+  }
+
+  /* ---------- Reflowable books: pages you turn, or scroll ---------- */
+  const paged = () => R?.mode === "flow" && settings.flow === "pages";
+  function openFlow(at) {
+    R.mode = "flow"; $("#pdfv").hidden = true; $("#flow").hidden = false;
+    $("#flow").className = settings.flow === "pages" ? "paged" : "scroll"; applyReaderStyle();
+    const t = at || R.meta.pos || { ch: 0, p: 0 };
+    renderChapter(Math.max(0, Math.min(t.ch || 0, R.content.length - 1)), t.find ? t : null);
+    goTo(t);
+    if (R.meta.kind === "pdf" && !R.meta.hasFile) banner("This PDF was added before version 2. Re-import it (press and hold it in the Library) to see its original pages.");
+  }
+  function banner(msg) { const b = document.createElement("div"); b.className = "banner"; b.textContent = msg; document.body.appendChild(b); setTimeout(() => b.remove(), 7000); }
+  function paraHTML(text, i, k, marks) {
+    const cls = k && k !== "p" ? ` class="k-${k}"` : "";
+    if (!marks.length) return `<p data-i="${i}"${cls}>${esc(text)}</p>`;
     const cuts = new Set([0, text.length]); marks.forEach(m => { cuts.add(m.s); cuts.add(m.e); });
     const pts = [...cuts].filter(x => x >= 0 && x <= text.length).sort((a, b) => a - b); let out = "";
-    for (let k = 0; k < pts.length - 1; k++) {
-      const a = pts[k], b = pts[k + 1], seg = esc(text.slice(a, b)), m = [...marks].reverse().find(m => m.s <= a && m.e >= b);
+    for (let j = 0; j < pts.length - 1; j++) {
+      const a = pts[j], b = pts[j + 1]; let seg = esc(text.slice(a, b));
+      const m = [...marks].reverse().find(m => m.q && m.s <= a && m.e >= b), f = marks.find(m => m.find && m.s <= a && m.e >= b);
+      if (f) seg = `<span class="find">${seg}</span>`;
       out += m ? `<mark class="c${m.q.color || 1}${m.q.note ? " note" : ""}" data-q="${m.q.id}">${seg}</mark>` : seg;
     }
-    return `<p data-i="${i}">${out}</p>`;
+    return `<p data-i="${i}"${cls}>${out}</p>`;
   }
-  function renderChapter(ch) {
+  function renderChapter(ch, find) {
     const { meta, content } = R, c = content[ch]; R.ch = ch;
-    const qs = quotes.filter(q => q.book === meta.id && q.ch === ch);
+    const qs = quotes.filter(q => q.book === meta.id && !q.rects && q.ch === ch);
     let html = `<h2 class="ch">${esc(c.title)}</h2>`, lastPg = pageAt(meta, ch, 0);
-    if (ch === 0 || meta.kind === "pdf") html = `<div class="pg" data-pg="${lastPg}">${meta.kind === "pdf" ? "PAGE" : "P."} ${lastPg}</div>` + html;
+    if (ch === 0 || meta.kind === "pdf") html = `<div class="pg">${meta.kind === "pdf" ? "PAGE" : "P."} ${lastPg}</div>` + html;
     c.paras.forEach((t, i) => {
       const pg = pageAt(meta, ch, i);
-      if (pg !== lastPg) { html += `<div class="pg" data-pg="${pg}">${meta.kind === "pdf" ? "PAGE" : "P."} ${pg}</div>`; lastPg = pg; }
+      if (pg !== lastPg) { html += `<div class="pg">${meta.kind === "pdf" ? "PAGE" : "P."} ${pg}</div>`; lastPg = pg; }
       const marks = qs.filter(q => i >= q.p && i <= q.p2).map(q => ({ q, s: i === q.p ? q.s : 0, e: i === q.p2 ? q.e : t.length }));
-      html += paraHTML(t, i, marks);
+      if (find && find.p === i) marks.push({ find: true, s: find.s, e: find.e });
+      html += paraHTML(t, i, c.k?.[i], marks);
     });
-    html += `<div class="nextch">${ch < content.length - 1 ? `<button class="btn" data-act="nextch">${esc(content[ch + 1].title)} →</button>` : `<p class="sub serif" style="font-size:20px;font-style:italic">The end.</p>`}
-      ${ch > 0 ? `<p><button class="btn plain sm" data-act="prevch">← ${esc(content[ch - 1].title)}</button></p>` : ""}</div>`;
-    $("#text").innerHTML = html; scrollTo(0, 0);
+    html += `<div class="endch">${ch < content.length - 1 ? (paged() ? `<p class="fine">End of chapter · next: ${esc(content[ch + 1].title)}</p>` : `<button class="btn" data-act="nextch">${esc(content[ch + 1].title)} →</button>`) : `<p class="sub serif" style="font-size:20px;font-style:italic">The end.</p>`}<span id="endmark"></span></div>`;
+    $("#text").innerHTML = html;
+    if (paged()) layoutPaged(); else scrollTo(0, 0);
   }
-  function topPara() {
-    const ps = document.querySelectorAll("#text p[data-i]"); for (const p of ps) if (p.getBoundingClientRect().bottom > 90) return +p.dataset.i; return 0;
+  function layoutPaged() {
+    const flow = $("#flow"), frame = $("#frame"), text = $("#text"), W = Math.min(flow.clientWidth, 720), m = Math.min(settings.margin, W / 6);
+    frame.style.width = W + "px"; Object.assign(text.style, { width: W + "px", padding: `0 ${m}px`, columnWidth: `${W - 2 * m}px`, columnGap: `${2 * m}px` });
+    text.classList.remove("anim"); text.style.transform = "translateX(0)";
+    R.W = W; R.page = 0;
+    const end = $("#endmark"), x = end.getBoundingClientRect().left - text.getBoundingClientRect().left;
+    R.pages = Math.max(1, Math.floor((x - 1) / W) + 1);
   }
-  let footT;
+  function pageOfEl(el) {
+    const r = (el.getClientRects ? el.getClientRects()[0] : null) || el.getBoundingClientRect(), x = r.left - $("#text").getBoundingClientRect().left;
+    return Math.max(0, Math.min(R.pages - 1, Math.floor((x + 1) / R.W)));
+  }
+  function setPage(k, anim = true) {
+    if (Date.now() > (R.pinUntil || 0)) R.forcePage = 0; // a pinned page number lasts until you move
+    R.page = Math.max(0, Math.min(R.pages - 1, k)); const t = $("#text");
+    t.classList.toggle("anim", anim); t.style.transform = `translateX(${-R.page * R.W}px)`;
+    updateFoot(); savePos(); markBookmark();
+  }
+  function goTo(t) {
+    const sel = t?.q ? `#text mark[data-q="${t.q}"]` : t?.find ? "#text .find" : `#text p[data-i="${t?.p || 0}"]`; let el = $(sel);
+    if (el && !t.q && !t.find && t.s > 0) el = charRange(el, t.s) || el; // an exact character, not just its paragraph
+    R.quietUntil = Date.now() + 900; R.forcePage = t?.pin || 0; R.pinUntil = Date.now() + 700;
+    if (paged()) { setPage(t?.last ? R.pages - 1 : el ? pageOfEl(el) : 0, false); }
+    else { const top = el?.getBoundingClientRect().top;
+      if (el && (t.q || t.find)) scrollTo(0, scrollY + top - innerHeight * .4); else if (el && (t.p || t.s)) scrollTo(0, scrollY + top - 92); else scrollTo(0, 0); updateFoot(); }
+    if (t?.q) document.querySelectorAll(`#text mark[data-q="${t.q}"]`).forEach(m => m.classList.add("pulse"));
+    if (t?.find) $("#text .find")?.classList.add("pulse");
+  }
+  // A character offset inside a paragraph element, and back.
+  function charRange(pEl, s) {
+    const w = document.createTreeWalker(pEl, NodeFilter.SHOW_TEXT); let n, acc = 0;
+    while ((n = w.nextNode())) { if (acc + n.data.length > s) { const r = document.createRange(); r.setStart(n, s - acc); r.setEnd(n, Math.min(n.data.length, s - acc + 1)); return r; } acc += n.data.length; }
+    return null;
+  }
+  function locAtPoint(x, y) {
+    let node, off;
+    if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); node = c?.offsetNode; off = c?.offset; }
+    else if (document.caretRangeFromPoint) { const c = document.caretRangeFromPoint(x, y); node = c?.startContainer; off = c?.startOffset; }
+    const pEl = node && (node.nodeType === 1 ? node : node.parentElement)?.closest?.("#text p[data-i]"); if (!pEl) return null;
+    const r = document.createRange(); r.setStart(pEl, 0); try { r.setEnd(node, off); } catch (e) { return null; }
+    return { ch: R.ch, p: +pEl.dataset.i, s: r.toString().length };
+  }
+  function screenEndLoc() {
+    if (paged()) { const f = $("#frame").getBoundingClientRect(), m = Math.min(settings.margin, R.W / 6); return locAtPoint(f.left + R.W - m - 4, f.bottom - 10); }
+    const t = $("#text").getBoundingClientRect(); return locAtPoint(t.right - Math.min(settings.margin, 40) - 6, innerHeight - 70);
+  }
+  function currentLoc() {
+    if (!R || R.mode !== "flow") return R?.meta.pos || { ch: 0, p: 0 };
+    // The first character on screen, so page numbers and saved places are exact.
+    if (paged()) { const f = $("#frame").getBoundingClientRect(), m = Math.min(settings.margin, R.W / 6), hit = locAtPoint(f.left + m + 3, f.top + 6); if (hit) return hit; }
+    else { const t = $("#text").getBoundingClientRect(), hit = locAtPoint(t.left + Math.min(settings.margin, 40) + 3, 96); if (hit) return hit; }
+    const ps = document.querySelectorAll("#text p[data-i]");
+    if (paged()) {
+      const f = $("#frame").getBoundingClientRect(), L = f.left - 1, Rr = f.left + R.W - 1;
+      for (const p of ps) for (const r of p.getClientRects()) if (r.left >= L && r.left < Rr && r.width > 0) return { ch: R.ch, p: +p.dataset.i };
+      return { ch: R.ch, p: ps.length ? +ps[ps.length - 1].dataset.i : 0 };
+    }
+    for (const p of ps) if (p.getBoundingClientRect().bottom > 90) return { ch: R.ch, p: +p.dataset.i };
+    return { ch: R.ch, p: 0 };
+  }
+  function turn(dir) {
+    if (!R) return;
+    if (R.mode === "pdf") { scrollBy({ top: dir * (innerHeight - 140), behavior: "smooth" }); return; }
+    if (!paged()) { scrollBy({ top: dir * (innerHeight - 140), behavior: "smooth" }); return; }
+    const n = R.page + dir;
+    if (n >= 0 && n < R.pages) { haptic(4); return setPage(n); }
+    if (dir > 0 && R.ch < R.content.length - 1) { renderChapter(R.ch + 1); setPage(0, false); fadeIn(); }
+    else if (dir < 0 && R.ch > 0) { renderChapter(R.ch - 1); setPage(R.pages - 1, false); fadeIn(); }
+    else setPage(R.page);
+  }
+  const fadeIn = () => $("#frame").animate?.([{ opacity: .2 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
+  function chapterTitleAt(loc) {
+    const toc = R.meta.toc || []; let t = null;
+    for (const e of toc) { if (e.ch == null) continue; if (e.ch < loc.ch || (e.ch === loc.ch && e.p <= loc.p)) t = e; }
+    return t?.title || R.content[loc.ch]?.title || "";
+  }
   function updateFoot() {
-    if (!R) return; const p = topPara(), pg = pageAt(R.meta, R.ch, p), tot = totalPages(R.meta);
-    $("#rpage").textContent = `Page ${pg} of ${tot} · ${R.content[R.ch].title}`; $("#rprog").style.width = Math.min(100, pg / tot * 100) + "%";
-    clearTimeout(footT); footT = setTimeout(() => { R.meta.pos = { ch: R.ch, p }; saveLib(); }, 600);
+    if (!R) return; const tot = totalPages(R.meta); let pg, left = "", title = "";
+    if (R.mode === "pdf") { pg = pdfCurrent(); const e = [...(R.meta.toc || [])].reverse().find(t => t.page <= pg); title = e?.title || R.meta.title; left = `${R.n - pg} page${R.n - pg === 1 ? "" : "s"} left`; }
+    else {
+      const loc = currentLoc(), c = R.content[loc.ch]; pg = R.forcePage || pageAt(R.meta, loc.ch, loc.p, loc.s || 0); title = chapterTitleAt(loc);
+      // A screen often holds the end of one stable page and the start of the next: say so.
+      const endLoc = !R.forcePage && screenEndLoc(), pg2 = endLoc ? pageAt(R.meta, endLoc.ch, endLoc.p, endLoc.s || 0) : pg;
+      R.pageLabel = pg2 > pg ? `Pages ${pg}–${pg2}` : `Page ${pg}`;
+      const w = c.paras.slice(loc.p).reduce((a, t) => a + wc(t), 0), mins = Math.max(1, Math.round(w / 230));
+      left = paged() && R.pages - 1 - R.page <= 0 ? "Last page of the chapter" : `${mins} min left in chapter`;
+    }
+    $("#scrub").max = tot; $("#scrub").value = pg; $("#scrub").style.setProperty("--pct", (pg - 1) / Math.max(1, tot - 1) * 100 + "%");
+    const lab = R.mode === "pdf" ? `Page ${pg}` : R.pageLabel;
+    $("#lbl1").textContent = title; $("#lbl2").textContent = `${lab} of ${tot} · ${left}`; $("#pnum").textContent = lab.replace(/^Pages? /, "");
   }
-  let lastY = 0;
-  addEventListener("scroll", () => { if (!document.body.classList.contains("reading")) return; const y = scrollY;
-    if (Math.abs(y - lastY) > 12) { document.body.classList.toggle("calm", y > lastY && y > 120); lastY = y; } updateFoot(); }, { passive: true });
+  function goToPage(n) {
+    const tot = totalPages(R.meta); n = Math.max(1, Math.min(tot, n | 0));
+    if (R.mode === "pdf") return goPdf({ page: n });
+    const loc = locOfPage(R.meta, n); if (loc.ch !== R.ch) renderChapter(loc.ch); goTo({ ...loc, pin: n });
+  }
 
-  /* Selecting a passage → the Quote bar */
+  /* Gestures in page mode: tap the edges or swipe to turn; tap the middle for the controls */
+  let drag = null, lastSelAt = 0, suppressClick = false;
+  const flowEl = () => $("#flow");
+  document.addEventListener("pointerdown", e => {
+    if (!paged() || !e.target.closest("#flow") || e.pointerType === "mouse" || !getSelection().isCollapsed) return;
+    drag = { x: e.clientX, y: e.clientY, t: Date.now(), on: false };
+  });
+  document.addEventListener("pointermove", e => {
+    if (!drag || !paged()) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.on && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.3 && getSelection().isCollapsed) drag.on = true;
+    if (drag.on) { const atEdge = (dx > 0 && R.page === 0 && R.ch === 0) || (dx < 0 && R.page === R.pages - 1 && R.ch === R.content.length - 1);
+      $("#text").classList.remove("anim"); $("#text").style.transform = `translateX(${-R.page * R.W + (atEdge ? dx / 4 : dx)}px)`; }
+  });
+  const endDrag = e => {
+    if (!drag) return; const d = drag; drag = null; if (!d.on) return;
+    suppressClick = true; setTimeout(() => (suppressClick = false), 50);
+    const dx = e.clientX - d.x, fast = Math.abs(dx) / Math.max(1, Date.now() - d.t) > .4;
+    if (Math.abs(dx) > R.W * .18 || (fast && Math.abs(dx) > 30)) turn(dx < 0 ? 1 : -1); else setPage(R.page);
+  };
+  document.addEventListener("pointerup", endDrag); document.addEventListener("pointercancel", () => { if (drag?.on) setPage(R.page); drag = null; });
+
+  /* ---------- PDFs: the original pages ---------- */
+  async function openPdf(at) {
+    R.mode = "pdf"; $("#flow").hidden = true; const v = $("#pdfv"); v.hidden = false;
+    if (!R.pdf) {
+      v.innerHTML = `<p class="fine" style="text-align:center;padding-top:30vh">Opening…</p>`;
+      try { await needPdf(); const blob = await dbGet("file:" + R.meta.id); R.pdf = await pdfjsLib.getDocument({ data: await blob.arrayBuffer() }).promise; }
+      catch (e) { toast("Couldn't open the PDF: " + (e.message || e)); return; }
+      if (R.closed) return; R.n = R.pdf.numPages; R.rendered = new Map();
+      if (!R.meta.toc?.length && !R.meta.tocChecked) { R.meta.toc = await pdfOutline(R.pdf); R.meta.tocChecked = true; saveLib(); }
+      const vp = (await R.pdf.getPage(1)).getViewport({ scale: 1 }); R.ratio = vp.height / vp.width; buildPdfPages();
+    }
+    goPdf(at || { page: R.meta.pos?.page || 1 });
+  }
+  function buildPdfPages() {
+    const v = $("#pdfv"); R.cssW = Math.min(innerWidth - 12, 920); R.rendered = new Map();
+    v.innerHTML = Array.from({ length: R.n }, (_, i) => `<div class="ppage" data-n="${i + 1}" style="width:${R.cssW}px;height:${Math.round(R.cssW * R.ratio)}px"><canvas></canvas><div class="hls"></div><div class="textLayer"></div><div class="pno">${i + 1}</div></div>`).join("");
+    R.io?.disconnect();
+    R.io = new IntersectionObserver(es => es.forEach(en => en.isIntersecting && renderPdfPage(+en.target.dataset.n)), { rootMargin: "1400px 0px" });
+    v.querySelectorAll(".ppage").forEach(p => R.io.observe(p));
+  }
+  const pdfDiv = n => $(`#pdfv .ppage[data-n="${n}"]`);
+  async function renderPdfPage(n) {
+    if (!R?.pdf || R.rendered.has(n)) return R?.rendered.get(n);
+    const job = (async () => {
+      const page = await R.pdf.getPage(n), div = pdfDiv(n); if (!div || R.closed) return;
+      const vp1 = page.getViewport({ scale: 1 }), scale = R.cssW / vp1.width, viewport = page.getViewport({ scale }), h = Math.round(viewport.height);
+      if (div.offsetHeight !== h) { const above = div.getBoundingClientRect().bottom < 0, d = h - div.offsetHeight; div.style.height = h + "px"; if (above) scrollBy(0, d); }
+      const dpr = Math.min(devicePixelRatio || 1, 2.5), cv = div.querySelector("canvas");
+      cv.width = Math.round(viewport.width * dpr); cv.height = Math.round(viewport.height * dpr);
+      await page.render({ canvasContext: cv.getContext("2d"), viewport, transform: [dpr, 0, 0, dpr, 0, 0] }).promise;
+      const tl = div.querySelector(".textLayer"); tl.replaceChildren(); tl.style.setProperty("--scale-factor", scale);
+      await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport, textDivs: [] }).promise;
+      drawHls(n); resolvePending(n); trimRendered(n);
+    })();
+    R.rendered.set(n, job); return job;
+  }
+  function trimRendered(near) {
+    if (R.rendered.size <= 16) return;
+    for (const n of [...R.rendered.keys()].sort((a, b) => Math.abs(b - near) - Math.abs(a - near)).slice(0, R.rendered.size - 16)) {
+      const d = pdfDiv(n); if (!d) continue; const cv = d.querySelector("canvas"); cv.width = cv.height = 0; d.querySelector(".textLayer").replaceChildren(); R.rendered.delete(n);
+    }
+  }
+  function drawHls(n) {
+    const d = pdfDiv(n); if (!d) return;
+    const qs = quotes.filter(q => q.book === R.meta.id && q.rects && q.page === n);
+    let h = qs.map(q => q.rects.map(r => `<i class="c${q.color || 1}" data-q="${q.id}" style="left:${r[0] * 100}%;top:${r[1] * 100}%;width:${r[2] * 100}%;height:${r[3] * 100}%"></i>`).join("")).join("");
+    if (R.find?.page === n) h += R.find.rects.map(r => `<i class="find" style="left:${r[0] * 100}%;top:${r[1] * 100}%;width:${r[2] * 100}%;height:${r[3] * 100}%"></i>`).join("");
+    d.querySelector(".hls").innerHTML = h;
+  }
+  function pdfCurrent() {
+    const ps = $("#pdfv").children, mid = innerHeight * .4; let lo = 0, hi = ps.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (ps[m].getBoundingClientRect().top <= mid) lo = m; else hi = m - 1; }
+    return lo + 1;
+  }
+  // Text inside a page's text layer, ignoring spaces (PDF text runs often lose or gain them).
+  function findInLayer(div, needle) {
+    const tl = div.querySelector(".textLayer"), map = []; let s = "";
+    const w = document.createTreeWalker(tl, NodeFilter.SHOW_TEXT); let node;
+    while ((node = w.nextNode())) for (let i = 0; i < node.data.length; i++) if (!/\s/.test(node.data[i])) { s += node.data[i].toLowerCase(); map.push([node, i]); }
+    const nd = needle.replace(/\s+/g, "").toLowerCase(); let i = s.indexOf(nd.slice(0, 400)), len = Math.min(nd.length, 400);
+    if (i < 0) { len = Math.min(40, nd.length); i = s.indexOf(nd.slice(0, len)); } if (i < 0) return null;
+    const r = document.createRange(), a = map[i], z = map[i + len - 1]; r.setStart(a[0], a[1]); r.setEnd(z[0], z[1] + 1); return r;
+  }
+  function normRects(range, div) {
+    const pr = div.getBoundingClientRect(), out = [];
+    const rs = [...range.getClientRects()].filter(r => r.width > 1 && r.height > 1 && r.bottom > pr.top && r.top < pr.bottom && r.right > pr.left && r.left < pr.right)
+      .map(r => [(r.left - pr.left) / pr.width, (r.top - pr.top) / pr.height, r.width / pr.width, r.height / pr.height]).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    for (const r of rs) { const l = out[out.length - 1];   // merge pieces on the same line
+      if (l && Math.abs(l[1] - r[1]) < r[3] * .6 && r[0] <= l[0] + l[2] + .02) { const x1 = Math.max(l[0] + l[2], r[0] + r[2]), y0 = Math.min(l[1], r[1]), y1 = Math.max(l[1] + l[3], r[1] + r[3]); l[2] = x1 - l[0]; l[1] = y0; l[3] = y1 - y0; }
+      else out.push([...r]); }
+    return out.map(r => r.map(v => Math.round(v * 10000) / 10000));
+  }
+  function goPdf(at) {
+    const n = Math.max(1, Math.min(R.n, at.page || 1)), d = pdfDiv(n); if (!d) return;
+    R.quietUntil = Date.now() + 1500; scrollTo(0, d.offsetTop - 70 + (at.y || 0) * d.offsetHeight);
+    R.pending = (at.q || at.term) ? { ...at, page: n } : null;
+    renderPdfPage(n).then(() => resolvePending(n)); updateFoot();
+  }
+  function resolvePending(n) {
+    const P = R?.pending; if (!P || P.page !== n) return; const d = pdfDiv(n); if (!d.querySelector(".textLayer span")) return;
+    R.pending = null; let rects = null, cls = null;
+    if (P.q) { const q = quotes.find(x => x.id === P.q);
+      if (q && !q.rects) { const r = findInLayer(d, q.text); if (r) { q.rects = normRects(r, d); q.ch = q.page; q.p = Math.round((q.rects[0]?.[1] || 0) * 1000); q.s = 0; saveQuotes(); drawHls(n); } }
+      rects = q?.rects; cls = `.hls i[data-q="${P.q}"]`; }
+    else if (P.term) { const r = findInLayer(d, P.term); if (r) { R.find = { page: n, rects: normRects(r, d) }; drawHls(n); rects = R.find.rects; cls = ".hls i.find"; } }
+    if (rects?.length) { R.quietUntil = Date.now() + 900; scrollTo(0, d.offsetTop + rects[0][1] * d.offsetHeight - innerHeight * .35); d.querySelectorAll(cls).forEach(i => i.classList.add("pulse")); }
+    updateFoot();
+  }
+
+  /* ---------- Selecting a passage → the Quote bar ---------- */
   function selInfo() {
-    const s = getSelection(); if (!s || s.isCollapsed || !s.rangeCount) return null;
-    const r = s.getRangeAt(0), text = $("#text"); if (!text.contains(r.commonAncestorContainer)) return null;
+    const s = getSelection(); if (!s || s.isCollapsed || !s.rangeCount || !R) return null;
+    const r = s.getRangeAt(0);
+    if (R.mode === "pdf") {
+      const start = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement, div = start?.closest(".ppage"); if (!div || !$("#pdfv").contains(div)) return null;
+      const rects = normRects(r, div), text = clean(s.toString()); if (!rects.length || !text) return null;
+      return { kind: "pdf", page: +div.dataset.n, rects, text, ch: +div.dataset.n, p: Math.round(rects[0][1] * 1000), s: 0 };
+    }
+    const text = $("#text"); if (!text.contains(r.commonAncestorContainer)) return null;
     const pOf = n => (n.nodeType === 1 ? n : n.parentElement)?.closest("p[data-i]");
     let sp = pOf(r.startContainer), ep = pOf(r.endContainer);
-    if (!sp || !ep) { const all = [...text.querySelectorAll("p[data-i]")].filter(p => r.intersectsNode(p)); sp ||= all[0]; ep ||= all[all.length - 1]; } // selection began or ended on a heading or page marker
+    if (!sp || !ep) { const all = [...text.querySelectorAll("p[data-i]")].filter(p => r.intersectsNode(p)); sp ||= all[0]; ep ||= all[all.length - 1]; } // began or ended on a heading
     if (!sp || !ep) return null;
     const off = (p, node, o) => { if (!p.contains(node)) return node.compareDocumentPosition?.(p) & Node.DOCUMENT_POSITION_FOLLOWING ? 0 : p.textContent.length; const rr = document.createRange(); rr.setStart(p, 0); rr.setEnd(node, o); return rr.toString().length; };
     let a = { p: +sp.dataset.i, s: off(sp, r.startContainer, r.startOffset) }, b = { p: +ep.dataset.i, e: off(ep, r.endContainer, r.endOffset) };
     const paras = R.content[R.ch].paras;
-    // trim spaces at the edges, like a careful hand
     while (a.s < paras[a.p].length && /\s/.test(paras[a.p][a.s])) a.s++;
     while (b.e > 0 && /\s/.test(paras[b.p][b.e - 1])) b.e--;
     if (a.p === b.p && b.e <= a.s) return null;
-    const text2 = a.p === b.p ? paras[a.p].slice(a.s, b.e) : [paras[a.p].slice(a.s), ...paras.slice(a.p + 1, b.p), paras[b.p].slice(0, b.e)].join("\n");
-    return { ch: R.ch, p: a.p, s: a.s, p2: b.p, e: b.e, text: text2.trim() };
+    const t2 = a.p === b.p ? paras[a.p].slice(a.s, b.e) : [paras[a.p].slice(a.s), ...paras.slice(a.p + 1, b.p), paras[b.p].slice(0, b.e)].join("\n");
+    return { ch: R.ch, p: a.p, s: a.s, p2: b.p, e: b.e, text: t2.trim() };
   }
   let selT;
-  document.addEventListener("selectionchange", () => { clearTimeout(selT); selT = setTimeout(() => { const i = document.body.classList.contains("reading") ? selInfo() : null; $("#qbar").classList.toggle("on", !!i); }, 120); });
+  document.addEventListener("selectionchange", () => {
+    if (!getSelection().isCollapsed) lastSelAt = Date.now();
+    clearTimeout(selT); selT = setTimeout(() => { const i = reading() ? selInfo() : null; $("#qbar").classList.toggle("on", !!i); }, 120);
+  });
   const hideQbar = () => $("#qbar").classList.remove("on");
 
-  /* Quote sheet: new or edit */
+  /* ---------- Bookmarks ---------- */
+  function bmHere() {
+    if (R.mode === "pdf") { const page = pdfCurrent(); return { page, label: (([...(R.meta.toc || [])].reverse().find(t => t.page <= page))?.title) || `Page ${page}` }; }
+    const loc = currentLoc(), t = R.content[loc.ch].paras[loc.p] || ""; return { ...loc, page: R.forcePage || pageAt(R.meta, loc.ch, loc.p, loc.s || 0), label: chapterTitleAt(loc), snip: t.slice(loc.s || 0, (loc.s || 0) + 90) };
+  }
+  const bmFind = h => (R.meta.bookmarks ||= []).findIndex(b => b.page === h.page);
+  function markBookmark() { if (!R) return; const on = bmFind(bmHere()) >= 0; $("#bmbtn").classList.toggle("on", on); }
+  addEventListener("scroll", () => { if (!reading() || paged()) return; if (R && Date.now() > (R.pinUntil || 0)) R.forcePage = 0; updateFoot(); savePos(); markBookmark(); }, { passive: true });
+
+  /* ---------- Sheets ---------- */
   function sheet(html) {
     document.querySelector(".sheet-back")?.remove();
     const back = document.createElement("div"); back.className = "sheet-back"; back.innerHTML = `<div class="sheet"><div class="grab"></div>${html}</div>`;
     back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back); return back;
   }
+  const closeSheet = () => document.querySelector(".sheet-back")?.remove();
+
+  /* The quote sheet: new or edit */
   let draft = null;
   function quoteSheet(q) {
     draft = q.id ? { ...q, tags: [...(q.tags || [])] } : q;
@@ -539,7 +918,7 @@
         <input type="text" id="newtag" placeholder="Add a tag and press Enter" style="margin-top:10px;font-size:15px" autocomplete="off" autocapitalize="none"></div>
       <div class="field" style="margin-top:10px"><label>Note</label><textarea id="qnote" rows="3" placeholder="Why it matters, what it reminds you of…">${esc(draft.note || "")}</textarea></div>
       <div class="row" style="margin-top:16px">${q.id ? `<button class="btn gray" data-act="delq" style="color:#d6453d">Delete</button>` : ""}<button class="btn grow" data-act="saveq">${q.id ? "Save" : "Save quote"}</button></div>
-      ${q.id ? `<button class="btn plain block" data-act="gotoq">Open at p. ${draft.page} →</button>` : ""}`);
+      ${q.id && !reading() ? `<button class="btn plain block" data-act="gotoq">Open at p. ${draft.page} →</button>` : ""}`);
   }
   const tagChips = tags => tags.map(t => `<button class="chip ${draft.tags.includes(t) ? "on" : ""}" data-act="qtag" data-v="${esc(t)}">#${esc(t)}</button>`).join("") || `<span class="fine">No tags yet.</span>`;
   function addTag(v) {
@@ -547,6 +926,74 @@
     if (!draft.tags.includes(v)) draft.tags.push(v);
     $("#qtags").innerHTML = tagChips([...new Set([...allTags(), ...draft.tags])]); $("#newtag").value = "";
   }
+  function refreshMarks() {
+    if (!R) return;
+    if (R.mode === "pdf") { for (const n of R.rendered.keys()) drawHls(n); return; }
+    const loc = currentLoc(); renderChapter(R.ch); if (paged()) goTo(loc); else { const y = scrollY; scrollTo(0, y); }
+  }
+
+  /* Contents · Bookmarks · Quotes */
+  let panelTab = "toc";
+  function contentsSheet() {
+    const m = R.meta, tot = totalPages(m), pdf = R.mode === "pdf";
+    const toc = (m.toc?.length ? m.toc : (pdf ? [] : R.content.map((c, i) => ({ title: c.title, level: 0, ch: i, p: 0 }))));
+    const here = pdf ? pdfCurrent() : currentLoc(), pageOf = e => pdf ? e.page : pageAt(m, e.ch, e.p);
+    const herePage = pdf ? here : pageAt(m, here.ch, here.p, here.s || 0);
+    let cur = -1; toc.forEach((e, i) => { if (pdf ? e.page <= here : (e.ch < here.ch || (e.ch === here.ch && e.p <= here.p))) cur = i; });
+    const bms = [...(m.bookmarks || [])].sort((a, b) => a.page - b.page), qs = quotes.filter(q => q.book === m.id).sort((a, b) => { const x = qOrder(a), y = qOrder(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; });
+    const body = panelTab === "toc"
+      ? `<div class="gotopage"><span class="sub grow">Go to page</span><input type="number" id="gopage" min="1" max="${tot}" placeholder="${herePage}" inputmode="numeric"><span class="fine">of ${tot}</span><button class="btn sm" data-act="gopage">Go</button></div>
+         ${toc.length ? `<div class="toc">${toc.map((e, i) => `<a href="#" data-act="tocgo" data-i="${i}" class="l${Math.min(3, e.level || 0)} ${i === cur ? "cur" : ""}">${esc(e.title)}<span>${pageOf(e)}</span></a>`).join("")}</div>`
+           : `<p class="sub" style="text-align:center;margin-top:24px">This PDF has no table of contents. Use Go to page, the slider, or search.</p>`}
+         ${needsReimport(m) ? `<p class="fine" style="margin-top:12px">Re-import this book from the Library (press and hold it) for its full table of contents.</p>` : ""}`
+      : panelTab === "bm"
+      ? (bms.length ? `<div class="toc">${bms.map((b, i) => `<a href="#" data-act="bmgo" data-i="${m.bookmarks.indexOf(b)}"><span style="margin:0;color:var(--label);font-size:inherit" class="grow">${esc(b.label || "Bookmark")}${b.snip ? `<div class="fine" style="white-space:normal">${esc(b.snip)}…</div>` : ""}</span><span>p. ${b.page}</span><button class="btn plain sm" data-act="bmdel" data-i="${m.bookmarks.indexOf(b)}" aria-label="Remove bookmark" style="padding:4px 6px;min-height:0">✕</button></a>`).join("")}</div>`
+        : `<p class="sub" style="text-align:center;margin-top:24px">Tap the ribbon at the top to bookmark a page.</p>`)
+      : (qs.length ? `<div class="toc">${qs.map(q => `<a href="#" data-act="qgo" data-q="${q.id}" style="border-left:3px solid var(--c${q.color || 1}s);padding-left:10px"><span class="grow serif" style="margin:0;color:var(--label);font-size:16px;white-space:normal">${esc(q.text.slice(0, 160))}${q.text.length > 160 ? "…" : ""}</span><span>p. ${q.page}</span></a>`).join("")}</div>`
+        : `<p class="sub" style="text-align:center;margin-top:24px">Select a passage and tap Quote.</p>`);
+    const s = sheet(`<div class="seg" style="margin-bottom:10px">${[["toc", "Contents"], ["bm", "Bookmarks"], ["q", "Quotes"]].map(([k, l]) => `<button class="${panelTab === k ? "on" : ""}" data-act="ptab" data-v="${k}">${l}</button>`).join("")}</div>${body}`);
+    s.querySelector(".toc a.cur")?.scrollIntoView({ block: "center" });
+  }
+  function goLoc(t) { closeSheet(); if (R.mode === "pdf") return goPdf(t); if (t.ch !== R.ch || t.find) renderChapter(t.ch, t.find ? t : null); goTo(t); }
+
+  /* Search in the book */
+  let searchQ = "";
+  function searchSheet() {
+    sheet(`<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="bsearch" placeholder="Search in ${esc(R.meta.title)}" value="${esc(searchQ)}" autofocus></div>
+      <div id="bres" style="margin-top:6px"></div>`);
+    const inp = $("#bsearch"); setTimeout(() => inp.focus(), 50); if (searchQ) runSearch(searchQ);
+  }
+  let searchT;
+  function runSearch(q) {
+    searchQ = q; const box = $("#bres"); if (!box) return; q = q.trim(); if (q.length < 2) { box.innerHTML = ""; return; }
+    const ql = q.toLowerCase(), hits = [];
+    R.content.forEach((c, ch) => c.paras.forEach((t, p) => { const tl = t.toLowerCase(); let i = tl.indexOf(ql);
+      while (i >= 0 && hits.length < 300) { hits.push({ ch, p, s: i, e: i + q.length, t }); i = tl.indexOf(ql, i + ql.length); } }));
+    box.innerHTML = `<p class="fine" style="margin:10px 4px">${hits.length >= 300 ? "300+" : hits.length} result${hits.length === 1 ? "" : "s"}</p>` + hits.map((h, k) => {
+      const a = Math.max(0, h.s - 60), z = Math.min(h.t.length, h.e + 80);
+      return `<a href="#" class="res" data-act="resgo" data-k="${k}"><div class="sn">${a ? "…" : ""}${esc(h.t.slice(a, h.s))}<b>${esc(h.t.slice(h.s, h.e))}</b>${esc(h.t.slice(h.e, z))}${z < h.t.length ? "…" : ""}</div>
+        <div class="fine">${esc(R.mode === "pdf" ? "" : chapterTitleAt(h) + " · ")}p. ${pageAt(R.meta, h.ch, h.p, h.s)}</div></a>`; }).join("");
+    R.hits = hits;
+  }
+
+  /* Text settings */
+  function typeSheet() {
+    const flow = R.mode === "flow", seg = (act, opts, cur) => `<div class="seg">${opts.map(([k, l]) => `<button class="${cur === k ? "on" : ""}" data-act="${act}" data-v="${k}">${l}</button>`).join("")}</div>`;
+    sheet(`<h2 style="margin-bottom:14px">${flow ? "Text" : "Display"}</h2>
+      ${flow ? `<div class="row" style="gap:8px"><button class="btn gray grow" data-act="size" data-v="-1" style="font-size:15px">A</button><button class="btn gray grow" data-act="size" data-v="1" style="font-size:22px">A</button></div>
+      <div class="ghead caps" style="margin-left:0">Font</div>${seg("font", [["serif", "Serif"], ["sans", "Sans"]], settings.font)}
+      <div class="ghead caps" style="margin-left:0">Line spacing</div>${seg("line", [[1.45, "Tight"], [1.62, "Normal"], [1.9, "Loose"]], settings.line)}
+      <div class="ghead caps" style="margin-left:0">Margins</div>${seg("margin", [[16, "Narrow"], [26, "Normal"], [42, "Wide"]], settings.margin)}
+      <div class="ghead caps" style="margin-left:0">Alignment</div>${seg("align", [["left", "Left"], ["justify", "Justified"]], settings.align)}
+      <div class="ghead caps" style="margin-left:0">Page turning</div>${seg("flow", [["pages", "Pages"], ["scroll", "Scroll"]], settings.flow)}` : `<p class="sub">PDFs show their original pages. Pinch to zoom.</p>`}
+      <div class="ghead caps" style="margin-left:0">Theme</div>${seg("theme", [["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]], settings.theme)}`);
+  }
+  function relayout(fn) {
+    if (!R || R.mode !== "flow") { fn?.(); return; }
+    const loc = currentLoc(); fn?.(); $("#flow").className = settings.flow === "pages" ? "paged" : "scroll"; applyReaderStyle(); renderChapter(R.ch); goTo(loc);
+  }
+  let rsT; addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => {
+    if (!R) return; if (R.mode === "flow") relayout(); else if (R.pdf && Math.abs(Math.min(innerWidth - 12, 920) - R.cssW) > 20) { const pg = pdfCurrent(); buildPdfPages(); goPdf({ page: pg }); } }, 200); });
 
   /* ---------- Export & backup ---------- */
   function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
@@ -554,7 +1001,7 @@
     const list = filtered(); let md = `# Commonplace\n\n`;
     for (const b of library.filter(b => list.some(q => q.book === b.id))) {
       md += `## ${b.title}${b.author ? ` · ${b.author}` : ""}\n\n`;
-      for (const q of list.filter(q => q.book === b.id).sort((x, y) => x.ch - y.ch || x.p - y.p || x.s - y.s))
+      for (const q of list.filter(q => q.book === b.id).sort((x, y) => { const a = qOrder(x), c = qOrder(y); return a[0] - c[0] || a[1] - c[1] || a[2] - c[2]; }))
         md += `> ${q.text.replace(/\n/g, "\n> ")}\n>\n> p. ${q.page}${q.tags?.length ? " · " + q.tags.map(t => "#" + t).join(" ") : ""}\n\n${q.note ? q.note + "\n\n" : ""}`;
     }
     download("commonplace-quotes.md", md, "text/markdown");
@@ -574,109 +1021,122 @@
     return `<div class="group">${step(1, "Click the <b>install</b> icon at the right of the address bar")}${step(2, "or choose <b>Install Commonplace</b> in the browser menu")}</div>`;
   }
   function showInstall(force) {
-    if (isStandalone() || document.querySelector(".sheet-back") || (!force && snoozed())) return;
+    if (isStandalone() || document.querySelector(".sheet-back") || (!force && snoozed()) || reading()) return;
     sheet(`<div class="row" style="gap:14px;margin-bottom:12px"><img src="icons/icon-192.png" width="60" height="60" style="border-radius:14px" alt=""><div><div class="fine">Free · works offline · private</div><h2>Install Commonplace</h2></div></div>
       <p class="sub">Keep your books and quotes one tap away, full screen, like any app. Everything stays on this device.</p><div id="installbody" style="margin-top:12px">${installBody()}</div>
       <button class="btn plain block" data-act="later">Not now</button>`);
   }
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#installbody"); if (b) b.innerHTML = installBody(); });
-  addEventListener("appinstalled", () => { document.querySelector(".sheet-back")?.remove(); toast("Installed. Open it from your home screen."); });
+  addEventListener("appinstalled", () => { closeSheet(); toast("Installed. Open it from your home screen."); });
 
   /* ---------- Actions ---------- */
+  let replaceId = null;
   document.addEventListener("click", async e => {
-    const m = e.target.closest("#text mark[data-q]");
-    if (m && getSelection().isCollapsed) { const q = quotes.find(x => x.id === m.dataset.q); if (q) quoteSheet(q); return; }
+    if (suppressClick) { e.preventDefault(); return; }
     const el = e.target.closest("[data-act]");
-    // A plain tap on the page shows or hides the reader's controls, as in most reading apps.
-    if (!el) { if (e.target.closest("#text") && getSelection().isCollapsed) document.body.classList.toggle("calm"); return; }
-    const a = el.dataset.act, d = el.dataset; haptic(5);
-    if (a === "import") $("#file").click();
+    if (!el && reading() && !e.target.closest(".sheet-back, .rbar, .rfoot, #qbar")) {
+      if (!getSelection().isCollapsed || Date.now() - lastSelAt < 450) return;
+      const mk = e.target.closest("#text mark[data-q]"); if (mk) { const q = quotes.find(x => x.id === mk.dataset.q); if (q) quoteSheet(q); return; }
+      const pg = e.target.closest(".ppage");
+      if (pg) { const r = pg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        const q = quotes.find(q => q.book === R.meta.id && q.page === +pg.dataset.n && q.rects?.some(b => x >= b[0] && x <= b[0] + b[2] && y >= b[1] - .004 && y <= b[1] + b[3] + .004)); if (q) { quoteSheet(q); return; } }
+      if (paged() && e.target.closest("#flow")) { const f = $("#frame").getBoundingClientRect(), x = (e.clientX - f.left) / f.width;
+        if (x < .3) return turn(-1); if (x > .7) return turn(1); }
+      document.body.classList.toggle("calm"); return;
+    }
+    if (!el) return;
+    const a = el.dataset.act, d = el.dataset; if (el.tagName === "BUTTON") haptic();
+    if (a === "import") { replaceId = null; $("#file").click(); }
+    else if (a === "reimport") { replaceId = d.id; closeSheet(); $("#file").click(); }
     else if (a === "sample") addSample().catch(() => toast("Couldn't load the sample"));
-    else if (a === "open") { document.querySelector(".sheet-back")?.remove(); location.hash = "#/read/" + d.id; }
+    else if (a === "open") { closeSheet(); location.hash = "#/read/" + d.id; }
     else if (a === "close") { getSelection().removeAllRanges(); location.hash = "#/"; }
-    else if (a === "nextch") { renderChapter(R.ch + 1); updateFoot(); }
-    else if (a === "prevch") { renderChapter(R.ch - 1); updateFoot(); }
-    else if (a === "toc") {
-      const { meta, content } = R;
-      const s = sheet(`<h2 style="margin-bottom:6px">${esc(meta.title)}</h2><div class="toc">${content.map((c, i) => `<a href="#" data-act="toch" data-i="${i}" class="${i === R.ch ? "cur" : ""}">${esc(c.title)}<span>p. ${pageAt(meta, i, 0)}</span></a>`).join("")}</div>`);
-      s.querySelector(".toc a.cur")?.scrollIntoView({ block: "center" });
-    }
-    else if (a === "toch") { e.preventDefault(); document.querySelector(".sheet-back")?.remove(); renderChapter(+d.i); updateFoot(); }
-    else if (a === "type") {
-      sheet(`<h2 style="margin-bottom:14px">Text</h2>
-        <div class="row" style="gap:8px"><button class="btn gray grow" data-act="size" data-v="-1" style="font-size:15px">A−</button><button class="btn gray grow" data-act="size" data-v="1" style="font-size:20px">A+</button></div>
-        <div class="ghead caps" style="margin-left:0">Font</div><div class="seg">${[["serif", "Serif"], ["sans", "Sans"]].map(([k, l]) => `<button class="${settings.font === k ? "on" : ""}" data-act="font" data-v="${k}">${l}</button>`).join("")}</div>
-        <div class="ghead caps" style="margin-left:0">Spacing</div><div class="seg">${[[1.45, "Tight"], [1.65, "Normal"], [1.9, "Loose"]].map(([k, l]) => `<button class="${settings.line === k ? "on" : ""}" data-act="line" data-v="${k}">${l}</button>`).join("")}</div>
-        <div class="ghead caps" style="margin-left:0">Theme</div><div class="seg">${[["auto", "Auto"], ["light", "Light"], ["sepia", "Sepia"], ["dark", "Dark"]].map(([k, l]) => `<button class="${settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
-        <div class="ghead caps" style="margin-left:0">Alignment</div><div class="seg">${[["left", "Left"], ["justify", "Justified"]].map(([k, l]) => `<button class="${settings.align === k ? "on" : ""}" data-act="align" data-v="${k}">${l}</button>`).join("")}</div>`);
-    }
-    else if (["size", "font", "line", "align"].includes(a)) {
-      const p = topPara();
-      if (a === "size") settings.size = Math.max(14, Math.min(30, settings.size + +d.v)); else settings[a] = a === "line" ? +d.v : d.v;
-      saveSettings(); applyReaderStyle(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el && a !== "size"));
-      $(`#text p[data-i="${p}"]`)?.scrollIntoView({ block: "start" }); scrollBy(0, -90);
+    else if (a === "nextch") { renderChapter(R.ch + 1); goTo({ p: 0 }); }
+    else if (a === "toc") { panelTab = "toc"; contentsSheet(); }
+    else if (a === "ptab") { panelTab = d.v; contentsSheet(); }
+    else if (a === "tocgo") { e.preventDefault(); const m = R.meta, t = (m.toc?.length ? m.toc : R.content.map((c, i) => ({ ch: i, p: 0 })))[+d.i]; goLoc(R.mode === "pdf" ? { page: t.page } : { ch: t.ch, p: t.p }); }
+    else if (a === "gopage") { const v = +$("#gopage").value; if (v) { closeSheet(); goToPage(v); } }
+    else if (a === "bmgo") { e.preventDefault(); if (e.target.closest("[data-act=bmdel]")) return; const b = R.meta.bookmarks[+d.i]; goLoc(R.mode === "pdf" ? { page: b.page } : { ch: b.ch, p: b.p, s: b.s || 0, pin: b.page }); }
+    else if (a === "bmdel") { e.preventDefault(); e.stopPropagation(); R.meta.bookmarks.splice(+d.i, 1); saveLib(); markBookmark(); contentsSheet(); }
+    else if (a === "bookmark") { const h = bmHere(), i = bmFind(h); if (i >= 0) { R.meta.bookmarks.splice(i, 1); toast("Bookmark removed"); } else { R.meta.bookmarks.push({ ...h, at: Date.now() }); toast(`Bookmarked p. ${h.page}`); } saveLib(); markBookmark(); }
+    else if (a === "qgo") { e.preventDefault(); const q = quotes.find(x => x.id === d.q); if (q) goLoc(quoteAt(q)); }
+    else if (a === "search") searchSheet();
+    else if (a === "resgo") { e.preventDefault(); const h = R.hits[+d.k]; goLoc(R.mode === "pdf" ? { page: pageAt(R.meta, h.ch, h.p), term: h.t.slice(h.s, h.e) } : { ch: h.ch, p: h.p, s: h.s, e: h.e, find: true }); }
+    else if (a === "type") typeSheet();
+    else if (a === "size") relayout(() => { settings.size = Math.max(14, Math.min(32, settings.size + +d.v)); saveSettings(); });
+    else if (["font", "line", "margin", "align", "flow"].includes(a)) {
+      const v = a === "line" || a === "margin" ? +d.v : d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el));
+      if (reading()) relayout(() => { settings[a] = v; saveSettings(); }); else { settings[a] = v; saveSettings(); }
     }
     else if (a === "theme") { settings.theme = d.v; saveSettings(); applyTheme(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
-    else if (a === "bookquotes") { qFilter = { book: R.meta.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; }
-    else if (a === "quote") {
-      const i = selInfo(); if (!i) return;
-      quoteSheet({ ...i, book: R.meta.id, page: pageAt(R.meta, i.ch, i.p, i.s), color: settings.lastColor || 1, tags: [], note: "" });
-    }
-    else if (a === "copysel") { const t = getSelection().toString(); try { await navigator.clipboard.writeText(t); toast("Copied"); } catch (err) { toast("Couldn't copy"); } }
+    else if (a === "quote") { const i = selInfo(); if (!i) return; quoteSheet({ ...i, book: R.meta.id, page: i.kind === "pdf" ? i.page : pageAt(R.meta, i.ch, i.p, i.s), color: settings.lastColor || 1, tags: [], note: "" }); }
+    else if (a === "copysel") { try { await navigator.clipboard.writeText(getSelection().toString()); toast("Copied"); } catch (err) { toast("Couldn't copy"); } }
+    else if (a === "lookup") { const t = clean(getSelection().toString()).slice(0, 80); if (t) window.open("https://en.wiktionary.org/wiki/Special:Search?search=" + encodeURIComponent(t), "_blank", "noopener"); }
     else if (a === "qcolor") { draft.color = +d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); $("#qprev").style.borderLeftColor = `var(--c${draft.color}s)`; }
     else if (a === "qtag") { const t = d.v; draft.tags.includes(t) ? draft.tags.splice(draft.tags.indexOf(t), 1) : draft.tags.push(t); el.classList.toggle("on"); }
     else if (a === "saveq") {
-      addTag($("#newtag").value); draft.note = $("#qnote").value.trim();
-      if (draft.id) { Object.assign(quotes.find(q => q.id === draft.id), draft, { edited: Date.now() }); }
-      else { draft.id = uid("q"); draft.at = Date.now(); quotes.push(draft); settings.lastColor = draft.color; saveSettings(); getSelection().removeAllRanges(); hideQbar(); }
-      await saveQuotes(); document.querySelector(".sheet-back")?.remove(); toast(draft.at > Date.now() - 2000 ? "Quoted" : "Saved");
-      if (document.body.classList.contains("reading")) { const y = scrollY; renderChapter(R.ch); scrollTo(0, y); } else render();
+      addTag($("#newtag").value); draft.note = $("#qnote").value.trim(); const isNew = !draft.id;
+      if (isNew) { draft.id = uid("q"); draft.at = Date.now(); quotes.push(draft); settings.lastColor = draft.color; saveSettings(); getSelection().removeAllRanges(); hideQbar(); }
+      else Object.assign(quotes.find(q => q.id === draft.id), draft, { edited: Date.now() });
+      await saveQuotes(); closeSheet(); toast(isNew ? "Quoted" : "Saved");
+      if (reading()) refreshMarks(); else render();
     }
-    else if (a === "delq") { if (!confirm("Delete this quote and its note?")) return; quotes = quotes.filter(q => q.id !== draft.id); await saveQuotes(); document.querySelector(".sheet-back")?.remove();
-      if (document.body.classList.contains("reading")) { const y = scrollY; renderChapter(R.ch); scrollTo(0, y); } else render(); }
+    else if (a === "delq") { if (!confirm("Delete this quote and its note?")) return; quotes = quotes.filter(q => q.id !== draft.id); await saveQuotes(); closeSheet(); if (reading()) refreshMarks(); else render(); }
     else if (a === "goto" || a === "gotoq") {
       if (a === "goto" && e.target.closest(".edit")) return;
       const q = quotes.find(x => x.id === (d.q || draft?.id)); if (!q || !library.some(b => b.id === q.book)) return toast("That book is no longer in your library");
-      document.querySelector(".sheet-back")?.remove();
-      if (document.body.classList.contains("reading") && R?.meta.id === q.book) { if (R.ch !== q.ch) renderChapter(q.ch); openBook(q.book, { ch: q.ch, p: q.p, q: q.id }); }
-      else location.hash = `#/read/${q.book}/${q.ch}/${q.p}/${q.id}`;
+      closeSheet(); const h = `#/read/${q.book}/q/${q.id}`; if (location.hash === h) openFromHash(h); else location.hash = h;
     }
     else if (a === "editq") { e.stopPropagation(); const q = quotes.find(x => x.id === d.q); if (q) quoteSheet(q); }
     else if (a === "fbook") { qFilter.book = d.v; render(); } else if (a === "ftag") { qFilter.tag = qFilter.tag === d.v ? "" : d.v; render(); } else if (a === "sort") { qFilter.sort = d.v; render(); }
-    else if (a === "gofilter") { document.querySelector(".sheet-back")?.remove(); qFilter = { book: d.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; render(); }
+    else if (a === "gofilter") { closeSheet(); qFilter = { book: d.id, tag: "", q: "", sort: "book" }; location.hash = "#/quotes"; render(); }
     else if (a === "delbook") { const b = library.find(x => x.id === d.id), n = quotes.filter(q => q.book === d.id).length;
       if (!confirm(`Remove “${b.title}”?${n ? ` Its ${n} quote${n === 1 ? "" : "s"} stay in your collection.` : ""}`)) return;
-      library = library.filter(x => x.id !== d.id); await saveLib(); await dbDel("content:" + d.id); document.querySelector(".sheet-back")?.remove(); render(); }
+      library = library.filter(x => x.id !== d.id); await saveLib(); await dbDel("content:" + d.id); await dbDel("file:" + d.id); closeSheet(); render(); }
     else if (a === "export") exportMd();
-    else if (a === "backup") download(`commonplace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "commonplace", v: 1, quotes, books: library.map(b => ({ id: b.id, title: b.title, author: b.author })) }, null, 1), "application/json");
+    else if (a === "backup") download(`commonplace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "commonplace", v: 2, quotes, books: library.map(b => ({ id: b.id, title: b.title, author: b.author, bookmarks: b.bookmarks || [] })) }, null, 1), "application/json");
     else if (a === "installsheet") showInstall(true);
-    else if (a === "later") { document.querySelector(".sheet-back")?.remove(); try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (err) {} }
-    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => document.querySelector(".sheet-back")?.remove()).catch(() => {}); }
+    else if (a === "later") { closeSheet(); try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (err) {} }
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeSheet()).catch(() => {}); }
   });
   // Long-press (or right-click) a book for its options.
   let pressT;
-  document.addEventListener("contextmenu", e => { const b = e.target.closest(".book[data-id]"); if (b) { e.preventDefault(); bookSheet(b.dataset.id); } });
-  document.addEventListener("pointerdown", e => { const b = e.target.closest(".book[data-id]"); if (!b) return; pressT = setTimeout(() => { pressT = "fired"; bookSheet(b.dataset.id); }, 550); });
-  document.addEventListener("pointerup", e => { if (pressT === "fired") { e.preventDefault(); e.stopPropagation(); } clearTimeout(pressT); setTimeout(() => (pressT = null), 0); }, true);
-  document.addEventListener("click", e => { if (pressT === "fired" && e.target.closest(".book")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
-  document.addEventListener("keydown", e => { if (e.target.id === "newtag" && (e.key === "Enter" || e.key === ",")) { e.preventDefault(); addTag(e.target.value); } });
-  document.addEventListener("input", e => { if (e.target.id === "qsearch") { qFilter.q = e.target.value; $("#qlist").innerHTML = filtered().map(qcard).join("") || `<p class="sub" style="text-align:center;margin-top:30px">Nothing matches.</p>`; } });
+  document.addEventListener("contextmenu", e => { const b = e.target.closest(".book[data-id], .hero[data-id]"); if (b) { e.preventDefault(); bookSheet(b.dataset.id); } });
+  document.addEventListener("pointerdown", e => { const b = e.target.closest(".book[data-id], .hero[data-id]"); if (!b) return; pressT = setTimeout(() => { pressT = "fired"; bookSheet(b.dataset.id); }, 550); });
+  document.addEventListener("pointerup", () => { if (pressT !== "fired") clearTimeout(pressT); setTimeout(() => { if (pressT === "fired") pressT = null; }, 0); }, true);
+  document.addEventListener("click", e => { if (pressT === "fired" && e.target.closest(".book, .hero")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  document.addEventListener("keydown", e => {
+    if (e.target.id === "newtag" && (e.key === "Enter" || e.key === ",")) { e.preventDefault(); addTag(e.target.value); return; }
+    if (e.target.id === "gopage" && e.key === "Enter") { e.preventDefault(); $("[data-act=gopage]").click(); return; }
+    if (e.key === "Escape") { if (document.querySelector(".sheet-back")) closeSheet(); else if (reading()) location.hash = "#/"; return; }
+    if (!reading() || document.querySelector(".sheet-back") || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); turn(1); } else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); turn(-1); }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "qsearch") { qFilter.q = e.target.value; $("#qlist").innerHTML = filtered().map(qcard).join("") || `<p class="sub" style="text-align:center;margin-top:30px">Nothing matches.</p>`; }
+    if (e.target.id === "bsearch") { clearTimeout(searchT); const v = e.target.value; searchT = setTimeout(() => runSearch(v), 220); }
+    if (e.target.id === "scrub") { const v = +e.target.value; e.target.style.setProperty("--pct", (v - 1) / Math.max(1, +e.target.max - 1) * 100 + "%"); $("#lbl2").textContent = `Go to page ${v} of ${e.target.max}`; }
+  });
   document.addEventListener("change", async e => {
-    if (e.target.id === "file" && e.target.files.length) { await importFiles(e.target.files); e.target.value = ""; }
+    if (e.target.id === "scrub") { goToPage(+e.target.value); return; }
+    if (e.target.id === "file" && e.target.files.length) { await importFiles(e.target.files, replaceId); replaceId = null; e.target.value = ""; }
     if (e.target.id === "restore" && e.target.files[0]) {
       try { const j = JSON.parse(await e.target.files[0].text()); if (j.app !== "commonplace" || !Array.isArray(j.quotes)) throw 0;
-        // reconnect quotes to books by id, or by title for books added again on a new device
-        const map = {}; for (const ob of j.books || []) { const nb = library.find(b => b.id === ob.id) || library.find(b => b.title === ob.title); if (nb) map[ob.id] = nb.id; }
+        const map = {}; for (const ob of j.books || []) { const nb = library.find(b => b.id === ob.id) || library.find(b => b.title === ob.title); if (nb) { map[ob.id] = nb.id; if (ob.bookmarks?.length && !nb.bookmarks?.length) nb.bookmarks = ob.bookmarks; } }
         let added = 0; for (const q of j.quotes) { if (quotes.some(x => x.id === q.id)) continue; quotes.push({ ...q, book: map[q.book] || q.book }); added++; }
-        await saveQuotes(); toast(`Restored ${added} quote${added === 1 ? "" : "s"}`); render();
+        await saveQuotes(); await saveLib(); toast(`Restored ${added} quote${added === 1 ? "" : "s"}`); render();
       } catch (err) { toast("That isn't a Commonplace backup"); }
       e.target.value = "";
     }
   });
+  // In scroll and PDF views, scrolling down tucks the controls away.
+  let lastY = 0;
+  addEventListener("scroll", () => { if (!reading() || paged()) return; const y = scrollY; if (Date.now() < (R?.quietUntil || 0)) { lastY = y; return; } if (Math.abs(y - lastY) > 14) { document.body.classList.toggle("calm", y > lastY && y > 140); lastY = y; } }, { passive: true });
 
   /* ---------- Start ---------- */
   (async () => {
     library = (await dbGet("library")) || []; quotes = (await dbGet("quotes")) || [];
+    library.forEach(b => { b.bookmarks ||= []; if (b.kind === "pdf" && b.hasFile == null) b.hasFile = false; });
     render(); setTimeout(() => showInstall(false), 1800);
   })();
   if ("serviceWorker" in navigator) {
