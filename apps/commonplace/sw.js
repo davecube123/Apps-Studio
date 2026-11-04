@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "commonplace-v7";
+const VERSION = "commonplace-v8";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2", "./data/sample-tao-te-ching.json"];
 // The EPUB/PDF parsers are kept offline once fetched.
 const RUNTIME_HOSTS = ["cdnjs.cloudflare.com"];
