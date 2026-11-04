@@ -92,6 +92,12 @@
     .gen hr { border: 0; border-top: 1px solid rgba(255,255,255,.4); width: 30%; margin: 7cqw 0; }
     .book .t { font: 600 13px/1.25 var(--sans); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .book .m { font-size: 11.5px; color: var(--label2); }
+    .book .m.left { color: var(--label3); margin-top: 1px; }
+    .timecard { margin-top: 14px; padding: 14px 16px; border-radius: 14px; }
+    .timecard .big, .tbig { font: 700 26px/1.15 var(--sans); letter-spacing: -.02em; margin: 3px 0 4px; color: var(--label); }
+    .timecard svg { width: 18px; height: 18px; stroke: var(--label3); fill: none; stroke-width: 2; flex: none; }
+    .trow2 { display: flex; gap: 12px; align-items: baseline; }
+    .trow2 .when { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--label2); font-size: 14px; }
     .book .bar { height: 3px; border-radius: 3px; background: var(--fill); overflow: hidden; } .book .bar i { display: block; height: 100%; background: var(--tint); }
     .add { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label2); cursor: pointer; font-size: 13px; padding: 6px; }
     .empty { text-align: center; padding: 50px 20px; }
@@ -279,7 +285,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "8", APP_DATE = "4 Nov 2026";
+  const APP_VERSION = "9", APP_DATE = "4 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -475,7 +481,7 @@
     const meta = { id, kind: parsed.kind, title: parsed.title, author: parsed.author || "", cover: parsed.cover, addedAt: old?.addedAt || Date.now(), lastAt: old?.lastAt || 0,
       pos: old?.pos || (parsed.kind === "pdf" ? { page: 1, y: 0 } : { ch: 0, p: 0 }), pages: parsed.pages || 0, toc: parsed.toc || [], bookmarks: old?.bookmarks || [], hasFile: !!file,
       chapters: chapters.map(c => { const plens = c.paras.map(p => p.length), m = { title: c.title, start, plens, ...(c.pg ? { pg: c.pg } : {}) }; start += plens.reduce((a, x) => a + x + 1, 0); return m; }) };
-    meta.chars = start;
+    meta.chars = start; meta.words = chapters.reduce((a, c) => a + c.paras.reduce((x, p) => x + wc(p), 0), 0);
     if (parsed.kind === "pdf" && meta.pos.page == null) meta.pos = { page: old ? pageAt(old, old.pos.ch || 0, old.pos.p || 0) : 1, y: 0 };
     await dbSet("content:" + id, chapters); if (file) await dbSet("file:" + id, file);
     if (old) library[library.indexOf(old)] = meta; else library.push(meta);
@@ -523,6 +529,110 @@
 
   /* ---------- Library ---------- */
   const pctRead = b => Math.min(100, Math.round(curPage(b) / totalPages(b) * 100));
+
+  /* ---------- Reading time ----------
+     Time left = the words still unread ÷ your pace. The pace is learned from your own reading: only
+     time with the reader open and in use counts (3 minutes without a touch is a pause), and jumps through
+     the contents, search or scrubber are not counted as reading. Until there are 10 minutes of it, the
+     typical adult silent-reading pace is used: 238 words a minute (Brysbaert, 2019, a meta-analysis of 190 studies). */
+  const DEF_WPM = 238, LEARN_SECS = 600;
+  let stats = { secs: 0, words: 0, days: {} };
+  const saveStats = () => dbSet("stats", stats);
+  const bookWords = b => b.words || Math.round((b.chars || 0) / 6);
+  function offAt(m, pos) {
+    if (isPdfView(m)) return ((pos.page || 1) - 1) / Math.max(1, m.pages) * (m.chars || 0);
+    const c = m.chapters?.[pos.ch || 0]; if (!c) return 0;
+    let off = c.start; for (let i = 0; i < (pos.p || 0) && i < c.plens.length; i++) off += c.plens[i] + 1; return off + (pos.s || 0);
+  }
+  const isDone = b => b.lastAt && pctRead(b) >= 100;
+  const wordsLeft = b => isDone(b) ? 0 : Math.round(bookWords(b) * Math.max(0, 1 - offAt(b, b.pos || {}) / Math.max(1, b.chars || 1)));
+  const learned = () => stats.secs >= LEARN_SECS && stats.words > 0;
+  const wpm = () => learned() ? Math.max(100, Math.min(700, Math.round(stats.words / (stats.secs / 60)))) : DEF_WPM;
+  const minsLeft = b => wordsLeft(b) / wpm();
+  const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  /* Minutes a day you actually read, over the last 14 days (or since you started, if sooner). */
+  function avgSpan() {
+    const keys = Object.keys(stats.days).sort(); if (!keys.length) return 1;
+    return Math.min(14, Math.max(1, Math.round((new Date(dayKey() + "T00:00") - new Date(keys[0] + "T00:00")) / 864e5) + 1));
+  }
+  function dailyAvg() {
+    const n = avgSpan(); let sum = 0;
+    for (let i = 0; i < n; i++) { const d = new Date(); d.setDate(d.getDate() - i); sum += stats.days[dayKey(d)] || 0; }
+    return sum / 60 / n;
+  }
+  const planMins = () => settings.planMin || (dailyAvg() >= 3 ? Math.round(dailyAvg()) : 30);
+  const planIsMine = () => !settings.planMin && dailyAvg() >= 3;
+  function dur(min, short) {
+    min = Math.max(1, Math.round(min)); if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h >= 10 || !m) return short ? `${h}h` : `${h} h`;
+    return short ? `${h}h ${m}m` : `${h} h ${m} min`;
+  }
+  function span(days) {
+    if (days <= 1) return "today"; if (days < 14) return `${days} days`;
+    if (days < 63) return `about ${Math.round(days / 7)} weeks`;
+    if (days < 730) return `about ${Math.round(days / 30.44)} months`;
+    const y = Math.round(days / 365.25 * 2) / 2; return `about ${y} years`;
+  }
+  function dateIn(days) {
+    if (days <= 1) return "today"; const d = new Date(); d.setDate(d.getDate() + Math.max(0, days - 1));
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "long", ...(d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}) });
+  }
+  const unfinished = () => library.filter(b => !isDone(b));
+  function timeCard() {
+    const left = unfinished(), mins = left.reduce((a, b) => a + minsLeft(b), 0);
+    if (!left.length) return `<div class="group timecard"><div class="caps">Your library</div><div class="big">All read</div><div class="fine">Every book on your shelf is finished. Time for a new one.</div></div>`;
+    const per = planMins(), days = Math.ceil(mins / per);
+    return `<button class="cell group timecard" data-act="timesheet"><div class="grow"><div class="caps">To finish all ${left.length} book${left.length === 1 ? "" : "s"}</div><div class="big">${dur(mins)}</div>
+      <div class="fine">${span(days)} at ${per} min a day${planIsMine() ? " (your average)" : ""}${days > 1 ? ` · by ${dateIn(days)}` : ""}</div></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`;
+  }
+  function timeSheet(refresh) {
+    const left = unfinished().sort((a, b) => minsLeft(a) - minsLeft(b)), mins = left.reduce((a, b) => a + minsLeft(b), 0), per = planMins(), avg = dailyAvg(), done = library.length - left.length;
+    let acc = 0;
+    const rows = left.map(b => { acc += minsLeft(b); const d = Math.ceil(acc / per);
+      return `<button class="cell" data-act="open" data-id="${b.id}"><div class="grow"><div class="trow2"><span>${esc(b.title)}</span><span class="when">${dur(minsLeft(b))}</span></div>
+        <div class="fine">${b.lastAt ? `${pctRead(b)}% read` : "Not started"} · ${bookWords(b).toLocaleString()} words · ${d <= 1 ? "done today" : `done by ${dateIn(d)}`}</div></div></button>`; }).join("");
+    const opts = [[0, avg >= 3 ? `Mine · ${Math.round(avg)}` : "Mine"], [15, "15"], [30, "30"], [60, "60"], [90, "90"]];
+    const html = `<h2>Reading time</h2>
+      <div class="tbig" style="margin-top:10px">${dur(mins)}</div>
+      <div class="sub">to finish ${left.length} book${left.length === 1 ? "" : "s"}${left.length ? `: ${span(Math.ceil(mins / per))} at ${per} min a day${Math.ceil(mins / per) > 1 ? `, by ${dateIn(Math.ceil(mins / per))}` : ""}` : ""}.</div>
+      <div class="ghead caps">Minutes a day</div>
+      <div class="seg">${opts.map(([k, l]) => `<button class="${(settings.planMin || 0) === k ? "on" : ""}" data-act="planmin" data-v="${k}">${l}</button>`).join("")}</div>
+      <p class="fine" style="margin:8px 2px 0">${avg >= 3 ? (avgSpan() === 1 ? `You have read ${Math.round(avg)} min today.` : `You have read ${Math.round(avg)} min a day on average over the last ${avgSpan()} days.`) : "Read for a few days and “Mine” will use your real daily average. Until then it assumes 30 minutes."}</p>
+      ${left.length ? `<div class="ghead caps">Shortest first</div><div class="group">${rows}</div>
+      <p class="fine" style="margin:8px 2px 0">Dates assume you read the books in this order, one after another.</p>` : ""}
+      <div class="ghead caps">Your pace</div>
+      <div class="group"><div class="cell"><div class="grow"><b>${wpm()} words a minute</b><div class="fine">${learned()
+        ? `Learned from ${dur(stats.secs / 60)} of your own reading in Commonplace.`
+        : `The typical adult silent-reading pace (Brysbaert, 2019). Commonplace learns your own pace after 10 minutes of reading (${Math.floor(stats.secs / 60)} so far).`}</div></div></div></div>
+      ${done ? `<p class="fine" style="margin:12px 2px 0">${done} finished book${done === 1 ? " is" : "s are"} not counted.</p>` : ""}`;
+    const open = refresh && document.querySelector(".sheet-back:not(.top) .sheet");
+    if (open) { const y = open.scrollTop; open.innerHTML = `<div class="grab"></div>${html}`; open.scrollTop = y; } else sheet(html);
+  }
+  /* Learn the pace: every 15 seconds while a book is open, on screen and touched in the last 3 minutes. */
+  let lastAct = 0, track = null;
+  const nudge = () => { lastAct = Date.now(); };
+  ["pointerdown", "keydown", "wheel", "touchmove"].forEach(t => addEventListener(t, nudge, { capture: true, passive: true }));
+  addEventListener("scroll", nudge, { capture: true, passive: true });
+  function paceTick() {
+    if (!R || R.closed || document.hidden) { track = null; return; }
+    if (Date.now() - lastAct > 180000) { if (track) track.wait = Infinity; return; } /* untouched for 3 minutes: a pause, so this page's time is dropped */
+    const m = R.meta; let off;
+    try { off = offAt(m, R.mode === "pdf" ? { page: pdfCurrent() } : currentLoc()); } catch (e) { return; }
+    /* Time on a page counts once you move on from it, so a pause before leaving the book is never counted.
+       More than 5 minutes on one page is a pause too; a jump or going back is not reading. */
+    if (track?.id !== m.id) { track = { id: m.id, off, wait: 0 }; return; }
+    track.wait += 15; const dw = (off - track.off) / Math.max(1, m.chars) * bookWords(m);
+    if (dw === 0) return;
+    if (dw > 0 && dw < 1200 && track.wait <= 300) {
+      stats.secs += track.wait; stats.words += dw;
+      const k = dayKey(); stats.days[k] = (stats.days[k] || 0) + track.wait;
+      for (const d of Object.keys(stats.days)) if (Date.now() - new Date(d + "T00:00") > 60 * 864e5) delete stats.days[d];
+      saveStats();
+    }
+    track = { id: m.id, off, wait: 0 };
+  }
+  setInterval(paceTick, 15000);
   // Most recently opened first (top left); books never opened follow, newest added first.
   const shelfOrder = () => [...library].sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0) || b.addedAt - a.addedAt);
   let libQ = "";
@@ -531,12 +641,14 @@
     const books = shelfOrder().filter(b => !q || `${b.title} ${b.author}`.toLowerCase().includes(q));
     if (!books.length) return `<p class="sub" style="grid-column:1/-1;text-align:center;margin-top:24px">No book matches “${esc(libQ.trim())}”.</p>`;
     return books.map(b => `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
-        <div><div class="t">${esc(b.title)}</div><div class="m">${b.lastAt ? `${pctRead(b)}%` : "New"}${qn(b.id) ? ` · ${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"}` : ""}</div></div></div>`).join("")
+        <div><div class="t">${esc(b.title)}</div><div class="m">${b.lastAt ? `${pctRead(b)}%` : "New"}${qn(b.id) ? ` · ${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"}` : ""}</div>
+        <div class="m left">${isDone(b) ? "Finished" : `${dur(minsLeft(b), true)} left`}</div></div></div>`).join("")
       + (q ? "" : `<div class="add" data-act="import"><div><div style="font-size:26px;line-height:1">+</div>Add a book<div class="fine" style="font-size:11px">EPUB · PDF · TXT</div></div></div>`);
   }
   function viewLibrary() {
     return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
       ${library.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="libsearch" placeholder="Search your books" value="${esc(libQ)}" autocomplete="off"></div>
+        ${timeCard()}
         <div class="shelf" id="shelf">${shelfHTML()}</div>
         <p class="fine" style="text-align:center;margin-top:22px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
@@ -548,7 +660,7 @@
   const needsReimport = b => (b.kind === "pdf" && !b.hasFile) || (b.kind === "epub" && !b.toc);
   function bookSheet(id) {
     const b = library.find(x => x.id === id), n = quotes.filter(q => q.book === id).length;
-    sheet(`<div class="row" style="gap:14px"><div style="width:64px">${coverHTML(b)}</div><div class="grow"><h2>${esc(b.title)}</h2><div class="sub">${esc(b.author)}</div><div class="fine">${totalPages(b)} pages · ${n} quote${n === 1 ? "" : "s"}</div></div></div>
+    sheet(`<div class="row" style="gap:14px"><div style="width:64px">${coverHTML(b)}</div><div class="grow"><h2>${esc(b.title)}</h2><div class="sub">${esc(b.author)}</div><div class="fine">${totalPages(b)} pages · ${n} quote${n === 1 ? "" : "s"}</div><div class="fine">${isDone(b) ? "Finished" : `About ${dur(minsLeft(b))} left at ${wpm()} words a minute`}</div></div></div>
       ${needsReimport(b) ? `<p class="fine" style="margin:14px 2px 0">${b.kind === "pdf" ? "Added before version 2: re-import the file to see its original pages." : "Added before version 2: re-import the file for its full table of contents."} Your quotes and place are kept.</p>` : ""}
       <div class="group" style="margin-top:16px">
         <button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>
@@ -638,7 +750,7 @@
     document.body.classList.add("reading"); document.body.classList.remove("calm"); hideQbar(); setBarColor();
     $("#rtitle").textContent = meta.title; document.querySelector(".banner")?.remove();
     if (isPdfView(meta)) await openPdf(at); else await openFlow(at); if (!R) return;
-    meta.lastAt = Date.now(); saveLib(); markBookmark();
+    meta.lastAt = Date.now(); nudge(); saveLib(); markBookmark();
   }
   function openFromHash(h) {
     const [, , id, kind, qid] = h.split("/"); // #/read/<id>  or  #/read/<id>/q/<quote>
@@ -1251,6 +1363,8 @@
     }
     else if (a === "editq") { e.stopPropagation(); const q = quotes.find(x => x.id === d.q); if (q) quoteSheet(q); }
     else if (a === "fbook") { qFilter.book = d.v; render(); } else if (a === "ftag") { qFilter.tag = qFilter.tag === d.v ? "" : d.v; render(); } else if (a === "sort") { qFilter.sort = d.v; render(); }
+    else if (a === "timesheet") timeSheet();
+    else if (a === "planmin") { settings.planMin = +d.v || 0; saveSettings(); timeSheet(true); const c = $(".timecard"); if (c) c.outerHTML = timeCard(); }
     else if (a === "gofilter") { qFilter = { book: d.id, tag: "", q: "", sort: "book" }; closeSheet(() => { location.hash = "#/quotes"; render(); }); }
     else if (a === "delbook") { const b = library.find(x => x.id === d.id), n = quotes.filter(q => q.book === d.id).length;
       if (!confirm(`Remove “${b.title}”?${n ? ` Its ${n} quote${n === 1 ? "" : "s"} stay in your collection.` : ""}`)) return;
@@ -1306,7 +1420,12 @@
   (async () => {
     library = (await dbGet("library")) || []; quotes = (await dbGet("quotes")) || [];
     library.forEach(b => { b.bookmarks ||= []; if (b.kind === "pdf" && b.hasFile == null) b.hasFile = false; });
+    stats = Object.assign({ secs: 0, words: 0, days: {} }, (await dbGet("stats")) || {});
     render(); setTimeout(() => showInstall(false), 1800);
+    /* Books added before version 9: count their words once. */
+    let counted = false;
+    for (const b of library) if (!b.words) { const c = await dbGet("content:" + b.id); if (c) { b.words = c.reduce((a, ch) => a + ch.paras.reduce((x, p) => x + wc(p), 0), 0); counted = true; } }
+    if (counted) { await saveLib(); if (!reading() && !document.querySelector(".sheet-back")) render(); }
   })();
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
