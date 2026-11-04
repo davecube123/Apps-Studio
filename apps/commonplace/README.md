@@ -30,6 +30,11 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.
 - **Library:** three columns of identical book tiles (any cover shape fits; landscape covers shown whole), most recently opened at the top left, with a search box for titles and authors.
+- **Reading time:** every book shows the time left to finish it, and the Library shows the total for all
+  unfinished books, how long that takes at your minutes a day, and the date you'd be done. Tap it for each book, shortest
+  first, with dates if you read them in that order, and pick a daily plan (your real average, or 15–90 minutes).
+  Your pace is learned from your own reading: only active time counts, and pauses or jumps don't. Until 10 minutes are recorded it uses
+  238 words a minute, the typical adult silent-reading pace (Brysbaert, 2019).
 
 ## Quoting
 
