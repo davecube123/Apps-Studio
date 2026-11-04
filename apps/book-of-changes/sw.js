@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "book-of-changes-v1";
+const VERSION = "book-of-changes-v2";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/hexagrams.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2"];
 
