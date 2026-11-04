@@ -206,7 +206,7 @@
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "1", APP_DATE = "4 Nov 2026";
+  const APP_VERSION = "2", APP_DATE = "4 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -442,11 +442,11 @@
   }
   function hexBody(n, { hiLines = [], foldOthers = false, values = null, showAll = false, compact = false } = {}) {
     const t = tx(n), h = hx(n);
-    const lines = [5, 4, 3, 2, 1, 0].map(i => lineCard(n, i, { on: hiLines.includes(i), fold: foldOthers && !hiLines.includes(i), v: values?.[i] })).join("");
+    const lines = [0, 1, 2, 3, 4, 5].map(i => lineCard(n, i, { on: hiLines.includes(i), fold: foldOthers && !hiLines.includes(i), v: values?.[i] })).join("");
     return `
       <div class="sec"><div class="eyebrow">The Judgment</div><p class="oracle">${esc(t.judgment.text)}</p><div class="expl"><p>${esc(t.judgment.meaning)}</p></div></div>
       <div class="sec"><div class="eyebrow">The Image · ${triPair(h)}</div><p class="oracle">${esc(t.image.text)}</p><div class="expl"><p>${esc(t.image.meaning)}</p></div></div>
-      ${compact ? "" : `<div class="sec"><div class="eyebrow">The Lines · read from the bottom up</div>${lines}</div>`}
+      ${compact ? "" : `<div class="sec"><div class="eyebrow">The Lines · from line 1, the beginning, to line 6</div>${lines}</div>`}
       ${t.all && (showAll || !compact) ? `<div class="sec"><div class="eyebrow">When all six lines move</div><div class="lcard${showAll ? " on" : ""}"><p class="oracle">${esc(t.all.text)}</p><div class="expl"><p>${esc(t.all.meaning)}</p></div></div></div>` : ""}
       ${compact ? "" : `<div class="sec"><div class="eyebrow">In your life</div><div class="life">
         <div><b>Work and decisions</b>${esc(t.life.work)}</div><div><b>Love and people</b>${esc(t.life.love)}</div><div><b>Inner life</b>${esc(t.life.inner)}</div></div></div>
@@ -473,7 +473,7 @@
     const n = BY_BITS[bitsOf(r.lines)], relBits = r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("");
     const m = r.lines.some(moving) ? BY_BITS[relBits] : null, em = emphasis(r.lines, n);
     const moved = em.lines.map(i => `<div class="lcard on"><div class="lh">${lineGlyph(isYang(r.lines[i]), true)}<div class="eyebrow">Line ${i + 1} · ${lineName(i, isYang(r.lines[i]))}${em.lead === i ? " · leads" : ""}</div></div>
-        <p class="oracle">${esc(tx(n).lines[i]?.text)}</p><div class="expl"><p>${esc(tx(n).lines[i]?.meaning)}</p></div></div>`).reverse().join("");
+        <p class="oracle">${esc(tx(n).lines[i]?.text)}</p><div class="expl"><p>${esc(tx(n).lines[i]?.meaning)}</p></div></div>`).join(""); /* in order, line 1 first */
     return `<a class="back" href="#/readings">← Readings</a>
       <div class="eyebrow">${dstr(r.at)}</div>
       <h2 style="margin-top:6px">${r.q ? esc(r.q) : `<span class="muted">No question written</span>`}</h2>
