@@ -99,6 +99,16 @@
     .trow2 { display: flex; gap: 12px; align-items: baseline; }
     .trow2 .when { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--label2); font-size: 14px; }
     .book .bar { height: 3px; border-radius: 3px; background: var(--fill); overflow: hidden; } .book .bar i { display: block; height: 100%; background: var(--tint); }
+    .shelf.small { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 10px; }
+    @media (min-width: 700px) { .shelf.small { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+    .shelf.small .book .t { font-size: 11.5px; } .shelf.small .book .m { font-size: 10.5px; }
+    .slot { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label3); font-size: 12px; padding: 8px; line-height: 1.35; cursor: pointer; }
+    .shead { display: flex; align-items: baseline; gap: 8px; margin: 26px 2px 0; }
+    .shead h2 { font-size: 20px; margin: 0; } .shead .cnt { color: var(--label2); font-size: 14px; }
+    .shelfbtn { margin-top: 26px; } .shelfbtn .covers { display: flex; margin-left: auto; } .shelfbtn .covers .cover { width: 26px; margin-left: -8px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+    .shelfbtn .covers .cover .gen { display: none; }
+    .tag-next { display: inline-block; font: 700 9.5px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: #fff; background: var(--tint); border-radius: 4px; padding: 2px 5px; margin-bottom: 3px; }
+    .week { margin: 10px 2px 0; font-size: 13px; color: var(--label2); }
     .add { aspect-ratio: 2 / 3; border-radius: 9px; border: 1.5px dashed var(--label3); display: grid; place-items: center; text-align: center; color: var(--label2); cursor: pointer; font-size: 13px; padding: 6px; }
     .empty { text-align: center; padding: 50px 20px; }
 
@@ -243,7 +253,7 @@
     .res .fine { margin-top: 3px; }
     .gotopage { display: flex; gap: 8px; align-items: center; background: var(--fill); border-radius: 12px; padding: 8px 8px 8px 14px; margin: 4px 0 10px; }
     .gotopage input { width: 70px; font: 600 17px var(--sans); text-align: right; -moz-appearance: textfield; } .gotopage input::-webkit-inner-spin-button { display: none; }
-    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); background: #1d1c1a; color: #fff; padding: 11px 18px; border-radius: 999px; font: 600 14px var(--sans);
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; text-align: center; white-space: normal !important; bottom: calc(env(safe-area-inset-bottom) + 96px); background: #1d1c1a; color: #fff; padding: 11px 18px; border-radius: 20px; line-height: 1.35; font: 600 14px var(--sans);
              z-index: 90; animation: rise .3s var(--ease) both; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
     .update { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 10px); transform: translateX(-50%); z-index: 95; border: 0; background: var(--tint); color: #fff; padding: 10px 18px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; }
     .group { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
@@ -285,7 +295,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "9", APP_DATE = "4 Nov 2026";
+  const APP_VERSION = "10", APP_DATE = "4 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -479,7 +489,7 @@
     const chapters = parsed.chapters.map(c => ({ title: c.title, paras: c.paras, ...(c.pg ? { pg: c.pg } : {}), ...(c.k ? { k: c.k } : {}) }));
     let start = 0;
     const meta = { id, kind: parsed.kind, title: parsed.title, author: parsed.author || "", cover: parsed.cover, addedAt: old?.addedAt || Date.now(), lastAt: old?.lastAt || 0,
-      pos: old?.pos || (parsed.kind === "pdf" ? { page: 1, y: 0 } : { ch: 0, p: 0 }), pages: parsed.pages || 0, toc: parsed.toc || [], bookmarks: old?.bookmarks || [], hasFile: !!file,
+      state: old?.state || "shelf", next: old?.next || false, finishedAt: old?.finishedAt || 0, pos: old?.pos || (parsed.kind === "pdf" ? { page: 1, y: 0 } : { ch: 0, p: 0 }), pages: parsed.pages || 0, toc: parsed.toc || [], bookmarks: old?.bookmarks || [], hasFile: !!file,
       chapters: chapters.map(c => { const plens = c.paras.map(p => p.length), m = { title: c.title, start, plens, ...(c.pg ? { pg: c.pg } : {}) }; start += plens.reduce((a, x) => a + x + 1, 0); return m; }) };
     meta.chars = start; meta.words = chapters.reduce((a, c) => a + c.paras.reduce((x, p) => x + wc(p), 0), 0);
     if (parsed.kind === "pdf" && meta.pos.page == null) meta.pos = { page: old ? pageAt(old, old.pos.ch || 0, old.pos.p || 0) : 1, y: 0 };
@@ -496,7 +506,7 @@
       catch (e) { console.error(e); toast(`Couldn't open ${f.name}: ${e.message}`, 5000); await new Promise(r => setTimeout(r, 1500)); }
     }
     document.querySelectorAll(".toast").forEach(t => t.remove());
-    if (last) { toast(replaceId ? `Updated “${last.title}”` : `Added “${last.title}”`); render(); }
+    if (last) { toast(replaceId ? `Updated “${last.title}”` : `Added “${last.title}” to the Shelf`); render(); }
   }
   async function addSample() {
     toast("Adding the sample…");
@@ -520,6 +530,7 @@
     if (h.startsWith("#/read/")) return openFromHash(h);
     closeReader();
     const tab = h.startsWith("#/quotes") ? "quotes" : h.startsWith("#/settings") ? "settings" : "library";
+    if (tab === "library") settle();
     const html = tab === "quotes" ? viewQuotes() : tab === "settings" ? viewSettings() : viewLibrary();
     const isNav = h !== lastHash; $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
     document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
@@ -528,7 +539,7 @@
   addEventListener("hashchange", render);
 
   /* ---------- Library ---------- */
-  const pctRead = b => Math.min(100, Math.round(curPage(b) / totalPages(b) * 100));
+  const pctRead = b => isDone(b) ? 100 : Math.min(99, Math.round(curPage(b) / totalPages(b) * 100)); /* 100% only once finished */
 
   /* ---------- Reading time ----------
      Time left = the words still unread ÷ your pace. The pace is learned from your own reading: only
@@ -544,7 +555,8 @@
     const c = m.chapters?.[pos.ch || 0]; if (!c) return 0;
     let off = c.start; for (let i = 0; i < (pos.p || 0) && i < c.plens.length; i++) off += c.plens[i] + 1; return off + (pos.s || 0);
   }
-  const isDone = b => b.lastAt && pctRead(b) >= 100;
+  /* Finished: marked so, or reading within the last page and a half (the last screen of a book rarely starts on its last page). */
+  const isDone = b => !!b.done || (!!b.lastAt && (isPdfView(b) ? (b.pos?.page || 1) >= (b.pages || 1) : offAt(b, b.pos || {}) >= (b.chars || 0) - Math.min(CPP * 1.5, (b.chars || 0) * .1)));
   const wordsLeft = b => isDone(b) ? 0 : Math.round(bookWords(b) * Math.max(0, 1 - offAt(b, b.pos || {}) / Math.max(1, b.chars || 1)));
   const learned = () => stats.secs >= LEARN_SECS && stats.words > 0;
   const wpm = () => learned() ? Math.max(100, Math.min(700, Math.round(stats.words / (stats.secs / 60)))) : DEF_WPM;
@@ -579,33 +591,37 @@
     return d.toLocaleDateString(undefined, { day: "numeric", month: "long", ...(d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}) });
   }
   const unfinished = () => library.filter(b => !isDone(b));
+  const focusBooks = () => library.filter(b => (b.state === "now" || b.next) && !isDone(b));
   function timeCard() {
-    const left = unfinished(), mins = left.reduce((a, b) => a + minsLeft(b), 0);
-    if (!left.length) return `<div class="group timecard"><div class="caps">Your library</div><div class="big">All read</div><div class="fine">Every book on your shelf is finished. Time for a new one.</div></div>`;
-    const per = planMins(), days = Math.ceil(mins / per);
-    return `<button class="cell group timecard" data-act="timesheet"><div class="grow"><div class="caps">To finish all ${left.length} book${left.length === 1 ? "" : "s"}</div><div class="big">${dur(mins)}</div>
+    const left = focusBooks(), mins = left.reduce((a, b) => a + minsLeft(b), 0);
+    if (!left.length) return unfinished().length ? "" : `<div class="group timecard"><div class="caps">Your library</div><div class="big">All read</div><div class="fine">Every book on your shelf is finished. Time for a new one.</div></div>`;
+    const per = planMins(), days = Math.ceil(mins / per), nx = left.some(b => b.next);
+    return `<button class="cell group timecard" data-act="timesheet"><div class="grow"><div class="caps">To finish Reading now${nx ? " + Up next" : ""}</div><div class="big">${dur(mins)}</div>
       <div class="fine">${span(days)} at ${per} min a day${planIsMine() ? " (your average)" : ""}${days > 1 ? ` · by ${dateIn(days)}` : ""}</div></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`;
   }
   function timeSheet(refresh) {
-    const left = unfinished().sort((a, b) => minsLeft(a) - minsLeft(b)), mins = left.reduce((a, b) => a + minsLeft(b), 0), per = planMins(), avg = dailyAvg(), done = library.length - left.length;
+    const left = focusBooks().sort((a, b) => (a.next - b.next) || minsLeft(a) - minsLeft(b)), mins = left.reduce((a, b) => a + minsLeft(b), 0), per = planMins(), avg = dailyAvg();
+    const all = unfinished(), allMins = all.reduce((a, b) => a + minsLeft(b), 0), allDays = Math.ceil(allMins / per);
     let acc = 0;
     const rows = left.map(b => { acc += minsLeft(b); const d = Math.ceil(acc / per);
       return `<button class="cell" data-act="open" data-id="${b.id}"><div class="grow"><div class="trow2"><span>${esc(b.title)}</span><span class="when">${dur(minsLeft(b))}</span></div>
-        <div class="fine">${b.lastAt ? `${pctRead(b)}% read` : "Not started"} · ${bookWords(b).toLocaleString()} words · ${d <= 1 ? "done today" : `done by ${dateIn(d)}`}</div></div></button>`; }).join("");
+        <div class="fine">${b.next ? "Up next · " : ""}${b.lastAt ? `${pctRead(b)}% read` : "Not started"} · ${bookWords(b).toLocaleString()} words · ${d <= 1 ? "done today" : `done by ${dateIn(d)}`}</div></div></button>`; }).join("");
     const opts = [[0, avg >= 3 ? `Mine · ${Math.round(avg)}` : "Mine"], [15, "15"], [30, "30"], [60, "60"], [90, "90"]];
     const html = `<h2>Reading time</h2>
       <div class="tbig" style="margin-top:10px">${dur(mins)}</div>
-      <div class="sub">to finish ${left.length} book${left.length === 1 ? "" : "s"}${left.length ? `: ${span(Math.ceil(mins / per))} at ${per} min a day${Math.ceil(mins / per) > 1 ? `, by ${dateIn(Math.ceil(mins / per))}` : ""}` : ""}.</div>
+      <div class="sub">to finish what you're reading now${left.some(b => b.next) ? " and Up next" : ""}${left.length ? `: ${span(Math.ceil(mins / per))} at ${per} min a day${Math.ceil(mins / per) > 1 ? `, by ${dateIn(Math.ceil(mins / per))}` : ""}` : ""}.</div>
       <div class="ghead caps">Minutes a day</div>
       <div class="seg">${opts.map(([k, l]) => `<button class="${(settings.planMin || 0) === k ? "on" : ""}" data-act="planmin" data-v="${k}">${l}</button>`).join("")}</div>
       <p class="fine" style="margin:8px 2px 0">${avg >= 3 ? (avgSpan() === 1 ? `You have read ${Math.round(avg)} min today.` : `You have read ${Math.round(avg)} min a day on average over the last ${avgSpan()} days.`) : "Read for a few days and “Mine” will use your real daily average. Until then it assumes 30 minutes."}</p>
-      ${left.length ? `<div class="ghead caps">Shortest first</div><div class="group">${rows}</div>
-      <p class="fine" style="margin:8px 2px 0">Dates assume you read the books in this order, one after another.</p>` : ""}
+      ${left.length ? `<div class="ghead caps">In this order</div><div class="group">${rows}</div>
+      <p class="fine" style="margin:8px 2px 0">Shortest first, Up next last. Dates assume you read them one after another.</p>` : ""}
+      <div class="ghead caps">The whole library</div>
+      <div class="group"><div class="cell"><div class="grow"><b>${dur(allMins)} for all ${all.length} unfinished book${all.length === 1 ? "" : "s"}</b><div class="fine">${span(allDays)} at ${per} min a day${allDays > 1 ? `, by ${dateIn(allDays)}` : ""}. Adding books is free: they wait on the Shelf.</div></div></div></div>
       <div class="ghead caps">Your pace</div>
       <div class="group"><div class="cell"><div class="grow"><b>${wpm()} words a minute</b><div class="fine">${learned()
         ? `Learned from ${dur(stats.secs / 60)} of your own reading in Commonplace.`
         : `The typical adult silent-reading pace (Brysbaert, 2019). Commonplace learns your own pace after 10 minutes of reading (${Math.floor(stats.secs / 60)} so far).`}</div></div></div></div>
-      ${done ? `<p class="fine" style="margin:12px 2px 0">${done} finished book${done === 1 ? " is" : "s are"} not counted.</p>` : ""}`;
+`;
     const open = refresh && document.querySelector(".sheet-back:not(.top) .sheet");
     if (open) { const y = open.scrollTop; open.innerHTML = `<div class="grab"></div>${html}`; open.scrollTop = y; } else sheet(html);
   }
@@ -635,21 +651,88 @@
   setInterval(paceTick, 15000);
   // Most recently opened first (top left); books never opened follow, newest added first.
   const shelfOrder = () => [...library].sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0) || b.addedAt - a.addedAt);
+
+  /* ---------- Reading now and the Shelf ----------
+     Only a few books are in front of you (Reading now, 3 by default); the rest wait on the Shelf.
+     New books go to the Shelf. A slot opens only when you finish a book or deliberately set one aside,
+     and the book marked Up next moves in by itself. Fewer open choices, more books finished. */
+  const SLOTS = () => settings.slots || 3;
+  const nowBooks = () => library.filter(b => b.state === "now").sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
+  const upNext = () => library.find(b => b.next);
+  function migrateShelves() {
+    if (library.some(b => b.state)) return false;
+    const opened = shelfOrder().filter(b => b.lastAt && !isDone(b));
+    library.forEach(b => { b.state = "shelf"; b.next = false; b.finishedAt = isDone(b) ? (b.lastAt || Date.now()) : 0; });
+    opened.slice(0, SLOTS()).forEach(b => b.state = "now"); return true;
+  }
+  /* A finished book leaves Reading now; Up next takes the free slot. */
+  function settle() {
+    let msg = "", changed = false;
+    for (const b of library) {
+      if (!b.state) { b.state = "shelf"; changed = true; }
+      if (b.state === "now" && isDone(b) && !b.finishedAt) { b.finishedAt = Date.now(); b.done = true; b.state = "shelf"; b.next = false; changed = true; msg = `Finished “${b.title}”`; }
+    }
+    nowBooks().slice(SLOTS()).forEach(b => { b.state = "shelf"; changed = true; }); /* fewer slots chosen: the least recent go back */
+    const nx = upNext();
+    if (nx && nowBooks().length < SLOTS()) { nx.state = "now"; nx.next = false; changed = true; msg = msg ? `${msg}. “${nx.title}” is up now.` : `“${nx.title}” moved to Reading now`; }
+    if (changed) saveLib(); if (msg) setTimeout(() => toast(msg, 3600), 300);
+  }
+  function tryOpen(id) {
+    const b = library.find(x => x.id === id); if (!b) return;
+    const go = () => closeSheet(() => { location.hash = "#/read/" + id; });
+    if (b.state === "now") return go();
+    if (nowBooks().length < SLOTS()) { b.state = "now"; b.next = false;
+      if (isDone(b)) { b.done = false; b.finishedAt = 0; b.pos = isPdfView(b) ? { page: 1, y: 0 } : { ch: 0, p: 0 }; } /* reading it again, from the start */
+      saveLib(); return go(); }
+    fullSheet(id);
+  }
+  function fullSheet(id) {
+    const b = library.find(x => x.id === id), nx = upNext();
+    sheet(`<h2>Reading now is full</h2>
+      <p class="sub" style="margin-top:6px">You're reading ${SLOTS()} book${SLOTS() === 1 ? "" : "s"}. To start “${esc(b.title)}”, finish one, set one aside, or make it Up next so it moves in the moment a slot frees.</p>
+      <div class="group" style="margin-top:16px"><button class="cell" data-act="${b.next ? "closepanel" : "setnext"}" data-id="${id}"><span class="grow" style="color:var(--tint);font-weight:600">${b.next ? "It is Up next" : nx ? `Make it Up next <span class="fine">(instead of “${esc(nx.title)}”)</span>` : "Make it Up next"}</span></button></div>
+      <div class="ghead caps">Or set one aside</div>
+      <div class="group">${nowBooks().map(n => `<button class="cell" data-act="swap" data-id="${n.id}" data-to="${id}"><div style="width:34px;flex:none">${coverHTML(n)}</div><div class="grow"><div>${esc(n.title)}</div><div class="fine">${n.lastAt ? `${pctRead(n)}% read · ${dur(minsLeft(n))} left` : "Not started"}</div></div><span class="fine">Set aside</span></button>`).join("")}</div>
+      <p class="fine" style="margin:10px 2px 0">Setting a book aside keeps your place and quotes. Stopping a book that isn't working for you is part of reading well.</p>`);
+  }
+  /* Minutes a day this week against your usual (the 4 weeks before). */
+  function weekLine() {
+    const keys = Object.keys(stats.days).sort(); if (!keys.length) return "";
+    const daysAgo = k => Math.round((new Date(dayKey() + "T00:00") - new Date(k + "T00:00")) / 864e5), first = daysAgo(keys[0]);
+    const sum = (a, b) => { let t = 0; for (const k of keys) { const d = daysAgo(k); if (d >= a && d <= b) t += stats.days[k]; } return t / 60; };
+    const wk = sum(0, 6) / Math.min(7, first + 1);
+    if (first < 10) return `<p class="week">This week: ${Math.round(wk)} min a day</p>`;
+    const usual = sum(7, 34) / Math.min(28, first - 6), diff = wk - usual;
+    return `<p class="week">This week: <b>${Math.round(wk)} min a day</b> · your usual ${Math.round(usual)}${Math.abs(diff) < 2 ? " · steady" : diff > 0 ? " · ahead" : ""}</p>`;
+  }
   let libQ = "";
+  const qn = id => quotes.filter(x => x.book === id).length;
+  function tile(b, small) {
+    return `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
+        <div>${b.next ? `<span class="tag-next">Up next</span>` : ""}<div class="t">${esc(b.title)}</div><div class="m">${isDone(b) ? "Finished" : b.lastAt ? `${pctRead(b)}%` : "New"}${!small && qn(b.id) ? ` · ${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"}` : ""}</div>
+        ${isDone(b) ? "" : `<div class="m left">${dur(minsLeft(b), true)} left</div>`}</div></div>`;
+  }
+  /* Up next first, then books you've started, then new ones (newest added first), finished last. */
+  const shelfBooks = () => library.filter(b => b.state !== "now").sort((a, b) => (b.next - a.next) || (isDone(a) - isDone(b)) || ((b.lastAt ? 1 : 0) - (a.lastAt ? 1 : 0)) || (b.lastAt || 0) - (a.lastAt || 0) || b.addedAt - a.addedAt);
   function shelfHTML() {
-    const q = libQ.trim().toLowerCase(), qn = id => quotes.filter(x => x.book === id).length;
-    const books = shelfOrder().filter(b => !q || `${b.title} ${b.author}`.toLowerCase().includes(q));
-    if (!books.length) return `<p class="sub" style="grid-column:1/-1;text-align:center;margin-top:24px">No book matches “${esc(libQ.trim())}”.</p>`;
-    return books.map(b => `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
-        <div><div class="t">${esc(b.title)}</div><div class="m">${b.lastAt ? `${pctRead(b)}%` : "New"}${qn(b.id) ? ` · ${qn(b.id)} quote${qn(b.id) === 1 ? "" : "s"}` : ""}</div>
-        <div class="m left">${isDone(b) ? "Finished" : `${dur(minsLeft(b), true)} left`}</div></div></div>`).join("")
-      + (q ? "" : `<div class="add" data-act="import"><div><div style="font-size:26px;line-height:1">+</div>Add a book<div class="fine" style="font-size:11px">EPUB · PDF · TXT</div></div></div>`);
+    const q = libQ.trim().toLowerCase();
+    if (q) { const books = shelfOrder().filter(b => `${b.title} ${b.author}`.toLowerCase().includes(q));
+      return books.length ? `<div class="shelf">${books.map(b => tile(b)).join("")}</div>` : `<p class="sub" style="text-align:center;margin-top:24px">No book matches “${esc(libQ.trim())}”.</p>`; }
+    const now = nowBooks(), sh = shelfBooks(), free = Math.max(0, SLOTS() - now.length), nx = upNext();
+    const slots = Array.from({ length: free }, () => sh.some(b => !isDone(b)) ? `<div class="slot" data-act="openshelf">Free slot<br>Pick a book from the Shelf</div>` : `<div class="slot" data-act="import">Free slot<br>Add a book</div>`).join("");
+    return `<div class="shead"><h2>Reading now</h2><span class="cnt">${now.length} of ${SLOTS()}</span></div>
+      <div class="shelf">${now.map(b => tile(b)).join("")}${slots}</div>
+      ${weekLine()}${timeCard()}
+      ${sh.length ? (settings.shelfOpen
+        ? `<button class="shead" data-act="shelftog" style="border:0;background:none;padding:0;cursor:pointer;color:inherit;font:inherit;width:100%"><h2>Shelf</h2><span class="cnt">${sh.length} book${sh.length === 1 ? "" : "s"}${nx ? " · 1 up next" : ""}</span><span class="fine" style="margin-left:auto;color:var(--tint)">Fold</span></button>
+           <div class="shelf small">${sh.map(b => tile(b, true)).join("")}</div>`
+        : `<button class="cell group shelfbtn" data-act="shelftog"><div class="grow"><b>Shelf</b><div class="fine">${sh.length} book${sh.length === 1 ? "" : "s"} waiting${nx ? ` · Up next: ${esc(nx.title)}` : ""}</div></div>
+           <div class="covers">${sh.slice(0, 5).map(b => coverHTML(b)).join("")}</div><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--label3);fill:none;stroke-width:2;flex:none"><path d="M9 6l6 6-6 6"/></svg></button>`) : ""}`;
   }
   function viewLibrary() {
     return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
       ${library.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="libsearch" placeholder="Search your books" value="${esc(libQ)}" autocomplete="off"></div>
-        ${timeCard()}
-        <div class="shelf" id="shelf">${shelfHTML()}</div>
+        <div id="shelf">${shelfHTML()}</div>
         <p class="fine" style="text-align:center;margin-top:22px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
           <p class="sub">Add an EPUB, a PDF with selectable text, or a plain-text book. It stays on this device.</p>
@@ -663,8 +746,12 @@
     sheet(`<div class="row" style="gap:14px"><div style="width:64px">${coverHTML(b)}</div><div class="grow"><h2>${esc(b.title)}</h2><div class="sub">${esc(b.author)}</div><div class="fine">${totalPages(b)} pages · ${n} quote${n === 1 ? "" : "s"}</div><div class="fine">${isDone(b) ? "Finished" : `About ${dur(minsLeft(b))} left at ${wpm()} words a minute`}</div></div></div>
       ${needsReimport(b) ? `<p class="fine" style="margin:14px 2px 0">${b.kind === "pdf" ? "Added before version 2: re-import the file to see its original pages." : "Added before version 2: re-import the file for its full table of contents."} Your quotes and place are kept.</p>` : ""}
       <div class="group" style="margin-top:16px">
-        <button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>
+        ${b.state === "now" ? `<button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>`
+          : `<button class="cell" data-act="open" data-id="${id}"><span class="grow">${isDone(b) ? "Read again" : b.lastAt ? "Pick it back up" : "Start reading"}${nowBooks().length >= SLOTS() ? ` <span class="fine">(Reading now is full)</span>` : ""}</span></button>
+             ${isDone(b) ? "" : `<button class="cell" data-act="setnext" data-id="${id}"><span class="grow">${b.next ? "Remove from Up next" : "Make it Up next"}</span></button>`}`}
         <button class="cell" data-act="gofilter" data-id="${id}"><span class="grow">Quotes from this book</span></button>
+        ${!isDone(b) && b.lastAt ? `<button class="cell" data-act="markdone" data-id="${id}"><span class="grow">Mark as finished</span></button>` : ""}
+        ${b.state === "now" ? `<button class="cell" data-act="aside" data-id="${id}"><span class="grow">Set aside <span class="fine">(back to the Shelf)</span></span></button>` : ""}
         <button class="cell" data-act="reimport" data-id="${id}"><span class="grow">Re-import the file <span class="fine">(keeps quotes)</span></span></button>
         <button class="cell" data-act="delbook" data-id="${id}"><span class="grow" style="color:#d6453d">Remove from library</span></button></div>`);
   }
@@ -709,6 +796,10 @@
       <div class="ghead caps">EPUB and text books</div><div class="seg">${[["vpages", "Pages ↕"], ["pages", "Pages ↔"], ["scroll", "Scroll"]].map(([k, l]) => `<button class="${settings.flow === k ? "on" : ""}" data-act="flow" data-v="${k}">${l}</button>`).join("")}</div>
       <p class="fine" style="margin:8px 4px">Pages ↕: real pages, one under the other, as in ReadEra. Pages ↔: tap or swipe to turn.</p>
       <p class="fine" style="margin:8px 4px">PDFs always show their original pages.</p>
+      <div class="ghead caps">Reading now</div><div class="seg">${[1, 2, 3, 4, 5].map(k => `<button class="${SLOTS() === k ? "on" : ""}" data-act="slots" data-v="${k}">${k}</button>`).join("")}</div>
+      <p class="fine" style="margin:8px 4px">How many books can be open at once. The rest wait on the Shelf; fewer open choices means more books finished.</p>
+      <div class="group" style="margin-top:12px"><button class="cell" data-act="openlast"><span class="grow">Open to my current book</span><span class="fine" style="color:${settings.openLast ? "var(--tint)" : "var(--label3)"};font-weight:600">${settings.openLast ? "On" : "Off"}</span></button></div>
+      <p class="fine" style="margin:8px 4px">When on, launching the app puts you straight on your page, with no choosing.</p>
       <div class="ghead caps">Your data</div><div class="group">
         <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
         <button class="cell" data-act="backup"><span class="grow">Back up quotes, notes and bookmarks (.json)</span></button>
@@ -1316,7 +1407,18 @@
     if (a === "import") { replaceId = null; $("#file").click(); }
     else if (a === "reimport") { replaceId = d.id; $("#file").click(); closeSheet(); } // the file picker must open within the tap
     else if (a === "sample") addSample().catch(() => toast("Couldn't load the sample"));
-    else if (a === "open") closeSheet(() => { location.hash = "#/read/" + d.id; });
+    else if (a === "open") tryOpen(d.id);
+    else if (a === "shelftog") { settings.shelfOpen = !settings.shelfOpen; saveSettings(); $("#shelf").innerHTML = shelfHTML(); }
+    else if (a === "openshelf") { settings.shelfOpen = true; saveSettings(); $("#shelf").innerHTML = shelfHTML(); document.querySelector(".shelf.small")?.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    else if (a === "setnext") { const b = library.find(x => x.id === d.id), was = b.next; library.forEach(x => x.next = false); b.next = !was; saveLib(); settle(); closeSheet(); render(); toast(b.next ? `“${b.title}” is Up next` : "Removed from Up next"); }
+    else if (a === "aside") { const b = library.find(x => x.id === d.id);
+      sheet(`<h2>Set aside “${esc(b.title)}”?</h2><p class="sub" style="margin-top:6px">It goes back to the Shelf with your place, bookmarks and quotes kept.${upNext() ? ` “${esc(upNext().title)}” (Up next) takes its slot.` : " Its slot opens for another book."}</p>
+        <div class="row" style="margin-top:18px;gap:10px"><button class="btn gray grow" data-act="closepanel">Keep reading</button><button class="btn grow" data-act="asideok" data-id="${b.id}">Set aside</button></div>`); }
+    else if (a === "markdone") { const b = library.find(x => x.id === d.id); b.done = true; saveLib(); closeSheet(); if (b.state !== "now") { b.finishedAt = Date.now(); saveLib(); toast(`Finished “${b.title}”`); } render(); }
+    else if (a === "asideok") { const b = library.find(x => x.id === d.id); b.state = "shelf"; saveLib(); settle(); closeSheet(); render(); toast(`“${b.title}” is back on the Shelf`); }
+    else if (a === "swap") { const out = library.find(x => x.id === d.id); out.state = "shelf"; saveLib(); tryOpen(d.to); }
+    else if (a === "slots") { settings.slots = +d.v; saveSettings(); settle(); render(); }
+    else if (a === "openlast") { settings.openLast = !settings.openLast; saveSettings(); render(); }
     else if (a === "close") { getSelection().removeAllRanges(); location.hash = "#/"; }
     else if (a === "nextch") { renderChapter(R.ch + 1); goTo({ p: 0 }); }
     else if (a === "toc") { panelTab = "toc"; contentsSheet(); }
@@ -1421,6 +1523,9 @@
     library = (await dbGet("library")) || []; quotes = (await dbGet("quotes")) || [];
     library.forEach(b => { b.bookmarks ||= []; if (b.kind === "pdf" && b.hasFile == null) b.hasFile = false; });
     stats = Object.assign({ secs: 0, words: 0, days: {} }, (await dbGet("stats")) || {});
+    if (migrateShelves()) await saveLib();
+    const cur = settings.openLast && (location.hash || "#/") === "#/" && nowBooks()[0];
+    if (cur) { history.replaceState(null, "", "#/"); history.pushState(null, "", "#/read/" + cur.id); } /* Back still leads to the Library */
     render(); setTimeout(() => showInstall(false), 1800);
     /* Books added before version 9: count their words once. */
     let counted = false;

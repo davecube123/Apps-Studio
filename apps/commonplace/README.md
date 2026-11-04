@@ -30,8 +30,13 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.
 - **Library:** three columns of identical book tiles (any cover shape fits; landscape covers shown whole), most recently opened at the top left, with a search box for titles and authors.
-- **Reading time:** every book shows the time left to finish it, and the Library shows the total for all
-  unfinished books, how long that takes at your minutes a day, and the date you'd be done. Tap it for each book, shortest
+- **Reading now and the Shelf:** only a few books are in front of you. Reading now holds 3 by default (1–5 in
+  Settings); every other book waits on the folded Shelf, and new books go there. A slot opens only when you finish
+  a book (or mark it finished) or deliberately set one aside. The book you make **Up next** moves in by itself
+  when a slot frees. Adding stays free; choosing stays small. A line shows this week's minutes a day against
+  your usual, and an optional setting opens the app straight on your current book.
+- **Reading time:** every book shows the time left to finish it, and the Library shows the total for Reading now
+  and Up next (with the whole library in the detail sheet), how long that takes at your minutes a day, and the date you'd be done. Tap it for each book, shortest
   first, with dates if you read them in that order, and pick a daily plan (your real average, or 15–90 minutes).
   Your pace is learned from your own reading: only active time counts, and pauses or jumps don't. Until 10 minutes are recorded it uses
   238 words a minute, the typical adult silent-reading pace (Brysbaert, 2019).
