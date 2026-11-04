@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4eee2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#12100d" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Book of Changes">
+  <meta name="description" content="The I Ching in plain modern language. Cast a hexagram with yarrow stalks, or study any of the 64.">
+  <link rel="preload" href="fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Book of Changes</title>
+  <style>
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader.woff2) format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader-italic.woff2) format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+    :root {
+      --paper: #f4eee2; --card: #fffdf8; --ink: #1d1914; --ink2: #575045; --muted: #978b7a;
+      --line: rgba(70,50,20,.11); --line2: rgba(70,50,20,.2); --seal: #a8322d; --seal-ink: #fff; --seal-soft: rgba(168,50,45,.09);
+      --gold: #9c7633; --glow: rgba(214,170,110,.28); --stalk: #a98450; --stalk2: #c3a679;
+      --e1: 0 1px 1px rgba(60,40,10,.04), 0 2px 6px rgba(60,40,10,.04);
+      --e2: 0 1px 2px rgba(60,40,10,.05), 0 6px 16px rgba(60,40,10,.06), 0 18px 40px rgba(60,40,10,.06);
+      --e3: 0 2px 6px rgba(40,25,5,.1), 0 16px 40px rgba(40,25,5,.16);
+      --r: 22px; --spring: cubic-bezier(.2,.9,.25,1.15); --ease: cubic-bezier(.2,.7,.2,1);
+      --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --cjk: "Songti SC", "Noto Serif CJK TC", "Noto Serif TC", "Noto Sans CJK TC", "PMingLiU", serif;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #12100d; --card: #1c1915; --ink: #eee6d6; --ink2: #bbb09e; --muted: #847a6c;
+        --line: rgba(255,240,215,.08); --line2: rgba(255,240,215,.16); --seal: #d8664f; --seal-soft: rgba(216,102,79,.14); --gold: #cda860; --glow: rgba(216,102,79,.12);
+        --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.3); --e3: 0 16px 40px rgba(0,0,0,.55); color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #12100d; --card: #1c1915; --ink: #eee6d6; --ink2: #bbb09e; --muted: #847a6c;
+      --line: rgba(255,240,215,.08); --line2: rgba(255,240,215,.16); --seal: #d8664f; --seal-soft: rgba(216,102,79,.14); --gold: #cda860; --glow: rgba(216,102,79,.12);
+      --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.3); --e3: 0 16px 40px rgba(0,0,0,.55); color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--paper); }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(120% 60% at 50% -10%, var(--glow), transparent 60%) no-repeat, var(--paper);
+           color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+    main { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 22px) 20px calc(env(safe-area-inset-bottom) + 120px); }
+    a { color: inherit; }
+    ::selection { background: var(--seal-soft); }
+    :focus-visible { outline: 2px solid var(--seal); outline-offset: 3px; border-radius: 8px; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 450; margin: 0; text-wrap: balance; }
+    h1 { font-size: 38px; line-height: 1.08; letter-spacing: -.02em; }
+    h2 { font-size: 27px; line-height: 1.15; letter-spacing: -.015em; }
+    h3 { font-size: 20px; line-height: 1.25; letter-spacing: -.01em; }
+    p { margin: .45em 0; text-wrap: pretty; }
+    .muted { color: var(--muted); } .small { font-size: 13.5px; } .serif { font-family: var(--serif); } .cjk { font-family: var(--cjk); }
+    .eyebrow { font: 600 11px/1.3 var(--sans); letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .center { text-align: center; }
+    .wrap { flex-wrap: wrap; }
+    .view.enter > * { animation: rise .45s var(--ease) both; }
+    .view.enter > *:nth-child(2) { animation-delay: 30ms; } .view.enter > *:nth-child(3) { animation-delay: 60ms; } .view.enter > *:nth-child(n+4) { animation-delay: 90ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    .card { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; box-shadow: var(--e2); }
+    .card.flat { box-shadow: var(--e1); }
+    .btn { appearance: none; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 999px; min-height: 42px; padding: 10px 18px;
+           font: 600 14.5px var(--sans); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+           transition: transform .3s var(--spring), background .2s; }
+    .btn:active { transform: scale(.95); transition-duration: .1s; }
+    .btn.seal { background: var(--seal); color: var(--seal-ink); border-color: transparent; box-shadow: 0 6px 18px color-mix(in srgb, var(--seal) 35%, transparent); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.block { width: 100%; min-height: 54px; font-size: 16px; }
+    .btn.sm { min-height: 34px; padding: 6px 14px; font-size: 13px; }
+    .btn:disabled { opacity: .35; pointer-events: none; box-shadow: none; }
+    .seg { display: inline-flex; background: color-mix(in srgb, var(--ink) 6%, transparent); border-radius: 999px; padding: 4px; gap: 2px; }
+    .seg button { border: 0; background: transparent; color: var(--ink2); border-radius: 999px; padding: 8px 16px; font: 600 13px var(--sans); cursor: pointer; }
+    .seg button.on { background: var(--card); color: var(--ink); box-shadow: var(--e1), 0 0 0 1px var(--line); }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); text-decoration: none; font: 500 15px var(--sans); margin: -6px 0 16px -4px;
+            padding: 6px 12px 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--card) 70%, transparent); border: 1px solid var(--line); cursor: pointer; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 26px 0; }
+    textarea, input[type=search], input[type=text] { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink); caret-color: var(--seal);
+           font: 400 19px/1.55 var(--serif); padding: 6px 0; }
+    textarea::placeholder, input::placeholder { color: var(--muted); opacity: .75; font-style: italic; }
+    .pillin { font: 15.5px var(--sans) !important; background: color-mix(in srgb, var(--ink) 5%, transparent) !important; border-radius: 14px; padding: 12px 16px !important; }
+    .pillin::placeholder { font-style: normal; }
+
+    /* Hexagram figures */
+    .hex { display: block; overflow: visible; }
+    .hex .ln { fill: currentColor; }
+    .hex .ln-empty { fill: none; stroke: var(--line2); stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .hex .mk { stroke: var(--seal); fill: none; }
+    .hex .ln.hi { fill: var(--seal); }
+    .hex.anim .ln { transform-box: fill-box; transform-origin: center; animation: draw .6s var(--ease) both; animation-delay: calc(var(--i) * 110ms); }
+    @keyframes draw { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
+    .num { font: 700 11.5px var(--sans); letter-spacing: .12em; color: var(--seal); }
+
+    /* Casting */
+    .yarrow svg { display: block; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+    .yarrow .yarea { fill: color-mix(in srgb, var(--ink) 4%, transparent); }
+    .yarrow .ylab { font: 600 9px var(--sans); letter-spacing: .08em; fill: var(--muted); text-transform: uppercase; }
+    .stalk { fill: var(--stalk); transition: transform .55s var(--ease), fill .3s, opacity .3s; transform-box: view-box; }
+    .yarrow svg.complete .stalk:not(.watch) { opacity: .3 !important; }
+    .stalk.rem { fill: var(--seal); } .stalk.aside { fill: var(--stalk2); } .stalk.watch { fill: var(--stalk2); opacity: .55 !important; }
+    .castread { display: flex; gap: 16px; align-items: center; min-height: 84px; }
+    .tally { display: grid; gap: 4px; font: 500 12.5px var(--sans); color: var(--ink2); }
+    .tally div { display: flex; gap: 8px; align-items: center; }
+    .tally b { width: 16px; color: var(--muted); font-weight: 700; }
+
+    /* Reading and study */
+    .hexhead { display: flex; gap: 20px; align-items: center; position: relative; }
+    .hexhead .glyph { position: absolute; right: -6px; top: -30px; font-family: var(--cjk); font-size: 132px; line-height: 1; color: var(--seal); opacity: .08; pointer-events: none; user-select: none; }
+    .kw { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .kw span { font: 600 12px var(--sans); color: var(--ink2); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 11px; }
+    .essence { font: 400 21px/1.5 var(--serif); margin: 20px 0 0; text-wrap: pretty; }
+    .sec { margin-top: 34px; }
+    .sec > .eyebrow { color: var(--seal); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .sec > .eyebrow::before { content: ""; width: 7px; height: 7px; background: var(--seal); border-radius: 2px; transform: rotate(45deg); }
+    .oracle { font: italic 400 21px/1.5 var(--serif); padding-left: 16px; border-left: 2px solid var(--seal); margin: 0 0 12px; color: var(--ink); text-wrap: pretty; }
+    .expl { font: 400 17.5px/1.65 var(--serif); color: var(--ink2); }
+    .expl p { margin: 0 0 .7em; }
+    .lcard { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; box-shadow: var(--e1); }
+    .lcard + .lcard { margin-top: 10px; }
+    .lcard.on { border-color: color-mix(in srgb, var(--seal) 45%, transparent); box-shadow: 0 0 0 3px var(--seal-soft), var(--e1); }
+    .lcard .lh { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .lcard .lh .eyebrow { color: var(--ink2); }
+    .lcard.on .lh .eyebrow { color: var(--seal); }
+    .lcard .oracle { font-size: 19px; border-left-width: 2px; }
+    .lcard .expl { font-size: 16.5px; }
+    .lcard.fold .expl, .lcard.fold .oracle { display: none; }
+    .lcard.fold { cursor: pointer; padding: 12px 18px; }
+    .lcard.fold .lh { margin: 0; }
+    .lcard .peek { font: italic 15px/1.4 var(--serif); color: var(--ink2); display: none; }
+    .lcard.fold .peek { display: block; }
+    .life { display: grid; gap: 10px; }
+    .life div { background: color-mix(in srgb, var(--ink) 4%, transparent); border-radius: 16px; padding: 13px 16px; font: 16.5px/1.55 var(--serif); color: var(--ink2); }
+    .life b { display: block; font: 600 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .askq { font: italic 400 22px/1.45 var(--serif); text-align: center; padding: 22px 10px; text-wrap: balance; }
+    .rule { background: var(--seal-soft); color: var(--ink); border-radius: 16px; padding: 12px 16px; font-size: 14.5px; margin-top: 16px; }
+    .pair { display: grid; grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); align-items: start; margin-top: 8px; }
+    .pair.single { grid-template-columns: minmax(0, 1fr); }
+    .pfig { display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; gap: 3px; }
+    .pfig .fbox, .pair .arrow { height: 96px; display: flex; align-items: center; justify-content: center; }
+    .pair .arrow { color: var(--muted); font-size: 22px; }
+    .pfig .pname { font: 450 18px/1.2 var(--serif); text-wrap: balance; }
+    .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px; }
+    .pager a { text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; box-shadow: var(--e1); }
+    .pager a:last-child { text-align: right; }
+    .pager .pname { font: 450 16px/1.2 var(--serif); }
+
+    /* Hexagram list */
+    .hlist { margin-top: 14px; }
+    .hrow { display: flex; gap: 14px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .hrow .n { width: 26px; font: 700 12px var(--sans); color: var(--muted); text-align: right; flex: none; }
+    .hrow .nm { font: 450 18px/1.2 var(--serif); }
+    .hrow .zh { font-family: var(--cjk); color: var(--muted); font-size: 15px; margin-left: 6px; }
+    .hrow .es { font-size: 13.5px; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
+    .map { display: grid; grid-template-columns: 34px repeat(8, minmax(0, 1fr)); gap: 4px; font-size: 11px; margin-top: 16px; }
+    .map .h { display: grid; place-items: center; color: var(--muted); font-size: 20px; text-align: center; }
+    .map .h small { display: block; font: 600 8px var(--sans); letter-spacing: .03em; }
+    .map a { background: var(--card); border: 1px solid var(--line); border-radius: 9px; aspect-ratio: 1; display: grid; place-items: center; text-decoration: none; color: var(--ink2); font-weight: 700; }
+    .map a:active { transform: scale(.9); }
+
+    /* Readings list */
+    .ritem { display: flex; gap: 16px; align-items: center; text-decoration: none; padding: 14px 16px; }
+    .ritem + .ritem { margin-top: 10px; }
+    .empty { text-align: center; padding: 44px 16px; color: var(--muted); }
+
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(420px, calc(100% - 28px));
+               padding: 6px; border-radius: 30px; background: color-mix(in srgb, var(--card) 78%, transparent); backdrop-filter: blur(24px) saturate(1.8);
+               -webkit-backdrop-filter: blur(24px) saturate(1.8); border: 1px solid var(--line2); box-shadow: var(--e3); display: flex; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 24px; color: var(--muted);
+                 font: 600 10.5px var(--sans); padding: 7px 0 6px; transition: background .3s var(--ease), color .3s; }
+    nav.tabs a svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--seal); background: var(--seal-soft); }
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 100px);
+             background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: 20px; font: 500 14px var(--sans); z-index: 50; box-shadow: var(--e3); animation: rise .35s var(--spring) both; }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 55; border: 0; cursor: pointer;
+              background: var(--seal); color: var(--seal-ink); padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--e3); }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,14,8,.38); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(520px, 100%); background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px); box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15.5px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--seal-soft); color: var(--seal); font: 700 12.5px/24px var(--sans); text-align: center; }
+    details > summary { cursor: pointer; list-style: none; color: var(--ink2); font: 600 14px var(--sans); }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after { content: " ›"; color: var(--muted); }
+    details[open] > summary::after { content: " ⌄"; }
+    .prose { font: 17px/1.65 var(--serif); color: var(--ink2); } .prose h3 { color: var(--ink); margin: 22px 0 6px; }
+    .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .toggle input { width: 20px; height: 20px; accent-color: var(--seal); }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs">
+    <a href="#/" data-tab="cast"><svg viewBox="0 0 24 24"><path d="M5 20L19 4M8 20L20 7M4 17L16 3"/></svg>Cast</a>
+    <a href="#/list" data-tab="list"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h7M13 10h7M4 14h16M4 18h7M13 18h7"/></svg>Hexagrams</a>
+    <a href="#/readings" data-tab="readings"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Readings</a>
+    <a href="#/about" data-tab="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>About</a>
+  </nav>
+  <script>
+  "use strict";
+  const APP_VERSION = "1", APP_DATE = "4 Nov 2026";
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5;
+  const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
+  function toast(m, ms = 2600) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+
+  /* ---------- Structure of the 64 hexagrams ---------- */
+  const TRI = {
+    qian: { bits: "111", sym: "☰", zh: "乾", img: "Heaven", q: "strong, creative" },
+    dui:  { bits: "110", sym: "☱", zh: "兌", img: "Lake", q: "joyful, open" },
+    li:   { bits: "101", sym: "☲", zh: "離", img: "Fire", q: "clear, clinging" },
+    zhen: { bits: "100", sym: "☳", zh: "震", img: "Thunder", q: "arousing, moving" },
+    xun:  { bits: "011", sym: "☴", zh: "巽", img: "Wind", q: "gentle, penetrating" },
+    kan:  { bits: "010", sym: "☵", zh: "坎", img: "Water", q: "deep, dangerous" },
+    gen:  { bits: "001", sym: "☶", zh: "艮", img: "Mountain", q: "still, resting" },
+    kun:  { bits: "000", sym: "☷", zh: "坤", img: "Earth", q: "receptive, yielding" },
+  };
+  const TRI_ORDER = ["qian", "dui", "li", "zhen", "xun", "kan", "gen", "kun"];
+  /* [upper, lower, Chinese, pinyin] in King Wen order */
+  const RAW = [
+    ["qian","qian","乾","Qián"],["kun","kun","坤","Kūn"],["kan","zhen","屯","Zhūn"],["gen","kan","蒙","Méng"],["kan","qian","需","Xū"],["qian","kan","訟","Sòng"],["kun","kan","師","Shī"],["kan","kun","比","Bǐ"],
+    ["xun","qian","小畜","Xiǎo Chù"],["qian","dui","履","Lǚ"],["kun","qian","泰","Tài"],["qian","kun","否","Pǐ"],["qian","li","同人","Tóng Rén"],["li","qian","大有","Dà Yǒu"],["kun","gen","謙","Qiān"],["zhen","kun","豫","Yù"],
+    ["dui","zhen","隨","Suí"],["gen","xun","蠱","Gǔ"],["kun","dui","臨","Lín"],["xun","kun","觀","Guān"],["li","zhen","噬嗑","Shì Kè"],["gen","li","賁","Bì"],["gen","kun","剝","Bō"],["kun","zhen","復","Fù"],
+    ["qian","zhen","無妄","Wú Wàng"],["gen","qian","大畜","Dà Chù"],["gen","zhen","頤","Yí"],["dui","xun","大過","Dà Guò"],["kan","kan","坎","Kǎn"],["li","li","離","Lí"],["dui","gen","咸","Xián"],["zhen","xun","恆","Héng"],
+    ["qian","gen","遯","Dùn"],["zhen","qian","大壯","Dà Zhuàng"],["li","kun","晉","Jìn"],["kun","li","明夷","Míng Yí"],["xun","li","家人","Jiā Rén"],["li","dui","睽","Kuí"],["kan","gen","蹇","Jiǎn"],["zhen","kan","解","Xiè"],
+    ["gen","dui","損","Sǔn"],["xun","zhen","益","Yì"],["dui","qian","夬","Guài"],["qian","xun","姤","Gòu"],["dui","kun","萃","Cuì"],["kun","xun","升","Shēng"],["dui","kan","困","Kùn"],["kan","xun","井","Jǐng"],
+    ["dui","li","革","Gé"],["li","xun","鼎","Dǐng"],["zhen","zhen","震","Zhèn"],["gen","gen","艮","Gèn"],["xun","gen","漸","Jiàn"],["zhen","dui","歸妹","Guī Mèi"],["zhen","li","豐","Fēng"],["li","gen","旅","Lǚ"],
+    ["xun","xun","巽","Xùn"],["dui","dui","兌","Duì"],["xun","kan","渙","Huàn"],["kan","dui","節","Jié"],["xun","dui","中孚","Zhōng Fú"],["zhen","gen","小過","Xiǎo Guò"],["kan","li","既濟","Jì Jì"],["li","kan","未濟","Wèi Jì"],
+  ];
+  const HEX = RAW.map((r, i) => ({ n: i + 1, up: r[0], lo: r[1], zh: r[2], py: r[3], bits: TRI[r[1]].bits + TRI[r[0]].bits /* bottom to top */ }));
+  const BY_BITS = Object.fromEntries(HEX.map(h => [h.bits, h.n]));
+  const hx = n => HEX[n - 1];
+  let TEXT = []; /* the rendition, data/hexagrams.json */
+  const tx = n => TEXT[n - 1] || { name: `Hexagram ${n}`, essence: "", keywords: [], judgment: {}, image: {}, lines: [{}, {}, {}, {}, {}, {}], life: {} };
+  const isYang = v => v === 1 || v === 7 || v === 9;
+  const moving = v => v === 6 || v === 9;
+  const bitsOf = lines => lines.map(v => isYang(v) ? "1" : "0").join("");
+  const linesOf = n => [...hx(n).bits].map(Number);
+  const triPair = h => h.up === h.lo ? `${TRI[h.up].img} doubled` : `${TRI[h.up].img} over ${TRI[h.lo].img}`;
+  const POS = ["at the beginning", "in the second place", "in the third place", "in the fourth place", "in the fifth place", "at the top"];
+  const lineName = (i, yang) => `${yang ? "Nine" : "Six"} ${POS[i]}`;
+  const LINE_NAME = { 6: "old yin · moving", 7: "young yang", 8: "young yin", 9: "old yang · moving" };
+
+  /* ---------- Storage ---------- */
+  const KEY = "book-of-changes";
+  const db = Object.assign({ readings: [], settings: { theme: "auto", slow: true }, draft: null }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  db.settings = Object.assign({ theme: "auto", slow: true }, db.settings);
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const freshDraft = () => ({ q: "", lines: [null, null, null, null, null, null], cast: freshCast() });
+  const dstr = t => new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+
+  /* ---------- Figures ---------- */
+  function hexSVG(lines, { w = 64, mark = true, cls = "", hi = [] } = {}) {
+    const lh = w * 0.115, sp = w * 0.085, H = 6 * lh + 5 * sp, mw = mark ? w * 0.24 : 0, W = w + mw * 2;
+    let s = `<svg class="hex ${cls}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><g>`;
+    for (let i = 0; i < 6; i++) {
+      const v = lines[i], y = H - (i + 1) * lh - i * sp, r = lh * 0.18, c = hi.includes(i) ? "ln hi" : "ln";
+      if (v == null) { s += `<rect x="${mw}" y="${y}" width="${w}" height="${lh}" rx="${r}" class="ln-empty"/>`; continue; }
+      if (isYang(v)) s += `<rect class="${c}" style="--i:${i}" x="${mw}" y="${y}" width="${w}" height="${lh}" rx="${r}"/>`;
+      else { const half = (w - w * 0.17) / 2; s += `<rect class="${c}" style="--i:${i}" x="${mw}" y="${y}" width="${half}" height="${lh}" rx="${r}"/><rect class="${c}" style="--i:${i}" x="${mw + w - half}" y="${y}" width="${half}" height="${lh}" rx="${r}"/>`; }
+    }
+    s += "</g>";
+    if (mark) for (let i = 0; i < 6; i++) {
+      const v = lines[i]; if (!moving(v)) continue;
+      const y = H - (i + 1) * lh - i * sp, cx = mw + w + mw * 0.55, cy = y + lh / 2, r = Math.max(2.5, lh * 0.42), sw = Math.max(1.2, w / 50);
+      s += v === 9 ? `<circle class="mk" cx="${cx}" cy="${cy}" r="${r}" stroke-width="${sw}"/>` : `<path class="mk" stroke-width="${sw}" d="M${cx - r} ${cy - r}L${cx + r} ${cy + r}M${cx + r} ${cy - r}L${cx - r} ${cy + r}"/>`;
+    }
+    return s + "</svg>";
+  }
+  const lineGlyph = (yang, on) => `<svg width="30" height="8" viewBox="0 0 30 8" aria-hidden="true" style="flex:none;color:${on ? "var(--seal)" : "var(--ink)"}">${yang ? `<rect width="30" height="8" rx="1.5" fill="currentColor"/>` : `<rect width="12.5" height="8" rx="1.5" fill="currentColor"/><rect x="17.5" width="12.5" height="8" rx="1.5" fill="currentColor"/>`}</svg>`;
+
+  /* ---------- Casting with yarrow stalks ----------
+     The classical procedure: of 50 stalks one is set aside; the 49 are divided (by your tap), one stalk
+     is taken from the right heap and held, both heaps are counted off by fours and the remainders laid
+     aside. Three divisions make a line (36/32/28/24 stalks left: 9/8/7/6), six lines make the hexagram,
+     built from the bottom up. Your tap chooses roughly where to divide, never the exact count (a hand is
+     never exact either), so the odds are the true yarrow odds: old yin 1/16, young yang 5/16,
+     young yin 7/16, old yang 3/16. */
+  const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+  function freshCast() { return { line: 0, div: 0, pool: [...Array(49).keys()], piles: [], log: [] }; }
+  let castBusy = false;
+  const YW = 360, YH = 216;
+  function stalkPos(c, phase, split) {
+    const P = {}, pool = c.pool, wob = id => ((id * 37) % 11 - 5) * 0.12;
+    P[49] = [48, 30, 90, 0.5, "watch"];
+    c.piles.forEach((pile, j) => pile.forEach((id, k) => { P[id] = [172 + j * 64, 18 + k * 3.4, 90, 0.48, "aside"]; }));
+    if (phase === "bundle") {
+      const step = Math.min(6.2, 300 / pool.length), x0 = YW / 2 - (pool.length - 1) * step / 2;
+      pool.forEach((id, k) => { P[id] = [x0 + k * step, 148, wob(id), 1, ""]; });
+    } else {
+      const { left, finger, right, remL, remR } = split;
+      const heap = (ids, cx, rem, side) => {
+        const g = Math.ceil(ids.length / 4), gw = Math.min(24, 150 / g), sp = phase === "count" ? gw * 0.17 : gw / 4, gap = phase === "count" ? gw - 3 * sp : 0;
+        const x0 = cx - (phase === "count" ? g * gw - gap : ids.length * sp) / 2;
+        ids.forEach((id, k) => {
+          const isRem = phase === "count" && (side < 0 ? k < rem : k >= ids.length - rem);
+          const x = phase === "count" ? x0 + Math.floor(k / 4) * gw + (k % 4) * sp : x0 + k * sp;
+          P[id] = [x, 148, wob(id), 1, isRem ? "rem" : ""]; });
+      };
+      heap(left, 92, remL, -1); heap(right, 270, remR, 1);
+      P[finger] = [YW / 2, 112, -18, 0.9, "rem"];
+    }
+    return P;
+  }
+  function mountYarrow() {
+    const box = $("#yarrow"); if (!box) return;
+    box.innerHTML = `<svg viewBox="0 0 ${YW} ${YH}" width="100%" role="img" aria-label="Fifty yarrow stalks. Tap where you would divide them.">
+      <text x="48" y="58" text-anchor="middle" class="ylab">the 50th</text>
+      <text x="236" y="70" text-anchor="middle" class="ylab" id="ytray"></text>
+      <rect x="20" y="86" width="${YW - 40}" height="124" rx="14" class="yarea"/>
+      <text x="${YW / 2}" y="${YH - 1}" text-anchor="middle" class="ylab" id="yhint"></text>
+      ${[...Array(50).keys()].map(id => `<rect class="stalk" data-id="${id}" x="-1.5" y="-56" width="3" height="112" rx="1.5"/>`).join("")}</svg>`;
+    placeStalks(stalkPos(db.draft.cast, "bundle"));
+    box.querySelector("svg").onclick = e => divideAt(e);
+  }
+  function placeStalks(P) {
+    document.querySelectorAll("#yarrow .stalk").forEach(el => {
+      const p = P[el.dataset.id];
+      if (!p) { el.style.opacity = 0; return; }
+      el.style.opacity = 1; el.style.transform = `translate(${p[0]}px, ${p[1]}px) rotate(${p[2]}deg) scale(${p[3]})`;
+      el.setAttribute("class", "stalk " + p[4]);
+    });
+    const c = db.draft.cast, t = $("#ytray"), h = $("#yhint");
+    if (t) t.textContent = c.piles.length ? `set aside: ${c.piles.map(p => p.length).join(" · ")}` : "";
+    if (h) h.textContent = c.line >= 6 ? "the hexagram is cast" : c.div === 0 ? `line ${c.line + 1} · tap where you would divide` : `line ${c.line + 1} · division ${c.div + 1} of 3 · tap again`;
+    $("#yarrow svg")?.classList.toggle("complete", c.line >= 6);
+  }
+  function divideAt(e) {
+    const d = db.draft, c = d.cast; if (castBusy || c.line >= 6) return;
+    const svg = e.currentTarget, r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * YW;
+    const N = c.pool.length, step = Math.min(6.2, 300 / N), x0 = YW / 2 - (N - 1) * step / 2;
+    const f = Math.max(0, Math.min(1, (x - x0) / ((N - 1) * step)));
+    let L = Math.round(f * N) + rnd(8) - 4; L = Math.max(3, Math.min(N - 3, L));
+    const left = c.pool.slice(0, L), finger = c.pool[L], right = c.pool.slice(L + 1);
+    const remL = left.length % 4 || 4, remR = right.length % 4 || 4;
+    const split = { left, finger, right, remL, remR };
+    const T = db.settings.slow ? [650, 1500, 700] : [160, 380, 220];
+    castBusy = true; haptic(8);
+    placeStalks(stalkPos(c, "split", split));
+    setTimeout(() => placeStalks(stalkPos(c, "count", split)), T[0]);
+    setTimeout(() => {
+      c.piles.push([finger, ...left.slice(0, remL), ...right.slice(right.length - remR)]);
+      c.pool = [...left.slice(remL), ...right.slice(0, right.length - remR)]; c.div++;
+      if (c.div === 3) {
+        const value = c.pool.length / 4, entry = c.piles.map(p => p.length);
+        placeStalks(stalkPos(c, "bundle"));
+        setTimeout(() => {
+          d.lines[c.line] = value; c.log.push(entry); c.line++; c.div = 0; c.pool = [...Array(49).keys()]; c.piles = [];
+          haptic(moving(value) ? [10, 40, 16] : 10); save(); placeStalks(stalkPos(c, "bundle")); refreshCast(); castBusy = false;
+          if (c.line === 6) { haptic([12, 60, 24]); const n = BY_BITS[bitsOf(d.lines)]; toast(`${n} · ${tx(n).name}`); }
+        }, T[2]);
+      } else { placeStalks(stalkPos(c, "bundle")); save(); refreshCast(); castBusy = false; }
+    }, T[1]);
+  }
+  function castReadout() {
+    const d = db.draft, c = d.cast, done = c.line >= 6, n = done ? BY_BITS[bitsOf(d.lines)] : null;
+    const tally = c.log.map((e, i) => `<div><b>${i + 1}</b>${lineGlyph(isYang(d.lines[i]), moving(d.lines[i]))}<span>${d.lines[i]} · ${LINE_NAME[d.lines[i]]}</span></div>`).reverse().join("");
+    return `<div class="castread">${hexSVG(d.lines, { w: 46 })}<div class="grow">
+      ${done ? `<div class="num">${n}</div><div class="serif" style="font-size:21px;line-height:1.2">${esc(tx(n).name)}</div><div class="small muted">${triPair(hx(n))}</div>`
+        : `<div class="eyebrow">Line ${c.line + 1} of 6 · division ${c.div + 1} of 3</div><div class="tally" style="margin-top:8px">${tally || `<span class="muted">The lines build from the bottom up.</span>`}</div>`}</div></div>`;
+  }
+  function refreshCast() {
+    const box = $("#castread"); if (box) box.innerHTML = castReadout();
+    const done = db.draft.cast.line >= 6, b = $("#castdone"); if (b) b.style.display = done ? "" : "none";
+  }
+
+  /* ---------- Which lines to read (after Zhu Xi, the common modern practice) ---------- */
+  function emphasis(lines, n) {
+    const mv = [0, 1, 2, 3, 4, 5].filter(i => moving(lines[i])), un = [0, 1, 2, 3, 4, 5].filter(i => !moving(lines[i])), k = mv.length;
+    if (!k) return { text: "No moving lines. Read the hexagram as a whole: its Judgment and Image are the answer.", lines: [], rel: [] };
+    if (k === 1) return { text: `One moving line. Line ${mv[0] + 1} carries the main message.`, lines: mv, lead: mv[0], rel: [] };
+    if (k === 2) return { text: `Two moving lines. Read both; the upper one, line ${mv[1] + 1}, leads.`, lines: mv, lead: mv[1], rel: [] };
+    if (k === 3) return { text: "Three moving lines. Read all three, and weigh this hexagram and the one it becomes equally.", lines: mv, lead: mv[1], rel: [] };
+    if (k === 4) return { text: `Four moving lines. The weight shifts to the future: read the second hexagram, especially its line ${un[0] + 1}, the lower of the two that stay.`, lines: mv, rel: [un[0]] };
+    if (k === 5) return { text: `Five moving lines. Read the second hexagram, especially its line ${un[0] + 1}, the one line that stays.`, lines: mv, rel: [un[0]] };
+    return { text: n <= 2 ? "All six lines move. Read the special text for all six lines, below." : "All six lines move: the situation is turning over completely. Let the second hexagram’s Judgment lead.", lines: mv, rel: [], all: true };
+  }
+
+  /* ---------- Views ---------- */
+  let lastHash = "";
+  function render() {
+    const h = location.hash || "#/";
+    let html, tab;
+    if (h.startsWith("#/h/")) { html = viewHex(+h.split("/")[2]); tab = "list"; }
+    else if (h.startsWith("#/r/")) { html = viewReading(h.split("/")[2]); tab = "readings"; }
+    else if (h.startsWith("#/list")) { html = viewList(); tab = "list"; }
+    else if (h.startsWith("#/readings")) { html = viewReadings(); tab = "readings"; }
+    else if (h.startsWith("#/about")) { html = viewAbout(); tab = "about"; }
+    else { html = viewCast(); tab = "cast"; }
+    if (html == null) return;
+    const nav = h !== lastHash; $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+    if (tab === "cast") { mountYarrow(); refreshCast(); }
+    if (nav) scrollTo(0, 0); lastHash = h;
+    document.title = h.startsWith("#/h/") ? `${tx(+h.split("/")[2]).name} · Book of Changes` : "Book of Changes";
+  }
+  addEventListener("hashchange", render);
+
+  function viewCast() {
+    db.draft ||= freshDraft();
+    const d = db.draft, started = d.cast.line > 0 || d.cast.div > 0;
+    return `<div class="eyebrow">The Book of Changes</div><h1 style="margin-top:6px">Ask, then divide the stalks</h1>
+      <div class="card flat" style="margin-top:18px;padding:14px 18px">
+        <div class="eyebrow">Your question</div>
+        <textarea id="q" rows="2" placeholder="What do I need to understand about…">${esc(d.q)}</textarea></div>
+      <p class="small muted" style="margin:10px 4px 0">Open questions work best: “What should I understand about…”, “How do I approach…”. Hold it in mind while you cast.</p>
+      <div class="card" style="margin-top:16px;padding:16px">
+        <div id="yarrow" class="yarrow"></div>
+        <div id="castread" style="margin-top:10px"></div>
+        <div id="castdone" style="display:none;margin-top:14px"><button class="btn seal block" data-act="read">Read the answer</button></div>
+        <div class="row between" style="margin-top:10px">
+          <button class="btn ghost sm" data-act="restart" ${started ? "" : "disabled"}>Start over</button>
+          <label class="small muted row" style="gap:6px"><input type="checkbox" data-act="slow" ${db.settings.slow ? "checked" : ""}> Unhurried</label></div></div>
+      <details style="margin-top:20px"><summary>How the yarrow method works</summary>
+        <div class="prose" style="margin-top:8px">
+          <p>Fifty stalks; one is set aside and watches. You divide the other forty-nine into two heaps. One stalk is taken from the right heap and held between the fingers; then each heap is counted off in fours, and what remains (one to four stalks) is laid aside with the held stalk.</p>
+          <p>That is one division. It is done three times with the stalks that are left. What is left at the end, 36, 32, 28 or 24 stalks, counted in fours, gives 9, 8, 7 or 6: <b>old yang</b> (moving), <b>young yin</b>, <b>young yang</b>, or <b>old yin</b> (moving). Eighteen divisions make six lines, built from the bottom up.</p>
+          <p>Your tap chooses roughly where the bundle splits, never the exact count, as with a hand. The odds are the real yarrow odds, which differ from coins: a moving yang line comes up three times as often as a moving yin line.</p></div></details>`;
+  }
+
+  function figPair(a, b) {
+    const one = (x, label) => `<a class="pfig" href="#/h/${x.n}"><div class="fbox">${x.fig}</div><div class="eyebrow">${label}</div><div class="num" style="margin-top:4px">${x.n}</div><div class="pname">${esc(tx(x.n).name)}</div></a>`;
+    return b ? `<div class="pair">${one(a, "Now")}<div class="arrow">→</div>${one(b, "Becoming")}</div>` : `<div class="pair single">${one(a, "Your hexagram")}</div>`;
+  }
+  function lineCard(n, i, opts = {}) {
+    const L = tx(n).lines[i] || {}, yang = hx(n).bits[i] === "1", v = opts.v;
+    const name = v != null ? `${lineName(i, isYang(v))}${moving(v) ? " · moving" : ""}` : lineName(i, yang);
+    return `<div class="lcard${opts.on ? " on" : ""}${opts.fold ? " fold" : ""}" ${opts.fold ? `data-act="unfold"` : ""}>
+      <div class="lh">${lineGlyph(yang, opts.on)}<div class="eyebrow">Line ${i + 1} · ${name}</div></div>
+      <div class="peek">${esc(L.text)}</div>
+      <p class="oracle">${esc(L.text)}</p><div class="expl"><p>${esc(L.meaning)}</p></div></div>`;
+  }
+  function hexBody(n, { hiLines = [], foldOthers = false, values = null, showAll = false, compact = false } = {}) {
+    const t = tx(n), h = hx(n);
+    const lines = [5, 4, 3, 2, 1, 0].map(i => lineCard(n, i, { on: hiLines.includes(i), fold: foldOthers && !hiLines.includes(i), v: values?.[i] })).join("");
+    return `
+      <div class="sec"><div class="eyebrow">The Judgment</div><p class="oracle">${esc(t.judgment.text)}</p><div class="expl"><p>${esc(t.judgment.meaning)}</p></div></div>
+      <div class="sec"><div class="eyebrow">The Image · ${triPair(h)}</div><p class="oracle">${esc(t.image.text)}</p><div class="expl"><p>${esc(t.image.meaning)}</p></div></div>
+      ${compact ? "" : `<div class="sec"><div class="eyebrow">The Lines · read from the bottom up</div>${lines}</div>`}
+      ${t.all && (showAll || !compact) ? `<div class="sec"><div class="eyebrow">When all six lines move</div><div class="lcard${showAll ? " on" : ""}"><p class="oracle">${esc(t.all.text)}</p><div class="expl"><p>${esc(t.all.meaning)}</p></div></div></div>` : ""}
+      ${compact ? "" : `<div class="sec"><div class="eyebrow">In your life</div><div class="life">
+        <div><b>Work and decisions</b>${esc(t.life.work)}</div><div><b>Love and people</b>${esc(t.life.love)}</div><div><b>Inner life</b>${esc(t.life.inner)}</div></div></div>
+      <div class="sec"><div class="eyebrow">To sit with</div><p class="askq">${esc(t.question)}</p></div>`}`;
+  }
+  function hexHead(n, fig) {
+    const t = tx(n), h = hx(n);
+    return `<div class="hexhead"><span class="glyph">${h.zh}</span>${fig || hexSVG(linesOf(n), { w: 64, mark: false, cls: "anim" })}
+        <div class="grow"><div class="num">HEXAGRAM ${n}</div><h2 style="margin-top:2px">${esc(t.name)}</h2>
+        <div class="small muted"><span class="cjk">${h.zh}</span> ${h.py} · ${TRI[h.up].sym} ${triPair(h)} ${TRI[h.lo].sym}</div></div></div>
+      <div class="kw">${(t.keywords || []).map(k => `<span>${esc(k)}</span>`).join("")}</div>
+      <p class="essence">${esc(t.essence)}</p>`;
+  }
+
+  function viewHex(n) {
+    if (!(n >= 1 && n <= 64)) { location.hash = "#/list"; return null; }
+    const p = n > 1 ? n - 1 : 64, q = n < 64 ? n + 1 : 1;
+    return `<a class="back" data-act="back">← Back</a>${hexHead(n)}${hexBody(n)}
+      <div class="pager"><a href="#/h/${p}"><div class="eyebrow">← ${p}</div><div class="pname">${esc(tx(p).name)}</div></a><a href="#/h/${q}"><div class="eyebrow">${q} →</div><div class="pname">${esc(tx(q).name)}</div></a></div>`;
+  }
+
+  function viewReading(id) {
+    const r = db.readings.find(x => x.id === id); if (!r) { location.hash = "#/readings"; return null; }
+    const n = BY_BITS[bitsOf(r.lines)], relBits = r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join("");
+    const m = r.lines.some(moving) ? BY_BITS[relBits] : null, em = emphasis(r.lines, n);
+    const moved = em.lines.map(i => `<div class="lcard on"><div class="lh">${lineGlyph(isYang(r.lines[i]), true)}<div class="eyebrow">Line ${i + 1} · ${lineName(i, isYang(r.lines[i]))}${em.lead === i ? " · leads" : ""}</div></div>
+        <p class="oracle">${esc(tx(n).lines[i]?.text)}</p><div class="expl"><p>${esc(tx(n).lines[i]?.meaning)}</p></div></div>`).reverse().join("");
+    return `<a class="back" href="#/readings">← Readings</a>
+      <div class="eyebrow">${dstr(r.at)}</div>
+      <h2 style="margin-top:6px">${r.q ? esc(r.q) : `<span class="muted">No question written</span>`}</h2>
+      <div class="card" style="margin-top:16px">${figPair({ n, fig: hexSVG(r.lines, { w: 60, cls: "anim" }) }, m && { n: m, fig: hexSVG(linesOf(m), { w: 60, mark: false }) })}
+        <div class="rule">${em.text}</div></div>
+      <div class="sec">${hexHead(n, "")}</div>
+      ${em.lines.length && !(em.all && n <= 2) ? `<div class="sec"><div class="eyebrow">Your moving line${em.lines.length > 1 ? "s" : ""}</div>${moved}</div>` : ""}
+      ${hexBody(n, { compact: true, showAll: em.all && n <= 2 })}
+      ${m ? `<hr><div class="eyebrow" style="color:var(--seal)">What it becomes</div>
+        <div class="sec" style="margin-top:14px">${hexHead(m, hexSVG(linesOf(m), { w: 54, mark: false }))}</div>
+        <div class="sec"><div class="eyebrow">Its Judgment</div><p class="oracle">${esc(tx(m).judgment.text)}</p><div class="expl"><p>${esc(tx(m).judgment.meaning)}</p></div></div>
+        ${em.rel.map(i => `<div class="sec"><div class="eyebrow">Its line ${i + 1}, the one to read</div>${lineCard(m, i, { on: true })}</div>`).join("")}
+        <p style="margin-top:14px"><a class="btn sm" href="#/h/${m}">Study ${esc(tx(m).name)} in full</a></p>` : ""}
+      <hr><div class="eyebrow">How to use it</div>
+      <p class="small muted" style="margin-top:6px">The first hexagram is the situation as it is. Moving lines are where it is changing, and the second hexagram is where it is heading. Read slowly, then ask what in your own life the images point to.</p>
+      <div class="sec"><div class="eyebrow">My note</div><div class="card flat" style="padding:12px 16px"><textarea id="note" data-id="${r.id}" rows="3" placeholder="What I take from this…">${esc(r.note || "")}</textarea></div></div>
+      <div class="row between" style="margin-top:18px"><a class="btn sm" href="#/h/${n}">Study ${esc(tx(n).name)} in full</a><button class="btn ghost sm" data-act="delreading" data-id="${r.id}" style="color:var(--seal)">Delete</button></div>`;
+  }
+
+  let listQ = "", listMode = "list";
+  function listRows() {
+    const q = listQ.trim().toLowerCase();
+    /* Names and numbers first, then themes, then words in the description. */
+    const score = h => { if (!q) return 1; const t = tx(h.n), has = x => String(x).toLowerCase().includes(q);
+      return String(h.n) === q ? 9 : has(`${t.name} ${h.py} ${h.zh}`) ? 4 : has((t.keywords || []).join(" ")) ? 3 : has(`${TRI[h.up].img} ${TRI[h.lo].img}`) ? 2 : has(t.essence) ? 1 : 0; };
+    const hits = HEX.map(h => [h, score(h)]).filter(x => x[1]).sort((a, b) => b[1] - a[1] || a[0].n - b[0].n).map(x => x[0]);
+    return hits.length ? hits.map(h => `<a class="hrow" href="#/h/${h.n}"><span class="n">${h.n}</span>${hexSVG(linesOf(h.n), { w: 30, mark: false })}
+        <div class="grow"><div><span class="nm">${esc(tx(h.n).name)}</span><span class="zh">${h.zh}</span></div><div class="es">${esc(tx(h.n).essence)}</div></div></a>`).join("")
+      : `<p class="empty">No hexagram matches “${esc(listQ.trim())}”.</p>`;
+  }
+  function viewList() {
+    const map = `<div class="map"><div></div>${TRI_ORDER.map(k => `<div class="h">${TRI[k].sym}<small>${TRI[k].img}</small></div>`).join("")}
+      ${TRI_ORDER.map(up => `<div class="h">${TRI[up].sym}<small>${TRI[up].img}</small></div>${TRI_ORDER.map(lo => { const n = BY_BITS[TRI[lo].bits + TRI[up].bits]; return `<a href="#/h/${n}" title="${esc(tx(n).name)}">${n}</a>`; }).join("")}`).join("")}</div>
+      <p class="small muted" style="margin-top:10px">Rows: the upper trigram. Columns: the lower trigram.</p>`;
+    return `<div class="eyebrow">Study</div><h1 style="margin-top:6px">The 64 hexagrams</h1>
+      <div class="row" style="margin-top:16px"><input type="search" id="hsearch" class="pillin" placeholder="Search a name, number or theme" value="${esc(listQ)}" autocomplete="off"></div>
+      <div class="seg" style="margin-top:12px"><button class="${listMode === "list" ? "on" : ""}" data-act="lmode" data-v="list">In order</button><button class="${listMode === "map" ? "on" : ""}" data-act="lmode" data-v="map">By trigram</button></div>
+      ${listMode === "map" ? map : `<div class="hlist" id="hlist">${listRows()}</div>`}`;
+  }
+
+  function viewReadings() {
+    const rs = [...db.readings].sort((a, b) => b.at - a.at);
+    return `<div class="eyebrow">Your history</div><h1 style="margin-top:6px">Readings</h1>
+      ${rs.length ? `<div style="margin-top:18px">${rs.map(r => { const n = BY_BITS[bitsOf(r.lines)], relBits = r.lines.map(v => moving(v) ? (isYang(v) ? "0" : "1") : (isYang(v) ? "1" : "0")).join(""), m = r.lines.some(moving) ? BY_BITS[relBits] : null;
+          return `<a class="card flat ritem" href="#/r/${r.id}">${hexSVG(r.lines, { w: 34 })}<div class="grow"><div class="small muted">${dstr(r.at)}</div>
+            <div class="serif" style="font-size:18px;line-height:1.25">${r.q ? esc(r.q) : "No question"}</div>
+            <div class="small" style="color:var(--ink2);margin-top:2px">${n} ${esc(tx(n).name)}${m ? ` → ${m} ${esc(tx(m).name)}` : ""}</div></div></a>`; }).join("")}</div>`
+        : `<div class="empty">${hexSVG([7, 8, 7, 8, 7, 8], { w: 56, mark: false })}<p style="margin-top:14px">Your readings will appear here.</p><a class="btn seal" href="#/" style="margin-top:8px">Cast a hexagram</a></div>`}`;
+  }
+
+  function viewAbout() {
+    return `<div class="eyebrow">About</div><h1 style="margin-top:6px">This rendition</h1>
+      <div class="prose" style="margin-top:12px">
+        <p>The I Ching, the Book of Changes, is about three thousand years old. Each of its 64 hexagrams has a <b>Judgment</b> (the oracle’s verdict on the situation), an <b>Image</b> (the two trigrams, and what a wise person does in response), and six <b>lines</b>, each a stage or a facet of the situation, read from the bottom up.</p>
+        <p>The text here is an original rendition in plain modern English, written for this app. It follows the received text and its classical commentaries, keeps the old images (the hidden dragon, the well, the cauldron), and explains each one: what it means, and what it asks of you. It is not a translation of any modern edition.</p>
+        <h3>Reading a cast</h3>
+        <p>Your hexagram is the situation now. <b>Moving lines</b> (old yang 9 and old yin 6, marked ○ and ×) are where it is changing; each turns into its opposite, which gives a second hexagram, where things are heading. The app tells you which lines to read, following the rules of Zhu Xi (12th century) used by most modern readers.</p>
+        <h3>The lines</h3>
+        <p>Line 1, at the bottom, is the beginning. Line 2 is the centre of the inner trigram: grounded, often favourable. Line 3 is the restless edge between inner and outer. Line 4 stands near power, like an adviser. Line 5 is the centre of the outer trigram, the place of the leader. Line 6 is the end, sometimes beyond the action. “Nine” names a solid line and “six” a broken one.</p>
+      </div>
+      <div class="sec"><div class="eyebrow">Settings</div>
+        <div class="seg">${[["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button class="${db.settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+        <label class="toggle" style="margin-top:12px"><span>Unhurried casting <span class="small muted">(slower stalk animation)</span></span><input type="checkbox" data-act="slow" ${db.settings.slow ? "checked" : ""}></label>
+        ${isStandalone() ? "" : `<div class="toggle"><span>Install on this phone</span><button class="btn sm" data-act="installsheet">Install</button></div>`}
+        <p class="small muted" style="margin-top:10px">Your readings and notes stay on this device.</p></div>
+      <p class="small muted center" style="margin-top:30px">Book of Changes · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "book-of-changes-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn seal block" data-act="install">Install the app</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> in Safari’s toolbar.</span></li><li><span>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon at the right of the address bar,</span></li><li><span>or choose <b>Install Book of Changes</b> in the browser menu.</span></li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
+        <div><div class="eyebrow">Free · works offline</div><h2>Install Book of Changes</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Open it full screen from your home screen, like any app. All 64 hexagrams are on the phone, so it works without a connection.</p>
+      <div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed. Open it from your home screen."); });
+
+  function applyTheme() { const t = db.settings.theme; t === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = t); }
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, d = el.dataset;
+    if (el.tagName === "BUTTON") haptic(6);
+    if (a === "read") {
+      const dr = db.draft; if (dr.cast.line < 6) return;
+      const r = { id: uid(), at: Date.now(), q: dr.q.trim(), lines: [...dr.lines], log: dr.cast.log, note: "" };
+      db.readings.push(r); db.draft = freshDraft(); save(); location.hash = "#/r/" + r.id;
+    }
+    else if (a === "restart") { if (castBusy) return; const dr = db.draft; if (dr.cast.line > 0 && dr.cast.line < 6 && !confirm("Start the cast over?")) return; db.draft = { ...freshDraft(), q: dr.q }; save(); render(); }
+    else if (a === "slow") { db.settings.slow = el.checked; save(); }
+    else if (a === "unfold") el.classList.remove("fold");
+    else if (a === "lmode") { listMode = d.v; render(); }
+    else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/list"; }
+    else if (a === "delreading") { if (!confirm("Delete this reading?")) return; db.readings = db.readings.filter(x => x.id !== d.id); save(); location.hash = "#/readings"; }
+    else if (a === "theme") { db.settings.theme = d.v; save(); applyTheme(); render(); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+  });
+  let navCount = 0; /* in-app steps, so Back never leaves the app */
+  addEventListener("hashchange", () => { navCount++; });
+  document.addEventListener("input", e => {
+    if (e.target.id === "q") { db.draft.q = e.target.value; save(); }
+    if (e.target.id === "note") { const r = db.readings.find(x => x.id === e.target.dataset.id); if (r) { r.note = e.target.value; save(); } }
+    if (e.target.id === "hsearch") { listQ = e.target.value; const l = $("#hlist"); if (l) l.innerHTML = listRows(); }
+  });
+
+  /* ---------- Start ---------- */
+  applyTheme();
+  fetch("data/hexagrams.json").then(r => r.json()).then(j => { TEXT = j; render(); }).catch(() => { render(); toast("Couldn’t load the hexagram texts. Check your connection once, then it works offline."); });
+  setTimeout(() => showInstall(false), 1800);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+  </script>
+</body>
+</html>
