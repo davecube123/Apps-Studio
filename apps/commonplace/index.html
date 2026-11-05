@@ -295,7 +295,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "10", APP_DATE = "4 Nov 2026";
+  const APP_VERSION = "11", APP_DATE = "5 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -1230,8 +1230,21 @@
     const back = document.createElement("div"); back.className = "sheet-back" + (opts.top ? " top" : ""); back.innerHTML = `<div class="sheet">${opts.top ? "" : `<div class="grab"></div>`}${html}</div>`;
     back.addEventListener("click", e => { if (e.target === back) closeSheet(); }); document.body.appendChild(back);
     if (!sheetEntry) { history.pushState({ sheet: 1 }, ""); sheetEntry = true; }
-    return back;
+    fitSheet(); return back;
   }
+  /* Keep a sheet above the on-screen keyboard. Android Chrome lays the keyboard over the page instead of
+     resizing it (resizing would also re-lay out the book's pages), so lift the sheet by the keyboard's
+     height, measured from the visual viewport, and keep the focused field in view. */
+  function fitSheet() {
+    const b = document.querySelector(".sheet-back"), vv = window.visualViewport; if (!b || !vv) return;
+    const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)), sh = b.querySelector(".sheet");
+    if (b.classList.contains("top")) { sh.style.maxHeight = Math.round(vv.height * .88) + "px"; return; }
+    b.style.bottom = kb + "px"; sh.style.maxHeight = Math.round(kb ? vv.height - 12 : vv.height * .9) + "px";
+    const f = document.activeElement; if (kb && f?.closest?.(".sheet")) f.scrollIntoView({ block: "nearest" });
+  }
+  window.visualViewport?.addEventListener("resize", fitSheet);
+  window.visualViewport?.addEventListener("scroll", fitSheet);
+  document.addEventListener("focusin", e => { if (e.target.closest?.(".sheet")) setTimeout(fitSheet, 320); });
   function closeSheet(then) {
     document.querySelector(".sheet-back")?.remove();
     if (sheetEntry) { sheetEntry = false; afterBack = then || null; history.back(); } else then?.();
