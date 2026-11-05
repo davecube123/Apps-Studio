@@ -5,7 +5,7 @@ The I Ching in plain modern language, as an installable, offline PWA.
 - **Cast with yarrow stalks:** the classical procedure (50 stalks, one set aside, three divisions per line, six lines from the bottom up), with true yarrow odds. Your tap chooses roughly where the bundle splits.
 - **Read the answer:** your hexagram, the one it becomes, and which lines to read (Zhu Xi's rules), with the Judgment, the Image and the moving lines. Readings and notes are kept on the device.
 - **Line order:** line texts are listed in the traditional order, line 1 (the beginning, bottom of the figure) to line 6.
-- **Quotes:** select any words in a hexagram or a reading and tap Save quote. Quotes collect in the Quotes tab; tapping one returns to the page and passage it came from.
+- **Notebook:** select any words in a hexagram or a reading, then tap **Quote** to keep them, or **Note** to write about them (thoughts, questions, later answers; you can add to a note over time and each addition is dated). Everything collects in the Notebook tab (All · Quotes · Notes) and leads back to its passage. Passages with notes get a small margin mark, and each hexagram page lists your notes on it.
 - **Study any hexagram:** browse all 64 in order or by trigram, search by name, number or theme, and read each in full: essence, Judgment, Image, all six lines, what it means for work, people and inner life, and a question to sit with.
 
 ## The text

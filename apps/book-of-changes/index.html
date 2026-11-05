@@ -193,11 +193,25 @@
     .prose { font: 17px/1.65 var(--serif); color: var(--ink2); } .prose h3 { color: var(--ink); margin: 22px 0 6px; }
     .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
     .toggle input { width: 20px; height: 20px; accent-color: var(--seal); }
-    #qbtn { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(env(safe-area-inset-bottom) + 96px); z-index: 40;
-            background: var(--ink); color: var(--paper); border: 0; border-radius: 999px; padding: 12px 20px; font: 600 15px var(--sans); box-shadow: var(--e3);
-            display: none; align-items: center; gap: 8px; cursor: pointer; animation: rise .25s var(--spring) both; }
-    #qbtn.on { display: flex; }
-    #qbtn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+    #qbar { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(env(safe-area-inset-bottom) + 96px); z-index: 40;
+            background: var(--ink); border-radius: 999px; padding: 5px; box-shadow: var(--e3); display: none; gap: 4px; animation: rise .25s var(--spring) both; }
+    #qbar.on { display: flex; }
+    #qbar button { border: 0; background: transparent; color: var(--paper); border-radius: 999px; padding: 10px 18px; font: 600 15px var(--sans); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    #qbar button + button { background: color-mix(in srgb, var(--paper) 14%, transparent); }
+    #qbar svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    [data-q] { position: relative; }
+    .nmark { position: absolute; left: -20px; top: 0; width: 20px; height: 28px; border: 0; padding: 0; background: none; cursor: pointer; color: var(--gold); }
+    .nmark::before { content: ""; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 3.5px; border-radius: 3px; background: currentColor; }
+    .nmark b { position: absolute; left: 0; top: -4px; font: 700 9px var(--sans); color: var(--gold); }
+    .lcard > .nmark { left: -20px; top: 12px; } .sec > .nmark { top: 22px; }
+    .nentry { border-left: 2px solid var(--line2); padding: 2px 0 2px 12px; margin-top: 10px; }
+    .nentry .nd { font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .nentry .nt { font: 16.5px/1.55 var(--serif); color: var(--ink2); white-space: pre-wrap; }
+    .nentry textarea { font-size: 17px; padding: 2px 0; }
+    .nentry textarea:focus-visible, .sheet textarea:focus-visible { outline: 0; }
+    .phrase { font: italic 400 19px/1.5 var(--serif); color: var(--ink); border-left: 2px solid var(--gold); padding-left: 12px; margin: 6px 0 4px; text-wrap: pretty; }
+    .sheet { max-height: 88vh; overflow-y: auto; }
+    .tagk { font: 700 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
     .qcard { display: block; text-decoration: none; padding: 16px 18px; cursor: pointer; }
     .qcard + .qcard { margin-top: 10px; }
     .qcard .qt { font: italic 400 19px/1.5 var(--serif); color: var(--ink); text-wrap: pretty; }
@@ -209,17 +223,19 @@
 </head>
 <body>
   <main id="main"></main>
-  <button id="qbtn" type="button" aria-label="Save the selected words as a quote"><svg viewBox="0 0 24 24"><path d="M10 7H6.5A1.5 1.5 0 0 0 5 8.5V12h5zM10 12c0 3-1.5 5-4 6M19 7h-3.5A1.5 1.5 0 0 0 14 8.5V12h5zM19 12c0 3-1.5 5-4 6"/></svg>Save quote</button>
+  <div id="qbar" role="toolbar" aria-label="Save the selected words">
+    <button type="button" data-save="quote"><svg viewBox="0 0 24 24"><path d="M10 7H6.5A1.5 1.5 0 0 0 5 8.5V12h5zM10 12c0 3-1.5 5-4 6M19 7h-3.5A1.5 1.5 0 0 0 14 8.5V12h5zM19 12c0 3-1.5 5-4 6"/></svg>Quote</button>
+    <button type="button" data-save="note"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>Note</button></div>
   <nav class="tabs" id="tabs">
     <a href="#/" data-tab="cast"><svg viewBox="0 0 24 24"><path d="M5 20L19 4M8 20L20 7M4 17L16 3"/></svg>Cast</a>
     <a href="#/list" data-tab="list"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h7M13 10h7M4 14h16M4 18h7M13 18h7"/></svg>Hexagrams</a>
     <a href="#/readings" data-tab="readings"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Readings</a>
-    <a href="#/quotes" data-tab="quotes"><svg viewBox="0 0 24 24"><path d="M10 7H6.5A1.5 1.5 0 0 0 5 8.5V12h5zM10 12c0 3-1.5 5-4 6M19 7h-3.5A1.5 1.5 0 0 0 14 8.5V12h5zM19 12c0 3-1.5 5-4 6"/></svg>Quotes</a>
+    <a href="#/notebook" data-tab="notebook"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M6 3v18M9.5 8h5M9.5 12h5"/></svg>Notebook</a>
     <a href="#/about" data-tab="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>About</a>
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "3", APP_DATE = "4 Nov 2026";
+  const APP_VERSION = "4", APP_DATE = "4 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -409,12 +425,13 @@
     else if (h.startsWith("#/list")) { html = viewList(); tab = "list"; }
     else if (h.startsWith("#/readings")) { html = viewReadings(); tab = "readings"; }
     else if (h.startsWith("#/about")) { html = viewAbout(); tab = "about"; }
-    else if (h.startsWith("#/quotes")) { html = viewQuotes(); tab = "quotes"; }
+    else if (h.startsWith("#/notebook") || h.startsWith("#/quotes")) { html = viewNotebook(); tab = "notebook"; }
     else { html = viewCast(); tab = "cast"; }
     if (html == null) return;
     const nav = h !== lastHash; $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
     if (tab === "cast") { mountYarrow(); refreshCast(); }
+    markNotes();
     if (nav) scrollTo(0, 0); lastHash = h;
     if (goQuote) { const q = goQuote; goQuote = null; requestAnimationFrame(() => scrollToQuote(q)); }
     document.title = h.startsWith("#/h/") ? `${tx(+h.split("/")[2]).name} · Book of Changes` : "Book of Changes";
@@ -479,7 +496,9 @@
   function viewHex(n) {
     if (!(n >= 1 && n <= 64)) { location.hash = "#/list"; return null; }
     const p = n > 1 ? n - 1 : 64, q = n < 64 ? n + 1 : 1;
+    const mine = db.quotes.filter(x => x.n === n && x.kind === "note").sort((a, b) => PART_ORDER(a.part) - PART_ORDER(b.part) || a.at - b.at);
     return `<a class="back" data-act="back">← Back</a>${hexHead(n)}${hexBody(n)}
+      ${mine.length ? `<div class="sec"><div class="eyebrow">Your notes on this hexagram</div>${mine.map(x => entryCard(x, { here: true })).join("")}</div>` : ""}
       <div class="pager"><a href="#/h/${p}"><div class="eyebrow">← ${p}</div><div class="pname">${esc(tx(p).name)}</div></a><a href="#/h/${q}"><div class="eyebrow">${q} →</div><div class="pname">${esc(tx(q).name)}</div></a></div>`;
   }
 
@@ -557,35 +576,116 @@
       <p class="small muted center" style="margin-top:30px">Book of Changes · version ${APP_VERSION} · ${APP_DATE}</p>`;
   }
 
-  /* ---------- Quotes ----------
-     Select any words in a hexagram or a reading and tap Save quote. Each quote remembers the page
-     and the passage it came from (data-q="<hexagram>:<part>"), so tapping it returns you there. */
+  /* ---------- Quotes and notes ----------
+     Select any words in a hexagram or a reading, then keep them as a Quote (the words alone) or a
+     Note (the words plus your own writing, which you can add to over time; each addition is dated).
+     Every entry remembers its page and passage (data-q="<hexagram>:<part>"), so it leads back there.
+     Passages with notes get a small mark in the margin; quotes stay unmarked. */
   const PART = { j: "Judgment", i: "Image", e: "Essence", a: "All lines moving", f: "In your life", q: "To sit with" };
   const partName = k => k[0] === "l" ? `Line ${+k.slice(1) + 1}` : PART[k] || "";
+  const PART_ORDER = k => ({ e: 0, j: 1, i: 2, a: 9, f: 10, q: 11 })[k] ?? 3 + +k.slice(1);
+  db.quotes.forEach(x => { x.kind ||= "quote"; x.entries ||= []; }); /* quotes saved before version 4 */
   let pendingQ = null, goQuote = null, qHideT;
   function selQuote() {
     const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
     const text = sel.toString().replace(/\s+/g, " ").trim(); if (text.length < 2) return null;
     const node = sel.getRangeAt(0).startContainer, el = (node.nodeType === 1 ? node : node.parentElement)?.closest("[data-q]");
-    if (!el || !$("#main").contains(el)) return null;
+    if (!el || !$("#main").contains(el) || el.closest(".nmark")) return null;
     const [n, part] = el.dataset.q.split(":");
     return { text: text.slice(0, 1200), n: +n, part, hash: location.hash || "#/" };
   }
   document.addEventListener("selectionchange", () => {
-    const q = selQuote(), b = $("#qbtn");
-    if (q) { clearTimeout(qHideT); pendingQ = q; b.classList.add("on"); }
-    else { clearTimeout(qHideT); qHideT = setTimeout(() => { pendingQ = null; b.classList.remove("on"); }, 450); } /* time for the tap on the button to land */
+    if ($(".sheet-back")) return;
+    const q = selQuote(), b = $("#qbar");
+    clearTimeout(qHideT);
+    if (q) { pendingQ = q; b.classList.add("on"); }
+    else qHideT = setTimeout(() => { pendingQ = null; b.classList.remove("on"); }, 450); /* time for the tap on the bar to land */
   });
-  $("#qbtn").addEventListener("pointerdown", e => e.preventDefault()); /* keep the selection while tapping */
-  $("#qbtn").addEventListener("click", () => {
-    const q = pendingQ || selQuote(); if (!q) return;
-    if (db.quotes.some(x => x.text === q.text && x.hash === q.hash)) { toast("Already in your quotes"); }
-    else { db.quotes.push({ id: uid(), at: Date.now(), ...q }); save(); haptic([8, 30, 12]); toast("Saved to Quotes"); }
-    getSelection()?.removeAllRanges(); pendingQ = null; $("#qbtn").classList.remove("on");
+  $("#qbar").addEventListener("pointerdown", e => e.preventDefault()); /* keep the selection while tapping */
+  $("#qbar").addEventListener("click", e => {
+    const kind = e.target.closest("[data-save]")?.dataset.save, q = pendingQ || selQuote(); if (!kind || !q) return;
+    getSelection()?.removeAllRanges(); pendingQ = null; $("#qbar").classList.remove("on");
+    const same = db.quotes.find(x => x.text === q.text && x.n === q.n && x.part === q.part);
+    if (kind === "quote") {
+      if (same) { toast(same.kind === "note" ? "Already in your notes" : "Already in your quotes"); return; }
+      db.quotes.push({ id: uid(), at: Date.now(), kind: "quote", entries: [], ...q }); save(); haptic([8, 30, 12]); toast("Saved to your Notebook");
+    } else noteSheet(same ? same.id : null, q);
   });
+
+  const entryKind = x => x.kind === "note" ? "Note" : "Quote";
   function quoteSource(q) {
     const r = q.hash.startsWith("#/r/") && db.readings.find(x => x.id === q.hash.split("/")[2]);
     return `${q.n} ${esc(tx(q.n).name)} · ${partName(q.part)}${r ? ` · from your reading${r.q ? ` “${esc(r.q.length > 40 ? r.q.slice(0, 40) + "…" : r.q)}”` : ""}` : ""}`;
+  }
+  function entryCard(x, { here = false } = {}) {
+    const notes = x.entries.map(en => `<div class="nentry"><div class="nd">${dstr(en.at)}</div><div class="nt">${esc(en.text)}</div></div>`).join("");
+    return `<div class="card flat qcard" data-act="${here || x.kind === "note" ? "editnote" : "openquote"}" data-id="${x.id}">
+      <div class="tagk">${here ? partName(x.part) : entryKind(x)}</div><div class="qt" style="margin-top:4px">“${esc(x.text)}”</div>${notes}
+      <div class="qs"><span class="grow">${here ? dstr(x.at) : `${quoteSource(x)} · ${dstr(x.at)}`}</span>
+        ${here ? "" : x.kind === "note" ? `<button class="btn sm ghost" data-act="openquote" data-id="${x.id}" style="color:var(--seal);padding:4px 8px">Go to passage</button>`
+          : `<button class="btn sm ghost" data-act="editnote" data-id="${x.id}" style="padding:4px 8px">Add a note</button><button class="del" data-act="delquote" data-id="${x.id}" aria-label="Delete this quote">×</button>`}</div></div>`;
+  }
+  let nbFilter = "all";
+  function viewNotebook() {
+    const all = [...db.quotes].sort((a, b) => Math.max(b.at, ...b.entries.map(e => e.at)) - Math.max(a.at, ...a.entries.map(e => e.at)));
+    const list = all.filter(x => nbFilter === "all" || x.kind === nbFilter), nq = all.filter(x => x.kind === "quote").length, nn = all.length - nq;
+    return `<div class="eyebrow">Your collection</div><h1 style="margin-top:6px">Notebook</h1>
+      ${all.length ? `<div class="seg" style="margin-top:14px">${[["all", `All · ${all.length}`], ["quote", `Quotes · ${nq}`], ["note", `Notes · ${nn}`]].map(([k, l]) => `<button class="${nbFilter === k ? "on" : ""}" data-act="nbfilter" data-v="${k}">${l}</button>`).join("")}</div>
+        <p class="small muted" style="margin:10px 2px 14px">Tap a quote to return to where you found it. Tap a note to read or add to it.</p>
+        ${list.map(x => entryCard(x)).join("") || `<p class="empty">Nothing here yet.</p>`}`
+      : `<div class="empty"><p class="serif" style="font-size:20px;color:var(--ink2)">Your notebook is empty.</p>
+          <p>On any hexagram or reading, press and hold a word and drag to select a phrase. Then tap <b>Quote</b> to keep the words, or <b>Note</b> to write about them: a thought, a question to sit with, an answer later.</p>
+          <a class="btn" href="#/list" style="margin-top:10px">Browse the hexagrams</a></div>`}`;
+  }
+
+  /* The note sheet: the phrase, what you've written so far (editable), and room to add more. */
+  let sheetOpen = false;
+  function noteSheet(id, fresh) {
+    const x = id ? db.quotes.find(q => q.id === id) : null, src = x || fresh; if (!src) return;
+    closeSheet(true);
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Note"><div class="grab"></div>
+      <div class="small muted">${quoteSource(src)}</div>
+      <div class="phrase">“${esc(src.text)}”</div>
+      ${(x?.entries || []).map((en, k) => `<div class="nentry"><div class="nd">${dstr(en.at)}</div><textarea rows="2" data-k="${k}" class="oldnote">${esc(en.text)}</textarea></div>`).join("")}
+      <div class="nentry" style="border-color:var(--seal)"><div class="nd">${x?.entries.length ? "Add to this note" : "Your note"} · ${dstr(Date.now())}</div>
+        <textarea id="newnote" rows="4" placeholder="A thought, a question to sit with, what it means in my life…"></textarea></div>
+      <div class="row" style="margin-top:16px;gap:10px"><button class="btn grow" data-act="sheetclose">Cancel</button><button class="btn seal grow" data-act="savenote" data-id="${x?.id || ""}">Save</button></div>
+      <div class="row between" style="margin-top:8px">${x ? `<button class="btn ghost sm" data-act="gopassage" data-id="${x.id}">Go to passage</button><button class="btn ghost sm" data-act="delentry" data-id="${x.id}" style="color:var(--seal)">Delete</button>` : ""}</div></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeSheet(); });
+    back._fresh = fresh || null;
+    document.body.appendChild(back); sheetOpen = true; history.pushState({ sheet: 1 }, "");
+    const ta = back.querySelector("#newnote"); ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; });
+    back.querySelectorAll("textarea.oldnote").forEach(t => { t.style.height = t.scrollHeight + "px"; });
+    setTimeout(() => ta.focus({ preventScroll: true }), 350);
+  }
+  function closeSheet(silent) {
+    const b = $(".sheet-back"); if (!b) return;
+    b.remove(); if (sheetOpen) { sheetOpen = false; if (!silent) history.back(); else history.replaceState(null, ""); }
+  }
+  addEventListener("popstate", () => { if (sheetOpen) { sheetOpen = false; $(".sheet-back")?.remove(); } });
+  function saveNote(id) {
+    const back = $(".sheet-back"), add = $("#newnote").value.trim(); let x = id && db.quotes.find(q => q.id === id);
+    if (x) {
+      back.querySelectorAll("textarea.oldnote").forEach(t => { const en = x.entries[+t.dataset.k]; if (en) en.text = t.value.trim(); });
+      x.entries = x.entries.filter(en => en.text);
+      if (add) x.entries.push({ at: Date.now(), text: add });
+      x.kind = x.entries.length ? "note" : "quote";
+    } else {
+      if (!add) { toast("Write something first, or tap Cancel"); return; }
+      x = { id: uid(), at: Date.now(), kind: "note", ...back._fresh, entries: [{ at: Date.now(), text: add }] }; db.quotes.push(x);
+    }
+    save(); closeSheet(); haptic([8, 30, 12]); toast("Note saved"); setTimeout(render, 60);
+  }
+  /* Margin marks beside passages you've written notes on. */
+  function markNotes() {
+    const notes = db.quotes.filter(x => x.kind === "note"); if (!notes.length) return;
+    document.querySelectorAll("#main [data-q]").forEach(el => {
+      const [n, part] = el.dataset.q.split(":"), mine = notes.filter(x => x.n === +n && x.part === part); if (!mine.length) return;
+      const b = document.createElement("button"); b.className = "nmark"; b.dataset.act = "editnote"; b.dataset.id = mine[mine.length - 1].id;
+      b.setAttribute("aria-label", `Your note${mine.length > 1 ? `s (${mine.length})` : ""} on this passage`); if (mine.length > 1) b.innerHTML = `<b>${mine.length}</b>`;
+      el.prepend(b);
+    });
   }
   function openQuote(id) {
     const q = db.quotes.find(x => x.id === id); if (!q) return;
@@ -595,19 +695,9 @@
     if ((location.hash || "#/") === to) scrollToQuote(q); else { goQuote = q; location.hash = to; }
   }
   function scrollToQuote(q) {
-    const el = document.querySelector(`[data-q="${q.n}:${q.part}"]`); if (!el) return;
+    const el = document.querySelector(`#main .sec [data-q="${q.n}:${q.part}"], #main [data-q="${q.n}:${q.part}"]`); if (!el) return;
     el.classList?.remove("fold");
     const y = el.getBoundingClientRect().top + scrollY - 24; scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-  }
-  function viewQuotes() {
-    const qs = [...db.quotes].sort((a, b) => b.at - a.at);
-    return `<div class="eyebrow">Your collection</div><h1 style="margin-top:6px">Quotes</h1>
-      ${qs.length ? `<p class="small muted" style="margin:8px 2px 16px">Tap a quote to return to where you found it.</p>
-        ${qs.map(q => `<div class="card flat qcard" data-act="openquote" data-id="${q.id}"><div class="qt">“${esc(q.text)}”</div>
-          <div class="qs"><span class="grow">${quoteSource(q)} · ${dstr(q.at)}</span><button class="del" data-act="delquote" data-id="${q.id}" aria-label="Delete this quote">×</button></div></div>`).join("")}`
-      : `<div class="empty"><p class="serif" style="font-size:20px;color:var(--ink2)">No quotes yet.</p>
-          <p>On any hexagram or reading, press and hold on a word, drag to select the words you want, then tap <b>Save quote</b>.</p>
-          <a class="btn" href="#/list" style="margin-top:10px">Browse the hexagrams</a></div>`}`;
   }
 
   /* ---------- Install prompt ---------- */
@@ -653,8 +743,14 @@
     else if (a === "restart") { if (castBusy) return; const dr = db.draft; if (dr.cast.line > 0 && dr.cast.line < 6 && !confirm("Start the cast over?")) return; db.draft = { ...freshDraft(), q: dr.q }; save(); render(); }
     else if (a === "slow") { db.settings.slow = el.checked; save(); }
     else if (a === "unfold") el.classList.remove("fold");
-    else if (a === "delquote") { e.stopPropagation(); if (!confirm("Delete this quote?")) return; db.quotes = db.quotes.filter(x => x.id !== d.id); save(); render(); }
     else if (a === "openquote") openQuote(d.id);
+    else if (a === "delquote") { if (!confirm("Delete this quote?")) return; db.quotes = db.quotes.filter(x => x.id !== d.id); save(); render(); }
+    else if (a === "editnote") noteSheet(d.id);
+    else if (a === "savenote") saveNote(d.id);
+    else if (a === "sheetclose") closeSheet();
+    else if (a === "gopassage") { const id = d.id; closeSheet(); setTimeout(() => openQuote(id), 150); }
+    else if (a === "delentry") { if (!confirm("Delete this note and its phrase from your notebook?")) return; db.quotes = db.quotes.filter(x => x.id !== d.id); save(); closeSheet(); setTimeout(render, 60); }
+    else if (a === "nbfilter") { nbFilter = d.v; render(); }
     else if (a === "lmode") { listMode = d.v; render(); }
     else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/list"; }
     else if (a === "delreading") { if (!confirm("Delete this reading?")) return; db.readings = db.readings.filter(x => x.id !== d.id); save(); location.hash = "#/readings"; }
