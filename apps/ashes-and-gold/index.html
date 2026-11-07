@@ -25,7 +25,7 @@
     #title h1 em { color: var(--gold); font-style: italic; }
     #title p { font: 15px/1.5 var(--serif); font-style: italic; color: var(--muted); margin: 14px 0 0; max-width: 300px; }
     .begin { margin-top: 42px; border: 1px solid rgba(239,230,214,.35); background: none; color: var(--ink); border-radius: 999px; padding: 13px 34px; font: 500 15px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
-    .chapters { display: flex; gap: 10px; margin-top: 26px; }
+    .chapters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; max-width: 300px; }
     .chapters button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(239,230,214,.25); background: none; color: var(--muted); font: 15px var(--serif); cursor: pointer; }
     .chapters button.open { color: var(--ink); border-color: rgba(239,230,214,.55); }
     .chapters button:disabled { opacity: .3; }
@@ -33,6 +33,7 @@
     #card { pointer-events: none; }
     #card .n { font: 400 15px var(--serif); letter-spacing: .4em; color: var(--gold); }
     #card .t { font: italic 400 34px/1.2 var(--serif); margin-top: 12px; }
+    #end em { font-style: italic; }
     #end { background: #16130f; }
     #end p { font: italic 17px/1.6 var(--serif); color: var(--muted); max-width: 300px; }
     #mute { position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.18);
@@ -52,13 +53,13 @@
     <p>A man’s journey, from boyhood to elderhood, told without words.</p>
     <button class="begin" id="begin">Begin</button>
     <div class="chapters" id="chapters"></div>
-    <div class="hp">Best with sound · chapters I–III of IX</div>
+    <div class="hp">Best with sound · about 30 minutes</div>
     <div class="ver" id="ver"></div>
   </div>
   <div id="card" class="overlay hide"><div class="n" id="cardn"></div><div class="t" id="cardt"></div></div>
   <div id="end" class="overlay hide">
-    <div class="n" style="font:400 15px var(--serif);letter-spacing:.4em;color:var(--gold)">TO BE CONTINUED</div>
-    <p style="margin-top:18px">The ashes. The golden spring. The four trials. The return. The blessing.</p>
+    <div style="font:400 40px/1.1 var(--serif)">Ashes<br>and <em style="color:var(--gold)">Gold</em></div>
+    <p style="margin-top:18px">The end.</p>
     <button class="begin" id="again">Back to the beginning</button>
   </div>
   <script>
@@ -66,7 +67,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "1";
+  const APP_VERSION = "2";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -114,7 +115,8 @@
   function person(x, footY, h, color, o = {}) {
     const ph = o.phase || 0, swing = o.walk ? Math.sin(ph) * .38 : 0, sit = o.sit || 0;
     const headR = h * .105, legH = h * .44 * (1 - sit * .55), hipY = footY - legH, bodyH = h * .4, bw = h * (o.coat ? .3 : .24);
-    ctx.save(); ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineCap = "round";
+    const x0 = x; ctx.save(); if (o.flip) { ctx.translate(2 * x, 0); ctx.scale(-1, 1); }
+    ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineCap = "round";
     /* legs */
     ctx.lineWidth = h * .085;
     if (sit) { ctx.beginPath(); ctx.moveTo(x - bw * .2, hipY); ctx.lineTo(x + h * .2 * sit, hipY + h * .02); ctx.lineTo(x + h * .22 * sit, footY); ctx.moveTo(x + bw * .2, hipY); ctx.lineTo(x + h * .24 * sit, hipY); ctx.lineTo(x + h * .26 * sit, footY); ctx.stroke(); }
@@ -134,7 +136,7 @@
     /* head */
     ctx.beginPath(); ctx.arc(x + (o.tilt || 0) * headR * .5, top - headR * 1.08, headR, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    return { headX: x, headY: top - headR * 1.08, handX: hand[0], handY: hand[1] };
+    return { headX: x0, headY: top - headR * 1.08, handX: o.flip ? 2 * x0 - hand[0] : hand[0], handY: hand[1], chestY: top + bodyH * .35 };
   }
   function glowDot(x, y, r, color, a = 1) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, color.replace("A", a)); g.addColorStop(1, color.replace("A", 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
   /* a soft pulsing hint, never words */
@@ -358,23 +360,398 @@
     },
   };
 
+  /* ---------- Shared for the later chapters ---------- */
+  /* drain colour from whatever is drawn: 1 = all grey */
+  function desat(amount) { if (amount <= .001) return; ctx.save(); ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = clamp(amount, 0, 1); ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+  /* a held tone whose pitch follows a gesture */
+  function voice(type = "triangle") {
+    if (!AC) return { set() {}, stop() {} };
+    const o = AC.createOscillator(), g = AC.createGain(), o2 = AC.createOscillator(), g2 = AC.createGain(); o.type = type; o2.type = "sine"; g.gain.value = 0; g2.gain.value = 0;
+    o.connect(g).connect(master); o2.connect(g2).connect(master); o.start(); o2.start();
+    return { set(f, v) { const t = AC.currentTime; o.frequency.setTargetAtTime(f, t, .04); o2.frequency.setTargetAtTime(f * 2, t, .04); g.gain.setTargetAtTime(v, t, .09); g2.gain.setTargetAtTime(v * .2, t, .09); },
+             stop() { const t = AC.currentTime; g.gain.setTargetAtTime(0, t, .12); g2.gain.setTargetAtTime(0, t, .12); setTimeout(() => { try { o.stop(); o2.stop(); } catch (e) {} }, 900); } };
+  }
+  const PENTA = [N.D4, N.F4, N.G4, N.A4, N.C5, N.D5, 1174.66];
+  const degHz = d => { const i = clamp(Math.floor(d), 0, 5), f = d - i; return PENTA[i] * Math.pow(PENTA[i + 1] / PENTA[i], f); };
+
+  /* ---------- Chapter IV · The Ashes ----------
+     Years in the grey. Sweep the ashes; they fall again. Nothing rewards you, until an ember does. */
+  const ch4 = {
+    num: "IV", name: "The Ashes",
+    layout() { this.floor = H * .74; this.pileX = W * .46; this.manX = W * .78; },
+    start() { this.t = 0; this.layout(); this.pile = 1; this.cycle = 0; this.cleared = -1; this.dust = []; this.fall = []; this.col = 0; this.broomX = this.pileX + 60; this.dir = 0; this.acc = 0;
+      this.phase = "sweep"; this.ember = 0; this.hold = 0; this.sit = 0; this.done = false; ambience(.02, 260, .02, 61.7); },
+    down(x, y) {
+      if (this.done) return next();
+      if (this.phase === "ember" && Math.hypot(x - this.pileX, y - (this.floor - 8)) < 70) { this.holding = true; return; }
+      if (this.phase === "sweep") { this.stroke = true; this.lx = x; this.acc = 0; this.dir = 0; }
+    },
+    move(x) {
+      if (!this.stroke || this.phase !== "sweep") return;
+      const dx = x - this.lx; this.lx = x; this.broomX = clamp(x, this.pileX - 120, this.pileX + 140);
+      const d = Math.sign(dx); if (d && d !== this.dir) { this.dir = d; this.acc = 0; }
+      this.acc += Math.abs(dx);
+      if (this.acc > 70 && this.pile > 0 && this.cleared < 0) { this.acc = 0; this.sweepOnce(); }
+    },
+    up() { this.stroke = false; this.holding = false; },
+    sweepOnce() {
+      this.pile = Math.max(0, this.pile - .34); haptic(6);
+      note([N.D3, N.F3, N.A3][Math.floor(Math.random() * 3)], { vol: .05, dur: 1.2 });
+      for (let i = 0; i < 14; i++) this.dust.push({ x: this.pileX + (Math.random() - .5) * 90, y: this.floor - Math.random() * 20, vx: (Math.random() - .5) * 60 + this.dir * 40, vy: -20 - Math.random() * 40, a: .8 });
+      if (this.pile <= 0) { this.cleared = this.t; this.cycle++; this.col = Math.min(.25, this.cycle * .06); }
+    },
+    update(dt) {
+      this.t += dt;
+      this.dust.forEach(d => { d.x += d.vx * dt; d.y += d.vy * dt; d.vy += 12 * dt; d.a -= dt * .5; }); this.dust = this.dust.filter(d => d.a > 0);
+      if (this.cleared >= 0 && this.phase === "sweep") {
+        const c = this.t - this.cleared;
+        if (this.cycle >= 4) { if (c > 1.5) { this.phase = "ember"; note(N.A4, { vol: .06, dur: 3 }); } }
+        else if (c > 1.4) { /* another season's ash falls */
+          if (Math.random() < dt * 30) this.fall.push({ x: this.pileX + (Math.random() - .5) * 110, y: -10, v: 60 + Math.random() * 60 });
+          this.pile = Math.min(1, this.pile + dt * .4); if (this.pile >= 1) this.cleared = -1; }
+      }
+      this.fall.forEach(f => f.y += f.v * dt); this.fall = this.fall.filter(f => f.y < this.floor);
+      if (this.phase === "ember") {
+        if (this.holding) { this.hold = Math.min(1, this.hold + dt / 2.6); if (Math.random() < dt * 3) note(PENTA[Math.floor(Math.random() * 5)], { vol: .035, dur: 2 }); }
+        this.ember = Math.min(1, this.ember + dt * .6);
+        if (this.hold >= 1) { this.phase = "fire"; haptic([10, 40, 20]); note(N.D4, { vol: .09, dur: 5 }); note(N.A4, { vol: .07, dur: 5, delay: .2 }); note(N.F4, { vol: .06, dur: 5, delay: .4 }); ambience(.015, 300, .02, 73.4); }
+      }
+      if (this.phase === "fire") { this.col = Math.min(1, this.col + dt * .3); this.sit = Math.min(1, this.sit + dt * .5); if (this.col >= 1 && !this.done) this.done = true; }
+    },
+    draw() {
+      const t = this.t, f = this.floor, warm = this.phase === "fire" ? this.col : 0;
+      const wall = ctx.createLinearGradient(0, 0, 0, f); wall.addColorStop(0, "#2b2622"); wall.addColorStop(1, "#4a3f37"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, f);
+      ctx.fillStyle = "#3a332d"; ctx.fillRect(0, f, W, H - f);
+      /* a high window: the seasons pass in its light */
+      const day = (Math.sin(this.cycle * 1.7 + t * .05) + 1) / 2;
+      ctx.fillStyle = `rgb(${lerp(40, 160, day) | 0},${lerp(52, 170, day) | 0},${lerp(70, 180, day) | 0})`; ctx.fillRect(W * .62, H * .14, W * .2, H * .16);
+      ctx.strokeStyle = "#2a231e"; ctx.lineWidth = 5; ctx.strokeRect(W * .62, H * .14, W * .2, H * .16);
+      /* the hearth */
+      ctx.fillStyle = "#231d19"; ctx.beginPath(); ctx.moveTo(W * .06, f); ctx.lineTo(W * .06, f - H * .2); ctx.arc(W * .2, f - H * .2, W * .14, Math.PI, 0); ctx.lineTo(W * .34, f); ctx.fill();
+      if (warm) glowDot(this.pileX, f - 20, W * (.3 + warm * .5), "rgba(255,170,80,A)", .45 * warm);
+      /* the ash pile */
+      const ph = 34 * this.pile; ctx.fillStyle = "#8a847d"; ctx.beginPath(); ctx.moveTo(this.pileX - 80, f);
+      ctx.quadraticCurveTo(this.pileX - 30, f - ph * 1.3, this.pileX, f - ph); ctx.quadraticCurveTo(this.pileX + 30, f - ph * 1.3, this.pileX + 80, f); ctx.fill();
+      ctx.fillStyle = "#a39d95"; this.fall.forEach(p => ctx.fillRect(p.x, p.y, 2.5, 2.5));
+      this.dust.forEach(d => { ctx.fillStyle = `rgba(170,164,156,${d.a})`; ctx.fillRect(d.x, d.y, 3, 3); });
+      /* the ember, then the small fire */
+      if (this.phase !== "sweep") { const e = this.ember, h = this.hold, fl = this.phase === "fire" ? 1 : h;
+        glowDot(this.pileX, f - 6, 26 + fl * 60, "rgba(255,140,60,A)", .5 * e + .3 * fl);
+        ctx.fillStyle = `rgba(255,${120 + fl * 80},70,${e})`; ctx.beginPath(); ctx.arc(this.pileX, f - 5, 4 + fl * 2, 0, Math.PI * 2); ctx.fill();
+        if (fl > .2) { const fh = 10 + fl * 34 + Math.sin(t * 12) * 3; ctx.fillStyle = `rgba(255,${170 + fl * 50},90,${fl})`;
+          ctx.beginPath(); ctx.moveTo(this.pileX - 12 * fl, f - 4); ctx.quadraticCurveTo(this.pileX - 10, f - fh * .6, this.pileX + Math.sin(t * 7) * 3, f - fh); ctx.quadraticCurveTo(this.pileX + 10, f - fh * .6, this.pileX + 12 * fl, f - 4); ctx.fill(); }
+        if (this.phase === "ember" && !this.holding && this.hold < .05) hint(this.pileX, f - 8, t); }
+      /* the young man with his broom; at the end he sits by the fire */
+      const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.pileX + 70, this.sit);
+      const m = person(mx, f, mh, "#2c2724", { sit: this.sit, reach: this.sit ? 0 : .35, flip: true, tilt: this.sit ? -.5 : 0 });
+      if (!this.sit) { ctx.strokeStyle = "#6b5a46"; ctx.lineWidth = 3.5; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(m.handX, m.handY); ctx.lineTo(this.broomX, f - 3); ctx.stroke();
+        ctx.strokeStyle = "#8c7a5c"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(this.broomX - 12, f - 2); ctx.lineTo(this.broomX + 12, f - 2); ctx.stroke(); }
+      if (this.phase === "sweep" && !this.stroke && this.cycle === 0 && this.pile === 1 && t > 1.5) { const hx = this.pileX + Math.sin(t * 2) * 60; hint(hx, f - 40, t); }
+      desat(1 - this.col);
+      if (this.done) hint(W / 2, H * .88, t);
+    },
+  };
+
+  /* ---------- Chapter V · The Golden Spring ----------
+     Set to guard the wild man's spring, he touches the water. The wound turns to gold. */
+  const ch5 = {
+    num: "V", name: "The Golden Spring",
+    layout() { this.px = W * .6; this.py = H * .79; this.pw = W * .6; this.phh = H * .065; this.manX = W * .15; this.floor = H * .74; },
+    start() { this.t = 0; this.layout(); this.gold = 0; this.rip = []; this.lastRip = 0; this.done = false; this.blink = 0; this.motes = [];
+      ambience(.025, 1400, .015, 82.4); },
+    inPool(x, y) { return ((x - this.px) / (this.pw / 2)) ** 2 + ((y - this.py) / (this.phh * 1.3)) ** 2 < 1.4; },
+    down(x, y) { if (this.done) return next(); if (this.gold < 1 && this.inPool(x, y)) { this.holding = true; this.hx = x; this.hy = y; } },
+    move(x, y) { if (this.holding) { this.hx = x; this.hy = y; if (!this.inPool(x, y)) this.holding = false; } },
+    up() { this.holding = false; },
+    update(dt) {
+      this.t += dt;
+      if (this.holding && this.gold < 1) { this.gold = Math.min(1, this.gold + dt / 5);
+        if (this.t - this.lastRip > .55) { this.lastRip = this.t; this.rip.push({ x: this.hx, y: this.hy, r: 0 }); note(PENTA[Math.min(6, Math.floor(this.gold * 6))], { vol: .045, dur: 2.4 }); haptic(4); }
+        if (this.gold >= 1) { haptic([12, 50, 24]); note(N.D4, { vol: .1, dur: 6 }); note(N.A4, { vol: .08, dur: 6, delay: .15 }); note(N.D5, { vol: .07, dur: 6, delay: .3 }); note(N.F4, { vol: .05, dur: 6, delay: .45 }); this.goldAt = this.t; } }
+      this.rip.forEach(r => r.r += dt * 60); this.rip = this.rip.filter(r => r.r < 120);
+      if (this.gold >= 1) { if (Math.random() < dt * 14) this.motes.push({ x: this.manX + (Math.random() - .5) * 60, y: this.floor - Math.random() * 120, v: 15 + Math.random() * 25, a: 1 });
+        this.blink = (this.t - this.goldAt) % 3 < .15 ? 1 : 0; if (this.t - this.goldAt > 5) this.done = true; }
+      this.motes.forEach(m => { m.y -= m.v * dt; m.a -= dt * .35; }); this.motes = this.motes.filter(m => m.a > 0);
+    },
+    draw() {
+      const t = this.t, g = this.gold, f = this.floor;
+      const sky = ctx.createLinearGradient(0, 0, 0, f); sky.addColorStop(0, "#14231f"); sky.addColorStop(1, "#2b4136"); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, f);
+      for (let i = 0; i < 7; i++) { ctx.fillStyle = i % 2 ? "#1a2c26" : "#16261f"; ctx.fillRect(i / 6 * W - 10, 0, 20 + i % 3 * 8, f); }
+      ctx.fillStyle = "#1d2a23"; ctx.fillRect(0, f, W, H - f);
+      /* the spring */
+      ctx.save(); ctx.beginPath(); ctx.ellipse(this.px, this.py, this.pw / 2, this.phh, 0, 0, Math.PI * 2); ctx.clip();
+      const wg = ctx.createLinearGradient(0, this.py - this.phh, 0, this.py + this.phh); wg.addColorStop(0, "#284a44"); wg.addColorStop(1, "#11231f"); ctx.fillStyle = wg; ctx.fillRect(0, this.py - this.phh, W, this.phh * 2);
+      glowDot(this.px, this.py, this.pw * .5, "rgba(236,190,92,A)", .15 + g * .55);
+      /* his reflection, its wound already a little gold */
+      ctx.globalAlpha = .28; ctx.translate(0, this.py * 2 - this.phh * .3); ctx.scale(1, -1);
+      person(this.manX, this.py - this.phh * .15, Math.min(H * .26, 205) * .9, "#9fb8a8", { sit: .6, reach: .9 }); ctx.restore();
+      this.rip.forEach(r => { ctx.strokeStyle = `rgba(240,215,150,${(1 - r.r / 120) * .7})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(r.x, r.y, r.r, r.r * .3, 0, 0, Math.PI * 2); ctx.stroke(); });
+      ctx.strokeStyle = "#3d5a4c"; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(this.px, this.py, this.pw / 2, this.phh, 0, 0, Math.PI * 2); ctx.stroke();
+      /* the wild man, sitting far off, watching */
+      const wx = W * .86, wy = f - 4, wh = H * .2; ctx.fillStyle = "#08100d"; ctx.beginPath();
+      for (let i = 0; i <= 30; i++) { const a = Math.PI + i / 30 * Math.PI, r = wh * .35 + (i % 2) * 4; ctx.lineTo(wx + Math.cos(a) * r * .8, wy - wh * .45 + Math.sin(a) * r); } ctx.lineTo(wx + wh * .3, wy); ctx.lineTo(wx - wh * .3, wy); ctx.fill();
+      if (!this.blink) for (const s of [-1, 1]) { glowDot(wx + s * 9 - 4, wy - wh * .62, 8, "rgba(232,170,80,A)", .5 + g * .3); }
+      /* the young man kneeling at the water, his wound turning gold */
+      const mh = Math.min(H * .26, 205), col = `rgb(${lerp(36, 58, g) | 0},${lerp(44, 50, g) | 0},${lerp(40, 34, g) | 0})`;
+      const m = person(this.manX, f, mh, col, { sit: .6, reach: this.holding || g >= 1 ? 1.15 : .6 });
+      const wx2 = m.headX + 2, wy2 = m.chestY; ctx.lineWidth = 3; ctx.lineCap = "round";
+      ctx.strokeStyle = g >= 1 ? "#f2c766" : `rgb(${lerp(20, 236, g) | 0},${lerp(14, 190, g) | 0},${lerp(14, 92, g) | 0})`;
+      ctx.beginPath(); ctx.moveTo(wx2 - 9, wy2 - 6); ctx.lineTo(wx2 - 2, wy2); ctx.lineTo(wx2 - 6, wy2 + 4); ctx.lineTo(wx2 + 4, wy2 + 12); ctx.stroke();
+      if (g > 0) glowDot(wx2 - 2, wy2 + 3, 20 + g * 30, "rgba(240,200,110,A)", g * .6);
+      if (g >= 1) glowDot(m.headX, m.headY, 34, "rgba(240,200,110,A)", .5);
+      ctx.fillStyle = "rgba(245,210,130,.9)"; this.motes.forEach(p => { ctx.globalAlpha = p.a; ctx.fillRect(p.x, p.y, 2.5, 2.5); }); ctx.globalAlpha = 1;
+      if (!this.holding && g < .02 && t > 1.5) hint(this.px - this.pw * .15, this.py, t);
+      if (this.done) hint(W / 2, H * .9, t);
+    },
+  };
+
+  /* ---------- Chapter VI · The Four Trials ----------
+     Warrior: hold your ground, never strike. Magician: find the hidden shape. Lover: meet her note. King: give light. */
+  const ch6 = {
+    num: "VI", name: "The Four Trials",
+    start() { this.t = 0; this.k = 0; this.T = 0; this.trans = 0; this.done = false; this.glow = 0; this.setup(); },
+    leave() { this.v1?.stop(); this.v2?.stop(); this.v1 = this.v2 = null; },
+    setup() {
+      this.T = 0; this.held = false; this.fin = 0;
+      if (this.k === 0) { this.prog = 0; this.push = 0; this.wind = []; ambience(.06, 1500, .03, 49); }
+      if (this.k === 1) { const P = [[.62, .36], [.52, .26], [.42, .36], [.52, .46], [.62, .36], [.82, .36], [.82, .44], [.76, .36], [.76, .42]];
+        this.pts = P.map(([x, y]) => ({ x: x * W - W * .1, y: y * H })); this.cur = 0; this.lines = []; this.drag = null;
+        this.decoys = Array.from({ length: 40 }, () => ({ x: Math.random() * W, y: H * (.08 + Math.random() * .62), r: .6 + Math.random() * 1.4, p: Math.random() * 6 })); ambience(.015, 600, .02, 55); }
+      if (this.k === 2) { this.seq = [1.5, 3, 2, 4.2]; this.si = 0; this.match = 0; this.mine = null; this.locked = []; this.v1 = voice(); this.v2 = voice("sine"); ambience(.012, 500, 0); }
+      if (this.k === 3) { const n = 7; this.folk = Array.from({ length: n }, (_, i) => { const a = Math.PI * (1.08 + i / (n - 1) * .84); return { x: W / 2 + Math.cos(a) * W * .4, y: H * .62 + Math.sin(a) * H * .2 * -1 * -1, lit: 0, orb: -1 }; });
+        this.folk.forEach((f, i) => { const a = Math.PI * (1.08 + i / (n - 1) * .84); f.x = W / 2 + Math.cos(a) * W * .4; f.y = H * .66 + Math.sin(a) * H * .2; }); ambience(.01, 400, .02, 65.4); }
+    },
+    nextTrial() { this.trans = 1; haptic([10, 40, 16]); setTimeout(() => { this.leave(); this.k++; if (this.k > 3) { this.done = true; this.k = 3; ambience(.01, 400, 0); } else this.setup(); }, 1100); },
+    down(x, y) {
+      if (this.done) return next(); if (this.trans > 0 && this.trans < 2) return;
+      if (this.k === 0) this.held = true;
+      if (this.k === 1) { const p = this.pts[this.cur]; if (Math.hypot(x - p.x, y - p.y) < 40) this.drag = { x, y }; }
+      if (this.k === 2) { this.mine = y; }
+      if (this.k === 3) { this.folk.forEach(f => { if (f.lit < 1 && f.orb < 0 && Math.hypot(x - f.x, y - (f.y - 30)) < 44) { f.orb = 0; note(PENTA[2 + Math.floor(Math.random() * 3)], { vol: .06, dur: 2 }); } }); }
+    },
+    move(x, y) {
+      if (this.k === 1 && this.drag) { this.drag = { x, y }; const nx = this.pts[this.cur + 1];
+        if (nx && Math.hypot(x - nx.x, y - nx.y) < 30) { this.lines.push([this.cur, this.cur + 1]); this.cur++; note(PENTA[Math.min(6, this.cur % 7)], { vol: .06, dur: 2 }); haptic(6);
+          if (this.cur >= this.pts.length - 1) { this.drag = null; this.fin = 1; note(N.D5, { vol: .08, dur: 4, delay: .2 }); setTimeout(() => this.nextTrial(), 1600); } } }
+      if (this.k === 2 && this.mine != null) this.mine = y;
+    },
+    up() { this.held = false; this.drag = null; if (this.k === 2) this.mine = null; },
+    update(dt) {
+      this.t += dt; this.T += dt; if (this.trans > 0) { this.trans += dt * .9; if (this.trans > 2.2) this.trans = 0; }
+      if (this.k === 0 && !this.done) { const gust = .5 + .5 * Math.sin(this.T * 1.3) * Math.sin(this.T * .37 + 1);
+        if (Math.random() < dt * (20 + gust * 40)) this.wind.push({ x: W + 10, y: Math.random() * H * .8, v: 300 + gust * 400, l: 20 + Math.random() * 40 });
+        this.wind.forEach(w => w.x -= w.v * dt); this.wind = this.wind.filter(w => w.x > -60);
+        if (this.held) { this.prog += dt; this.push = Math.max(0, this.push - dt * 30); } else this.push = Math.min(W * .25, this.push + dt * 40 * (.4 + gust));
+        if (this.prog >= 6 && !this.fin) { this.fin = 1; note(N.D4, { vol: .08, dur: 4 }); note(N.A4, { vol: .07, dur: 4, delay: .2 }); this.nextTrial(); } }
+      if (this.k === 2 && !this.done && this.v1) { const target = this.seq[this.si] ?? this.seq[this.seq.length - 1];
+        this.v1.set(degHz(target), this.fin ? 0 : .05);
+        if (this.mine != null && !this.fin) { const d = clamp((H * .78 - this.mine) / (H * .56) * 6, 0, 6); this.myDeg = d; this.v2.set(degHz(d), .045);
+          if (Math.abs(d - target) < .35) { this.match += dt; if (this.match > 1.1) { this.locked.push(target); this.si++; this.match = 0; haptic(10); note(degHz(target) * 1.5, { vol: .05, dur: 2 });
+              if (this.si >= this.seq.length) { this.fin = 1; this.v1.set(degHz(target), 0); this.v2.set(degHz(target), 0); note(N.D4, { vol: .08, dur: 5 }); note(N.F4, { vol: .07, dur: 5, delay: .1 }); note(N.A4, { vol: .06, dur: 5, delay: .2 }); note(N.D5, { vol: .05, dur: 5, delay: .3 }); setTimeout(() => this.nextTrial(), 2200); } } }
+          else this.match = Math.max(0, this.match - dt * 2); }
+        else { this.v2.set(220, 0); this.myDeg = null; } }
+      if (this.k === 3 && !this.done) { this.folk.forEach(f => { if (f.orb >= 0) { f.orb += dt * 1.3; if (f.orb >= 1) { f.orb = -1; f.lit = .001; haptic(6); } } if (f.lit > 0) f.lit = Math.min(1, f.lit + dt); });
+        const lit = this.folk.filter(f => f.lit >= 1).length; this.glow = lerp(this.glow, lit / this.folk.length, dt * 2);
+        if (lit === this.folk.length && !this.fin) { this.fin = 1; note(N.D4, { vol: .09, dur: 6 }); note(N.A4, { vol: .08, dur: 6, delay: .15 }); note(N.D5, { vol: .07, dur: 6, delay: .3 }); note(N.F4, { vol: .05, dur: 6, delay: .45 }); setTimeout(() => this.nextTrial(), 2800); } }
+    },
+    draw() {
+      const t = this.t, f = H * .76, mh = Math.min(H * .27, 210);
+      if (this.k === 0) { /* Warrior */
+        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#3b2723"); bg.addColorStop(1, "#7a4a37"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f); ctx.fillStyle = "#2d1f1b"; ctx.fillRect(0, f, W, H - f);
+        ctx.strokeStyle = "rgba(240,215,190,.35)"; ctx.lineWidth = 1.2; this.wind.forEach(w => { ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.lineTo(w.x + w.l, w.y); ctx.stroke(); });
+        const p = clamp(this.prog / 6, 0, 1), ox = lerp(W * .95, W * .68, p), oa = this.fin ? .4 : 1;
+        ctx.globalAlpha = oa; person(ox, f, mh * 1.05, "#1c1312", { flip: true, armsOut: .5 + p * .2, coat: 1 }); ctx.globalAlpha = 1;
+        person(W * .36 - this.push, f, mh, "#2a1b18", { tilt: this.held ? .8 : -.4, armsOut: this.held ? .15 : .35 });
+        if (this.held) glowDot(W * .36 - this.push, f - mh * .5, mh * .7, "rgba(240,170,110,A)", .12 + p * .25);
+        if (!this.held && this.T < 5) hint(W * .36, f - mh * .5, t);
+      }
+      if (this.k === 1) { /* Magician */
+        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0d1024"); bg.addColorStop(1, "#22264a"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+        this.decoys.forEach(d => { ctx.fillStyle = `rgba(230,230,250,${.25 + .2 * Math.sin(t * 1.5 + d.p)})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
+        ctx.strokeStyle = this.fin ? "rgba(240,200,110,.95)" : "rgba(220,225,255,.75)"; ctx.lineWidth = this.fin ? 3 : 2; ctx.lineCap = "round";
+        this.lines.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(this.pts[a].x, this.pts[a].y); ctx.lineTo(this.pts[b].x, this.pts[b].y); ctx.stroke(); });
+        if (this.drag) { const p = this.pts[this.cur]; ctx.strokeStyle = "rgba(220,225,255,.4)"; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(this.drag.x, this.drag.y); ctx.stroke(); }
+        this.pts.forEach((p, i) => { const isCur = i === this.cur, isNext = i === this.cur + 1, visited = i <= this.cur;
+          const a = this.fin ? 1 : visited ? .9 : isNext ? .45 + .35 * Math.sin(t * 4) : .4;
+          if (this.fin) glowDot(p.x, p.y, 22, "rgba(240,200,110,A)", .5);
+          ctx.fillStyle = `rgba(240,240,255,${a})`; ctx.beginPath(); ctx.arc(p.x, p.y, isCur || this.fin ? 3.4 : 2.2, 0, Math.PI * 2); ctx.fill(); });
+        if (!this.drag && !this.fin && this.cur === 0 && this.T > 1) hint(this.pts[0].x, this.pts[0].y, t);
+        person(W * .5, H * .9, mh * .55, "#090b18", { tilt: -.2 });
+      }
+      if (this.k === 2) { /* Lover */
+        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#14262b"); bg.addColorStop(1, "#3f5b5c"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f); ctx.fillStyle = "#1b2b2c"; ctx.fillRect(0, f, W, H - f);
+        const yOf = d => H * .78 - d / 6 * H * .56, target = this.seq[Math.min(this.si, this.seq.length - 1)];
+        /* the steps of the scale, faint */
+        for (let d = 0; d <= 6; d++) { ctx.fillStyle = "rgba(220,235,235,.06)"; ctx.fillRect(W * .2, yOf(d), W * .6, 1); }
+        /* her note and his */
+        person(W * .78, f, mh * .95, "#1a2a2c", { flip: true, tilt: .3 }); person(W * .22, f, mh, "#1c2627", { tilt: -.3 });
+        const hx = W * .7, mx = W * .3;
+        if (!this.fin) { glowDot(hx, yOf(target), 44, "rgba(230,200,220,A)", .55); ctx.fillStyle = "#f3dfe8"; ctx.beginPath(); ctx.arc(hx, yOf(target), 6, 0, Math.PI * 2); ctx.fill(); }
+        if (this.myDeg != null && !this.fin) { const close = Math.abs(this.myDeg - target) < .35; glowDot(mx, yOf(this.myDeg), 40, close ? "rgba(240,200,110,A)" : "rgba(200,225,230,A)", .55); ctx.fillStyle = close ? "#f6d792" : "#d9eef0"; ctx.beginPath(); ctx.arc(mx, yOf(this.myDeg), 6, 0, Math.PI * 2); ctx.fill();
+          if (close) { ctx.strokeStyle = `rgba(240,200,110,${this.match})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(mx, yOf(this.myDeg)); ctx.lineTo(hx, yOf(target)); ctx.stroke(); } }
+        this.locked.forEach((d, i) => { glowDot(W * .5, yOf(d), 14, "rgba(240,200,110,A)", .6); });
+        if (this.fin) { const k = clamp(this.T - (this.finT ??= this.T), 0, 3) / 3; glowDot(W * .5, lerp(H * .4, H * .2, k), 90, "rgba(245,205,130,A)", .7); }
+        if (this.myDeg == null && !this.fin && this.T > 1.5) hint(mx, yOf(this.seq[0]) + Math.sin(t * 1.5) * 40, t);
+      }
+      if (this.k === 3) { /* King */
+        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#14110d"); bg.addColorStop(1, "#2f271c"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+        glowDot(W / 2, H * .6, W * (.3 + this.glow * .7), "rgba(240,190,100,A)", .15 + this.glow * .45);
+        const me = { x: W / 2, y: H * .8 };
+        this.folk.forEach(fo => { const c = fo.lit ? `rgb(${lerp(40, 196, fo.lit) | 0},${lerp(36, 150, fo.lit) | 0},${lerp(32, 80, fo.lit) | 0})` : "#2a241d";
+          if (fo.lit) glowDot(fo.x, fo.y - 30, 46, "rgba(240,190,100,A)", .4 * fo.lit);
+          person(fo.x, fo.y, mh * .5, c, { tilt: 0 });
+          if (fo.orb >= 0) { const k = ease(fo.orb), ox = lerp(me.x, fo.x, k), oy = lerp(me.y - mh * .6, fo.y - 30, k) - Math.sin(k * Math.PI) * 50; glowDot(ox, oy, 18, "rgba(250,215,140,A)", .9); }
+          if (!fo.lit && fo.orb < 0 && this.T > 1.2 && this.folk.every(q => !q.lit && q.orb < 0) && fo === this.folk[3]) hint(fo.x, fo.y - 30, t); });
+        person(me.x, me.y, mh * .9, this.glow > .5 ? "#3a2c1c" : "#231c15", { armsOut: .25 + this.glow * .4 });
+        if (this.glow) glowDot(me.x, me.y - mh * .5, mh * (.4 + this.glow * .6), "rgba(245,200,110,A)", .25 + this.glow * .35);
+      }
+      if (this.trans > 0) { const a = this.trans < 1 ? this.trans : clamp(2.2 - this.trans, 0, 1); ctx.fillStyle = `rgba(22,19,15,${a})`; ctx.fillRect(0, 0, W, H); }
+      /* four marks: which trial */
+      for (let i = 0; i < 4; i++) { ctx.fillStyle = i < this.k || (i === this.k && this.fin) ? "rgba(240,200,110,.9)" : i === this.k ? "rgba(239,230,214,.7)" : "rgba(239,230,214,.2)"; ctx.beginPath(); ctx.arc(W / 2 + (i - 1.5) * 16, H - 40, 3.5, 0, Math.PI * 2); ctx.fill(); }
+      if (this.done) hint(W / 2, H * .88, t);
+    },
+  };
+
+  /* ---------- Chapter VII · The Return ----------
+     He comes home. The tall father, old now, sits on a bench. Sit beside him; stay. */
+  const ch7 = {
+    num: "VII", name: "The Return",
+    layout() { this.floor = H * .7; this.benchX = W * .66; },
+    start() { this.t = 0; this.layout(); this.mx = W * .08; this.sit = 0; this.phase = "walk"; this.hold = 0; this.reachA = 0; this.lamp = 0; this.done = false; this.leaves = []; ambience(.04, 520, 0); },
+    down(x, y) {
+      if (this.done) return next();
+      if (this.phase === "walk") { this.drag = true; this.tx = x; if (Math.abs(this.mx - (this.benchX - 52)) < 40 && Math.hypot(x - this.benchX, y - (this.floor - 40)) < 90) this.sitDown(); }
+      else if (this.phase === "sit") this.holding = true;
+    },
+    move(x) { if (this.drag) this.tx = x; },
+    up() { this.drag = false; this.holding = false; },
+    sitDown() { this.phase = "sitting"; this.drag = false; note(N.F4, { vol: .06, dur: 3 }); },
+    update(dt) {
+      this.t += dt;
+      if (this.phase === "walk" && this.drag) { const target = clamp(this.tx, W * .05, this.benchX - 52); const d = target - this.mx; this.mx += clamp(d, -55 * dt, 55 * dt); this.walking = Math.abs(d) > 2; } else this.walking = false;
+      if (this.phase === "walk" && this.mx >= this.benchX - 56) { this.mx = this.benchX - 52; if (!this.nearT) this.nearT = this.t; }
+      if (this.phase === "sitting") { this.sit = Math.min(1, this.sit + dt * .8); if (this.sit >= 1) this.phase = "sit"; }
+      if (this.phase === "sit") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 4.5); } else this.hold = Math.max(0, this.hold - dt * .3);
+        this.reachA = this.hold; if (this.hold >= 1) { this.phase = "end"; haptic([12, 50, 24]); note(N.D4, { vol: .09, dur: 6 }); note(N.A4, { vol: .07, dur: 6, delay: .3 }); note(N.F4, { vol: .06, dur: 6, delay: .6 }); } }
+      if (this.phase === "end") { this.lamp = Math.min(1, this.lamp + dt * .5); if (this.lamp >= 1 && !this.endT) this.endT = this.t; if (this.endT && this.t - this.endT > 2.5) this.done = true; }
+      if (Math.random() < dt * .5) this.leaves.push({ x: Math.random() * W, y: -10, v: 16 + Math.random() * 12, s: Math.random() * 6 });
+      this.leaves.forEach(l => { l.y += l.v * dt; l.x += Math.sin(this.t + l.s) * 10 * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
+    },
+    draw() {
+      const t = this.t, gy = this.floor;
+      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#8f8aa0"); sk.addColorStop(1, "#e3c9a8"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+      ctx.fillStyle = "#a9a0a6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin(xx * .012) * 22 - Math.sin(xx * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
+      ctx.fillStyle = "#86808a"; for (const xx of [W * .12, W * .45, W * .92]) { ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#5e5a5f"; ctx.fillRect(0, gy, W, H - gy);
+      /* the same lamp as long ago */
+      const lx = this.benchX + 56; ctx.fillStyle = "#3e3a40"; ctx.fillRect(lx, gy - 190, 4, 190); ctx.fillRect(lx - 16, gy - 190, 20, 4);
+      if (this.lamp) { glowDot(lx - 14, gy - 182, 150, "rgba(240,196,110,A)", .6 * this.lamp); ctx.fillStyle = `rgba(250,220,150,${this.lamp})`; ctx.beginPath(); ctx.arc(lx - 14, gy - 182, 5, 0, Math.PI * 2); ctx.fill(); }
+      /* bench */
+      const bx = this.benchX; ctx.fillStyle = "#4a3b30"; ctx.fillRect(bx - 80, gy - 34, 165, 8); ctx.fillRect(bx - 74, gy - 34, 6, 34); ctx.fillRect(bx + 73, gy - 34, 6, 34); ctx.fillRect(bx - 80, gy - 70, 165, 6);
+      const fh = Math.min(H * .3, 230), mh = fh * .96;
+      /* the old father: bent, grey, his hand slowly reaching */
+      person(bx + 48, gy, fh * .9, "#5d5966", { sit: 1, coat: 1, tilt: -.6 - this.reachA * .3, reach: this.reachA * .95, flip: true });
+      const me = person(this.mx + (this.phase === "walk" ? 0 : 0), gy, mh, "#3b3540", { walk: this.walking, phase: t * 6, sit: this.sit, tilt: this.sit ? .5 : 0 });
+      ctx.fillStyle = "rgba(150,110,70,.55)"; this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(this.t * 2 + l.s); ctx.fillRect(-4, -2, 8, 4); ctx.restore(); });
+      if (this.phase === "walk" && !this.drag && this.mx < this.benchX - 66 && t > 1.2) hint(this.mx + 70, gy - mh * .5, t);
+      if (this.phase === "walk" && this.mx >= this.benchX - 56) hint(bx - 10, gy - 40, t);
+      if (this.phase === "sit" && !this.holding && this.hold < .05) hint(W / 2, H * .84, t);
+      if (this.done) hint(W / 2, H * .88, t);
+    },
+  };
+
+  /* ---------- Chapter VIII · The Blessing ----------
+     Now he walks ahead, and a small boy follows. This time, turn around. */
+  const ch8 = {
+    num: "VIII", name: "The Blessing",
+    start() { this.t = 0; this.x = 0; this.gap = 150; this.ph = 0; this.bph = 0; this.ripples = []; this.lastCall = 0; this.phase = "walk"; this.turn = 0; this.kneel = 0; this.hold = 0; this.together = 0; this.done = false; ambience(.03, 600, 0); },
+    manX() { return W * .3 + this.gap; },
+    down(x, y) {
+      if (this.done) return next();
+      if (this.phase === "walk" && Math.abs(x - this.manX()) < 70 && y > H * .3) { this.phase = "turn"; note(N.D4, { vol: .08, dur: 3 }); note(N.A4, { vol: .06, dur: 3, delay: .2 }); haptic(12); }
+      else if (this.phase === "wait" && Math.hypot(x - this.handX, y - this.handY) < 70) this.holding = true;
+    },
+    up() { this.holding = false; },
+    update(dt) {
+      this.t += dt;
+      const bs = this.phase === "walk" ? 38 : this.phase === "run" ? 70 : this.phase === "together" ? 34 : 0, ms = this.phase === "walk" ? 44 : this.phase === "together" ? 34 : 0;
+      this.x += ms * dt; this.gap += (ms - bs) * dt; this.ph += ms * dt * .07; this.bph += bs * dt * .09;
+      if (this.phase === "walk") { this.gap = Math.min(this.gap, W * .55); if (this.t - this.lastCall > 3.2) { this.lastCall = this.t; this.ripples.push({ t: 0 }); note(N.A4, { vol: .09 }); note(N.D5, { vol: .07, delay: .18 }); } }
+      this.ripples.forEach(r => r.t += dt); this.ripples = this.ripples.filter(r => r.t < 1.6);
+      if (this.phase === "turn") { this.turn = Math.min(1, this.turn + dt * 1.2); this.kneel = Math.min(1, this.kneel + dt * .8); if (this.kneel >= 1) this.phase = "run"; }
+      if (this.phase === "run" && this.gap <= 66) { this.gap = 66; this.phase = "wait"; note(N.F4, { vol: .07, dur: 3 }); }
+      if (this.phase === "wait") { if (this.holding) this.hold = Math.min(1, this.hold + dt / 1.6); else this.hold = Math.max(0, this.hold - dt);
+        if (this.hold >= 1) { this.phase = "together"; haptic([12, 50, 24]); note(N.D4, { vol: .09, dur: 5 }); note(N.F4, { vol: .07, dur: 5, delay: .2 }); note(N.A4, { vol: .07, dur: 5, delay: .4 }); note(N.D5, { vol: .06, dur: 5, delay: .6 }); } }
+      if (this.phase === "together") { this.together = Math.min(1, this.together + dt * .1); this.kneel = Math.max(0, this.kneel - dt); if (this.together >= 1) this.done = true; }
+    },
+    draw() {
+      const t = this.t, gy = H * .7, warm = this.phase === "together" ? this.together : 0;
+      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, `rgb(${lerp(140, 196, warm) | 0},${lerp(155, 160, warm) | 0},${lerp(171, 140, warm) | 0})`); sk.addColorStop(1, `rgb(${lerp(216, 245, warm) | 0},${lerp(211, 214, warm) | 0},${lerp(202, 160, warm) | 0})`); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+      ctx.fillStyle = "#a9b0b6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin((xx + this.x * .15) * .012) * 22 - Math.sin((xx + this.x * .15) * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
+      ctx.fillStyle = "#7d8790"; for (let i = -1; i < 7; i++) { const sp = 150, xx = ((i * sp - this.x * .6) % (sp * 7) + sp * 7) % (sp * 7) - sp; ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#5d646a"; ctx.fillRect(0, gy, W, H - gy);
+      if (warm) glowDot(W * .8, gy - 40, W, "rgba(245,190,110,A)", .35 * warm);
+      const bx = W * .3, mx = this.manX(), fh = Math.min(H * .3, 230), bh = fh * .5;
+      const turned = this.phase !== "walk";
+      const m = person(mx, gy, fh, "#2b3138", { coat: 1, walk: this.phase === "walk" || this.phase === "together", phase: this.ph, flip: turned && this.phase !== "together", sit: this.kneel * .55, reach: this.phase === "run" || this.phase === "wait" ? .7 : this.phase === "together" ? .2 : 0, tilt: turned ? -.4 * this.turn : 0 });
+      const b = person(bx + (this.phase === "together" ? 0 : 0), gy, bh, "#4c5864", { walk: this.phase !== "wait", phase: this.bph, reach: this.phase === "wait" || this.phase === "together" ? 1.2 : 0 });
+      if (this.phase === "wait") { this.handX = (m.handX + b.handX) / 2; this.handY = (m.handY + b.handY) / 2; glowDot(this.handX, this.handY, 30, "rgba(240,200,110,A)", .25 + this.hold * .5);
+        if (this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.85)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 26, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); } else hint(this.handX, this.handY, t); }
+      this.ripples.forEach(r => { ctx.strokeStyle = `rgba(250,246,238,${.7 * (1 - r.t / 1.6)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + r.t * 70, -.9, .9); ctx.stroke(); });
+      if (this.phase === "walk" && t > 3) hint(mx, gy - fh * .55, t);
+      if (this.done) hint(W / 2, H * .86, t);
+    },
+  };
+
+  /* ---------- Chapter IX · Coda ----------
+     One long held touch. Every chapter's colour, in turn, then the gold. */
+  const ch9 = {
+    num: "IX", name: "Ashes and Gold",
+    start() { this.t = 0; this.p = 0; this.rings = []; this.lastRing = -1; this.held = false; this.done = false; this.cx = W / 2; this.cy = H * .55; this.final = 0; ambience(.015, 300, .02, 55); },
+    down(x, y) { if (this.done) return next(); this.held = true; if (this.p < .02) { this.cx = x; this.cy = y; } },
+    up() { this.held = false; },
+    COL: ["#8d9bab", "#c58a4e", "#1f3a30", "#8a847d", "#e6b65c", "#a0503a", "#3a4a8a", "#5a8a8c", "#e8b45c", "#e3c9a8", "#f0c070"],
+    CH: [N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.A4, N.D5, N.D4],
+    update(dt) {
+      this.t += dt;
+      if (this.held && this.p < 1) { this.p = Math.min(1, this.p + dt / 15);
+        const k = Math.floor(this.p * this.COL.length); if (k > this.lastRing && k < this.COL.length) { this.lastRing = k; this.rings.push({ c: this.COL[k], r: 0 }); note(this.CH[k], { vol: .07, dur: 4 }); note(this.CH[k] / 2, { vol: .04, dur: 4 }); haptic(6); }
+        if (this.p >= 1) { haptic([12, 60, 24]); note(N.D3, { vol: .1, dur: 8 }); note(N.A3, { vol: .08, dur: 8, delay: .2 }); note(N.F4, { vol: .07, dur: 8, delay: .4 }); note(N.D5, { vol: .06, dur: 8, delay: .6 }); } }
+      this.rings.forEach(r => r.r += dt * (this.held || this.p >= 1 ? 90 : 12));
+      if (this.p >= 1) { this.final = Math.min(1, this.final + dt * .25); if (this.final >= 1 && !this.done) { this.done = true; } }
+    },
+    draw() {
+      const t = this.t; ctx.fillStyle = "#1a1714"; ctx.fillRect(0, 0, W, H);
+      this.rings.forEach(r => { ctx.fillStyle = r.c; ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(this.cx, this.cy, r.r, 0, Math.PI * 2); ctx.fill(); }); ctx.globalAlpha = 1;
+      if (this.final) { /* the last image: a man on the ash, facing the gold */
+        ctx.globalAlpha = this.final; const gy = H * .64;
+        const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#6b4a2c"); sk.addColorStop(1, "#e2b066"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+        glowDot(W / 2, gy - H * .1, W * .7, "rgba(255,210,120,A)", .6); ctx.fillStyle = "#f1c56c"; ctx.beginPath(); ctx.arc(W / 2, gy - H * .1, Math.min(W, H) * .16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#3b3936"; ctx.fillRect(0, gy, W, H - gy); ctx.fillStyle = "#5e8a52"; for (let i = 0; i < 18; i++) { const xx = (i * 97) % W, hh = 6 + (i * 13) % 10; ctx.fillRect(xx, gy - hh * .2, 2, hh); }
+        person(W / 2, gy, Math.min(H * .28, 220), "#141210", {}); ctx.globalAlpha = 1; }
+      if (!this.held && this.p < .02) hint(W / 2, H * .55, t);
+      if (this.p > 0 && this.p < 1) { ctx.strokeStyle = "rgba(239,230,214,.5)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(this.cx, this.cy, 30, -Math.PI / 2, -Math.PI / 2 + this.p * Math.PI * 2); ctx.stroke(); }
+      if (this.done) hint(W / 2, H * .9, t);
+    },
+  };
+
   /* ---------- Flow ---------- */
-  const CHAPTERS = [ch1, ch2, ch3];
+  const CHAPTERS = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9];
   let scene = null, ci = -1, fadeA = 0, fadeDir = 0, onFaded = null;
   const roman = n => ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n];
   function play(i) {
     ci = i; audio(); $("#title").classList.add("hide"); $("#end").classList.add("hide"); $("#home").style.display = "grid";
     $("#cardn").textContent = roman(i); $("#cardt").textContent = CHAPTERS[i].name; $("#card").classList.remove("hide"); scene = null;
-    note([N.D4, N.F4, N.A4][i] || N.D4, { vol: .06, dur: 4 });
+    scene?.leave?.(); note([N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.D4][i] || N.D4, { vol: .06, dur: 4 });
     setTimeout(() => { $("#card").classList.add("hide"); scene = CHAPTERS[i]; scene.start(); fadeA = 1; fadeDir = -1; }, 2600);
   }
   function next() {
     if (fadeDir) return; fadeDir = 1; onFaded = () => {
       save.reached = Math.max(save.reached, ci + 2); store();
-      if (ci + 1 < CHAPTERS.length) play(ci + 1); else { scene = null; ambience(0, 300, 0); $("#end").classList.remove("hide"); }
+      scene?.leave?.(); if (ci + 1 < CHAPTERS.length) play(ci + 1); else { scene = null; ambience(0, 300, 0); $("#end").classList.remove("hide"); }
     };
   }
-  function toTitle() { scene = null; ci = -1; ambience(0, 300, 0); $("#end").classList.add("hide"); $("#card").classList.add("hide"); $("#home").style.display = "none"; renderTitle(); $("#title").classList.remove("hide"); }
+  function toTitle() { scene?.leave?.(); scene = null; ci = -1; ambience(0, 300, 0); $("#end").classList.add("hide"); $("#card").classList.add("hide"); $("#home").style.display = "none"; renderTitle(); $("#title").classList.remove("hide"); }
   function renderTitle() {
     $("#begin").textContent = save.reached > 1 && save.reached <= CHAPTERS.length ? "Continue" : "Begin";
     $("#chapters").innerHTML = CHAPTERS.map((c, i) => `<button class="${i < save.reached ? "open" : ""}" ${i < save.reached ? "" : "disabled"} data-ch="${i}" aria-label="Chapter ${roman(i)}, ${c.name}">${roman(i)}</button>`).join("");
