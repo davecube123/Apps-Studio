@@ -68,7 +68,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "6";
+  const APP_VERSION = "7";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -140,6 +140,13 @@
     return { headX: x0, headY: top - headR * 1.08, handX: o.flip ? 2 * x0 - hand[0] : hand[0], handY: hand[1], chestY: top + bodyH * .35 };
   }
   function glowDot(x, y, r, color, a = 1) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, color.replace("A", a)); g.addColorStop(1, color.replace("A", 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+  /* press-and-hold sign: a steady ring with an arc that fills as you hold (distinct from the tap hint) */
+  function holdHint(x, y, t, prog = 0) {
+    ctx.save(); const breathe = 1 + Math.sin(t * 2.2) * .06;
+    ctx.strokeStyle = "rgba(239,230,214,.28)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 26 * breathe, 0, Math.PI * 2); ctx.stroke();
+    if (prog > 0) { ctx.strokeStyle = "rgba(240,200,110,.95)"; ctx.lineWidth = 3.5; ctx.lineCap = "round"; ctx.beginPath(); ctx.arc(x, y, 26 * breathe, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke(); }
+    ctx.fillStyle = `rgba(239,230,214,${.55 + .35 * Math.sin(t * 2.2)})`; ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
   /* a soft pulsing hint, never words */
   function hint(x, y, t, a = 1) { const p = (t % 1.8) / 1.8; ctx.save(); ctx.globalAlpha = a * (1 - p) * .8; ctx.strokeStyle = "#efe6d6"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 10 + p * 22, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = a * .9; ctx.fillStyle = "#efe6d6"; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
 
@@ -436,7 +443,7 @@
       if (this.done) return next();
       if (this.phase === "bring" && Math.hypot(x - this.kx, y - this.ky) < 50) { this.drag = true; }
       else if (this.phase === "turn" && Math.hypot(x - this.lockX, y - this.lockY) < 110) { this.drag = true; this.ang = Math.atan2(y - this.lockY, x - this.lockX); }
-      else if (this.phase === "hand" && Math.hypot(x - this.handX, y - this.handY) < 60) { this.holding = true; }
+      else if (this.phase === "hand") { this.holding = true; this.hold = Math.min(1, this.hold + .12); }
     },
     move(x, y) {
       if (!this.drag) return;
@@ -457,7 +464,7 @@
       this.flies.forEach(f => { f.p += dt * f.s; f.x += Math.sin(f.p) * 14 * dt * (1 + this.notch); f.y += Math.cos(f.p * .8) * 10 * dt; });
       if (this.phase === "open") { this.open = Math.min(1, this.open + dt * .6); if (this.open >= 1) this.out = Math.min(1, this.out + dt * .35);
         if (this.out >= 1) { this.kneel = Math.min(1, this.kneel + dt * .5); if (this.kneel >= 1 && this.phase === "open") { this.phase = "hand"; ambience(.025, 700, .02, 55); note(N.C5, { vol: .07, dur: 3 }); } } }
-      if (this.phase === "hand") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 1.6); if (Math.random() < dt * 4) note([N.D4, N.F4, N.A4, N.D5][Math.floor(this.hold * 3.99)], { vol: .05, dur: 1.5 }); } else this.hold = Math.max(0, this.hold - dt);
+      if (this.phase === "hand") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 1.6); if (Math.random() < dt * 4) note([N.D4, N.F4, N.A4, N.D5][Math.floor(this.hold * 3.99)], { vol: .05, dur: 1.5 }); } else this.hold = Math.max(0, this.hold - dt * .1);
         if (this.hold >= 1) { this.phase = "walk"; haptic([12, 50, 20]); note(N.D4, { vol: .09, dur: 4 }); note(N.A4, { vol: .08, dur: 4, delay: .25 }); note(N.D5, { vol: .07, dur: 4, delay: .5 }); } }
       if (this.phase === "walk") { this.walk = Math.min(1, this.walk + dt * .12); if (this.walk >= 1 && !this.done) { this.done = true; ambience(.02, 600, 0); } }
     },
@@ -520,8 +527,7 @@
       const me = figLit(mx, this.floor, mh, { dir: 1, color: "#1d2824", far: "#17201c", speed: this.phase === "walk" ? 1 : 0, phase: t * 5.5, reach: this.phase === "hand" ? .75 + this.hold * .3 : this.drag && this.phase === "bring" ? .9 : 0 }, "rgba(170,210,190,.35)", 1.3);
       if (this.phase === "bring") { ctx.save(); ctx.translate(this.kx, this.ky); ctx.strokeStyle = "#e6b65c"; ctx.fillStyle = "#e6b65c"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(-12, 0, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-6, -1.8, 18, 3.6); ctx.fillRect(8, 0, 3, 6); ctx.restore();
         glowDot(this.kx - 4, this.ky, 30, "rgba(240,200,110,A)", .35); if (!this.drag && t > 1.5) hint(this.lockX, this.lockY + 3, t, .8); }
-      if (this.phase === "hand" && !this.holding && this.hold < .05) hint(this.handX, this.handY, t);
-      if (this.phase === "hand" && this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.8)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 28, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); }
+      if (this.phase === "hand") holdHint(this.handX, this.handY, t, this.hold);
       ctx.restore();
       /* darkness closes as they walk into the forest */
       grainAndVignette();
@@ -554,7 +560,7 @@
       this.motes = Array.from({ length: 26 }, () => ({ u: Math.random(), v: Math.random(), p: Math.random() * 6, s: .5 + Math.random() })); },
     down(x, y) {
       if (this.done) return next();
-      if (this.phase === "ember" && Math.hypot(x - this.pileX, y - (this.floor - 8)) < 70) { this.holding = true; return; }
+      if (this.phase === "ember") { this.holding = true; this.hold = Math.min(1, this.hold + .12); return; }
       if (this.phase === "sweep") { this.stroke = true; this.lx = x; this.acc = 0; this.dir = 0; }
     },
     move(x) {
@@ -623,7 +629,7 @@
         ctx.fillStyle = `rgba(255,${120 + fl2 * 80},70,${e})`; ctx.beginPath(); ctx.arc(this.pileX, f - 5, 4 + fl2 * 2, 0, Math.PI * 2); ctx.fill();
         if (fl2 > .2) { for (const [o, sc] of [[0, 1], [-7, .7], [7, .65]]) { const fh = (10 + fl2 * 34) * sc + Math.sin(t * 12 + o) * 3; ctx.fillStyle = `rgba(255,${170 + fl2 * 50},${o ? 70 : 100},${fl2 * (o ? .7 : 1)})`;
           ctx.beginPath(); ctx.moveTo(this.pileX + o - 10 * fl2 * sc, f - 4); ctx.quadraticCurveTo(this.pileX + o - 9 * sc, f - fh * .6, this.pileX + o + Math.sin(t * 7 + o) * 3, f - fh); ctx.quadraticCurveTo(this.pileX + o + 9 * sc, f - fh * .6, this.pileX + o + 10 * fl2 * sc, f - 4); ctx.fill(); } }
-        if (this.phase === "ember" && !this.holding && this.hold < .05) hint(this.pileX, f - 8, t); }
+        if (this.phase === "ember") holdHint(this.pileX, f - 8, t, this.hold); }
       /* the young man, bent to his broom; at the end he sits by the fire */
       const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.pileX + 64, this.sit);
       ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(mx, f + 2, mh * .17, 4, 0, 0, Math.PI * 2); ctx.fill();
@@ -823,7 +829,7 @@
     down(x, y) {
       if (this.done) return next();
       if (this.phase === "walk") { this.drag = true; this.tx = x; if (Math.abs(this.mx - (this.benchX - 52)) < 40 && Math.hypot(x - this.benchX, y - (this.floor - 40)) < 90) this.sitDown(); }
-      else if (this.phase === "sit") this.holding = true;
+      else if (this.phase === "sit") { this.holding = true; this.hold = Math.min(1, this.hold + .12); }
     },
     move(x) { if (this.drag) this.tx = x; },
     up() { this.drag = false; this.holding = false; },
@@ -833,7 +839,7 @@
       if (this.phase === "walk" && this.drag) { const target = clamp(this.tx, W * .05, this.benchX - 52); const d = target - this.mx; this.mx += clamp(d, -55 * dt, 55 * dt); this.walking = Math.abs(d) > 2; } else this.walking = false;
       if (this.phase === "walk" && this.mx >= this.benchX - 56) { this.mx = this.benchX - 52; if (!this.nearT) this.nearT = this.t; }
       if (this.phase === "sitting") { this.sit = Math.min(1, this.sit + dt * .8); if (this.sit >= 1) this.phase = "sit"; }
-      if (this.phase === "sit") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 4.5); } else this.hold = Math.max(0, this.hold - dt * .3);
+      if (this.phase === "sit") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 3.5); } else this.hold = Math.max(0, this.hold - dt * .08);
         this.reachA = this.hold; if (this.hold >= 1) { this.phase = "end"; haptic([12, 50, 24]); note(N.D4, { vol: .09, dur: 6 }); note(N.A4, { vol: .07, dur: 6, delay: .3 }); note(N.F4, { vol: .06, dur: 6, delay: .6 }); } }
       if (this.phase === "end") { this.lamp = Math.min(1, this.lamp + dt * .5); if (this.lamp >= 1 && !this.endT) this.endT = this.t; if (this.endT && this.t - this.endT > 2.5) this.done = true; }
       if (Math.random() < dt * .5) this.leaves.push({ x: Math.random() * W, y: -10, v: 16 + Math.random() * 12, s: Math.random() * 6 });
@@ -855,7 +861,7 @@
       grainAndVignette();
       if (this.phase === "walk" && !this.drag && this.mx < this.benchX - 66 && t > 1.2) hint(this.mx + 70, gy - mh * .5, t);
       if (this.phase === "walk" && this.mx >= this.benchX - 56) hint(bx - 10, gy - 40, t);
-      if (this.phase === "sit" && !this.holding && this.hold < .05) hint(W / 2, H * .84, t);
+      if (this.phase === "sit") holdHint(W / 2, H * .84, t, this.hold);
       if (this.done) hint(W / 2, H * .88, t);
     },
   };
@@ -869,7 +875,7 @@
     down(x, y) {
       if (this.done) return next();
       if (this.phase === "walk" && this.t > 1.5) { this.phase = "turn"; note(N.D4, { vol: .08, dur: 3 }); note(N.A4, { vol: .06, dur: 3, delay: .2 }); haptic(12); }
-      else if (this.phase === "wait") this.holding = true;
+      else if (this.phase === "wait") { this.holding = true; this.hold = Math.min(1, this.hold + .12); }
     },
     up() { this.holding = false; },
     update(dt) {
@@ -880,7 +886,7 @@
       this.ripples.forEach(r => r.t += dt); this.ripples = this.ripples.filter(r => r.t < 1.6);
       if (this.phase === "turn") { this.turn = Math.min(1, this.turn + dt * 1.2); this.kneel = Math.min(1, this.kneel + dt * .8); if (this.kneel >= 1) this.phase = "run"; }
       if (this.phase === "run" && this.gap <= 66) { this.gap = 66; this.phase = "wait"; note(N.F4, { vol: .07, dur: 3 }); }
-      if (this.phase === "wait") { if (this.holding) this.hold = Math.min(1, this.hold + dt / 1.6); else this.hold = Math.max(0, this.hold - dt);
+      if (this.phase === "wait") { if (this.holding) this.hold = Math.min(1, this.hold + dt / 1.6); else this.hold = Math.max(0, this.hold - dt * .1);
         if (this.hold >= 1) { this.phase = "together"; haptic([12, 50, 24]); note(N.D4, { vol: .09, dur: 5 }); note(N.F4, { vol: .07, dur: 5, delay: .2 }); note(N.A4, { vol: .07, dur: 5, delay: .4 }); note(N.D5, { vol: .06, dur: 5, delay: .6 }); } }
       if (this.phase === "together") { this.together = Math.min(1, this.together + dt * .1); this.kneel = Math.max(0, this.kneel - dt); if (this.together >= 1) this.done = true; }
     },
@@ -893,7 +899,7 @@
       const m = figLit(mx, gy, fh, { dir: turned ? -1 : 1, coat: 1, hem: Math.sin(this.ph * 2) * 1.5, speed: this.phase === "walk" || this.phase === "together" ? 1 : 0, phase: this.ph, kneel: this.kneel, reach: this.phase === "run" || this.phase === "wait" ? .8 : 0, color: "#272c33", far: "#20252b" }, "rgba(255,226,180,.55)", turned ? -1.6 : 1.6);
       const b = figLit(bx, gy, bh, { dir: 1, speed: this.phase === "run" ? 1.7 : this.phase === "wait" ? 0 : 1, phase: this.bph, reach: this.phase === "wait" ? 1 : this.phase === "together" ? 1.25 : 0, color: "#465260", far: "#3c4753" }, "rgba(255,226,180,.5)", 1.2);
       if (this.phase === "wait") { this.handX = (m.handX + b.handX) / 2; this.handY = (m.handY + b.handY) / 2; glowDot(this.handX, this.handY, 30, "rgba(240,200,110,A)", .25 + this.hold * .5);
-        if (this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.85)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 26, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); } else hint(this.handX, this.handY, t); }
+        holdHint(this.handX, this.handY, t, this.hold); }
       this.ripples.forEach(r => { const k = r.t / 1.6; ctx.strokeStyle = `rgba(255,246,232,${.75 * (1 - k)})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + ease(Math.min(1, k * 1.2)) * 70, -.75, .75); ctx.stroke(); });
       grainAndVignette();
       if (this.phase === "walk" && t > 2) hint(mx, gy - fh * .55, t);
@@ -931,7 +937,7 @@
         ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(W / 2, gy + 2, 30, 4, 0, 0, Math.PI * 2); ctx.fill();
         figLit(W / 2, gy, Math.min(H * .28, 220), { dir: 1, color: "#141210", far: "#100e0c" }, "rgba(255,214,140,.7)", 1.6); ctx.globalAlpha = 1; }
       grainAndVignette();
-      if (!this.held && this.p < 1) hint(this.p < .02 ? W / 2 : this.cx, this.p < .02 ? H * .55 : this.cy, t);
+      if (!this.held && this.p < 1) holdHint(this.p < .02 ? W / 2 : this.cx, this.p < .02 ? H * .55 : this.cy, t, this.p);
       if (this.p > 0 && this.p < 1) { ctx.strokeStyle = "rgba(239,230,214,.5)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(this.cx, this.cy, 30, -Math.PI / 2, -Math.PI / 2 + this.p * Math.PI * 2); ctx.stroke(); }
       if (this.done) hint(W / 2, H * .9, t);
     },
