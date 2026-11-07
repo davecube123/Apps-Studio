@@ -67,7 +67,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "3";
+  const APP_VERSION = "4";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -146,16 +146,17 @@
      Hips, knees, shoulders and elbows with a real walk cycle; the body bobs because the lowest foot
      always rests on the ground. Optional coat with a hem that swings behind the motion. */
   function fig(x, gy, h, o = {}) {
-    const dir = o.dir || 1, sp = o.speed || 0, ph = o.phase || 0, sit = o.sit || 0, reach = o.reach || 0, slump = o.slump || 0;
+    const dir = o.dir || 1, sp = o.speed || 0, ph = o.phase || 0, sit = o.sit || 0, reach = o.reach || 0, slump = o.slump || 0, kn = o.kneel || 0;
     const thigh = h * .25, shin = h * .25, torso = h * .3, headR = h * .088, upper = h * .165, fore = h * .15, lw = h * .072;
     const amp = Math.min(1, sp) * .42 + Math.max(0, sp - 1) * .22, on = Math.min(1, sp);
     const leg = i => { const a = ph + i * Math.PI;
       let tA = amp * Math.sin(a), sA = tA - (.08 + .95 * Math.max(0, Math.sin(a - 1.9)) * on);
       tA = lerp(tA, Math.PI / 2 - .05, sit); sA = lerp(sA, .08, sit);
+      if (kn) { tA = lerp(tA, i ? .06 : Math.PI / 2 - .12, kn); sA = lerp(sA, i ? -1.5 : .04, kn); }
       const k = [Math.sin(tA) * thigh, Math.cos(tA) * thigh]; return { k, f: [k[0] + Math.sin(sA) * shin, k[1] + Math.cos(sA) * shin] }; };
     const L = [leg(0), leg(1)];
-    const hipWalk = gy - Math.max(L[0].f[1], L[1].f[1]), hipY = lerp(hipWalk, gy - shin * 1.02, sit);
-    const lean = .05 + Math.max(0, sp - 1) * .12 + slump * .3 + sit * .12;
+    const hipWalk = gy - Math.max(L[0].f[1], L[1].f[1]), hipY = lerp(lerp(hipWalk, gy - shin * 1.02, sit), gy - thigh * 1.04 - h * .01, kn);
+    const lean = .05 + Math.max(0, sp - 1) * .12 + slump * .3 + sit * .12 + kn * .08;
     const sh = [Math.sin(lean) * torso, -Math.cos(lean) * torso];
     const hd = [sh[0] + Math.sin(lean + slump * .4) * (headR * 1.25), sh[1] - Math.cos(lean + slump * .4) * (headR * 1.25)];
     const W2 = (fx, fy) => [x + dir * fx, hipY + fy];
@@ -163,6 +164,7 @@
       let aA = -amp * .95 * Math.sin(a), eB = .25 + .5 * Math.max(0, Math.sin(a + .6)) * on;
       if (i === 0) { aA = lerp(aA, 1.5, reach); eB = lerp(eB, .12, reach); }
       aA = lerp(aA, .42, sit); eB = lerp(eB, 1.05, sit);
+      if (o.armA != null && !(i === 0 && reach > .01)) { aA = o.armA * (i ? .85 : 1); eB = o.elb ?? .2; }
       const e = [sh[0] + Math.sin(aA) * upper, sh[1] + Math.cos(aA) * upper];
       return { e, hnd: [e[0] + Math.sin(aA + eB) * fore, e[1] + Math.cos(aA + eB) * fore] }; };
     const A = [arm(0), arm(1)];
@@ -181,7 +183,7 @@
     if (Math.abs(face) > .15) { ctx.beginPath(); ctx.moveTo(nx - dir * face * headR * .3, ny - headR * .28); ctx.lineTo(nx + dir * face * headR * .18, ny + headR * .02); ctx.lineTo(nx - dir * face * headR * .3, ny + headR * .18); ctx.fill(); }
     limb([[0, 0], L[0].k, L[0].f], lw, c); limb([sh, A[0].e, A[0].hnd], lw * .85, c);
     ctx.restore();
-    const hw = W2(...A[0].hnd); return { headX: hp[0], headY: hp[1], handX: hw[0], handY: hw[1], hipY };
+    const hw = W2(...A[0].hnd), cw = W2(sh[0] * .55 + dir * 0, sh[1] * .58); return { headX: hp[0], headY: hp[1], handX: hw[0], handY: hw[1], hipY, chestX: cw[0], chestY: cw[1] };
   }
   /* rim light: the figure drawn once in light, offset toward the sun, then in shadow on top */
   function figLit(x, gy, h, o, rim, off = 1.6) { fig(x + off, gy - off * .6, h, { ...o, color: rim, far: rim }); return fig(x, gy, h, o); }
@@ -216,13 +218,51 @@
     ctx.lineTo(W, H); ctx.fill();
   }
 
+  /* ---------- The road at dusk: shared by chapters I, VII and VIII ---------- */
+  const PAL_DUSK = { sky: ["#5f6f86", "#a9aab0", "#e6d4bd"], sun: "rgba(250,214,160,A)", core: "rgba(255,236,200,A)", r1: "#a7adb5", r2: "#8f98a1", fog: "230,220,206", tree: ["#6b757d", "#5d666e"], road: ["#565d64", "#33383d"], post: "#3b4147", grass: "#2a2f33" };
+  const PAL_EVENING = { sky: ["#5d5878", "#b293a0", "#f1c79a"], sun: "rgba(255,200,140,A)", core: "rgba(255,226,180,A)", r1: "#ab98a4", r2: "#927f8f", fog: "240,214,190", tree: ["#6e6474", "#615869"], road: ["#5a5361", "#36313b"], post: "#3e3843", grass: "#2c2730" };
+  function makeClouds() { return Array.from({ length: 5 }, (_, i) => ({ x: hash1(i) * W * 1.4, y: H * (.08 + hash1(i + 9) * .25), w: 140 + hash1(i + 3) * 200, s: 3 + hash1(i + 5) * 5 })); }
+  function driftClouds(cl, dt, v = 0) { cl.forEach(c => { c.x -= (c.s + v * .02) * dt; if (c.x + c.w < -20) c.x = W + 40; }); }
+  function paintRoad(cam, t, P, clouds, lamp = {}) {
+    const gy = H * .72;
+      /* sky: a cool dusk warming to the horizon, a low sun ahead */
+      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, P.sky[0]); sk.addColorStop(.55, P.sky[1]); sk.addColorStop(1, P.sky[2]); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+      glowDot(W * .82, gy - H * .1, W * .9, P.sun, .45); glowDot(W * .82, gy - H * .1, W * .16, P.core, .7);
+      clouds.forEach(c => { ctx.fillStyle = "rgba(236,226,214,.22)"; ctx.beginPath(); ctx.ellipse(c.x + c.w / 2, c.y, c.w / 2, c.w * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.ellipse(c.x + c.w * .4, c.y - c.w * .04, c.w * .28, c.w * .05, 0, 0, Math.PI * 2); ctx.fill(); });
+      /* layers of land, hazier with distance */
+      ridge(cam, .04, gy - H * .17, H * .06, 1, P.r1);
+      ridge(cam, .12, gy - H * .09, H * .05, 4, P.r2);
+      const fog = ctx.createLinearGradient(0, gy - H * .14, 0, gy); fog.addColorStop(0, `rgba(${P.fog},0)`); fog.addColorStop(1, `rgba(${P.fog},.45)`); ctx.fillStyle = fog; ctx.fillRect(0, gy - H * .14, W, H * .14);
+      /* a row of trees, swaying a little */
+      const tsp = 125, tf = .45; for (let k = Math.floor(cam * tf / tsp) - 1; k < (cam * tf + W) / tsp + 1; k++) { if (hash1(k * 3.1) < .25) continue;
+        const sx = k * tsp - cam * tf + hash1(k) * 50, v = Math.floor(hash1(k * 7) * 4), sp = treeSprite(v, P.tree[0], P.tree[1]), sc = .75 + hash1(k * 2) * .45;
+        ctx.save(); ctx.translate(sx, gy - 2); ctx.rotate(Math.sin(t * .8 + k) * .012); ctx.drawImage(sp, -60 * sc, -170 * sc, 120 * sc, 170 * sc); ctx.restore(); }
+      /* the road */
+      const rd = ctx.createLinearGradient(0, gy, 0, H); rd.addColorStop(0, P.road[0]); rd.addColorStop(1, P.road[1]); ctx.fillStyle = rd; ctx.fillRect(0, gy, W, H - gy);
+      ctx.fillStyle = "rgba(235,225,210,.18)"; ctx.fillRect(0, gy, W, 2);
+      ctx.strokeStyle = "rgba(235,225,210,.08)"; ctx.lineWidth = 2; for (let k = Math.floor(cam / 60) - 1; k < (cam + W) / 60 + 1; k++) { const sx = k * 60 - cam; ctx.beginPath(); ctx.moveTo(sx, gy + 28); ctx.lineTo(sx + 26, gy + 28); ctx.stroke(); }
+      /* lamp posts along the road; one lights at the end */
+      const lsp = 300; for (let k = Math.floor((cam - W) / lsp); k < (cam + W * 2) / lsp; k++) { const sx = k * lsp - cam + 40; if (sx < -60 || sx > W + 60) continue;
+        ctx.fillStyle = P.post; ctx.fillRect(sx - 2, gy - 196, 4, 196); ctx.strokeStyle = P.post; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(sx, gy - 192); ctx.quadraticCurveTo(sx, gy - 206, sx - 18, gy - 204); ctx.stroke();
+        ctx.fillStyle = "#2e3338"; ctx.beginPath(); ctx.moveTo(sx - 26, gy - 196); ctx.lineTo(sx - 10, gy - 196); ctx.lineTo(sx - 14, gy - 204); ctx.lineTo(sx - 22, gy - 204); ctx.fill();
+        if (k === lamp.lit && lamp.a > 0) { const a = lamp.a;
+          const cone = ctx.createLinearGradient(0, gy - 196, 0, gy); cone.addColorStop(0, `rgba(255,214,140,${.38 * a})`); cone.addColorStop(1, "rgba(255,214,140,0)");
+          ctx.fillStyle = cone; ctx.beginPath(); ctx.moveTo(sx - 24, gy - 196); ctx.lineTo(sx - 12, gy - 196); ctx.lineTo(sx + 50, gy); ctx.lineTo(sx - 86, gy); ctx.fill();
+          glowDot(sx - 18, gy - 194, 90, "rgba(255,206,130,A)", .55 * a); ctx.fillStyle = `rgba(255,236,190,${a})`; ctx.fillRect(sx - 24, gy - 197, 12, 3);
+          ctx.fillStyle = `rgba(255,214,140,${.18 * a})`; ctx.beginPath(); ctx.ellipse(sx - 18, gy + 4, 70, 9, 0, 0, Math.PI * 2); ctx.fill(); } }
+    /* near grass, swaying, moving faster than the road */
+    ctx.strokeStyle = P.grass; ctx.lineWidth = 1.6; for (let k = Math.floor(cam * 1.3 / 22) - 1; k < (cam * 1.3 + W) / 22 + 1; k++) { if (hash1(k * 1.7) < .55) continue;
+      const sx = k * 22 - cam * 1.3, base = H - 6 - hash1(k) * 18, hh = 14 + hash1(k * 3) * 22, sw = Math.sin(t * 1.6 + k) * 4;
+      for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(sx + j * 3, base); ctx.quadraticCurveTo(sx + j * 4 + sw * .5, base - hh * .6, sx + j * 6 + sw, base - hh * (1 - Math.abs(j) * .25)); ctx.stroke(); } }
+  }
+
   /* ---------- Chapter I · Ahead ----------
      A father walks ahead and never turns. The boy can call (tap) or run (hold); the gap only grows. */
   const ch1 = {
     num: "I", name: "Ahead",
     start() { this.t = 0; this.cam = 0; this.gap = 120; this.calls = 0; this.stam = 1; this.ph = 0; this.fph = 0; this.ripples = []; this.turn = 0; this.tiltT = -9;
       this.gone = false; this.goneT = 0; this.sit = 0; this.slump = 0; this.lamp = 0; this.litLamp = null; this.litT = 0; this.arriveT = 0; this.stopW = 0; this.done = false; this.leaves = []; this.held = false; this.bv = 40; this.fv = 46; this.hem = 0; this.reach = 0;
-      this.clouds = Array.from({ length: 5 }, (_, i) => ({ x: hash1(i) * W * 1.4, y: H * (.08 + hash1(i + 9) * .25), w: 140 + hash1(i + 3) * 200, s: 3 + hash1(i + 5) * 5 }));
+      this.clouds = makeClouds();
       ambience(.05, 520, 0); },
     down() { this.held = true; this.downT = this.t; },
     up() { this.held = false; if (this.t - this.downT < .28) this.call(); },
@@ -262,35 +302,11 @@
         if (g > 6.8) this.done = true; }
       if (Math.random() < dt * .5) this.leaves.push({ x: Math.random() * W * 1.2, y: -10, v: 16 + Math.random() * 14, s: Math.random() * 6, r: 3 + Math.random() * 2 });
       this.leaves.forEach(l => { l.y += l.v * dt; l.x += (Math.sin(this.t * 1.3 + l.s) * 14 - this.bv * .3) * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
-      this.clouds.forEach(c => { c.x -= (c.s + this.bv * .02) * dt; if (c.x + c.w < -20) c.x = W + 40; });
+      driftClouds(this.clouds, dt, this.bv);
     },
     draw() {
       const t = this.t, gy = H * .72, cam = this.cam;
-      /* sky: a cool dusk warming to the horizon, a low sun ahead */
-      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#5f6f86"); sk.addColorStop(.55, "#a9aab0"); sk.addColorStop(1, "#e6d4bd"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
-      glowDot(W * .82, gy - H * .1, W * .9, "rgba(250,214,160,A)", .45); glowDot(W * .82, gy - H * .1, W * .16, "rgba(255,236,200,A)", .7);
-      this.clouds.forEach(c => { ctx.fillStyle = "rgba(236,226,214,.22)"; ctx.beginPath(); ctx.ellipse(c.x + c.w / 2, c.y, c.w / 2, c.w * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.ellipse(c.x + c.w * .4, c.y - c.w * .04, c.w * .28, c.w * .05, 0, 0, Math.PI * 2); ctx.fill(); });
-      /* layers of land, hazier with distance */
-      ridge(cam, .04, gy - H * .17, H * .06, 1, "#a7adb5");
-      ridge(cam, .12, gy - H * .09, H * .05, 4, "#8f98a1");
-      const fog = ctx.createLinearGradient(0, gy - H * .14, 0, gy); fog.addColorStop(0, "rgba(230,220,206,0)"); fog.addColorStop(1, "rgba(230,220,206,.45)"); ctx.fillStyle = fog; ctx.fillRect(0, gy - H * .14, W, H * .14);
-      /* a row of trees, swaying a little */
-      const tsp = 125, tf = .45; for (let k = Math.floor(cam * tf / tsp) - 1; k < (cam * tf + W) / tsp + 1; k++) { if (hash1(k * 3.1) < .25) continue;
-        const sx = k * tsp - cam * tf + hash1(k) * 50, v = Math.floor(hash1(k * 7) * 4), sp = treeSprite(v, "#6b757d", "#5d666e"), sc = .75 + hash1(k * 2) * .45;
-        ctx.save(); ctx.translate(sx, gy - 2); ctx.rotate(Math.sin(t * .8 + k) * .012); ctx.drawImage(sp, -60 * sc, -170 * sc, 120 * sc, 170 * sc); ctx.restore(); }
-      /* the road */
-      const rd = ctx.createLinearGradient(0, gy, 0, H); rd.addColorStop(0, "#565d64"); rd.addColorStop(1, "#33383d"); ctx.fillStyle = rd; ctx.fillRect(0, gy, W, H - gy);
-      ctx.fillStyle = "rgba(235,225,210,.18)"; ctx.fillRect(0, gy, W, 2);
-      ctx.strokeStyle = "rgba(235,225,210,.08)"; ctx.lineWidth = 2; for (let k = Math.floor(cam / 60) - 1; k < (cam + W) / 60 + 1; k++) { const sx = k * 60 - cam; ctx.beginPath(); ctx.moveTo(sx, gy + 28); ctx.lineTo(sx + 26, gy + 28); ctx.stroke(); }
-      /* lamp posts along the road; one lights at the end */
-      const lsp = 300; for (let k = Math.floor((cam - W) / lsp); k < (cam + W * 2) / lsp; k++) { const sx = k * lsp - cam + 40; if (sx < -60 || sx > W + 60) continue;
-        ctx.fillStyle = "#3b4147"; ctx.fillRect(sx - 2, gy - 196, 4, 196); ctx.strokeStyle = "#3b4147"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(sx, gy - 192); ctx.quadraticCurveTo(sx, gy - 206, sx - 18, gy - 204); ctx.stroke();
-        ctx.fillStyle = "#2e3338"; ctx.beginPath(); ctx.moveTo(sx - 26, gy - 196); ctx.lineTo(sx - 10, gy - 196); ctx.lineTo(sx - 14, gy - 204); ctx.lineTo(sx - 22, gy - 204); ctx.fill();
-        if (k === this.litLamp && this.lamp > 0) { const a = this.lamp;
-          const cone = ctx.createLinearGradient(0, gy - 196, 0, gy); cone.addColorStop(0, `rgba(255,214,140,${.38 * a})`); cone.addColorStop(1, "rgba(255,214,140,0)");
-          ctx.fillStyle = cone; ctx.beginPath(); ctx.moveTo(sx - 24, gy - 196); ctx.lineTo(sx - 12, gy - 196); ctx.lineTo(sx + 50, gy); ctx.lineTo(sx - 86, gy); ctx.fill();
-          glowDot(sx - 18, gy - 194, 90, "rgba(255,206,130,A)", .55 * a); ctx.fillStyle = `rgba(255,236,190,${a})`; ctx.fillRect(sx - 24, gy - 197, 12, 3);
-          ctx.fillStyle = `rgba(255,214,140,${.18 * a})`; ctx.beginPath(); ctx.ellipse(sx - 18, gy + 4, 70, 9, 0, 0, Math.PI * 2); ctx.fill(); } }
+      paintRoad(cam, t, PAL_DUSK, this.clouds, { lit: this.litLamp, a: this.lamp });
       /* the curb stone he sits on */
       const bx = W * .3, fx = bx + this.gap, fh = Math.min(H * .3, 235), bh = fh * .5;
       if (this.sit > 0) { ctx.fillStyle = `rgba(80,86,92,${this.sit})`; ctx.fillRect(bx - 22, gy - bh * .25 + 4, 30, bh * .25); }
@@ -303,10 +319,6 @@
         ctx.beginPath(); ctx.arc(b.headX + bh * .05, b.headY, 8 + ease(Math.min(1, k * 1.2)) * 80, -.75, .75); ctx.stroke(); });
       /* leaves, fluttering as they fall */
       this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(Math.sin(t * 2 + l.s) * .8); ctx.scale(Math.cos(t * 3 + l.s), 1); ctx.fillStyle = "rgba(128,92,60,.7)"; ctx.beginPath(); ctx.ellipse(0, 0, l.r, l.r * .5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
-      /* near grass, swaying, moving faster than the road */
-      ctx.strokeStyle = "#2a2f33"; ctx.lineWidth = 1.6; for (let k = Math.floor(cam * 1.3 / 22) - 1; k < (cam * 1.3 + W) / 22 + 1; k++) { if (hash1(k * 1.7) < .55) continue;
-        const sx = k * 22 - cam * 1.3, base = H - 6 - hash1(k) * 18, hh = 14 + hash1(k * 3) * 22, sw = Math.sin(t * 1.6 + k) * 4;
-        for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(sx + j * 3, base); ctx.quadraticCurveTo(sx + j * 4 + sw * .5, base - hh * .6, sx + j * 6 + sw, base - hh * (1 - Math.abs(j) * .25)); ctx.stroke(); } }
       grainAndVignette();
       if (this.t < 6 && !this.calls) hint(b.headX + 40, b.headY - 20, this.t, clamp(this.t - 1.5, 0, 1));
       if (this.done) hint(W / 2, H * .86, this.t);
@@ -345,43 +357,67 @@
       if (this.leave >= 1) { this.turn = Math.min(1, this.turn + dt * .4); if (this.turn >= 1 && !this.done) { this.done = true; note(N.D4, { vol: .06, dur: 4 }); } }
     },
     draw() {
-      const t = this.t, floor = H * .74;
-      const wall = ctx.createLinearGradient(0, 0, 0, floor); wall.addColorStop(0, "#2a1c15"); wall.addColorStop(1, "#4a3022"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, floor);
-      ctx.fillStyle = "#3a261b"; ctx.fillRect(0, floor, W, H - floor);
-      /* lamp glow */
-      const lampX = W * .86, lampY = this.bedY - 70; glowDot(lampX, lampY, W * .7, "rgba(243,190,110,A)", .38 * (1 - this.leave * .2));
-      ctx.fillStyle = "#6a4a30"; ctx.fillRect(lampX - 2, lampY, 4, this.bedY - lampY + 10); ctx.fillStyle = "#f2c47c"; ctx.beginPath(); ctx.moveTo(lampX - 18, lampY); ctx.lineTo(lampX + 18, lampY); ctx.lineTo(lampX + 11, lampY - 22); ctx.lineTo(lampX - 11, lampY - 22); ctx.fill();
-      /* window with night */
-      ctx.fillStyle = "#1b2433"; ctx.fillRect(W * .5, H * .16, W * .22, H * .2); ctx.fillStyle = "#e9e3d0"; ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(W * .66, H * .21, 6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
-      ctx.strokeStyle = "#5a3d2b"; ctx.lineWidth = 4; ctx.strokeRect(W * .5, H * .16, W * .22, H * .2); ctx.beginPath(); ctx.moveTo(W * .61, H * .16); ctx.lineTo(W * .61, H * .36); ctx.stroke();
-      /* the door, ajar: a strip of cold light */
-      const dx = this.doorX, open = this.walk ? clamp(this.walk * 1.4, 0, 1) * (1 - clamp((this.leave - .5) * 2, 0, 1)) : .1;
-      ctx.fillStyle = "#24170f"; ctx.fillRect(dx, floor - H * .34, W * .12, H * .34);
-      ctx.fillStyle = `rgba(150,175,205,${.25 + open * .55})`; ctx.fillRect(dx + W * .12 * (1 - open * .8) - 4, floor - H * .34, W * .12 * open * .8 + 4, H * .34);
-      /* bed */
-      const bx = this.bedX, by = this.bedY, bw = W * .62;
-      ctx.fillStyle = "#5c3b28"; ctx.fillRect(bx - bw / 2, by, bw, 16); ctx.fillRect(bx - bw / 2, by - 26, 8, 60); ctx.fillRect(bx + bw / 2 - 8, by - 10, 8, 44);
-      ctx.fillStyle = "#e8dccb"; ctx.beginPath(); ctx.roundRect(bx - bw / 2 + 6, by - 14, bw - 12, 16, 6); ctx.fill();
-      /* pillow and the mother asleep */
-      const px = this.pillowX, breath = Math.sin(t * 1.4) * 2.2, stir = this.stir, tw = this.turn;
-      ctx.fillStyle = "#f3ead9"; ctx.beginPath(); ctx.ellipse(px, by - 24, 46, 15, 0, 0, Math.PI * 2); ctx.fill();
+      const t = this.t, floor = H * .74, bx = this.bedX, by = this.bedY, bw = W * .62, px = this.pillowX;
+      /* a warm room at night: papered wall, the lamp's pool of light */
+      const wall = ctx.createLinearGradient(0, 0, 0, floor); wall.addColorStop(0, "#22150e"); wall.addColorStop(1, "#4d3123"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, floor);
+      ctx.fillStyle = "rgba(255,220,170,.03)"; for (let x = 0; x < W; x += 22) ctx.fillRect(x, 0, 9, floor);
+      const lampX = W * .86, lampY = by - 70; glowDot(lampX, lampY - 10, W * .8, "rgba(243,190,110,A)", .42 * (1 - this.leave * .2));
+      /* the window: night, stars, a moon, curtains */
+      const wx = W * .47, wy = H * .14, ww = W * .26, wh = H * .21;
+      const ns = ctx.createLinearGradient(0, wy, 0, wy + wh); ns.addColorStop(0, "#0b1222"); ns.addColorStop(1, "#24324c"); ctx.fillStyle = ns; ctx.fillRect(wx, wy, ww, wh);
+      for (let i = 0; i < 14; i++) { ctx.fillStyle = `rgba(230,230,240,${.3 + .4 * Math.sin(t * 1.3 + i)})`; ctx.fillRect(wx + hash1(i) * ww, wy + hash1(i + 20) * wh * .7, 1.5, 1.5); }
+      glowDot(wx + ww * .72, wy + wh * .3, 40, "rgba(230,230,210,A)", .35); ctx.fillStyle = "#ece6cf"; ctx.beginPath(); ctx.arc(wx + ww * .72, wy + wh * .3, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#4a3022"; ctx.lineWidth = 5; ctx.strokeRect(wx, wy, ww, wh); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(wx + ww / 2, wy); ctx.lineTo(wx + ww / 2, wy + wh); ctx.moveTo(wx, wy + wh * .45); ctx.lineTo(wx + ww, wy + wh * .45); ctx.stroke();
+      ctx.fillStyle = "#3a2219"; ctx.fillRect(wx - 10, wy + wh, ww + 20, 6);
+      for (const s of [-1, 1]) { const cx = s < 0 ? wx - 6 : wx + ww + 6; ctx.fillStyle = "#5b2c22"; ctx.beginPath(); ctx.moveTo(cx, wy - 14);
+        ctx.quadraticCurveTo(cx - s * 26, wy + wh * .5, cx - s * 10, wy + wh + 30); ctx.lineTo(cx + s * 18, wy + wh + 30); ctx.lineTo(cx + s * 18, wy - 14); ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2; for (let k = 1; k < 3; k++) { ctx.beginPath(); ctx.moveTo(cx + s * k * 5, wy - 10); ctx.quadraticCurveTo(cx + s * k * 5 - s * 16, wy + wh * .5, cx + s * k * 5, wy + wh + 28); ctx.stroke(); } }
+      ctx.fillStyle = "#3b2416"; ctx.fillRect(wx - 30, wy - 18, ww + 60, 5);
+      /* floor: skirting, boards, a rug */
+      ctx.fillStyle = "#2b1a11"; ctx.fillRect(0, floor - 10, W, 10);
+      const fl = ctx.createLinearGradient(0, floor, 0, H); fl.addColorStop(0, "#3e281a"); fl.addColorStop(1, "#1f140d"); ctx.fillStyle = fl; ctx.fillRect(0, floor, W, H - floor);
+      ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 1; for (let y = floor + 8, g = 8; y < H; g *= 1.25, y += g) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      ctx.fillStyle = "#5a2a22"; ctx.beginPath(); ctx.ellipse(bx, floor + 26, bw * .55, 22, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(230,190,120,.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(bx, floor + 26, bw * .5, 17, 0, 0, Math.PI * 2); ctx.stroke();
+      glowDot(lampX - 30, floor + 10, W * .5, "rgba(243,190,110,A)", .18);
+      /* the door, ajar: a strip of cold light, spilling onto the floor when open */
+      const dx = this.doorX, dw = W * .12, dh = H * .34, open = this.walk ? clamp(this.walk * 1.4, 0, 1) * (1 - clamp((this.leave - .5) * 2, 0, 1)) : .1;
+      ctx.fillStyle = "#3a2418"; ctx.fillRect(dx - 5, floor - dh - 6, dw + 10, dh + 6);
+      ctx.fillStyle = "#24170f"; ctx.fillRect(dx, floor - dh, dw, dh);
+      const lw = dw * open * .8 + 4, lx = dx + dw * (1 - open * .8) - 4;
+      const cold = ctx.createLinearGradient(lx, 0, lx + lw, 0); cold.addColorStop(0, `rgba(140,168,205,${.35 + open * .5})`); cold.addColorStop(1, `rgba(190,210,235,${.25 + open * .5})`); ctx.fillStyle = cold; ctx.fillRect(lx, floor - dh, lw, dh);
+      if (open > .15) { ctx.fillStyle = `rgba(160,185,215,${open * .22})`; ctx.beginPath(); ctx.moveTo(lx, floor); ctx.lineTo(lx + lw, floor); ctx.lineTo(lx + lw + 60 * open, H); ctx.lineTo(lx + 10, H); ctx.fill(); }
+      ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 2; ctx.strokeRect(dx + 6, floor - dh + 10, (dw - 12) * (1 - open * .8), dh * .4); ctx.strokeRect(dx + 6, floor - dh * .5, (dw - 12) * (1 - open * .8), dh * .42);
+      /* the lamp on its table */
+      ctx.fillStyle = "#3c271a"; ctx.fillRect(lampX - 22, by - 6, 44, 6); ctx.fillRect(lampX - 18, by, 5, floor - by); ctx.fillRect(lampX + 13, by, 5, floor - by);
+      ctx.fillStyle = "#7a5636"; ctx.fillRect(lampX - 3, lampY, 6, by - lampY - 6);
+      const shade = ctx.createLinearGradient(0, lampY - 24, 0, lampY); shade.addColorStop(0, "#f7d49a"); shade.addColorStop(1, "#e8b06a"); ctx.fillStyle = shade; ctx.beginPath(); ctx.moveTo(lampX - 19, lampY); ctx.lineTo(lampX + 19, lampY); ctx.lineTo(lampX + 12, lampY - 24); ctx.lineTo(lampX - 12, lampY - 24); ctx.fill();
+      glowDot(lampX, lampY + 4, 34, "rgba(255,226,170,A)", .7);
+      /* the bed: headboard, mattress, the mother asleep under a folded blanket */
+      ctx.fillStyle = "#4a2d1d"; ctx.beginPath(); ctx.roundRect(bx - bw / 2 - 4, by - 70, 12, 104, 4); ctx.fill(); ctx.fillRect(bx + bw / 2 - 10, by - 14, 10, 48);
+      ctx.fillStyle = "#5e3b27"; ctx.fillRect(bx - bw / 2, by, bw, 14);
+      ctx.fillStyle = "#e9dece"; ctx.beginPath(); ctx.roundRect(bx - bw / 2 + 6, by - 14, bw - 12, 16, 6); ctx.fill();
+      const breath = Math.sin(t * 1.4) * 2.2, stir = this.stir, tw = this.turn;
+      ctx.fillStyle = "#f4ecdd"; ctx.beginPath(); ctx.ellipse(px, by - 24, 46, 15, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(160,130,100,.25)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(px, by - 24, 38, 10, 0, Math.PI * .1, Math.PI * .9); ctx.stroke();
       ctx.fillStyle = "#8a5a3c"; ctx.beginPath(); ctx.arc(px + 8 + stir * 6 * Math.sin(t * 9) + tw * -10, by - 38, 15, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#4b2e20"; ctx.beginPath(); ctx.arc(px + 2 + tw * -10, by - 42, 15, Math.PI * .8, Math.PI * 2.05); ctx.fill();
-      ctx.fillStyle = "#b9875f"; ctx.beginPath(); ctx.moveTo(px + 20, by - 12);
-      ctx.bezierCurveTo(px + 60, by - 52 - breath - stir * 8, bx + bw * .25, by - 50 - breath, bx + bw / 2 - 12, by - 14); ctx.lineTo(px + 20, by - 12); ctx.fill();
-      if (tw) { /* she turns toward where he was: one hand open on the blanket */ ctx.fillStyle = "#8a5a3c"; ctx.beginPath(); ctx.arc(px - 30 - tw * 8, by - 18, 6, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#3e2519"; ctx.beginPath(); ctx.arc(px + 2 + tw * -10, by - 42, 15.5, Math.PI * .78, Math.PI * 2.08); ctx.fill(); ctx.beginPath(); ctx.ellipse(px - 16 + tw * -10, by - 30, 10, 6, -.4, 0, Math.PI * 2); ctx.fill();
+      const bl = ctx.createLinearGradient(0, by - 56, 0, by - 10); bl.addColorStop(0, "#c99467"); bl.addColorStop(1, "#9c6c49"); ctx.fillStyle = bl; ctx.beginPath(); ctx.moveTo(px + 20, by - 12);
+      ctx.bezierCurveTo(px + 60, by - 52 - breath - stir * 8, bx + bw * .25, by - 50 - breath, bx + bw / 2 - 12, by - 14); ctx.lineTo(bx + bw / 2 - 12, by + 4); ctx.lineTo(px + 20, by + 4); ctx.fill();
+      ctx.strokeStyle = "rgba(90,55,35,.35)"; ctx.lineWidth = 1.5; for (let k = 0; k < 3; k++) { const fx0 = px + 70 + k * bw * .16; ctx.beginPath(); ctx.moveTo(fx0, by - 40 - breath + k * 3); ctx.quadraticCurveTo(fx0 + 14, by - 26, fx0 + 6, by - 8); ctx.stroke(); }
+      ctx.fillStyle = "#e6c79a"; ctx.fillRect(px + 22, by - 14, bw * .7, 4);
+      if (tw) { ctx.fillStyle = "#8a5a3c"; ctx.beginPath(); ctx.arc(px - 30 - tw * 8, by - 18, 6, 0, Math.PI * 2); ctx.fill(); }
       /* the key */
       if (!this.got) { const ky = this.keyY() + 18; ctx.save(); ctx.translate(this.k, ky); ctx.fillStyle = "#e6b65c"; ctx.strokeStyle = "#e6b65c"; ctx.lineWidth = 3.5;
         ctx.beginPath(); ctx.arc(-14, 0, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-8, -1.8, 20, 3.6); ctx.fillRect(7, 0, 3, 7); ctx.fillRect(11, 0, 3, 5); ctx.restore();
-        /* the pillow covers the key's end until it is drawn out */
-        ctx.fillStyle = "#f3ead9"; ctx.beginPath(); ctx.ellipse(px + 14, by - 22, 34, 11, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#f4ecdd"; ctx.beginPath(); ctx.ellipse(px + 14, by - 22, 34, 11, 0, 0, Math.PI * 2); ctx.fill();
         glowDot(this.k - 10, this.keyY() + 18, 26, "rgba(240,200,110,A)", .25 + .15 * Math.sin(t * 3)); }
-      /* the boy, older now, waiting at the bedside */
-      const walkX = lerp(W * .27, this.doorX + W * .06, ease(this.walk)), boyH = Math.min(H * .26, 200);
+      /* the boy, older now: he reaches, takes it, walks to the door and looks back once */
+      const walkX = lerp(W * .27, this.doorX + W * .06, ease(this.walk)), boyH = Math.min(H * .26, 200), walking = this.walk > 0 && this.walk < 1, atDoor = this.walk >= 1;
       if (this.leave < .9) { ctx.globalAlpha = 1 - clamp((this.leave - .5) * 2.5, 0, 1);
-        person(walkX, floor, boyH, "#2a2522", { walk: this.walk > 0 && this.walk < 1, phase: t * 7, tilt: this.walk >= 1 && this.leave < .6 ? .9 : 0, reach: !this.walk && !this.got ? .5 : 0 });
-        if (this.got) { ctx.fillStyle = "#e6b65c"; ctx.beginPath(); ctx.arc(walkX + 14, floor - boyH * .5, 3.5, 0, Math.PI * 2); ctx.fill(); glowDot(walkX + 14, floor - boyH * .5, 22, "rgba(240,200,110,A)", .4); }
+        ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(walkX, floor + 2, boyH * .17, 4, 0, 0, Math.PI * 2); ctx.fill();
+        const b = figLit(walkX, floor, boyH, { dir: this.walk ? -1 : 1, color: "#2a2420", far: "#211c19", speed: walking ? 1 : 0, phase: t * 5.5, reach: !this.walk && !this.got ? .62 : 0, turn: atDoor && this.leave < .6 ? .88 : 0 }, "rgba(255,200,130,.45)", this.walk ? -1.4 : 1.4);
+        if (this.got) { ctx.fillStyle = "#e6b65c"; ctx.beginPath(); ctx.arc(b.handX, b.handY, 3.5, 0, Math.PI * 2); ctx.fill(); glowDot(b.handX, b.handY, 22, "rgba(240,200,110,A)", .45); }
         ctx.globalAlpha = 1; }
+      grainAndVignette();
       if (!this.got && !this.drag && this.t > 2 && this.k === this.keyHome && !this.stirs) hint(this.k, this.keyY() + 18, t);
       if (this.got && !this.walk) hint(this.doorX + W * .06, floor - H * .17, t);
       if (this.done) hint(W / 2, H * .88, t);
@@ -426,9 +462,17 @@
     },
     draw() {
       const t = this.t, sx = (Math.random() - .5) * 8 * this.shake, sy = (Math.random() - .5) * 6 * this.shake; ctx.save(); ctx.translate(sx, sy);
-      const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0c1512"); bg.addColorStop(1, "#1b2822"); ctx.fillStyle = bg; ctx.fillRect(-10, -10, W + 20, H + 20);
-      for (let i = 0; i < 9; i++) { const xx = (i / 8) * W * 1.1 - W * .05, w = 16 + (i % 3) * 10; ctx.fillStyle = i % 2 ? "#13201b" : "#0f1a16"; ctx.fillRect(xx, 0, w, this.floor); }
-      ctx.fillStyle = "#111b17"; ctx.fillRect(-10, this.floor, W + 20, H - this.floor + 10);
+      const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0a1311"); bg.addColorStop(.6, "#18261f"); bg.addColorStop(1, "#1d2c25"); ctx.fillStyle = bg; ctx.fillRect(-10, -10, W + 20, H + 20);
+      glowDot(W * .78, H * .06, W * .8, "rgba(190,215,200,A)", .16 + this.notch * .02);
+      for (let i = 0; i < 3; i++) { const x0 = W * (.55 + i * .16); ctx.fillStyle = "rgba(200,228,210,.045)"; ctx.beginPath(); ctx.moveTo(x0, -10); ctx.lineTo(x0 + 26, -10); ctx.lineTo(x0 - 140 + i * 10, this.floor); ctx.lineTo(x0 - 190 + i * 10, this.floor); ctx.fill(); }
+      /* trunks in three depths: thin and hazy far, dark and wide near */
+      for (const [n, wmin, wadd, col, seed] of [[14, 5, 6, "#1a2a23", 1], [9, 12, 12, "#13201b", 7], [5, 22, 18, "#0c1512", 13]]) {
+        for (let i = 0; i < n; i++) { const xx = hash1(i * 3 + seed) * W * 1.1 - W * .05, w = wmin + hash1(i + seed) * wadd; ctx.fillStyle = col; ctx.fillRect(xx, 0, w, this.floor + 4);
+          ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(xx + w * .62, 0, w * .38, this.floor + 4); } }
+      const mist = ctx.createLinearGradient(0, this.floor - 90, 0, this.floor + 10); mist.addColorStop(0, "rgba(120,150,138,0)"); mist.addColorStop(1, "rgba(120,150,138,.28)"); ctx.fillStyle = mist; ctx.fillRect(-10, this.floor - 90, W + 20, 100);
+      const gr = ctx.createLinearGradient(0, this.floor, 0, H); gr.addColorStop(0, "#152119"); gr.addColorStop(1, "#0b120f"); ctx.fillStyle = gr; ctx.fillRect(-10, this.floor, W + 20, H - this.floor + 10);
+      ctx.strokeStyle = "#1c2c24"; ctx.lineWidth = 1.6; ctx.lineCap = "round"; for (let i = 0; i < 14; i++) { const fx = hash1(i + 50) * W, fy = this.floor + 6 + hash1(i + 60) * (H - this.floor - 20), sz = 12 + hash1(i + 70) * 16;
+        for (let j = -3; j <= 3; j++) { ctx.beginPath(); ctx.moveTo(fx, fy); ctx.quadraticCurveTo(fx + j * sz * .25, fy - sz * .7, fx + j * sz * .45, fy - sz * (1 - Math.abs(j) * .12)); ctx.stroke(); } }
       /* fireflies */
       this.flies.forEach(f => glowDot(f.x, f.y, 9, "rgba(214,232,140,A)", .35 + .3 * Math.sin(f.p * 3)));
       const { cx, cy, cw, ch } = this, x0 = cx - cw / 2, y0 = cy - ch / 2, lean = 1 + this.notch * .035 + this.out * .2, eyes = .35 + this.notch * .2;
@@ -440,6 +484,8 @@
       for (let i = 0; i <= 40; i++) { const a = Math.PI + i / 40 * Math.PI, r = wmH * .32 + Math.sin(i * 1.7 + t) * 4 + (i % 2) * 5;
         ctx.lineTo(wmX + Math.cos(a) * r * .9, wmFoot - wmH * .55 + Math.sin(a) * r * 1.25 - br); }
       ctx.lineTo(wmX + wmH * .3, wmFoot); ctx.lineTo(wmX - wmH * .3, wmFoot); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "rgba(48,66,56,.55)"; ctx.lineWidth = 1.3; for (let i = 0; i < 26; i++) { const a = Math.PI * (1.05 + i / 26 * .9), r = wmH * .3; const x1 = wmX + Math.cos(a) * r * .82, y1 = wmFoot - wmH * .55 + Math.sin(a) * r * 1.12 - br;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - Math.cos(a) * 9, y1 - Math.sin(a) * 12 + 4); ctx.stroke(); }
       const ex = wmX - (this.out ? 6 : 0), ey = wmFoot - wmH * .78 - br;
       for (const s of [-1, 1]) { glowDot(ex + s * wmH * .07, ey, 10, "rgba(232,170,80,A)", eyes); ctx.fillStyle = `rgba(250,205,120,${eyes})`; ctx.beginPath(); ctx.arc(ex + s * wmH * .07, ey, 2.4, 0, Math.PI * 2); ctx.fill(); }
       /* his offered hand, once kneeling */
@@ -469,13 +515,15 @@
         ctx.fillStyle = `rgba(239,230,214,${.5 * fade})`; ctx.beginPath(); const ax = this.lockX + Math.cos(Math.PI * 1.3) * 62, ay = this.lockY + Math.sin(Math.PI * 1.3) * 62; ctx.arc(ax, ay, 4, 0, Math.PI * 2); ctx.fill(); }
       /* the young man */
       const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.manX + W * .1, ease(this.out)) + lerp(0, W * .62, ease(this.walk));
-      const me = person(mx, this.floor, mh, "#1f2a26", { walk: this.phase === "walk", phase: t * 6, reach: this.phase === "hand" ? .6 + this.hold * .3 : this.drag && this.phase === "bring" ? .8 : 0 });
+      ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(mx, this.floor + 2, mh * .17, 4, 0, 0, Math.PI * 2); ctx.fill();
+      const me = figLit(mx, this.floor, mh, { dir: 1, color: "#1d2824", far: "#17201c", speed: this.phase === "walk" ? 1 : 0, phase: t * 5.5, reach: this.phase === "hand" ? .75 + this.hold * .3 : this.drag && this.phase === "bring" ? .9 : 0 }, "rgba(170,210,190,.35)", 1.3);
       if (this.phase === "bring") { ctx.save(); ctx.translate(this.kx, this.ky); ctx.strokeStyle = "#e6b65c"; ctx.fillStyle = "#e6b65c"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(-12, 0, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-6, -1.8, 18, 3.6); ctx.fillRect(8, 0, 3, 6); ctx.restore();
         glowDot(this.kx - 4, this.ky, 30, "rgba(240,200,110,A)", .35); if (!this.drag && t > 1.5) hint(this.lockX, this.lockY + 3, t, .8); }
       if (this.phase === "hand" && !this.holding && this.hold < .05) hint(this.handX, this.handY, t);
       if (this.phase === "hand" && this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.8)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 28, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); }
       ctx.restore();
       /* darkness closes as they walk into the forest */
+      grainAndVignette();
       if (this.walk) { ctx.fillStyle = `rgba(6,9,8,${clamp((this.walk - .5) * 2, 0, 1) * .85})`; ctx.fillRect(0, 0, W, H); }
       if (this.done) hint(W / 2, H * .88, t);
     },
@@ -501,7 +549,8 @@
     num: "IV", name: "The Ashes",
     layout() { this.floor = H * .74; this.pileX = W * .46; this.manX = W * .78; },
     start() { this.t = 0; this.layout(); this.pile = 1; this.cycle = 0; this.cleared = -1; this.dust = []; this.fall = []; this.col = 0; this.broomX = this.pileX + 60; this.dir = 0; this.acc = 0;
-      this.phase = "sweep"; this.ember = 0; this.hold = 0; this.sit = 0; this.done = false; ambience(.02, 260, .02, 61.7); },
+      this.phase = "sweep"; this.ember = 0; this.hold = 0; this.sit = 0; this.done = false; ambience(.02, 260, .02, 61.7);
+      this.motes = Array.from({ length: 26 }, () => ({ u: Math.random(), v: Math.random(), p: Math.random() * 6, s: .5 + Math.random() })); },
     down(x, y) {
       if (this.done) return next();
       if (this.phase === "ember" && Math.hypot(x - this.pileX, y - (this.floor - 8)) < 70) { this.holding = true; return; }
@@ -541,34 +590,48 @@
     },
     draw() {
       const t = this.t, f = this.floor, warm = this.phase === "fire" ? this.col : 0;
-      const wall = ctx.createLinearGradient(0, 0, 0, f); wall.addColorStop(0, "#2b2622"); wall.addColorStop(1, "#4a3f37"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, f);
-      ctx.fillStyle = "#3a332d"; ctx.fillRect(0, f, W, H - f);
-      /* a high window: the seasons pass in its light */
-      const day = (Math.sin(this.cycle * 1.7 + t * .05) + 1) / 2;
-      ctx.fillStyle = `rgb(${lerp(40, 160, day) | 0},${lerp(52, 170, day) | 0},${lerp(70, 180, day) | 0})`; ctx.fillRect(W * .62, H * .14, W * .2, H * .16);
-      ctx.strokeStyle = "#2a231e"; ctx.lineWidth = 5; ctx.strokeRect(W * .62, H * .14, W * .2, H * .16);
-      /* the hearth */
-      ctx.fillStyle = "#231d19"; ctx.beginPath(); ctx.moveTo(W * .06, f); ctx.lineTo(W * .06, f - H * .2); ctx.arc(W * .2, f - H * .2, W * .14, Math.PI, 0); ctx.lineTo(W * .34, f); ctx.fill();
-      if (warm) glowDot(this.pileX, f - 20, W * (.3 + warm * .5), "rgba(255,170,80,A)", .45 * warm);
-      /* the ash pile */
+      /* a stone kitchen: rough wall, a high window, a beam of light with dust in it */
+      const wall = ctx.createLinearGradient(0, 0, 0, f); wall.addColorStop(0, "#26221f"); wall.addColorStop(1, "#4a4038"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, f);
+      ctx.strokeStyle = "rgba(0,0,0,.12)"; ctx.lineWidth = 1; for (let r = 0, y = 0; y < f; r++, y += 26) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let x = (r % 2) * 30; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 26); ctx.stroke(); } }
+      const day = (Math.sin(this.cycle * 1.7 + t * .05) + 1) / 2, wx = W * .62, wy = H * .14, ww = W * .2, wh = H * .16;
+      ctx.fillStyle = `rgb(${lerp(40, 168, day) | 0},${lerp(52, 176, day) | 0},${lerp(70, 186, day) | 0})`; ctx.fillRect(wx, wy, ww, wh);
+      ctx.strokeStyle = "#2a231e"; ctx.lineWidth = 5; ctx.strokeRect(wx, wy, ww, wh); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(wx + ww / 2, wy); ctx.lineTo(wx + ww / 2, wy + wh); ctx.stroke();
+      const beam = ctx.createLinearGradient(wx, wy, this.pileX, f); beam.addColorStop(0, `rgba(225,228,232,${.08 + day * .1})`); beam.addColorStop(1, "rgba(225,228,232,0)");
+      ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(wx, wy + wh); ctx.lineTo(wx + ww, wy + wh); ctx.lineTo(this.pileX + 90, f); ctx.lineTo(this.pileX - 120, f); ctx.fill();
+      this.motes.forEach(m => { const k = (m.v + t * .02 * m.s) % 1, x = lerp(lerp(wx, wx + ww, m.u), lerp(this.pileX - 120, this.pileX + 90, m.u), k) + Math.sin(t + m.p) * 6, y = lerp(wy + wh, f, k);
+        ctx.fillStyle = `rgba(235,235,240,${(.25 + day * .4) * Math.sin(k * Math.PI)})`; ctx.fillRect(x, y, 1.6, 1.6); });
+      /* the hearth: a brick arch, cold */
+      const hx0 = W * .05, hx1 = W * .35, hcx = (hx0 + hx1) / 2, top = f - H * .2;
+      ctx.fillStyle = "#3a312b"; ctx.fillRect(hx0 - 12, top - W * .16 - 14, hx1 - hx0 + 24, 12);
+      ctx.fillStyle = "#4a3f37"; ctx.beginPath(); ctx.moveTo(hx0 - 10, f); ctx.lineTo(hx0 - 10, top); ctx.arc(hcx, top, (hx1 - hx0) / 2 + 10, Math.PI, 0); ctx.lineTo(hx1 + 10, f); ctx.fill();
+      ctx.fillStyle = "#181310"; ctx.beginPath(); ctx.moveTo(hx0 + 6, f); ctx.lineTo(hx0 + 6, top); ctx.arc(hcx, top, (hx1 - hx0) / 2 - 6, Math.PI, 0); ctx.lineTo(hx1 - 6, f); ctx.fill();
+      ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1.5; for (let a = 0; a <= 8; a++) { const an = Math.PI + a / 8 * Math.PI, r0 = (hx1 - hx0) / 2 - 6, r1 = r0 + 16; ctx.beginPath(); ctx.moveTo(hcx + Math.cos(an) * r0, top + Math.sin(an) * r0); ctx.lineTo(hcx + Math.cos(an) * r1, top + Math.sin(an) * r1); ctx.stroke(); }
+      /* the floor: flagstones */
+      const fl = ctx.createLinearGradient(0, f, 0, H); fl.addColorStop(0, "#3c352f"); fl.addColorStop(1, "#211d1a"); ctx.fillStyle = fl; ctx.fillRect(0, f, W, H - f);
+      ctx.strokeStyle = "rgba(0,0,0,.2)"; for (let y = f + 14, g = 14; y < H; g *= 1.3, y += g) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      if (warm) glowDot(this.pileX, f - 20, W * (.3 + warm * .5), "rgba(255,170,80,A)", .5 * warm);
+      /* the ash pile, speckled */
       const ph = 34 * this.pile; ctx.fillStyle = "#8a847d"; ctx.beginPath(); ctx.moveTo(this.pileX - 80, f);
       ctx.quadraticCurveTo(this.pileX - 30, f - ph * 1.3, this.pileX, f - ph); ctx.quadraticCurveTo(this.pileX + 30, f - ph * 1.3, this.pileX + 80, f); ctx.fill();
+      if (this.pile > .05) for (let i = 0; i < 40; i++) { const u = hash1(i) * 2 - 1, x = this.pileX + u * 70, y = f - (1 - u * u) * ph * .9 * hash1(i + 3); ctx.fillStyle = i % 3 ? "rgba(60,56,52,.4)" : "rgba(200,195,188,.5)"; ctx.fillRect(x, y, 2, 2); }
       ctx.fillStyle = "#a39d95"; this.fall.forEach(p => ctx.fillRect(p.x, p.y, 2.5, 2.5));
       this.dust.forEach(d => { ctx.fillStyle = `rgba(170,164,156,${d.a})`; ctx.fillRect(d.x, d.y, 3, 3); });
       /* the ember, then the small fire */
-      if (this.phase !== "sweep") { const e = this.ember, h = this.hold, fl = this.phase === "fire" ? 1 : h;
-        glowDot(this.pileX, f - 6, 26 + fl * 60, "rgba(255,140,60,A)", .5 * e + .3 * fl);
-        ctx.fillStyle = `rgba(255,${120 + fl * 80},70,${e})`; ctx.beginPath(); ctx.arc(this.pileX, f - 5, 4 + fl * 2, 0, Math.PI * 2); ctx.fill();
-        if (fl > .2) { const fh = 10 + fl * 34 + Math.sin(t * 12) * 3; ctx.fillStyle = `rgba(255,${170 + fl * 50},90,${fl})`;
-          ctx.beginPath(); ctx.moveTo(this.pileX - 12 * fl, f - 4); ctx.quadraticCurveTo(this.pileX - 10, f - fh * .6, this.pileX + Math.sin(t * 7) * 3, f - fh); ctx.quadraticCurveTo(this.pileX + 10, f - fh * .6, this.pileX + 12 * fl, f - 4); ctx.fill(); }
+      if (this.phase !== "sweep") { const e = this.ember, h = this.hold, fl2 = this.phase === "fire" ? 1 : h;
+        glowDot(this.pileX, f - 6, 26 + fl2 * 60, "rgba(255,140,60,A)", .5 * e + .3 * fl2);
+        ctx.fillStyle = `rgba(255,${120 + fl2 * 80},70,${e})`; ctx.beginPath(); ctx.arc(this.pileX, f - 5, 4 + fl2 * 2, 0, Math.PI * 2); ctx.fill();
+        if (fl2 > .2) { for (const [o, sc] of [[0, 1], [-7, .7], [7, .65]]) { const fh = (10 + fl2 * 34) * sc + Math.sin(t * 12 + o) * 3; ctx.fillStyle = `rgba(255,${170 + fl2 * 50},${o ? 70 : 100},${fl2 * (o ? .7 : 1)})`;
+          ctx.beginPath(); ctx.moveTo(this.pileX + o - 10 * fl2 * sc, f - 4); ctx.quadraticCurveTo(this.pileX + o - 9 * sc, f - fh * .6, this.pileX + o + Math.sin(t * 7 + o) * 3, f - fh); ctx.quadraticCurveTo(this.pileX + o + 9 * sc, f - fh * .6, this.pileX + o + 10 * fl2 * sc, f - 4); ctx.fill(); } }
         if (this.phase === "ember" && !this.holding && this.hold < .05) hint(this.pileX, f - 8, t); }
-      /* the young man with his broom; at the end he sits by the fire */
-      const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.pileX + 70, this.sit);
-      const m = person(mx, f, mh, "#2c2724", { sit: this.sit, reach: this.sit ? 0 : .35, flip: true, tilt: this.sit ? -.5 : 0 });
+      /* the young man, bent to his broom; at the end he sits by the fire */
+      const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.pileX + 64, this.sit);
+      ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(mx, f + 2, mh * .17, 4, 0, 0, Math.PI * 2); ctx.fill();
+      if (this.sit) { ctx.globalAlpha = this.sit; ctx.fillStyle = "#4d443c"; ctx.beginPath(); ctx.roundRect(mx - 4, f - mh * .25 + 2, 34, mh * .25, 6); ctx.fill(); ctx.fillStyle = "rgba(255,170,90,.25)"; ctx.fillRect(mx - 4, f - mh * .25 + 2, 6, mh * .25); ctx.globalAlpha = 1; }
+      const m = figLit(mx, f, mh, { dir: -1, color: "#2c2724", far: "#25211e", reach: this.sit ? 0 : .6, sit: this.sit, slump: this.sit ? .3 : .22 }, warm ? "rgba(255,170,90,.6)" : "rgba(220,224,230,.25)", -1.3);
       if (!this.sit) { ctx.strokeStyle = "#6b5a46"; ctx.lineWidth = 3.5; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(m.handX, m.handY); ctx.lineTo(this.broomX, f - 3); ctx.stroke();
         ctx.strokeStyle = "#8c7a5c"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(this.broomX - 12, f - 2); ctx.lineTo(this.broomX + 12, f - 2); ctx.stroke(); }
       if (this.phase === "sweep" && !this.stroke && this.cycle === 0 && this.pile === 1 && t > 1.5) { const hx = this.pileX + Math.sin(t * 2) * 60; hint(hx, f - 40, t); }
-      desat(1 - this.col);
+      desat(1 - this.col); grainAndVignette();
       if (this.done) hint(W / 2, H * .88, t);
     },
   };
@@ -596,31 +659,41 @@
     },
     draw() {
       const t = this.t, g = this.gold, f = this.floor;
-      const sky = ctx.createLinearGradient(0, 0, 0, f); sky.addColorStop(0, "#14231f"); sky.addColorStop(1, "#2b4136"); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, f);
-      for (let i = 0; i < 7; i++) { ctx.fillStyle = i % 2 ? "#1a2c26" : "#16261f"; ctx.fillRect(i / 6 * W - 10, 0, 20 + i % 3 * 8, f); }
-      ctx.fillStyle = "#1d2a23"; ctx.fillRect(0, f, W, H - f);
-      /* the spring */
+      /* a clearing in the forest, shafts of light through the leaves */
+      const sky = ctx.createLinearGradient(0, 0, 0, f); sky.addColorStop(0, "#0f1e19"); sky.addColorStop(1, "#2e4838"); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, f);
+      for (let i = 0; i < 3; i++) { const x0 = W * (.15 + i * .3); ctx.fillStyle = `rgba(240,222,160,${.05 + g * .04})`; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + 40, 0); ctx.lineTo(x0 + 160 + i * 20, f); ctx.lineTo(x0 + 60 + i * 20, f); ctx.fill(); }
+      for (let k = 0; k < 7; k++) { const v = k % 4, sp = treeSprite(v, "#24402f", "#1d3527"), sc = 1.3 + hash1(k + 40) * .5, sx = k / 6 * W * 1.1 - W * .05;
+        ctx.save(); ctx.globalAlpha = .9; ctx.translate(sx, f + 4); ctx.rotate(Math.sin(t * .6 + k) * .01); ctx.drawImage(sp, -60 * sc, -170 * sc, 120 * sc, 170 * sc); ctx.restore(); }
+      const mist = ctx.createLinearGradient(0, f - 80, 0, f); mist.addColorStop(0, "rgba(170,200,175,0)"); mist.addColorStop(1, "rgba(170,200,175,.25)"); ctx.fillStyle = mist; ctx.fillRect(0, f - 80, W, 80);
+      const gr = ctx.createLinearGradient(0, f, 0, H); gr.addColorStop(0, "#22352a"); gr.addColorStop(1, "#14201a"); ctx.fillStyle = gr; ctx.fillRect(0, f, W, H - f);
+      /* the spring: dark water, a glow rising in it, shimmer, his reflection */
       ctx.save(); ctx.beginPath(); ctx.ellipse(this.px, this.py, this.pw / 2, this.phh, 0, 0, Math.PI * 2); ctx.clip();
-      const wg = ctx.createLinearGradient(0, this.py - this.phh, 0, this.py + this.phh); wg.addColorStop(0, "#284a44"); wg.addColorStop(1, "#11231f"); ctx.fillStyle = wg; ctx.fillRect(0, this.py - this.phh, W, this.phh * 2);
+      const wg = ctx.createLinearGradient(0, this.py - this.phh, 0, this.py + this.phh); wg.addColorStop(0, "#3a5f55"); wg.addColorStop(1, "#10221d"); ctx.fillStyle = wg; ctx.fillRect(0, this.py - this.phh, W, this.phh * 2);
       glowDot(this.px, this.py, this.pw * .5, "rgba(236,190,92,A)", .15 + g * .55);
-      /* his reflection, its wound already a little gold */
-      ctx.globalAlpha = .28; ctx.translate(0, this.py * 2 - this.phh * .3); ctx.scale(1, -1);
-      person(this.manX, this.py - this.phh * .15, Math.min(H * .26, 205) * .9, "#9fb8a8", { sit: .6, reach: .9 }); ctx.restore();
+      ctx.strokeStyle = "rgba(220,235,220,.18)"; ctx.lineWidth = 1.2; for (let i = 0; i < 9; i++) { const sx = this.px - this.pw * .4 + ((hash1(i) * this.pw * .8 + t * 8) % (this.pw * .8)), sy = this.py - this.phh * .6 + hash1(i + 9) * this.phh * 1.2; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + 10 + hash1(i + 3) * 14, sy); ctx.stroke(); }
+      ctx.globalAlpha = .22; ctx.translate(0, this.py * 2 - this.phh * .25); ctx.scale(1, -1);
+      fig(this.manX, this.py - this.phh * .1, Math.min(H * .26, 205) * .9, { dir: 1, kneel: 1, reach: 1, color: "#a8c2b0", far: "#a8c2b0" }); ctx.restore();
       this.rip.forEach(r => { ctx.strokeStyle = `rgba(240,215,150,${(1 - r.r / 120) * .7})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(r.x, r.y, r.r, r.r * .3, 0, 0, Math.PI * 2); ctx.stroke(); });
       ctx.strokeStyle = "#3d5a4c"; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(this.px, this.py, this.pw / 2, this.phh, 0, 0, Math.PI * 2); ctx.stroke();
+      /* reeds at the water's edge */
+      ctx.strokeStyle = "#1e3328"; ctx.lineWidth = 2; ctx.lineCap = "round"; for (let i = 0; i < 16; i++) { const a = Math.PI * (.05 + hash1(i) * .9), x = this.px + Math.cos(a) * this.pw / 2 * (i % 2 ? 1 : -1), y = this.py - Math.sin(a) * this.phh * .2, hh = 18 + hash1(i + 4) * 26, sw = Math.sin(t * 1.4 + i) * 3;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + sw * .5, y - hh * .6, x + sw, y - hh); ctx.stroke(); }
       /* the wild man, sitting far off, watching */
       const wx = W * .86, wy = f - 4, wh = H * .2; ctx.fillStyle = "#08100d"; ctx.beginPath();
       for (let i = 0; i <= 30; i++) { const a = Math.PI + i / 30 * Math.PI, r = wh * .35 + (i % 2) * 4; ctx.lineTo(wx + Math.cos(a) * r * .8, wy - wh * .45 + Math.sin(a) * r); } ctx.lineTo(wx + wh * .3, wy); ctx.lineTo(wx - wh * .3, wy); ctx.fill();
-      if (!this.blink) for (const s of [-1, 1]) { glowDot(wx + s * 9 - 4, wy - wh * .62, 8, "rgba(232,170,80,A)", .5 + g * .3); }
-      /* the young man kneeling at the water, his wound turning gold */
-      const mh = Math.min(H * .26, 205), col = `rgb(${lerp(36, 58, g) | 0},${lerp(44, 50, g) | 0},${lerp(40, 34, g) | 0})`;
-      const m = person(this.manX, f, mh, col, { sit: .6, reach: this.holding || g >= 1 ? 1.15 : .6 });
-      const wx2 = m.headX + 2, wy2 = m.chestY; ctx.lineWidth = 3; ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(40,60,50,.6)"; ctx.lineWidth = 1.2; for (let i = 0; i < 14; i++) { const a = Math.PI * (1.1 + i / 14 * .8), r = wh * .3; ctx.beginPath(); ctx.moveTo(wx + Math.cos(a) * r * .7, wy - wh * .45 + Math.sin(a) * r * .9); ctx.lineTo(wx + Math.cos(a) * r * .55, wy - wh * .45 + Math.sin(a) * r * .7 + 8); ctx.stroke(); }
+      if (!this.blink) for (const s of [-1, 1]) glowDot(wx + s * 9 - 4, wy - wh * .62, 8, "rgba(232,170,80,A)", .5 + g * .3);
+      /* the young man kneeling at the water; his wound turning gold */
+      const mh = Math.min(H * .26, 205), col = `rgb(${lerp(34, 60, g) | 0},${lerp(44, 50, g) | 0},${lerp(40, 34, g) | 0})`;
+      ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(this.manX + 8, f + 2, mh * .2, 4, 0, 0, Math.PI * 2); ctx.fill();
+      const m = figLit(this.manX, f, mh, { dir: 1, kneel: 1, reach: this.holding || g >= 1 ? 1.1 : .6, color: col, far: col, slump: .2 }, `rgba(240,210,150,${.25 + g * .4})`, 1.3);
+      const cx = m.chestX, cy = m.chestY; ctx.lineWidth = 3; ctx.lineCap = "round";
       ctx.strokeStyle = g >= 1 ? "#f2c766" : `rgb(${lerp(20, 236, g) | 0},${lerp(14, 190, g) | 0},${lerp(14, 92, g) | 0})`;
-      ctx.beginPath(); ctx.moveTo(wx2 - 9, wy2 - 6); ctx.lineTo(wx2 - 2, wy2); ctx.lineTo(wx2 - 6, wy2 + 4); ctx.lineTo(wx2 + 4, wy2 + 12); ctx.stroke();
-      if (g > 0) glowDot(wx2 - 2, wy2 + 3, 20 + g * 30, "rgba(240,200,110,A)", g * .6);
+      ctx.beginPath(); ctx.moveTo(cx - 6, cy - 7); ctx.lineTo(cx + 1, cy - 1); ctx.lineTo(cx - 3, cy + 3); ctx.lineTo(cx + 5, cy + 10); ctx.stroke();
+      if (g > 0) glowDot(cx, cy + 2, 20 + g * 30, "rgba(240,200,110,A)", g * .6);
       if (g >= 1) glowDot(m.headX, m.headY, 34, "rgba(240,200,110,A)", .5);
       ctx.fillStyle = "rgba(245,210,130,.9)"; this.motes.forEach(p => { ctx.globalAlpha = p.a; ctx.fillRect(p.x, p.y, 2.5, 2.5); }); ctx.globalAlpha = 1;
+      grainAndVignette();
       if (!this.holding && g < .02 && t > 1.5) hint(this.px - this.pw * .15, this.py, t);
       if (this.done) hint(W / 2, H * .9, t);
     },
@@ -631,7 +704,7 @@
   const ch6 = {
     num: "VI", name: "The Four Trials",
     start() { this.t = 0; this.k = 0; this.T = 0; this.trans = 0; this.done = false; this.glow = 0; this.setup(); },
-    leave() { this.v1?.stop(); this.v2?.stop(); this.v1 = this.v2 = null; },
+    onExit() { this.v1?.stop(); this.v2?.stop(); this.v1 = this.v2 = null; },
     setup() {
       this.T = 0; this.held = false; this.fin = 0;
       if (this.k === 0) { this.prog = 0; this.push = 0; this.wind = []; ambience(.06, 1500, .03, 49); }
@@ -642,7 +715,7 @@
       if (this.k === 3) { const n = 7; this.folk = Array.from({ length: n }, (_, i) => { const a = Math.PI * (1.08 + i / (n - 1) * .84); return { x: W / 2 + Math.cos(a) * W * .4, y: H * .62 + Math.sin(a) * H * .2 * -1 * -1, lit: 0, orb: -1 }; });
         this.folk.forEach((f, i) => { const a = Math.PI * (1.08 + i / (n - 1) * .84); f.x = W / 2 + Math.cos(a) * W * .4; f.y = H * .66 + Math.sin(a) * H * .2; }); ambience(.01, 400, .02, 65.4); }
     },
-    nextTrial() { this.trans = 1; haptic([10, 40, 16]); setTimeout(() => { this.leave(); this.k++; if (this.k > 3) { this.done = true; this.k = 3; ambience(.01, 400, 0); } else this.setup(); }, 1100); },
+    nextTrial() { this.trans = 1; haptic([10, 40, 16]); setTimeout(() => { this.onExit(); this.k++; if (this.k > 3) { this.done = true; this.k = 3; ambience(.01, 400, 0); } else this.setup(); }, 1100); },
     down(x, y) {
       if (this.done) return next(); if (this.trans > 0 && this.trans < 2) return;
       if (this.k === 0) this.held = true;
@@ -678,16 +751,20 @@
     draw() {
       const t = this.t, f = H * .76, mh = Math.min(H * .27, 210);
       if (this.k === 0) { /* Warrior */
-        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#3b2723"); bg.addColorStop(1, "#7a4a37"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f); ctx.fillStyle = "#2d1f1b"; ctx.fillRect(0, f, W, H - f);
+        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#35221f"); bg.addColorStop(1, "#8a523a"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f);
+        glowDot(W * .8, f - H * .12, W * .7, "rgba(255,150,90,A)", .3); ridge(this.T * 20, .2, f - H * .06, H * .03, 2, "#5c372b");
+        const gf = ctx.createLinearGradient(0, f, 0, H); gf.addColorStop(0, "#3a261f"); gf.addColorStop(1, "#1f1411"); ctx.fillStyle = gf; ctx.fillRect(0, f, W, H - f);
+        ctx.strokeStyle = "rgba(90,60,45,.8)"; ctx.lineWidth = 1.4; for (let i = 0; i < 40; i++) { const gx = hash1(i) * W, gy2 = f + 4 + hash1(i + 9) * (H - f - 30), bend = 6 + Math.sin(t * 3 + i) * 4; ctx.beginPath(); ctx.moveTo(gx, gy2); ctx.quadraticCurveTo(gx - bend * .5, gy2 - 10, gx - bend, gy2 - 18); ctx.stroke(); }
         ctx.strokeStyle = "rgba(240,215,190,.35)"; ctx.lineWidth = 1.2; this.wind.forEach(w => { ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.lineTo(w.x + w.l, w.y); ctx.stroke(); });
         const p = clamp(this.prog / 6, 0, 1), ox = lerp(W * .95, W * .68, p), oa = this.fin ? .4 : 1;
-        ctx.globalAlpha = oa; person(ox, f, mh * 1.05, "#1c1312", { flip: true, armsOut: .5 + p * .2, coat: 1 }); ctx.globalAlpha = 1;
-        person(W * .36 - this.push, f, mh, "#2a1b18", { tilt: this.held ? .8 : -.4, armsOut: this.held ? .15 : .35 });
+        ctx.globalAlpha = oa; figLit(ox, f, mh * 1.05, { dir: -1, coat: 1, hem: -6 + Math.sin(t * 5) * 3, armA: .45 + p * .25, elb: .3, color: "#1c1312", far: "#160f0e" }, "rgba(255,170,120,.35)", -1.2); ctx.globalAlpha = 1;
+        figLit(W * .36 - this.push, f, mh, { dir: 1, slump: this.held ? .38 : .05, armA: this.held ? -.3 : .15, elb: .25, color: "#2a1b18", far: "#22160f" }, "rgba(255,170,120,.45)", 1.3);
         if (this.held) glowDot(W * .36 - this.push, f - mh * .5, mh * .7, "rgba(240,170,110,A)", .12 + p * .25);
         if (!this.held && this.T < 5) hint(W * .36, f - mh * .5, t);
       }
       if (this.k === 1) { /* Magician */
-        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0d1024"); bg.addColorStop(1, "#22264a"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0a0c1f"); bg.addColorStop(1, "#262a52"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+        glowDot(W * .25, H * .3, W * .7, "rgba(120,80,160,A)", .12); glowDot(W * .8, H * .55, W * .6, "rgba(60,130,150,A)", .1);
         this.decoys.forEach(d => { ctx.fillStyle = `rgba(230,230,250,${.25 + .2 * Math.sin(t * 1.5 + d.p)})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
         ctx.strokeStyle = this.fin ? "rgba(240,200,110,.95)" : "rgba(220,225,255,.75)"; ctx.lineWidth = this.fin ? 3 : 2; ctx.lineCap = "round";
         this.lines.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(this.pts[a].x, this.pts[a].y); ctx.lineTo(this.pts[b].x, this.pts[b].y); ctx.stroke(); });
@@ -697,15 +774,17 @@
           if (this.fin) glowDot(p.x, p.y, 22, "rgba(240,200,110,A)", .5);
           ctx.fillStyle = `rgba(240,240,255,${a})`; ctx.beginPath(); ctx.arc(p.x, p.y, isCur || this.fin ? 3.4 : 2.2, 0, Math.PI * 2); ctx.fill(); });
         if (!this.drag && !this.fin && this.cur === 0 && this.T > 1) hint(this.pts[0].x, this.pts[0].y, t);
-        person(W * .5, H * .9, mh * .55, "#090b18", { tilt: -.2 });
+        ridge(0, 0, H * .9, H * .02, 5, "#0a0c1a"); fig(W * .5, H * .9, mh * .55, { dir: 1, color: "#05060f", far: "#05060f" });
       }
       if (this.k === 2) { /* Lover */
-        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#14262b"); bg.addColorStop(1, "#3f5b5c"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f); ctx.fillStyle = "#1b2b2c"; ctx.fillRect(0, f, W, H - f);
+        const bg = ctx.createLinearGradient(0, 0, 0, f); bg.addColorStop(0, "#14232c"); bg.addColorStop(.7, "#5a6e74"); bg.addColorStop(1, "#c79a8e"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, f);
+        ridge(0, 0, f - H * .07, H * .03, 3, "#475a5e"); ridge(0, 0, f - H * .02, H * .02, 6, "#2d3c3e");
+        const gf = ctx.createLinearGradient(0, f, 0, H); gf.addColorStop(0, "#1e2b2d"); gf.addColorStop(1, "#111819"); ctx.fillStyle = gf; ctx.fillRect(0, f, W, H - f);
         const yOf = d => H * .78 - d / 6 * H * .56, target = this.seq[Math.min(this.si, this.seq.length - 1)];
         /* the steps of the scale, faint */
         for (let d = 0; d <= 6; d++) { ctx.fillStyle = "rgba(220,235,235,.06)"; ctx.fillRect(W * .2, yOf(d), W * .6, 1); }
         /* her note and his */
-        person(W * .78, f, mh * .95, "#1a2a2c", { flip: true, tilt: .3 }); person(W * .22, f, mh, "#1c2627", { tilt: -.3 });
+        figLit(W * .78, f, mh * .95, { dir: -1, coat: 1, color: "#1a2a2c", far: "#152224" }, "rgba(240,200,190,.4)", -1.2); figLit(W * .22, f, mh, { dir: 1, color: "#1c2627", far: "#162022" }, "rgba(240,200,190,.4)", 1.2);
         const hx = W * .7, mx = W * .3;
         if (!this.fin) { glowDot(hx, yOf(target), 44, "rgba(230,200,220,A)", .55); ctx.fillStyle = "#f3dfe8"; ctx.beginPath(); ctx.arc(hx, yOf(target), 6, 0, Math.PI * 2); ctx.fill(); }
         if (this.myDeg != null && !this.fin) { const close = Math.abs(this.myDeg - target) < .35; glowDot(mx, yOf(this.myDeg), 40, close ? "rgba(240,200,110,A)" : "rgba(200,225,230,A)", .55); ctx.fillStyle = close ? "#f6d792" : "#d9eef0"; ctx.beginPath(); ctx.arc(mx, yOf(this.myDeg), 6, 0, Math.PI * 2); ctx.fill();
@@ -720,12 +799,13 @@
         const me = { x: W / 2, y: H * .8 };
         this.folk.forEach(fo => { const c = fo.lit ? `rgb(${lerp(40, 196, fo.lit) | 0},${lerp(36, 150, fo.lit) | 0},${lerp(32, 80, fo.lit) | 0})` : "#2a241d";
           if (fo.lit) glowDot(fo.x, fo.y - 30, 46, "rgba(240,190,100,A)", .4 * fo.lit);
-          person(fo.x, fo.y, mh * .5, c, { tilt: 0 });
+          fig(fo.x, fo.y, mh * .5, { dir: fo.x < W / 2 ? 1 : -1, color: c, far: c });
           if (fo.orb >= 0) { const k = ease(fo.orb), ox = lerp(me.x, fo.x, k), oy = lerp(me.y - mh * .6, fo.y - 30, k) - Math.sin(k * Math.PI) * 50; glowDot(ox, oy, 18, "rgba(250,215,140,A)", .9); }
           if (!fo.lit && fo.orb < 0 && this.T > 1.2 && this.folk.every(q => !q.lit && q.orb < 0) && fo === this.folk[3]) hint(fo.x, fo.y - 30, t); });
-        person(me.x, me.y, mh * .9, this.glow > .5 ? "#3a2c1c" : "#231c15", { armsOut: .25 + this.glow * .4 });
+        fig(me.x, me.y, mh * .9, { dir: 1, armA: .25 + this.glow * 1.1, elb: .15, color: this.glow > .5 ? "#3a2c1c" : "#231c15", far: this.glow > .5 ? "#33261a" : "#1e1812" });
         if (this.glow) glowDot(me.x, me.y - mh * .5, mh * (.4 + this.glow * .6), "rgba(245,200,110,A)", .25 + this.glow * .35);
       }
+      grainAndVignette();
       if (this.trans > 0) { const a = this.trans < 1 ? this.trans : clamp(2.2 - this.trans, 0, 1); ctx.fillStyle = `rgba(22,19,15,${a})`; ctx.fillRect(0, 0, W, H); }
       /* four marks: which trial */
       for (let i = 0; i < 4; i++) { ctx.fillStyle = i < this.k || (i === this.k && this.fin) ? "rgba(240,200,110,.9)" : i === this.k ? "rgba(239,230,214,.7)" : "rgba(239,230,214,.2)"; ctx.beginPath(); ctx.arc(W / 2 + (i - 1.5) * 16, H - 40, 3.5, 0, Math.PI * 2); ctx.fill(); }
@@ -737,8 +817,8 @@
      He comes home. The tall father, old now, sits on a bench. Sit beside him; stay. */
   const ch7 = {
     num: "VII", name: "The Return",
-    layout() { this.floor = H * .7; this.benchX = W * .66; },
-    start() { this.t = 0; this.layout(); this.mx = W * .08; this.sit = 0; this.phase = "walk"; this.hold = 0; this.reachA = 0; this.lamp = 0; this.done = false; this.leaves = []; ambience(.04, 520, 0); },
+    layout() { this.floor = H * .72; this.benchX = W * .6; },
+    start() { this.t = 0; this.layout(); this.mx = W * .08; this.sit = 0; this.phase = "walk"; this.hold = 0; this.reachA = 0; this.lamp = 0; this.done = false; this.leaves = []; this.clouds = makeClouds(); ambience(.04, 520, 0); },
     down(x, y) {
       if (this.done) return next();
       if (this.phase === "walk") { this.drag = true; this.tx = x; if (Math.abs(this.mx - (this.benchX - 52)) < 40 && Math.hypot(x - this.benchX, y - (this.floor - 40)) < 90) this.sitDown(); }
@@ -748,7 +828,7 @@
     up() { this.drag = false; this.holding = false; },
     sitDown() { this.phase = "sitting"; this.drag = false; note(N.F4, { vol: .06, dur: 3 }); },
     update(dt) {
-      this.t += dt;
+      this.t += dt; driftClouds(this.clouds, dt);
       if (this.phase === "walk" && this.drag) { const target = clamp(this.tx, W * .05, this.benchX - 52); const d = target - this.mx; this.mx += clamp(d, -55 * dt, 55 * dt); this.walking = Math.abs(d) > 2; } else this.walking = false;
       if (this.phase === "walk" && this.mx >= this.benchX - 56) { this.mx = this.benchX - 52; if (!this.nearT) this.nearT = this.t; }
       if (this.phase === "sitting") { this.sit = Math.min(1, this.sit + dt * .8); if (this.sit >= 1) this.phase = "sit"; }
@@ -759,21 +839,19 @@
       this.leaves.forEach(l => { l.y += l.v * dt; l.x += Math.sin(this.t + l.s) * 10 * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
     },
     draw() {
-      const t = this.t, gy = this.floor;
-      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#8f8aa0"); sk.addColorStop(1, "#e3c9a8"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
-      ctx.fillStyle = "#a9a0a6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin(xx * .012) * 22 - Math.sin(xx * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
-      ctx.fillStyle = "#86808a"; for (const xx of [W * .12, W * .45, W * .92]) { ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
-      ctx.fillStyle = "#5e5a5f"; ctx.fillRect(0, gy, W, H - gy);
-      /* the same lamp as long ago */
-      const lx = this.benchX + 56; ctx.fillStyle = "#3e3a40"; ctx.fillRect(lx, gy - 190, 4, 190); ctx.fillRect(lx - 16, gy - 190, 20, 4);
-      if (this.lamp) { glowDot(lx - 14, gy - 182, 150, "rgba(240,196,110,A)", .6 * this.lamp); ctx.fillStyle = `rgba(250,220,150,${this.lamp})`; ctx.beginPath(); ctx.arc(lx - 14, gy - 182, 5, 0, Math.PI * 2); ctx.fill(); }
-      /* bench */
-      const bx = this.benchX; ctx.fillStyle = "#4a3b30"; ctx.fillRect(bx - 80, gy - 34, 165, 8); ctx.fillRect(bx - 74, gy - 34, 6, 34); ctx.fillRect(bx + 73, gy - 34, 6, 34); ctx.fillRect(bx - 80, gy - 70, 165, 6);
-      const fh = Math.min(H * .3, 230), mh = fh * .96;
-      /* the old father: bent, grey, his hand slowly reaching */
-      person(bx + 48, gy, fh * .9, "#5d5966", { sit: 1, coat: 1, tilt: -.6 - this.reachA * .3, reach: this.reachA * .95, flip: true });
-      const me = person(this.mx + (this.phase === "walk" ? 0 : 0), gy, mh, "#3b3540", { walk: this.walking, phase: t * 6, sit: this.sit, tilt: this.sit ? .5 : 0 });
-      ctx.fillStyle = "rgba(150,110,70,.55)"; this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(this.t * 2 + l.s); ctx.fillRect(-4, -2, 8, 4); ctx.restore(); });
+      const t = this.t, gy = this.floor, bx = this.benchX, cam = 340 - (bx + 100);
+      paintRoad(cam, t, PAL_EVENING, this.clouds, { lit: 1, a: this.lamp });
+      const fh = Math.min(H * .3, 230), mh = fh * .96, seat = gy - mh * .255 + 3;
+      /* the bench */
+      ctx.fillStyle = "#4a3b30"; ctx.fillRect(bx - 82, seat, 168, 7); ctx.fillStyle = "#5c4a3d"; ctx.fillRect(bx - 82, seat, 168, 2);
+      ctx.fillStyle = "#3d3028"; ctx.fillRect(bx - 74, seat + 7, 6, gy - seat - 7); ctx.fillRect(bx + 72, seat + 7, 6, gy - seat - 7); ctx.fillRect(bx - 82, seat - 40, 168, 5); ctx.fillRect(bx - 76, seat - 40, 5, 40); ctx.fillRect(bx + 75, seat - 40, 5, 40);
+      ctx.fillStyle = "rgba(20,16,22,.25)"; ctx.beginPath(); ctx.ellipse(bx, gy + 3, 100, 6, 0, 0, Math.PI * 2); ctx.fill();
+      /* the old father, sitting, bent; turned toward his son; his hand reaching */
+      figLit(bx + 42, gy, fh * .9, { dir: -1, sit: 1, coat: 1, slump: .5, reach: this.reachA * .9, color: "#5c5766", far: "#524d5c" }, "rgba(255,214,170,.45)", 1.2);
+      ctx.fillStyle = "rgba(20,16,22,.25)"; ctx.beginPath(); ctx.ellipse(this.mx, gy + 2, mh * .16, 4, 0, 0, Math.PI * 2); ctx.fill();
+      figLit(this.mx, gy, mh, { dir: 1, speed: this.walking ? 1 : 0, phase: t * 6.2, sit: this.sit, slump: this.sit * .15, color: "#3a3440", far: "#322c37" }, "rgba(255,214,170,.5)", 1.4);
+      this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(Math.sin(t * 2 + l.s) * .8); ctx.scale(Math.cos(t * 3 + l.s), 1); ctx.fillStyle = "rgba(150,104,64,.7)"; ctx.beginPath(); ctx.ellipse(0, 0, 4, 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+      grainAndVignette();
       if (this.phase === "walk" && !this.drag && this.mx < this.benchX - 66 && t > 1.2) hint(this.mx + 70, gy - mh * .5, t);
       if (this.phase === "walk" && this.mx >= this.benchX - 56) hint(bx - 10, gy - 40, t);
       if (this.phase === "sit" && !this.holding && this.hold < .05) hint(W / 2, H * .84, t);
@@ -785,7 +863,7 @@
      Now he walks ahead, and a small boy follows. This time, turn around. */
   const ch8 = {
     num: "VIII", name: "The Blessing",
-    start() { this.t = 0; this.x = 0; this.gap = 150; this.ph = 0; this.bph = 0; this.ripples = []; this.lastCall = 0; this.phase = "walk"; this.turn = 0; this.kneel = 0; this.hold = 0; this.together = 0; this.done = false; ambience(.03, 600, 0); },
+    start() { this.t = 0; this.x = 0; this.gap = 150; this.ph = 0; this.bph = 0; this.ripples = []; this.lastCall = 0; this.phase = "walk"; this.turn = 0; this.kneel = 0; this.hold = 0; this.together = 0; this.done = false; this.clouds = makeClouds(); ambience(.03, 600, 0); },
     manX() { return W * .3 + this.gap; },
     down(x, y) {
       if (this.done) return next();
@@ -794,7 +872,7 @@
     },
     up() { this.holding = false; },
     update(dt) {
-      this.t += dt;
+      this.t += dt; driftClouds(this.clouds, dt, 40);
       const bs = this.phase === "walk" ? 38 : this.phase === "run" ? 70 : this.phase === "together" ? 34 : 0, ms = this.phase === "walk" ? 44 : this.phase === "together" ? 34 : 0;
       this.x += ms * dt; this.gap += (ms - bs) * dt; this.ph += ms * dt * .07; this.bph += bs * dt * .09;
       if (this.phase === "walk") { this.gap = Math.min(this.gap, W * .55); if (this.t - this.lastCall > 3.2) { this.lastCall = this.t; this.ripples.push({ t: 0 }); note(N.A4, { vol: .09 }); note(N.D5, { vol: .07, delay: .18 }); } }
@@ -806,19 +884,17 @@
       if (this.phase === "together") { this.together = Math.min(1, this.together + dt * .1); this.kneel = Math.max(0, this.kneel - dt); if (this.together >= 1) this.done = true; }
     },
     draw() {
-      const t = this.t, gy = H * .7, warm = this.phase === "together" ? this.together : 0;
-      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, `rgb(${lerp(140, 196, warm) | 0},${lerp(155, 160, warm) | 0},${lerp(171, 140, warm) | 0})`); sk.addColorStop(1, `rgb(${lerp(216, 245, warm) | 0},${lerp(211, 214, warm) | 0},${lerp(202, 160, warm) | 0})`); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
-      ctx.fillStyle = "#a9b0b6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin((xx + this.x * .15) * .012) * 22 - Math.sin((xx + this.x * .15) * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
-      ctx.fillStyle = "#7d8790"; for (let i = -1; i < 7; i++) { const sp = 150, xx = ((i * sp - this.x * .6) % (sp * 7) + sp * 7) % (sp * 7) - sp; ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
-      ctx.fillStyle = "#5d646a"; ctx.fillRect(0, gy, W, H - gy);
-      if (warm) glowDot(W * .8, gy - 40, W, "rgba(245,190,110,A)", .35 * warm);
-      const bx = W * .3, mx = this.manX(), fh = Math.min(H * .3, 230), bh = fh * .5;
-      const turned = this.phase !== "walk";
-      const m = person(mx, gy, fh, "#2b3138", { coat: 1, walk: this.phase === "walk" || this.phase === "together", phase: this.ph, flip: turned && this.phase !== "together", sit: this.kneel * .55, reach: this.phase === "run" || this.phase === "wait" ? .7 : this.phase === "together" ? .2 : 0, tilt: turned ? -.4 * this.turn : 0 });
-      const b = person(bx + (this.phase === "together" ? 0 : 0), gy, bh, "#4c5864", { walk: this.phase !== "wait", phase: this.bph, reach: this.phase === "wait" || this.phase === "together" ? 1.2 : 0 });
+      const t = this.t, gy = H * .72, warm = this.phase === "together" ? this.together : 0;
+      paintRoad(this.x, t, PAL_DUSK, this.clouds);
+      if (warm) { ctx.fillStyle = `rgba(255,190,120,${.2 * warm})`; ctx.fillRect(0, 0, W, gy); glowDot(W * .82, gy - H * .1, W, "rgba(255,200,120,A)", .35 * warm); }
+      const bx = W * .3, mx = this.manX(), fh = Math.min(H * .3, 235), bh = fh * .5, turned = this.phase !== "walk" && this.phase !== "together";
+      ctx.fillStyle = "rgba(20,22,26,.22)"; ctx.beginPath(); ctx.ellipse(mx - 4, gy + 2, fh * .16, 4, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.ellipse(bx - 2, gy + 2, bh * .18, 3, 0, 0, Math.PI * 2); ctx.fill();
+      const m = figLit(mx, gy, fh, { dir: turned ? -1 : 1, coat: 1, hem: Math.sin(this.ph * 2) * 1.5, speed: this.phase === "walk" || this.phase === "together" ? 1 : 0, phase: this.ph, kneel: this.kneel, reach: this.phase === "run" || this.phase === "wait" ? .8 : 0, color: "#272c33", far: "#20252b" }, "rgba(255,226,180,.55)", turned ? -1.6 : 1.6);
+      const b = figLit(bx, gy, bh, { dir: 1, speed: this.phase === "run" ? 1.7 : this.phase === "wait" ? 0 : 1, phase: this.bph, reach: this.phase === "wait" ? 1 : this.phase === "together" ? 1.25 : 0, color: "#465260", far: "#3c4753" }, "rgba(255,226,180,.5)", 1.2);
       if (this.phase === "wait") { this.handX = (m.handX + b.handX) / 2; this.handY = (m.handY + b.handY) / 2; glowDot(this.handX, this.handY, 30, "rgba(240,200,110,A)", .25 + this.hold * .5);
         if (this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.85)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 26, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); } else hint(this.handX, this.handY, t); }
-      this.ripples.forEach(r => { ctx.strokeStyle = `rgba(250,246,238,${.7 * (1 - r.t / 1.6)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + r.t * 70, -.9, .9); ctx.stroke(); });
+      this.ripples.forEach(r => { const k = r.t / 1.6; ctx.strokeStyle = `rgba(255,246,232,${.75 * (1 - k)})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + ease(Math.min(1, k * 1.2)) * 70, -.75, .75); ctx.stroke(); });
+      grainAndVignette();
       if (this.phase === "walk" && t > 3) hint(mx, gy - fh * .55, t);
       if (this.done) hint(W / 2, H * .86, t);
     },
@@ -849,7 +925,10 @@
         const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#6b4a2c"); sk.addColorStop(1, "#e2b066"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
         glowDot(W / 2, gy - H * .1, W * .7, "rgba(255,210,120,A)", .6); ctx.fillStyle = "#f1c56c"; ctx.beginPath(); ctx.arc(W / 2, gy - H * .1, Math.min(W, H) * .16, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#3b3936"; ctx.fillRect(0, gy, W, H - gy); ctx.fillStyle = "#5e8a52"; for (let i = 0; i < 18; i++) { const xx = (i * 97) % W, hh = 6 + (i * 13) % 10; ctx.fillRect(xx, gy - hh * .2, 2, hh); }
-        person(W / 2, gy, Math.min(H * .28, 220), "#141210", {}); ctx.globalAlpha = 1; }
+        ridge(0, 0, gy - H * .02, H * .025, 4, "rgba(150,110,70,.6)");
+        ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(W / 2, gy + 2, 30, 4, 0, 0, Math.PI * 2); ctx.fill();
+        figLit(W / 2, gy, Math.min(H * .28, 220), { dir: 1, color: "#141210", far: "#100e0c" }, "rgba(255,214,140,.7)", 1.6); ctx.globalAlpha = 1; }
+      grainAndVignette();
       if (!this.held && this.p < .02) hint(W / 2, H * .55, t);
       if (this.p > 0 && this.p < 1) { ctx.strokeStyle = "rgba(239,230,214,.5)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(this.cx, this.cy, 30, -Math.PI / 2, -Math.PI / 2 + this.p * Math.PI * 2); ctx.stroke(); }
       if (this.done) hint(W / 2, H * .9, t);
@@ -863,16 +942,16 @@
   function play(i) {
     ci = i; audio(); $("#title").classList.add("hide"); $("#end").classList.add("hide"); $("#home").style.display = "grid";
     $("#cardn").textContent = roman(i); $("#cardt").textContent = CHAPTERS[i].name; $("#card").classList.remove("hide"); scene = null;
-    scene?.leave?.(); note([N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.D4][i] || N.D4, { vol: .06, dur: 4 });
+    scene?.onExit?.(); note([N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.D4][i] || N.D4, { vol: .06, dur: 4 });
     setTimeout(() => { $("#card").classList.add("hide"); scene = CHAPTERS[i]; scene.start(); fadeA = 1; fadeDir = -1; }, 2600);
   }
   function next() {
     if (fadeDir) return; fadeDir = 1; onFaded = () => {
       save.reached = Math.max(save.reached, ci + 2); store();
-      scene?.leave?.(); if (ci + 1 < CHAPTERS.length) play(ci + 1); else { scene = null; ambience(0, 300, 0); $("#end").classList.remove("hide"); }
+      scene?.onExit?.(); if (ci + 1 < CHAPTERS.length) play(ci + 1); else { scene = null; ambience(0, 300, 0); $("#end").classList.remove("hide"); }
     };
   }
-  function toTitle() { scene?.leave?.(); scene = null; ci = -1; ambience(0, 300, 0); $("#end").classList.add("hide"); $("#card").classList.add("hide"); $("#home").style.display = "none"; renderTitle(); $("#title").classList.remove("hide"); }
+  function toTitle() { scene?.onExit?.(); scene = null; ci = -1; ambience(0, 300, 0); $("#end").classList.add("hide"); $("#card").classList.add("hide"); $("#home").style.display = "none"; renderTitle(); $("#title").classList.remove("hide"); }
   function renderTitle() {
     $("#begin").textContent = save.reached > 1 && save.reached <= CHAPTERS.length ? "Continue" : "Begin";
     $("#chapters").innerHTML = CHAPTERS.map((c, i) => `<button class="${i < save.reached ? "open" : ""}" ${i < save.reached ? "" : "disabled"} data-ch="${i}" aria-label="Chapter ${roman(i)}, ${c.name}">${roman(i)}</button>`).join("");
