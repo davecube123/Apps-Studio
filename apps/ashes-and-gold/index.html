@@ -41,6 +41,7 @@
     #mute svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
     #home { position: fixed; top: calc(env(safe-area-inset-top) + 12px); left: 14px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.18);
             color: rgba(239,230,214,.7); cursor: pointer; display: grid; place-items: center; font: 20px var(--serif); }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 14px); z-index: 20; border: 0; background: #e6b65c; color: #16130f; padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); cursor: pointer; }
     .ver { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 8px); font: 11px var(--sans); color: rgba(239,230,214,.3); }
   </style>
 </head>
@@ -67,7 +68,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "4";
+  const APP_VERSION = "5";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -981,7 +982,12 @@
   }
   resize(); setMuteIcon(); renderTitle(); requestAnimationFrame(frame);
   window.__ag = { get scene() { return scene; }, play, next, CHAPTERS };
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  /* updates: the page is fetched fresh when online; if a newer version arrives while playing, offer a reload */
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(r => r.update?.()).catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
   </script>
 </body>
 </html>
