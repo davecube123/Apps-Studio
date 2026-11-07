@@ -68,7 +68,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "5";
+  const APP_VERSION = "6";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -868,8 +868,8 @@
     manX() { return W * .3 + this.gap; },
     down(x, y) {
       if (this.done) return next();
-      if (this.phase === "walk" && Math.abs(x - this.manX()) < 70 && y > H * .3) { this.phase = "turn"; note(N.D4, { vol: .08, dur: 3 }); note(N.A4, { vol: .06, dur: 3, delay: .2 }); haptic(12); }
-      else if (this.phase === "wait" && Math.hypot(x - this.handX, y - this.handY) < 70) this.holding = true;
+      if (this.phase === "walk" && this.t > 1.5) { this.phase = "turn"; note(N.D4, { vol: .08, dur: 3 }); note(N.A4, { vol: .06, dur: 3, delay: .2 }); haptic(12); }
+      else if (this.phase === "wait") this.holding = true;
     },
     up() { this.holding = false; },
     update(dt) {
@@ -896,7 +896,7 @@
         if (this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.85)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 26, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); } else hint(this.handX, this.handY, t); }
       this.ripples.forEach(r => { const k = r.t / 1.6; ctx.strokeStyle = `rgba(255,246,232,${.75 * (1 - k)})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + ease(Math.min(1, k * 1.2)) * 70, -.75, .75); ctx.stroke(); });
       grainAndVignette();
-      if (this.phase === "walk" && t > 3) hint(mx, gy - fh * .55, t);
+      if (this.phase === "walk" && t > 2) hint(mx, gy - fh * .55, t);
       if (this.done) hint(W / 2, H * .86, t);
     },
   };
@@ -907,12 +907,13 @@
     num: "IX", name: "Ashes and Gold",
     start() { this.t = 0; this.p = 0; this.rings = []; this.lastRing = -1; this.held = false; this.done = false; this.cx = W / 2; this.cy = H * .55; this.final = 0; ambience(.015, 300, .02, 55); },
     down(x, y) { if (this.done) return next(); this.held = true; if (this.p < .02) { this.cx = x; this.cy = y; } },
+    /* the whole hold takes about 12 seconds; lifting the finger only pauses it */
     up() { this.held = false; },
     COL: ["#8d9bab", "#c58a4e", "#1f3a30", "#8a847d", "#e6b65c", "#a0503a", "#3a4a8a", "#5a8a8c", "#e8b45c", "#e3c9a8", "#f0c070"],
     CH: [N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.A4, N.D5, N.D4],
     update(dt) {
       this.t += dt;
-      if (this.held && this.p < 1) { this.p = Math.min(1, this.p + dt / 15);
+      if (this.held && this.p < 1) { this.p = Math.min(1, this.p + dt / 12);
         const k = Math.floor(this.p * this.COL.length); if (k > this.lastRing && k < this.COL.length) { this.lastRing = k; this.rings.push({ c: this.COL[k], r: 0 }); note(this.CH[k], { vol: .07, dur: 4 }); note(this.CH[k] / 2, { vol: .04, dur: 4 }); haptic(6); }
         if (this.p >= 1) { haptic([12, 60, 24]); note(N.D3, { vol: .1, dur: 8 }); note(N.A3, { vol: .08, dur: 8, delay: .2 }); note(N.F4, { vol: .07, dur: 8, delay: .4 }); note(N.D5, { vol: .06, dur: 8, delay: .6 }); } }
       this.rings.forEach(r => r.r += dt * (this.held || this.p >= 1 ? 90 : 12));
@@ -930,7 +931,7 @@
         ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(W / 2, gy + 2, 30, 4, 0, 0, Math.PI * 2); ctx.fill();
         figLit(W / 2, gy, Math.min(H * .28, 220), { dir: 1, color: "#141210", far: "#100e0c" }, "rgba(255,214,140,.7)", 1.6); ctx.globalAlpha = 1; }
       grainAndVignette();
-      if (!this.held && this.p < .02) hint(W / 2, H * .55, t);
+      if (!this.held && this.p < 1) hint(this.p < .02 ? W / 2 : this.cx, this.p < .02 ? H * .55 : this.cy, t);
       if (this.p > 0 && this.p < 1) { ctx.strokeStyle = "rgba(239,230,214,.5)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(this.cx, this.cy, 30, -Math.PI / 2, -Math.PI / 2 + this.p * Math.PI * 2); ctx.stroke(); }
       if (this.done) hint(W / 2, H * .9, t);
     },
