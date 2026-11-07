@@ -75,7 +75,7 @@
   /* Living Window. Every pixel and every sound is generated here: an original landscape whose light
      follows the real sun (computed from the clock, and from your location if you share it), and
      whose weather follows Open-Meteo's current conditions if you allow it. */
-  const APP_VERSION = "1";
+  const APP_VERSION = "2";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -333,12 +333,21 @@
   $("#open").addEventListener("click", () => { $("#open").classList.add("hide"); startAudio(); keepAwake(); if (S.timer) setTimer(S.timer); if (S.useSky) fetchWeather(); setTimeout(showPanel, 1200); });
 
   /* ---------- Loop ---------- */
-  function resize() { DPR = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
-  addEventListener("resize", resize); resize();
+  const MAXDPR = 2;
+  /* Size from the canvas's real on-screen box, checked every frame: some in-app browsers report a smaller
+     window size at first, which left part of the screen undrawn. */
+  function fit() {
+    const r = cv.getBoundingClientRect(), w = Math.round(r.width) || innerWidth, h = Math.round(r.height) || innerHeight, d = Math.min(MAXDPR, devicePixelRatio || 1);
+    if (w === W && h === H && d === DPR && cv.width === Math.round(w * d)) return false;
+    DPR = d; W = w; H = h; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); return true;
+  }
+  function clearAll() { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  fit();
   let last = performance.now(), lastPanel = 0;
   function frame(now) {
     const dt = Math.min(.1, (now - last) / 1000); last = now; T += dt;
     if (fadeStart && Date.now() > fadeStart) { fadeAmt = clamp((Date.now() - fadeStart) / 60e3, 0, 1); applyVolumes(); if (fadeAmt >= 1 && wakeLock) { wakeLock.release(); wakeLock = null; } }
+    fit(); clearAll(); ctx.fillStyle = "#151218"; ctx.fillRect(0, 0, W, H);
     easeWeather(dt); const sc = draw(dt); soundTick(sc, dt);
     if (now - lastPanel > 15e3 && !$("#panel").classList.contains("hide")) { lastPanel = now; renderPanel(); }
     requestAnimationFrame(frame);

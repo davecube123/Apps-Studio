@@ -68,12 +68,20 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "7";
+  const APP_VERSION = "8";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
-  function resize() { DPR = Math.min(2.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); scene?.layout?.(); }
-  addEventListener("resize", resize);
+  const MAXDPR = 2.5;
+  /* Size from the canvas's real on-screen box, checked every frame: some in-app browsers report a smaller
+     window size at first, which left part of the screen undrawn. */
+  function fit() {
+    const r = cv.getBoundingClientRect(), w = Math.round(r.width) || innerWidth, h = Math.round(r.height) || innerHeight, d = Math.min(MAXDPR, devicePixelRatio || 1);
+    if (w === W && h === H && d === DPR && cv.width === Math.round(w * d)) return false;
+    DPR = d; W = w; H = h; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); return true;
+  }
+  function clearAll() { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  function resize() { if (fit()) scene?.layout?.(); }
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, ease = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
   const haptic = p => { try { navigator.vibrate?.(p); } catch (e) {} };
   const save = {}; try { Object.assign(save, JSON.parse(localStorage.getItem("ashes-and-gold") || "{}")); } catch (e) {}
@@ -981,7 +989,7 @@
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000); last = now;
-    ctx.fillStyle = "#16130f"; ctx.fillRect(0, 0, W, H);
+    if (fit()) scene?.layout?.(); clearAll(); ctx.fillStyle = "#16130f"; ctx.fillRect(0, 0, W, H);
     if (scene) { scene.update(dt); scene.draw(); }
     if (fadeDir) { fadeA = clamp(fadeA + fadeDir * dt * .8, 0, 1); if (fadeDir > 0 && fadeA >= 1) { fadeDir = 0; const f = onFaded; onFaded = null; f?.(); } else if (fadeDir < 0 && fadeA <= 0) fadeDir = 0; }
     if (fadeA > 0) { ctx.fillStyle = `rgba(22,19,15,${fadeA})`; ctx.fillRect(0, 0, W, H); }
