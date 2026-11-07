@@ -66,6 +66,7 @@
     <div class="row"><span class="lbl">Sky</span><div class="grow" id="skysrc"></div></div>
     <div class="row"><span class="lbl">Music</span><input type="range" id="vmus" min="0" max="1" step=".01" class="grow" aria-label="Music volume"></div>
     <div class="row"><span class="lbl">Nature</span><input type="range" id="vnat" min="0" max="1" step=".01" class="grow" aria-label="Nature sounds volume"></div>
+    <div class="row"><span class="lbl">Thunder</span><div class="chips grow" id="thunder"></div></div>
     <div class="row"><span class="lbl">Fade out</span><div class="chips grow" id="timer"></div></div>
     <div class="row"><span class="lbl">Screen</span><div class="chips grow" id="awake"></div></div>
     <div class="ver" id="ver"></div>
@@ -75,13 +76,13 @@
   /* Living Window. Every pixel and every sound is generated here: an original landscape whose light
      follows the real sun (computed from the clock, and from your location if you share it), and
      whose weather follows Open-Meteo's current conditions if you allow it. */
-  const APP_VERSION = "2";
+  const APP_VERSION = "3";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const hash1 = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
-  const S = Object.assign({ lat: null, lon: null, useSky: false, wx: "auto", mus: .55, nat: .7, timer: 0, awake: true }, (() => { try { return JSON.parse(localStorage.getItem("living-window")) || {}; } catch (e) { return {}; } })());
+  const S = Object.assign({ lat: null, lon: null, useSky: false, wx: "auto", mus: .55, nat: .7, timer: 0, awake: true, thunder: "distant" }, (() => { try { return JSON.parse(localStorage.getItem("living-window")) || {}; } catch (e) { return {}; } })());
   const store = () => { try { localStorage.setItem("living-window", JSON.stringify(S)); } catch (e) {} };
 
   /* ---------- The sun and the moon, from the clock ---------- */
@@ -200,7 +201,7 @@
       ctx.beginPath(); ctx.moveTo(gx, gy); ctx.quadraticCurveTo(gx + sw * .4, gy - hh * .6, gx + sw, gy - hh); ctx.stroke(); }
     /* birds, by day */
     nextBird -= dt; if (nextBird < 0 && day > .4 && cur.rain < .2 && !cur.storm) { const n = 3 + Math.floor(Math.random() * 5), y = hz * (.2 + Math.random() * .4), dir = Math.random() < .5 ? 1 : -1;
-      birds.push({ x: dir > 0 ? -60 : W + 60, y, dir, n, v: 28 + Math.random() * 18, ph: Math.random() * 6 }); nextBird = 18 + Math.random() * 30; if (Math.random() < .6) chirpSoon(); }
+      birds.push({ x: dir > 0 ? -60 : W + 60, y, dir, n, v: 28 + Math.random() * 18, ph: Math.random() * 6 }); nextBird = 18 + Math.random() * 30; if (Math.random() < .6) chirpSoon(dir > 0 ? W * .15 : W * .85); }
     birds.forEach(b => { b.x += b.dir * b.v * dt; b.ph += dt * 7; ctx.strokeStyle = rgb(mix([40, 40, 50], [20, 20, 30], 1 - day), .8); ctx.lineWidth = 1.5;
       for (let k = 0; k < b.n; k++) { const bx = b.x - b.dir * (Math.floor((k + 1) / 2) * 16), by = b.y + Math.floor((k + 1) / 2) * 7 * (k % 2 ? 1 : -1) * .9 + Math.sin(b.ph * .3 + k) * 2, f = Math.sin(b.ph + k) * 4;
         ctx.beginPath(); ctx.moveTo(bx - 6, by - f); ctx.quadraticCurveTo(bx - 3, by - 3 - f * .3, bx, by); ctx.quadraticCurveTo(bx + 3, by - 3 - f * .3, bx + 6, by - f); ctx.stroke(); } });
@@ -217,7 +218,7 @@
       ctx.fillStyle = "rgba(250,250,255,.85)"; flakes.forEach(f => { f.y += f.v * dt; f.x += (Math.sin(T + f.p) * 12 + slant * 40) * dt; if (f.y > H) { f.y = -5; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill(); }); }
     if (flakes.length > cur.snow * 140) flakes.length = Math.floor(cur.snow * 140);
     /* lightning */
-    if (cur.storm > .5) { nextBolt -= dt; if (nextBolt < 0) { flash = 1; nextBolt = 8 + Math.random() * 18; setTimeout(thunder, 900 + Math.random() * 2200); } }
+    if (cur.storm > .5) { nextBolt -= dt; if (nextBolt < 0) { flash = .6 + Math.random() * .4; nextBolt = 14 + Math.random() * 30; const delay = 1500 + Math.random() * 6000; setTimeout(() => thunder((delay - 1500) / 6000), delay); } }
     flash = Math.max(0, flash - dt * 2.2);
     /* the glass: drops that cling and run */
     if (cur.rain > .05) { if (Math.random() < dt * cur.rain * 14) drops.push({ x: Math.random() * W, y: Math.random() * H * .9, r: 1.5 + Math.random() * 3, v: 0, run: Math.random() < .35, trail: [] }); }
@@ -239,55 +240,94 @@
     return { el, day, night, dusk };
   }
 
-  /* ---------- Sound: generated, never recorded ---------- */
-  let AC = null, musG, natG, rainG, rainF, windG, windF, cricG, padNodes = [], lastChord = -1;
+  /* ---------- Sound: generated, never recorded ----------
+     Everything passes through a gentle limiter, so nothing can jump out at you while you rest. */
+  let AC = null, musG, natG, rainG, rainBodyG, rainF, windG, windF, whistleG, whistleF, padNodes = [], lastChord = -1, noiseBuf = null;
+  const crickets = [{ f: 4400, pan: -.6, next: 0, per: 1.1 }, { f: 4900, pan: .5, next: .4, per: .9 }, { f: 4650, pan: .1, next: .8, per: 1.35 }];
   function startAudio() {
-    if (AC) { if (AC.state === "suspended") AC.resume(); return; }
+    if (AC) { if (AC.state !== "running") AC.resume(); return; }
     try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
-    const master = AC.createGain(); master.gain.value = 1; master.connect(AC.destination); AC._master = master;
+    const lim = AC.createDynamicsCompressor(); lim.threshold.value = -16; lim.knee.value = 10; lim.ratio.value = 6; lim.attack.value = .01; lim.release.value = .4; lim.connect(AC.destination);
+    const master = AC.createGain(); master.gain.value = 1; master.connect(lim); AC._master = master;
     musG = AC.createGain(); musG.gain.value = 0; musG.connect(master); natG = AC.createGain(); natG.gain.value = 0; natG.connect(master);
     const verb = AC.createConvolver(), len = AC.sampleRate * 3.2, ir = AC.createBuffer(2, len, AC.sampleRate);
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
     verb.buffer = ir; const verbG = AC.createGain(); verbG.gain.value = .55; verb.connect(verbG).connect(musG); AC._verb = verb;
-    const nb = AC.createBuffer(1, AC.sampleRate * 3, AC.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-    const noise = () => { const s = AC.createBufferSource(); s.buffer = nb; s.loop = true; s.start(); return s; };
-    rainF = AC.createBiquadFilter(); rainF.type = "bandpass"; rainF.frequency.value = 1800; rainF.Q.value = .5; rainG = AC.createGain(); rainG.gain.value = 0; noise().connect(rainF).connect(rainG).connect(natG);
-    windF = AC.createBiquadFilter(); windF.type = "lowpass"; windF.frequency.value = 500; windG = AC.createGain(); windG.gain.value = 0; noise().connect(windF).connect(windG).connect(natG);
-    /* crickets: a high tone, pulsed */
-    const co = AC.createOscillator(); co.frequency.value = 4600; const cg = AC.createGain(); cg.gain.value = 0; const lfo = AC.createOscillator(); lfo.frequency.value = 22; const lg = AC.createGain(); lg.gain.value = .5;
-    lfo.connect(lg).connect(cg.gain); cricG = AC.createGain(); cricG.gain.value = 0; co.connect(cg).connect(cricG).connect(natG); co.start(); lfo.start(); AC._cricPulse = cg;
+    noiseBuf = AC.createBuffer(1, AC.sampleRate * 4, AC.sampleRate); const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const noise = (offset = 0) => { const s = AC.createBufferSource(); s.buffer = noiseBuf; s.loop = true; s.start(0, offset); return s; };
+    const pan = v => { const p = AC.createStereoPanner ? AC.createStereoPanner() : AC.createGain(); if (p.pan) p.pan.value = v; return p; };
+    /* rain: two decorrelated layers of patter, left and right, plus a low body for downpours */
+    rainG = AC.createGain(); rainG.gain.value = 0; rainG.connect(natG); rainF = [];
+    for (const [side, off] of [[-.7, 0], [.7, 1.9]]) { const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900; const pk = AC.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = 3200; pk.gain.value = 4; rainF.push(hp);
+      noise(off).connect(hp).connect(pk).connect(pan(side)).connect(rainG); }
+    rainBodyG = AC.createGain(); rainBodyG.gain.value = 0; const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 450; noise(2.7).connect(lp).connect(rainBodyG).connect(natG);
+    /* wind, and a faint whistle in strong gusts */
+    windF = AC.createBiquadFilter(); windF.type = "lowpass"; windF.frequency.value = 500; windG = AC.createGain(); windG.gain.value = 0; noise(.7).connect(windF).connect(windG).connect(natG);
+    whistleF = AC.createBiquadFilter(); whistleF.type = "bandpass"; whistleF.frequency.value = 800; whistleF.Q.value = 9; whistleG = AC.createGain(); whistleG.gain.value = 0; noise(3.1).connect(whistleF).connect(whistleG).connect(natG);
     applyVolumes();
   }
+  /* if the phone pauses sound (a call, another app), bring it back */
+  document.addEventListener("visibilitychange", () => { if (AC && document.visibilityState === "visible" && AC.state !== "running") AC.resume(); });
+  document.addEventListener("pointerdown", () => { if (AC && AC.state !== "running") AC.resume(); }, true);
   function applyVolumes() { if (!AC) return; const t = AC.currentTime; musG.gain.setTargetAtTime(S.mus * .5 * (1 - fadeAmt), t, .5); natG.gain.setTargetAtTime(S.nat * (1 - fadeAmt), t, .5); }
-  /* the pad: four soft voices, a new chord every so often; the colour of the chords follows the time of day */
+  const panner = v => { if (AC.createStereoPanner) { const p = AC.createStereoPanner(); p.pan.value = clamp(v, -1, 1); return p; } return AC.createGain(); };
+  /* the pad: four soft voices, a new chord every so often; the colour of the chords follows the time of day, darker in rain */
   const CH = { dawn: [[60, 64, 67, 71], [57, 60, 64, 67], [62, 65, 69, 72], [55, 59, 62, 67]], day: [[65, 69, 72, 76], [60, 64, 67, 72], [62, 65, 69, 74], [67, 71, 74, 79]],
-               dusk: [[57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 65], [52, 55, 59, 62]], night: [[50, 57, 62, 64], [48, 55, 60, 62], [45, 52, 57, 60], [47, 54, 59, 62]] };
+               dusk: [[57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 65], [52, 55, 59, 62]], night: [[50, 57, 62, 64], [48, 55, 60, 62], [45, 52, 57, 60], [47, 54, 59, 62]],
+               rain: [[45, 52, 57, 60], [41, 48, 53, 57], [43, 50, 55, 58], [40, 47, 52, 55]] };
   const hz2 = m => 440 * Math.pow(2, (m - 69) / 12);
   function padStep(mood) {
-    if (!AC) return; const set = CH[mood], i = (lastChord + 1 + Math.floor(Math.random() * 2)) % set.length; lastChord = i; const t = AC.currentTime, dur = 14;
+    if (!AC) return; const set = CH[mood], i = (lastChord + 1 + Math.floor(Math.random() * 2)) % set.length; lastChord = i; const t = AC.currentTime;
     padNodes.forEach(n => { n.g.gain.cancelScheduledValues(t); n.g.gain.setTargetAtTime(0, t, 2.5); setTimeout(() => { try { n.o.stop(); } catch (e) {} }, 9000); }); padNodes = [];
     set[i].forEach((m, k) => { const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = k % 2 ? "triangle" : "sine"; o.frequency.value = hz2(m - 12 * (k === 0)); o.detune.value = (Math.random() - .5) * 8;
-      f.type = "lowpass"; f.frequency.value = mood === "night" ? 900 : 1600; g.gain.value = 0; g.gain.setTargetAtTime(.05 / (1 + k * .2), t, 2.8);
-      o.connect(f).connect(g); g.connect(musG); g.connect(AC._verb); o.start(); padNodes.push({ o, g }); });
-    /* now and then, a few quiet notes on top */
-    if (Math.random() < .7) for (let k = 0; k < 3; k++) { const m = set[i][Math.floor(Math.random() * 4)] + 12, at = t + 2 + k * (1.2 + Math.random() * 1.5), o = AC.createOscillator(), g = AC.createGain();
+      f.type = "lowpass"; f.frequency.value = mood === "night" ? 900 : mood === "rain" ? 700 : 1600; g.gain.value = 0; g.gain.setTargetAtTime(.05 / (1 + k * .2), t, 2.8);
+      const pn = panner((k - 1.5) * .25); o.connect(f).connect(g).connect(pn); pn.connect(musG); g.connect(AC._verb); o.start(); padNodes.push({ o, g }); });
+    if (Math.random() < (mood === "rain" ? .35 : .7)) for (let k = 0; k < 3; k++) { const m = set[i][Math.floor(Math.random() * 4)] + 12, at = t + 2 + k * (1.2 + Math.random() * 1.5), o = AC.createOscillator(), g = AC.createGain();
       o.frequency.value = hz2(m); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(.035, at + .02); g.gain.exponentialRampToValueAtTime(.0001, at + 3.5); o.connect(g); g.connect(musG); g.connect(AC._verb); o.start(at); o.stop(at + 3.6); }
   }
-  function chirp(at) { if (!AC) return; const base = 2600 + Math.random() * 1800, n = 2 + Math.floor(Math.random() * 4);
-    for (let k = 0; k < n; k++) { const t = at + k * (.09 + Math.random() * .08), o = AC.createOscillator(), g = AC.createGain(); o.type = "sine";
-      o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base * (1.2 + Math.random() * .5), t + .05); o.frequency.exponentialRampToValueAtTime(base * .85, t + .09);
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .1); o.connect(g).connect(natG); o.start(t); o.stop(t + .12); } }
-  function chirpSoon() { if (AC) chirp(AC.currentTime + Math.random() * 1.5); }
-  function thunder() { if (!AC) return; const t = AC.currentTime, s = AC.createBufferSource(), len = AC.sampleRate * 4, b = AC.createBuffer(1, len, AC.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.5); s.buffer = b; const f = AC.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 160; const g = AC.createGain(); g.gain.value = .9;
-    s.connect(f).connect(g).connect(natG); s.start(t); }
+  /* a short sound event: an oscillator with its own envelope, placed left or right */
+  function blip(at, f0, f1, dur, vol, panV, type = "sine", dest = natG) {
+    const o = AC.createOscillator(), g = AC.createGain(), pn = panner(panV); o.type = type; o.frequency.setValueAtTime(f0, at); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, at + dur * .8);
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + Math.min(.012, dur * .2)); g.gain.exponentialRampToValueAtTime(.0001, at + dur); o.connect(g).connect(pn).connect(dest); o.start(at); o.stop(at + dur + .02);
+  }
+  /* birds: three kinds of song, heard from where they are */
+  function bird(at, panV = (Math.random() - .5) * 1.4, near = .6 + Math.random() * .4) {
+    if (!AC) return; const v = .045 * near, kind = Math.floor(Math.random() * 3), b = 2400 + Math.random() * 1600;
+    if (kind === 0) { /* two notes, high then low */ const n = 1 + Math.floor(Math.random() * 3); for (let k = 0; k < n; k++) { const t = at + k * .55; blip(t, b * 1.25, b * 1.2, .22, v, panV); blip(t + .26, b * .92, b * .85, .2, v * .9, panV); } }
+    else if (kind === 1) { /* a trill */ const n = 6 + Math.floor(Math.random() * 8), gap = .045 + Math.random() * .02; for (let k = 0; k < n; k++) blip(at + k * gap, b, b * 1.15, .04, v * (1 - k / n * .4), panV); }
+    else { /* a falling warble */ for (let k = 0; k < 4; k++) { const f = b * (1.3 - k * .1); blip(at + k * .13, f, f * (Math.random() < .5 ? 1.12 : .9), .1, v, panV); } }
+  }
+  function chirpSoon(x) { if (AC) bird(AC.currentTime + Math.random() * 1.2, x != null ? (x / W) * 2 - 1 : undefined); }
+  /* crickets: each chirps in short bursts of pulses, then pauses */
+  function cricketTick(t, level) {
+    crickets.forEach(c => { if (t < c.next) return; c.next = t + c.per * (.9 + Math.random() * .2); if (level < .02) return;
+      const pulses = 3 + (Math.random() < .3 ? 1 : 0); for (let k = 0; k < pulses; k++) blip(t + .02 + k * .06, c.f, c.f * 1.01, .035, .012 * level, c.pan, "sine"); });
+  }
+  /* drops tapping the glass */
+  function dropTick(t, dt) { const n = cur.rain * dt * 26; for (let k = 0; k < n || Math.random() < n - k; k++) { if (k > 6) break;
+      const glass = Math.random() < .7, f = glass ? 2200 + Math.random() * 2600 : 900 + Math.random() * 500; blip(t + Math.random() * dt, f, f * .7, glass ? .03 : .06, (glass ? .012 : .02) * (.5 + Math.random()), (Math.random() - .5) * 1.8, "sine"); } }
+  /* distant thunder: a long, low, rolling rumble that builds and swells unevenly; never a sharp crack.
+     The further away (the longer after the flash), the softer and lower it is. */
+  function thunder(dist = .5) {
+    if (!AC || S.thunder === "off" || fadeAmt > 0) return;
+    const t = AC.currentTime, dur = 6 + dist * 3, len = Math.floor(AC.sampleRate * dur), b = AC.createBuffer(2, len, AC.sampleRate);
+    const swells = Array.from({ length: 3 + Math.floor(Math.random() * 3) }, (_, k) => ({ at: .15 + k * (.6 + Math.random() * 1.1) + Math.random() * .3, w: .5 + Math.random() * 1.2, h: .5 + Math.random() * .5 }));
+    for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let lp = 0;
+      for (let i = 0; i < len; i++) { const x = i / AC.sampleRate; let env = 0; for (const s of swells) env += s.h * Math.exp(-((x - s.at) ** 2) / (2 * s.w * s.w * .25));
+        env *= Math.min(1, x / .6) * Math.exp(-x / (dur * .55)); lp += (Math.random() * 2 - 1 - lp) * .04; d[i] = lp * env * 6; } }
+    const src = AC.createBufferSource(); src.buffer = b; const f = AC.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 260 - dist * 140;
+    const g = AC.createGain(); g.gain.value = (.5 - dist * .25) * (S.timer ? .5 : 1); src.connect(f).connect(g).connect(natG); src.start(t);
+  }
   function soundTick(sc, dt) {
     if (!AC) return; const t = AC.currentTime;
-    rainG.gain.setTargetAtTime(cur.rain * .22, t, 1); rainF.frequency.setTargetAtTime(1400 + cur.rain * 900, t, 1);
-    const gust = .6 + .4 * Math.sin(T * .23) * Math.sin(T * .071 + 1); windG.gain.setTargetAtTime((.02 + cur.wind * .14) * gust, t, .8); windF.frequency.setTargetAtTime(250 + cur.wind * 700 * gust, t, .8);
-    cricG.gain.setTargetAtTime(sc.night * (1 - cur.rain) * (1 - cur.snow) * .012, t, 2);
-    if (sc.day > .3 && cur.rain < .3 && Math.random() < dt * (.08 + (sc.dusk > .2 ? .15 : 0) + (sc.el > 0 && sc.el < 15 ? .25 : 0))) chirp(t + .05);
-    padTimer -= dt; if (padTimer < 0) { padTimer = 12 + Math.random() * 6; padStep(sc.night > .6 ? "night" : sc.dusk > .35 ? "dusk" : sc.el < 15 ? "dawn" : "day"); }
+    rainG.gain.setTargetAtTime(cur.rain * .13, t, 1); rainBodyG.gain.setTargetAtTime(cur.rain * cur.rain * .08, t, 1.5); rainF.forEach(f => f.frequency.setTargetAtTime(1100 - cur.rain * 300, t, 1));
+    const gust = .6 + .4 * Math.sin(T * .23) * Math.sin(T * .071 + 1); windG.gain.setTargetAtTime((.02 + cur.wind * .14) * gust * (1 - cur.snow * .4), t, .8); windF.frequency.setTargetAtTime((250 + cur.wind * 700 * gust) * (1 - cur.snow * .4), t, .8);
+    whistleG.gain.setTargetAtTime(Math.max(0, cur.wind - .45) * .05 * gust, t, 1); whistleF.frequency.setTargetAtTime(650 + gust * 450, t, 1.5);
+    if (cur.rain > .03) dropTick(t, dt);
+    cricketTick(t, sc.night * (1 - cur.rain) * (1 - cur.snow) * (1 - cur.wind * .6));
+    const birdRate = sc.day > .3 && cur.rain < .3 ? .06 + (sc.el > -2 && sc.el < 12 ? .35 : 0) + (sc.dusk > .2 ? .1 : 0) : 0; /* a fuller chorus at dawn */
+    if (Math.random() < dt * birdRate) bird(t + .05);
+    padTimer -= dt; if (padTimer < 0) { padTimer = 12 + Math.random() * 6; padStep(cur.rain > .45 ? "rain" : sc.night > .6 ? "night" : sc.dusk > .35 ? "dusk" : sc.el < 15 ? "dawn" : "day"); }
   }
   let padTimer = 0;
 
@@ -312,6 +352,7 @@
       : `<button class="btn gold" id="usesky">Use my sky</button> <span class="fine" style="margin:0 0 0 6px">real sunrise, sunset and weather</span>`;
     $("#vmus").value = S.mus; $("#vnat").value = S.nat;
     $("#timer").innerHTML = [[0, "Off"], [15, "15 min"], [30, "30"], [60, "1 h"], [90, "1½ h"]].map(([k, l]) => `<button class="${S.timer === k ? "on" : ""}" data-timer="${k}">${l}</button>`).join("");
+    $("#thunder").innerHTML = [["distant", "Distant"], ["off", "Off"]].map(([k, l]) => `<button class="${S.thunder === k ? "on" : ""}" data-thunder="${k}">${l}</button>`).join("");
     $("#awake").innerHTML = `<button class="${S.awake ? "on" : ""}" data-awake="1">Keep awake</button><button class="${!S.awake ? "on" : ""}" data-awake="0">Let it sleep</button>`;
     $("#ver").textContent = `Living Window · version ${APP_VERSION}`;
   }
@@ -319,6 +360,7 @@
     touchPanel(); const b = e.target.closest("button, a"); if (!b) return;
     if (b.dataset.wx) { S.wx = b.dataset.wx; store(); renderPanel(); }
     else if (b.dataset.timer != null) setTimer(+b.dataset.timer);
+    else if (b.dataset.thunder) { S.thunder = b.dataset.thunder; store(); renderPanel(); }
     else if (b.dataset.awake != null) { S.awake = b.dataset.awake === "1"; store(); if (!S.awake && wakeLock) { wakeLock.release(); wakeLock = null; } else keepAwake(); renderPanel(); }
     else if (b.id === "usesky") { if (!navigator.geolocation) return; b.textContent = "Asking…";
       navigator.geolocation.getCurrentPosition(p => { S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.useSky = true; S.wx = "auto"; store(); fetchWeather(); renderPanel(); },
@@ -353,7 +395,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__lw = { S, cur, setScrub: m => { scrubMin = m; }, setLive: l => { live = l; }, get fadeAmt() { return fadeAmt; } };
+  window.__lw = { S, cur, thunder: d => thunder(d), get AC() { return AC; }, setScrub: m => { scrubMin = m; }, setLive: l => { live = l; }, get fadeAmt() { return fadeAmt; } };
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(r => r.update?.()).catch(() => {});
