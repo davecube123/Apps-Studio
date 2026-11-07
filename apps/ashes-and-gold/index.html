@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#16130f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ashes and Gold">
+  <meta name="description" content="A wordless story about a man's journey, from boyhood to elderhood, told through small interactions.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Ashes and Gold</title>
+  <style>
+    :root { --ink: #efe6d6; --muted: rgba(239,230,214,.55); --gold: #e6b65c; --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; background: #16130f; color: var(--ink); overflow: hidden; overscroll-behavior: none; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+    canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; }
+    .overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px;
+               transition: opacity 1.2s ease; z-index: 5; }
+    .overlay.hide { opacity: 0; pointer-events: none; }
+    #title { background: radial-gradient(70% 45% at 50% 42%, rgba(230,182,92,.22), transparent 70%), #16130f; }
+    #title h1 { font: 400 46px/1.05 var(--serif); letter-spacing: .01em; margin: 0; }
+    #title h1 em { color: var(--gold); font-style: italic; }
+    #title p { font: 15px/1.5 var(--serif); font-style: italic; color: var(--muted); margin: 14px 0 0; max-width: 300px; }
+    .begin { margin-top: 42px; border: 1px solid rgba(239,230,214,.35); background: none; color: var(--ink); border-radius: 999px; padding: 13px 34px; font: 500 15px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+    .chapters { display: flex; gap: 10px; margin-top: 26px; }
+    .chapters button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(239,230,214,.25); background: none; color: var(--muted); font: 15px var(--serif); cursor: pointer; }
+    .chapters button.open { color: var(--ink); border-color: rgba(239,230,214,.55); }
+    .chapters button:disabled { opacity: .3; }
+    .hp { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 26px); font: 12px var(--sans); letter-spacing: .08em; color: var(--muted); }
+    #card { pointer-events: none; }
+    #card .n { font: 400 15px var(--serif); letter-spacing: .4em; color: var(--gold); }
+    #card .t { font: italic 400 34px/1.2 var(--serif); margin-top: 12px; }
+    #end { background: #16130f; }
+    #end p { font: italic 17px/1.6 var(--serif); color: var(--muted); max-width: 300px; }
+    #mute { position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.18);
+            color: rgba(239,230,214,.7); cursor: pointer; display: grid; place-items: center; }
+    #mute svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    #home { position: fixed; top: calc(env(safe-area-inset-top) + 12px); left: 14px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.18);
+            color: rgba(239,230,214,.7); cursor: pointer; display: grid; place-items: center; font: 20px var(--serif); }
+    .ver { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 8px); font: 11px var(--sans); color: rgba(239,230,214,.3); }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <button id="home" aria-label="Back to the title" class="hide" style="display:none">‹</button>
+  <button id="mute" aria-label="Sound on or off"></button>
+  <div id="title" class="overlay">
+    <h1>Ashes<br>and <em>Gold</em></h1>
+    <p>A man’s journey, from boyhood to elderhood, told without words.</p>
+    <button class="begin" id="begin">Begin</button>
+    <div class="chapters" id="chapters"></div>
+    <div class="hp">Best with sound · chapters I–III of IX</div>
+    <div class="ver" id="ver"></div>
+  </div>
+  <div id="card" class="overlay hide"><div class="n" id="cardn"></div><div class="t" id="cardt"></div></div>
+  <div id="end" class="overlay hide">
+    <div class="n" style="font:400 15px var(--serif);letter-spacing:.4em;color:var(--gold)">TO BE CONTINUED</div>
+    <p style="margin-top:18px">The ashes. The golden spring. The four trials. The return. The blessing.</p>
+    <button class="begin" id="again">Back to the beginning</button>
+  </div>
+  <script>
+  "use strict";
+  /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
+     Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
+     the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
+  const APP_VERSION = "1";
+  const $ = s => document.querySelector(s);
+  const cv = $("#c"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+  function resize() { DPR = Math.min(2.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); scene?.layout?.(); }
+  addEventListener("resize", resize);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, ease = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+  const haptic = p => { try { navigator.vibrate?.(p); } catch (e) {} };
+  const save = {}; try { Object.assign(save, JSON.parse(localStorage.getItem("ashes-and-gold") || "{}")); } catch (e) {}
+  const store = () => { try { localStorage.setItem("ashes-and-gold", JSON.stringify(save)); } catch (e) {} };
+  save.reached ||= 1; save.muted ??= false;
+
+  /* ---------- Sound: soft generated tones, no recordings ---------- */
+  let AC = null, master = null, noiseG = null, noiseF = null, droneO = null, droneG = null;
+  function audio() {
+    if (!AC) {
+      try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+      master = AC.createGain(); master.gain.value = save.muted ? 0 : .9; master.connect(AC.destination);
+      const buf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = AC.createBufferSource(); src.buffer = buf; src.loop = true;
+      noiseF = AC.createBiquadFilter(); noiseF.type = "lowpass"; noiseF.frequency.value = 400; noiseG = AC.createGain(); noiseG.gain.value = 0;
+      src.connect(noiseF).connect(noiseG).connect(master); src.start();
+      droneO = AC.createOscillator(); droneO.type = "sine"; droneO.frequency.value = 55; droneG = AC.createGain(); droneG.gain.value = 0; droneO.connect(droneG).connect(master); droneO.start();
+    }
+    if (AC.state === "suspended") AC.resume();
+  }
+  function note(f, { dur = 2.2, vol = .14, delay = 0, type = "sine" } = {}) {
+    if (!AC) return; const t = AC.currentTime + delay;
+    [[1, vol, type], [2, vol * .22, "sine"], [3, vol * .06, "sine"]].forEach(([m, v, ty]) => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = ty; o.frequency.value = f * m;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur / m);
+      o.connect(g).connect(master); o.start(t); o.stop(t + dur + .1); });
+  }
+  function thud(vol = .5) { if (!AC) return; const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(38, t + .4);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + .7); o.connect(g).connect(master); o.start(t); o.stop(t + .8); }
+  function ambience(level, cutoff, drone = 0, droneHz = 55) {
+    if (!AC) return; const t = AC.currentTime;
+    noiseG.gain.setTargetAtTime(level, t, .8); noiseF.frequency.setTargetAtTime(cutoff, t, .8);
+    droneG.gain.setTargetAtTime(drone, t, 1); droneO.frequency.setTargetAtTime(droneHz, t, 1);
+  }
+  const N = { D3: 146.83, F3: 174.61, A3: 220, C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880 };
+  function setMuteIcon() { $("#mute").innerHTML = save.muted ? `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 8.5a5 5 0 0 1 0 7M19.5 6a8.5 8.5 0 0 1 0 12"/></svg>`; }
+  $("#mute").onclick = e => { e.stopPropagation(); save.muted = !save.muted; store(); setMuteIcon(); if (master) master.gain.value = save.muted ? 0 : .9; };
+
+  /* ---------- Figures: simple, flat, original ---------- */
+  function person(x, footY, h, color, o = {}) {
+    const ph = o.phase || 0, swing = o.walk ? Math.sin(ph) * .38 : 0, sit = o.sit || 0;
+    const headR = h * .105, legH = h * .44 * (1 - sit * .55), hipY = footY - legH, bodyH = h * .4, bw = h * (o.coat ? .3 : .24);
+    ctx.save(); ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineCap = "round";
+    /* legs */
+    ctx.lineWidth = h * .085;
+    if (sit) { ctx.beginPath(); ctx.moveTo(x - bw * .2, hipY); ctx.lineTo(x + h * .2 * sit, hipY + h * .02); ctx.lineTo(x + h * .22 * sit, footY); ctx.moveTo(x + bw * .2, hipY); ctx.lineTo(x + h * .24 * sit, hipY); ctx.lineTo(x + h * .26 * sit, footY); ctx.stroke(); }
+    else { for (const s of [1, -1]) { ctx.beginPath(); ctx.moveTo(x + s * bw * .18, hipY); ctx.lineTo(x + s * bw * .18 + Math.sin(swing * s) * legH * .9, footY - (1 - Math.cos(swing)) * legH * .3); ctx.stroke(); } }
+    /* body */
+    const top = hipY - bodyH; ctx.beginPath(); ctx.roundRect(x - bw / 2, top, bw, bodyH + (o.coat ? h * .1 : h * .02), bw * .35); ctx.fill();
+    /* arms: hanging, swinging when walking, or one reaching forward */
+    ctx.lineWidth = h * .065;
+    const L = h * .3; let hand = null;
+    for (const s of [1, -1]) {
+      const sx = x + s * bw * .42, sy = top + h * .05;
+      const a = s === 1 && o.reach ? 1.25 * o.reach : (o.walk ? -Math.sin(ph) * .3 * s : 0) + (o.armsOut || 0) * s;
+      const ex = sx + Math.sin(a) * L, ey = sy + Math.cos(a) * L;
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+      if (s === 1) hand = [ex, ey];
+    }
+    /* head */
+    ctx.beginPath(); ctx.arc(x + (o.tilt || 0) * headR * .5, top - headR * 1.08, headR, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    return { headX: x, headY: top - headR * 1.08, handX: hand[0], handY: hand[1] };
+  }
+  function glowDot(x, y, r, color, a = 1) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, color.replace("A", a)); g.addColorStop(1, color.replace("A", 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+  /* a soft pulsing hint, never words */
+  function hint(x, y, t, a = 1) { const p = (t % 1.8) / 1.8; ctx.save(); ctx.globalAlpha = a * (1 - p) * .8; ctx.strokeStyle = "#efe6d6"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 10 + p * 22, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = a * .9; ctx.fillStyle = "#efe6d6"; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+
+  /* ---------- Chapter I · Ahead ----------
+     A father walks ahead and never turns. The boy can call (tap) or run (hold); the gap only grows. */
+  const ch1 = {
+    num: "I", name: "Ahead",
+    start() { this.t = 0; this.x = 0; this.gap = 120; this.calls = 0; this.run = 0; this.stam = 1; this.ph = 0; this.fph = 0; this.ripples = []; this.tilt = 0; this.tiltT = -9;
+      this.gone = false; this.goneT = 0; this.sit = 0; this.lamp = 0; this.done = false; this.leaves = []; this.held = false; ambience(.05, 520, 0); },
+    down() { this.held = true; this.downT = this.t; },
+    up() { this.held = false; if (this.t - this.downT < .28) this.call(); },
+    call() {
+      if (this.done) return next(); if (this.gone) return;
+      this.calls++; this.ripples.push({ t: 0 }); haptic(12);
+      note(N.A4, { vol: .12 }); note(N.D5, { vol: .1, delay: .18 });
+      if (this.calls === 3) { this.tiltT = this.t; setTimeout(() => note(N.F4, { vol: .09, dur: 3 }), 600); }
+    },
+    update(dt) {
+      this.t += dt;
+      const running = this.held && this.t - this.downT > .28 && this.stam > 0 && !this.gone;
+      if (running) this.stam -= dt * .7; else this.stam = Math.min(1, this.stam + dt * .25);
+      const bs = this.gone ? Math.max(0, 40 - (this.t - this.goneT) * 20) : running ? 96 : this.stam <= 0 ? 24 : 40;
+      const fs = this.tiltT > 0 && this.t - this.tiltT < .9 ? 0 : 46; /* he pauses, half turns... and walks on */
+      this.x += bs * dt; if (!this.gone) this.gap += (fs - bs) * dt;
+      this.gap = Math.max(70, this.gap); this.ph += bs * dt * .085; this.fph += fs * dt * .07;
+      const dtl = this.t - this.tiltT; this.tilt = dtl > 0 && dtl < 1.4 ? Math.sin(dtl / 1.4 * Math.PI) * .9 : 0;
+      this.ripples.forEach(r => r.t += dt); this.ripples = this.ripples.filter(r => r.t < 1.6);
+      if (!this.gone && W * .3 + this.gap > W + 60) { this.gone = true; this.goneT = this.t; note(N.D4, { vol: .08, dur: 4 }); ambience(.035, 380, 0); }
+      if (this.gone) { const g = this.t - this.goneT; this.sit = clamp((g - 2.5) / 1.2, 0, 1); this.lamp = clamp((g - 4.5) / 2, 0, 1);
+        if (g > 4.5 && !this.lampNote) { this.lampNote = 1; note(N.C5, { vol: .07, dur: 4 }); note(N.G4, { vol: .05, dur: 4, delay: .3 }); }
+        if (g > 7.5) this.done = true; }
+      if (Math.random() < dt * .4) this.leaves.push({ x: Math.random() * W, y: -10, v: 18 + Math.random() * 14, s: Math.random() * 6 });
+      this.leaves.forEach(l => { l.y += l.v * dt; l.x += Math.sin(this.t + l.s) * 10 * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
+    },
+    draw() {
+      const gy = H * .7, sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#8d9bab"); sk.addColorStop(1, "#d8d3ca"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+      /* far hills and near trees scroll at different speeds */
+      ctx.fillStyle = "#a9b0b6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin((xx + this.x * .15) * .012) * 22 - Math.sin((xx + this.x * .15) * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
+      ctx.fillStyle = "#7d8790"; for (let i = -1; i < 7; i++) { const sp = 150, xx = ((i * sp - this.x * .6) % (sp * 7) + sp * 7) % (sp * 7) - sp; ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#5d646a"; ctx.fillRect(0, gy, W, H - gy); ctx.fillStyle = "#6c737a"; ctx.fillRect(0, gy, W, 3);
+      /* the lamp that comes on at the end */
+      const lx = W * .3 - 46; ctx.fillStyle = "#3e444a"; ctx.fillRect(lx, gy - 190, 4, 190); ctx.fillRect(lx, gy - 190, 20, 4);
+      if (this.lamp) { glowDot(lx + 14, gy - 182, 120, "rgba(240,196,110,A)", .55 * this.lamp); ctx.fillStyle = `rgba(250,220,150,${this.lamp})`; ctx.beginPath(); ctx.arc(lx + 14, gy - 182, 5, 0, Math.PI * 2); ctx.fill(); }
+      const bx = W * .3, fx = bx + this.gap, fh = Math.min(H * .3, 230), bh = fh * .5;
+      if (!this.gone || fx < W + 80) person(fx, gy, fh, "#2b3138", { coat: 1, walk: !this.gone || true, phase: this.fph, tilt: -this.tilt });
+      const b = person(bx, gy, bh, "#4c5864", { walk: this.sit < .1 && !(this.gone && this.t - this.goneT > 2), phase: this.ph, sit: this.sit, reach: this.held && !this.gone ? .7 : 0 });
+      this.ripples.forEach(r => { ctx.strokeStyle = `rgba(250,246,238,${.7 * (1 - r.t / 1.6)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + r.t * 70, -.9, .9); ctx.stroke(); });
+      ctx.fillStyle = "rgba(120,96,70,.55)"; this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(this.t * 2 + l.s); ctx.fillRect(-4, -2, 8, 4); ctx.restore(); });
+      if (this.t < 6 && !this.calls) hint(b.headX + 40, b.headY - 20, this.t, clamp(this.t - 1.5, 0, 1));
+      if (this.done) hint(W / 2, H * .86, this.t);
+    },
+  };
+
+  /* ---------- Chapter II · The Key ----------
+     The key lies under the sleeping mother's pillow. Draw it out slowly; too fast and she stirs. */
+  const ch2 = {
+    num: "II", name: "The Key",
+    layout() { this.bedX = W * .58; this.bedY = H * .66; this.pillowX = this.bedX - W * .2; this.keyHome = this.pillowX + 6; this.keyEnd = W * .27 + 8; this.doorX = W * .015; },
+    start() { this.t = 0; this.layout(); this.k = this.keyHome; this.drag = false; this.stir = 0; this.stirs = 0; this.lock = 0; this.got = false; this.walk = 0; this.leave = 0; this.done = false; this.lastNoteX = this.k; this.turn = 0;
+      ambience(.012, 180, .03, 73.4); },
+    down(x, y) {
+      if (this.done) return next();
+      if (this.got && !this.walk) { this.walk = .001; note(N.E4, { vol: .07 }); return; }
+      if (this.got || this.lock > 0) return;
+      if (Math.hypot(x - this.k, y - this.keyY()) < 46) { this.drag = true; this.lx = x; this.lt = performance.now(); this.v = 0; }
+    },
+    move(x) {
+      if (!this.drag) return; const now = performance.now(), dtm = Math.max(1, now - this.lt) / 1000;
+      const nk = clamp(x, this.keyEnd, this.keyHome), v = Math.abs(nk - this.k) / dtm; this.v = this.v * .6 + v * .4; this.lx = x; this.lt = now;
+      this.k = nk;
+      if (Math.abs(this.k - this.lastNoteX) > 18) { this.lastNoteX = this.k; note([N.E5, N.G5, N.A5, N.D5][Math.floor(Math.random() * 4)], { vol: .025, dur: 1 }); }
+      if (this.v > 230) { /* too fast: she stirs */
+        this.drag = false; this.stir = 1; this.stirs++; this.lock = 1.3; this.k = Math.min(this.keyHome, this.k + 34); haptic(30);
+        note(N.D3, { vol: .09, dur: 1.4 }); note(147 * 1.06, { vol: .06, dur: 1.4 });
+      }
+      if (this.k <= this.keyEnd + 2) { this.drag = false; this.got = true; haptic([10, 40, 14]); note(N.A4, { vol: .1 }); note(N.D5, { vol: .08, delay: .2 }); note(N.F4, { vol: .06, delay: .4 }); }
+    },
+    up() { this.drag = false; },
+    keyY() { return this.bedY - 44; },
+    update(dt) {
+      this.t += dt; this.stir = Math.max(0, this.stir - dt * .9); this.lock = Math.max(0, this.lock - dt);
+      if (this.walk) { this.walk = Math.min(1, this.walk + dt * .35); if (this.walk >= 1) { this.leave = Math.min(1, this.leave + dt * .4); if (this.leave > .15 && !this.lookNote) { this.lookNote = 1; note(N.C4, { vol: .07, dur: 3 }); } } }
+      if (this.leave >= 1) { this.turn = Math.min(1, this.turn + dt * .4); if (this.turn >= 1 && !this.done) { this.done = true; note(N.D4, { vol: .06, dur: 4 }); } }
+    },
+    draw() {
+      const t = this.t, floor = H * .74;
+      const wall = ctx.createLinearGradient(0, 0, 0, floor); wall.addColorStop(0, "#2a1c15"); wall.addColorStop(1, "#4a3022"); ctx.fillStyle = wall; ctx.fillRect(0, 0, W, floor);
+      ctx.fillStyle = "#3a261b"; ctx.fillRect(0, floor, W, H - floor);
+      /* lamp glow */
+      const lampX = W * .86, lampY = this.bedY - 70; glowDot(lampX, lampY, W * .7, "rgba(243,190,110,A)", .38 * (1 - this.leave * .2));
+      ctx.fillStyle = "#6a4a30"; ctx.fillRect(lampX - 2, lampY, 4, this.bedY - lampY + 10); ctx.fillStyle = "#f2c47c"; ctx.beginPath(); ctx.moveTo(lampX - 18, lampY); ctx.lineTo(lampX + 18, lampY); ctx.lineTo(lampX + 11, lampY - 22); ctx.lineTo(lampX - 11, lampY - 22); ctx.fill();
+      /* window with night */
+      ctx.fillStyle = "#1b2433"; ctx.fillRect(W * .5, H * .16, W * .22, H * .2); ctx.fillStyle = "#e9e3d0"; ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(W * .66, H * .21, 6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = "#5a3d2b"; ctx.lineWidth = 4; ctx.strokeRect(W * .5, H * .16, W * .22, H * .2); ctx.beginPath(); ctx.moveTo(W * .61, H * .16); ctx.lineTo(W * .61, H * .36); ctx.stroke();
+      /* the door, ajar: a strip of cold light */
+      const dx = this.doorX, open = this.walk ? clamp(this.walk * 1.4, 0, 1) * (1 - clamp((this.leave - .5) * 2, 0, 1)) : .1;
+      ctx.fillStyle = "#24170f"; ctx.fillRect(dx, floor - H * .34, W * .12, H * .34);
+      ctx.fillStyle = `rgba(150,175,205,${.25 + open * .55})`; ctx.fillRect(dx + W * .12 * (1 - open * .8) - 4, floor - H * .34, W * .12 * open * .8 + 4, H * .34);
+      /* bed */
+      const bx = this.bedX, by = this.bedY, bw = W * .62;
+      ctx.fillStyle = "#5c3b28"; ctx.fillRect(bx - bw / 2, by, bw, 16); ctx.fillRect(bx - bw / 2, by - 26, 8, 60); ctx.fillRect(bx + bw / 2 - 8, by - 10, 8, 44);
+      ctx.fillStyle = "#e8dccb"; ctx.beginPath(); ctx.roundRect(bx - bw / 2 + 6, by - 14, bw - 12, 16, 6); ctx.fill();
+      /* pillow and the mother asleep */
+      const px = this.pillowX, breath = Math.sin(t * 1.4) * 2.2, stir = this.stir, tw = this.turn;
+      ctx.fillStyle = "#f3ead9"; ctx.beginPath(); ctx.ellipse(px, by - 24, 46, 15, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#8a5a3c"; ctx.beginPath(); ctx.arc(px + 8 + stir * 6 * Math.sin(t * 9) + tw * -10, by - 38, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#4b2e20"; ctx.beginPath(); ctx.arc(px + 2 + tw * -10, by - 42, 15, Math.PI * .8, Math.PI * 2.05); ctx.fill();
+      ctx.fillStyle = "#b9875f"; ctx.beginPath(); ctx.moveTo(px + 20, by - 12);
+      ctx.bezierCurveTo(px + 60, by - 52 - breath - stir * 8, bx + bw * .25, by - 50 - breath, bx + bw / 2 - 12, by - 14); ctx.lineTo(px + 20, by - 12); ctx.fill();
+      if (tw) { /* she turns toward where he was: one hand open on the blanket */ ctx.fillStyle = "#8a5a3c"; ctx.beginPath(); ctx.arc(px - 30 - tw * 8, by - 18, 6, 0, Math.PI * 2); ctx.fill(); }
+      /* the key */
+      if (!this.got) { const ky = this.keyY() + 18; ctx.save(); ctx.translate(this.k, ky); ctx.fillStyle = "#e6b65c"; ctx.strokeStyle = "#e6b65c"; ctx.lineWidth = 3.5;
+        ctx.beginPath(); ctx.arc(-14, 0, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-8, -1.8, 20, 3.6); ctx.fillRect(7, 0, 3, 7); ctx.fillRect(11, 0, 3, 5); ctx.restore();
+        /* the pillow covers the key's end until it is drawn out */
+        ctx.fillStyle = "#f3ead9"; ctx.beginPath(); ctx.ellipse(px + 14, by - 22, 34, 11, 0, 0, Math.PI * 2); ctx.fill();
+        glowDot(this.k - 10, this.keyY() + 18, 26, "rgba(240,200,110,A)", .25 + .15 * Math.sin(t * 3)); }
+      /* the boy, older now, waiting at the bedside */
+      const walkX = lerp(W * .27, this.doorX + W * .06, ease(this.walk)), boyH = Math.min(H * .26, 200);
+      if (this.leave < .9) { ctx.globalAlpha = 1 - clamp((this.leave - .5) * 2.5, 0, 1);
+        person(walkX, floor, boyH, "#2a2522", { walk: this.walk > 0 && this.walk < 1, phase: t * 7, tilt: this.walk >= 1 && this.leave < .6 ? .9 : 0, reach: !this.walk && !this.got ? .5 : 0 });
+        if (this.got) { ctx.fillStyle = "#e6b65c"; ctx.beginPath(); ctx.arc(walkX + 14, floor - boyH * .5, 3.5, 0, Math.PI * 2); ctx.fill(); glowDot(walkX + 14, floor - boyH * .5, 22, "rgba(240,200,110,A)", .4); }
+        ctx.globalAlpha = 1; }
+      if (!this.got && !this.drag && this.t > 2 && this.k === this.keyHome && !this.stirs) hint(this.k, this.keyY() + 18, t);
+      if (this.got && !this.walk) hint(this.doorX + W * .06, floor - H * .17, t);
+      if (this.done) hint(W / 2, H * .88, t);
+    },
+  };
+
+  /* ---------- Chapter III · The Cage ----------
+     In the forest, a wild man behind bars. Bring the key to the lock and turn it; each turn the forest grows louder. */
+  const ch3 = {
+    num: "III", name: "The Cage",
+    layout() { this.cx = W * .5; this.cy = H * .42; this.cw = Math.min(W * .62, 300); this.ch = H * .4; this.lockX = this.cx; this.lockY = this.cy + this.ch * .34; this.manX = W * .2; this.floor = H * .8; },
+    start() { this.t = 0; this.layout(); this.phase = "bring"; this.kx = this.manX + 18; this.ky = this.floor - 90; this.turn = 0; this.notch = 0; this.shake = 0; this.open = 0; this.out = 0; this.kneel = 0; this.hold = 0; this.walk = 0; this.done = false;
+      this.flies = Array.from({ length: 22 }, () => ({ x: Math.random() * W, y: H * (.2 + Math.random() * .6), p: Math.random() * 7, s: .5 + Math.random() })); ambience(.03, 900, 0, 55); },
+    down(x, y) {
+      if (this.done) return next();
+      if (this.phase === "bring" && Math.hypot(x - this.kx, y - this.ky) < 50) { this.drag = true; }
+      else if (this.phase === "turn" && Math.hypot(x - this.lockX, y - this.lockY) < 110) { this.drag = true; this.ang = Math.atan2(y - this.lockY, x - this.lockX); }
+      else if (this.phase === "hand" && Math.hypot(x - this.handX, y - this.handY) < 60) { this.holding = true; }
+    },
+    move(x, y) {
+      if (!this.drag) return;
+      if (this.phase === "bring") { this.kx = x; this.ky = y;
+        if (Math.hypot(x - this.lockX, y - this.lockY) < 34) { this.drag = false; this.phase = "turn"; this.kx = this.lockX; this.ky = this.lockY; thud(.25); haptic(15); } }
+      else if (this.phase === "turn") {
+        const a = Math.atan2(y - this.lockY, x - this.lockX); let d = a - this.ang; if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; this.ang = a;
+        this.turn = clamp(this.turn + d, 0, Math.PI * 3);
+        const n = Math.floor(this.turn / Math.PI);
+        if (n > this.notch) { this.notch = n; this.shake = 1; haptic([25, 30, 25]); thud(.55); note([N.D3, N.F3, N.A3][n - 1] / 2, { vol: .12, dur: 3 });
+          ambience(.03 + n * .045, 900 + n * 500, .03 + n * .05, 55 + n * 5);
+          if (n === 3) { this.phase = "open"; this.drag = false; note(N.D3, { vol: .12, dur: 5 }); note(N.A3, { vol: .1, dur: 5, delay: .1 }); note(N.F4, { vol: .08, dur: 5, delay: .2 }); } }
+      }
+    },
+    up() { this.drag = false; this.holding = false; if (this.phase === "bring") { this.kx = this.manX + 18; this.ky = this.floor - 90; } },
+    update(dt) {
+      this.t += dt; this.shake = Math.max(0, this.shake - dt * 1.6);
+      this.flies.forEach(f => { f.p += dt * f.s; f.x += Math.sin(f.p) * 14 * dt * (1 + this.notch); f.y += Math.cos(f.p * .8) * 10 * dt; });
+      if (this.phase === "open") { this.open = Math.min(1, this.open + dt * .6); if (this.open >= 1) this.out = Math.min(1, this.out + dt * .35);
+        if (this.out >= 1) { this.kneel = Math.min(1, this.kneel + dt * .5); if (this.kneel >= 1 && this.phase === "open") { this.phase = "hand"; ambience(.025, 700, .02, 55); note(N.C5, { vol: .07, dur: 3 }); } } }
+      if (this.phase === "hand") { if (this.holding) { this.hold = Math.min(1, this.hold + dt / 1.6); if (Math.random() < dt * 4) note([N.D4, N.F4, N.A4, N.D5][Math.floor(this.hold * 3.99)], { vol: .05, dur: 1.5 }); } else this.hold = Math.max(0, this.hold - dt);
+        if (this.hold >= 1) { this.phase = "walk"; haptic([12, 50, 20]); note(N.D4, { vol: .09, dur: 4 }); note(N.A4, { vol: .08, dur: 4, delay: .25 }); note(N.D5, { vol: .07, dur: 4, delay: .5 }); } }
+      if (this.phase === "walk") { this.walk = Math.min(1, this.walk + dt * .12); if (this.walk >= 1 && !this.done) { this.done = true; ambience(.02, 600, 0); } }
+    },
+    draw() {
+      const t = this.t, sx = (Math.random() - .5) * 8 * this.shake, sy = (Math.random() - .5) * 6 * this.shake; ctx.save(); ctx.translate(sx, sy);
+      const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#0c1512"); bg.addColorStop(1, "#1b2822"); ctx.fillStyle = bg; ctx.fillRect(-10, -10, W + 20, H + 20);
+      for (let i = 0; i < 9; i++) { const xx = (i / 8) * W * 1.1 - W * .05, w = 16 + (i % 3) * 10; ctx.fillStyle = i % 2 ? "#13201b" : "#0f1a16"; ctx.fillRect(xx, 0, w, this.floor); }
+      ctx.fillStyle = "#111b17"; ctx.fillRect(-10, this.floor, W + 20, H - this.floor + 10);
+      /* fireflies */
+      this.flies.forEach(f => glowDot(f.x, f.y, 9, "rgba(214,232,140,A)", .35 + .3 * Math.sin(f.p * 3)));
+      const { cx, cy, cw, ch } = this, x0 = cx - cw / 2, y0 = cy - ch / 2, lean = 1 + this.notch * .035 + this.out * .2, eyes = .35 + this.notch * .2;
+      const drawWild = () => {
+      /* the wild man: a huge shaggy dark shape, breathing */
+      const wmX = lerp(cx, W * .62, ease(this.out)) + lerp(0, W * .55, ease(this.walk)), wmFoot = lerp(y0 + ch, this.floor, ease(this.out)), wmH = ch * .9 * lean * (1 - this.kneel * .32);
+      const br = Math.sin(t * 1.1) * 3;
+      ctx.fillStyle = "#070b09"; ctx.beginPath();
+      for (let i = 0; i <= 40; i++) { const a = Math.PI + i / 40 * Math.PI, r = wmH * .32 + Math.sin(i * 1.7 + t) * 4 + (i % 2) * 5;
+        ctx.lineTo(wmX + Math.cos(a) * r * .9, wmFoot - wmH * .55 + Math.sin(a) * r * 1.25 - br); }
+      ctx.lineTo(wmX + wmH * .3, wmFoot); ctx.lineTo(wmX - wmH * .3, wmFoot); ctx.closePath(); ctx.fill();
+      const ex = wmX - (this.out ? 6 : 0), ey = wmFoot - wmH * .78 - br;
+      for (const s of [-1, 1]) { glowDot(ex + s * wmH * .07, ey, 10, "rgba(232,170,80,A)", eyes); ctx.fillStyle = `rgba(250,205,120,${eyes})`; ctx.beginPath(); ctx.arc(ex + s * wmH * .07, ey, 2.4, 0, Math.PI * 2); ctx.fill(); }
+      /* his offered hand, once kneeling */
+      if (this.phase === "hand" || this.phase === "walk") { this.handX = wmX - wmH * .38; this.handY = wmFoot - wmH * .32;
+        if (this.phase === "hand") { ctx.fillStyle = "#070b09"; ctx.beginPath(); ctx.ellipse(this.handX, this.handY, 13, 9, -.4, 0, Math.PI * 2); ctx.fill(); glowDot(this.handX, this.handY, 40, "rgba(240,200,110,A)", .18 + this.hold * .5); } }
+      };
+      if (!this.out) drawWild();
+      /* the cage: bars, beams, the door swinging open */
+      ctx.strokeStyle = "#3c4540"; ctx.lineWidth = 5; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(x0 - 6, y0); ctx.lineTo(x0 + cw + 6, y0); ctx.moveTo(x0 - 6, y0 + ch); ctx.lineTo(x0 + cw + 6, y0 + ch); ctx.stroke();
+      ctx.lineWidth = 4; const bars = 9;
+      for (let i = 0; i <= bars; i++) { const bx = x0 + i / bars * cw, isDoor = i >= 3 && i <= 6;
+        const off = isDoor ? -this.open * (bx - x0 + 10) * .9 : 0, alpha = isDoor ? 1 - this.open * .6 : 1;
+        ctx.globalAlpha = alpha; ctx.beginPath(); ctx.moveTo(bx + off, y0); ctx.lineTo(bx + off, y0 + ch); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+      if (this.out) drawWild();
+      /* lock and turning key */
+      if (this.phase === "bring" || this.phase === "turn") {
+        ctx.fillStyle = "#5a5f55"; ctx.beginPath(); ctx.roundRect(this.lockX - 16, this.lockY - 12, 32, 30, 5); ctx.fill();
+        ctx.strokeStyle = "#5a5f55"; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(this.lockX, this.lockY - 12, 10, Math.PI, 0); ctx.stroke();
+        ctx.fillStyle = "#161a17"; ctx.beginPath(); ctx.arc(this.lockX, this.lockY + 1, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(this.lockX - 1.5, this.lockY + 1, 3, 8); }
+      if (this.phase === "turn") { ctx.save(); ctx.translate(this.lockX, this.lockY + 3); ctx.rotate(this.turn);
+        ctx.strokeStyle = "#e6b65c"; ctx.fillStyle = "#e6b65c"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(0, -20, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-1.8, -14, 3.6, 14); ctx.restore();
+        /* a faint ring shows where to turn, fading as the turning starts */
+        const fade = clamp(1 - this.turn / 1.5, 0, 1) * (.5 + .5 * Math.sin(t * 3));
+        ctx.strokeStyle = `rgba(239,230,214,${.35 * fade})`; ctx.lineWidth = 1.5; ctx.setLineDash([3, 7]); ctx.beginPath(); ctx.arc(this.lockX, this.lockY, 62, -Math.PI / 2, Math.PI * 1.3); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = `rgba(239,230,214,${.5 * fade})`; ctx.beginPath(); const ax = this.lockX + Math.cos(Math.PI * 1.3) * 62, ay = this.lockY + Math.sin(Math.PI * 1.3) * 62; ctx.arc(ax, ay, 4, 0, Math.PI * 2); ctx.fill(); }
+      /* the young man */
+      const mh = Math.min(H * .26, 205), mx = lerp(this.manX, this.manX + W * .1, ease(this.out)) + lerp(0, W * .62, ease(this.walk));
+      const me = person(mx, this.floor, mh, "#1f2a26", { walk: this.phase === "walk", phase: t * 6, reach: this.phase === "hand" ? .6 + this.hold * .3 : this.drag && this.phase === "bring" ? .8 : 0 });
+      if (this.phase === "bring") { ctx.save(); ctx.translate(this.kx, this.ky); ctx.strokeStyle = "#e6b65c"; ctx.fillStyle = "#e6b65c"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(-12, 0, 6, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(-6, -1.8, 18, 3.6); ctx.fillRect(8, 0, 3, 6); ctx.restore();
+        glowDot(this.kx - 4, this.ky, 30, "rgba(240,200,110,A)", .35); if (!this.drag && t > 1.5) hint(this.lockX, this.lockY + 3, t, .8); }
+      if (this.phase === "hand" && !this.holding && this.hold < .05) hint(this.handX, this.handY, t);
+      if (this.phase === "hand" && this.hold > 0) { ctx.strokeStyle = "rgba(240,200,110,.8)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.handX, this.handY, 28, -Math.PI / 2, -Math.PI / 2 + this.hold * Math.PI * 2); ctx.stroke(); }
+      ctx.restore();
+      /* darkness closes as they walk into the forest */
+      if (this.walk) { ctx.fillStyle = `rgba(6,9,8,${clamp((this.walk - .5) * 2, 0, 1) * .85})`; ctx.fillRect(0, 0, W, H); }
+      if (this.done) hint(W / 2, H * .88, t);
+    },
+  };
+
+  /* ---------- Flow ---------- */
+  const CHAPTERS = [ch1, ch2, ch3];
+  let scene = null, ci = -1, fadeA = 0, fadeDir = 0, onFaded = null;
+  const roman = n => ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n];
+  function play(i) {
+    ci = i; audio(); $("#title").classList.add("hide"); $("#end").classList.add("hide"); $("#home").style.display = "grid";
+    $("#cardn").textContent = roman(i); $("#cardt").textContent = CHAPTERS[i].name; $("#card").classList.remove("hide"); scene = null;
+    note([N.D4, N.F4, N.A4][i] || N.D4, { vol: .06, dur: 4 });
+    setTimeout(() => { $("#card").classList.add("hide"); scene = CHAPTERS[i]; scene.start(); fadeA = 1; fadeDir = -1; }, 2600);
+  }
+  function next() {
+    if (fadeDir) return; fadeDir = 1; onFaded = () => {
+      save.reached = Math.max(save.reached, ci + 2); store();
+      if (ci + 1 < CHAPTERS.length) play(ci + 1); else { scene = null; ambience(0, 300, 0); $("#end").classList.remove("hide"); }
+    };
+  }
+  function toTitle() { scene = null; ci = -1; ambience(0, 300, 0); $("#end").classList.add("hide"); $("#card").classList.add("hide"); $("#home").style.display = "none"; renderTitle(); $("#title").classList.remove("hide"); }
+  function renderTitle() {
+    $("#begin").textContent = save.reached > 1 && save.reached <= CHAPTERS.length ? "Continue" : "Begin";
+    $("#chapters").innerHTML = CHAPTERS.map((c, i) => `<button class="${i < save.reached ? "open" : ""}" ${i < save.reached ? "" : "disabled"} data-ch="${i}" aria-label="Chapter ${roman(i)}, ${c.name}">${roman(i)}</button>`).join("");
+    $("#ver").textContent = `version ${APP_VERSION}`;
+  }
+  $("#begin").onclick = () => play(save.reached > 1 && save.reached <= CHAPTERS.length ? save.reached - 1 : 0);
+  $("#chapters").onclick = e => { const b = e.target.closest("[data-ch]"); if (b) play(+b.dataset.ch); };
+  $("#again").onclick = () => toTitle();
+  $("#home").onclick = e => { e.stopPropagation(); toTitle(); };
+
+  /* input */
+  const pt = e => [e.clientX, e.clientY];
+  cv.addEventListener("pointerdown", e => { if (!scene) return; cv.setPointerCapture?.(e.pointerId); scene.down?.(...pt(e)); });
+  cv.addEventListener("pointermove", e => { if (scene) scene.move?.(...pt(e)); });
+  cv.addEventListener("pointerup", e => { if (scene) scene.up?.(...pt(e)); });
+  cv.addEventListener("pointercancel", e => { if (scene) scene.up?.(...pt(e)); });
+
+  /* loop */
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    ctx.fillStyle = "#16130f"; ctx.fillRect(0, 0, W, H);
+    if (scene) { scene.update(dt); scene.draw(); }
+    if (fadeDir) { fadeA = clamp(fadeA + fadeDir * dt * .8, 0, 1); if (fadeDir > 0 && fadeA >= 1) { fadeDir = 0; const f = onFaded; onFaded = null; f?.(); } else if (fadeDir < 0 && fadeA <= 0) fadeDir = 0; }
+    if (fadeA > 0) { ctx.fillStyle = `rgba(22,19,15,${fadeA})`; ctx.fillRect(0, 0, W, H); }
+    requestAnimationFrame(frame);
+  }
+  resize(); setMuteIcon(); renderTitle(); requestAnimationFrame(frame);
+  window.__ag = { get scene() { return scene; }, play, next, CHAPTERS };
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  </script>
+</body>
+</html>
