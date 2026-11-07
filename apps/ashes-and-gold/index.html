@@ -67,7 +67,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "2";
+  const APP_VERSION = "3";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -142,12 +142,88 @@
   /* a soft pulsing hint, never words */
   function hint(x, y, t, a = 1) { const p = (t % 1.8) / 1.8; ctx.save(); ctx.globalAlpha = a * (1 - p) * .8; ctx.strokeStyle = "#efe6d6"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 10 + p * 22, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = a * .9; ctx.fillStyle = "#efe6d6"; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
 
+  /* ---------- A jointed figure, seen side-on ----------
+     Hips, knees, shoulders and elbows with a real walk cycle; the body bobs because the lowest foot
+     always rests on the ground. Optional coat with a hem that swings behind the motion. */
+  function fig(x, gy, h, o = {}) {
+    const dir = o.dir || 1, sp = o.speed || 0, ph = o.phase || 0, sit = o.sit || 0, reach = o.reach || 0, slump = o.slump || 0;
+    const thigh = h * .25, shin = h * .25, torso = h * .3, headR = h * .088, upper = h * .165, fore = h * .15, lw = h * .072;
+    const amp = Math.min(1, sp) * .42 + Math.max(0, sp - 1) * .22, on = Math.min(1, sp);
+    const leg = i => { const a = ph + i * Math.PI;
+      let tA = amp * Math.sin(a), sA = tA - (.08 + .95 * Math.max(0, Math.sin(a - 1.9)) * on);
+      tA = lerp(tA, Math.PI / 2 - .05, sit); sA = lerp(sA, .08, sit);
+      const k = [Math.sin(tA) * thigh, Math.cos(tA) * thigh]; return { k, f: [k[0] + Math.sin(sA) * shin, k[1] + Math.cos(sA) * shin] }; };
+    const L = [leg(0), leg(1)];
+    const hipWalk = gy - Math.max(L[0].f[1], L[1].f[1]), hipY = lerp(hipWalk, gy - shin * 1.02, sit);
+    const lean = .05 + Math.max(0, sp - 1) * .12 + slump * .3 + sit * .12;
+    const sh = [Math.sin(lean) * torso, -Math.cos(lean) * torso];
+    const hd = [sh[0] + Math.sin(lean + slump * .4) * (headR * 1.25), sh[1] - Math.cos(lean + slump * .4) * (headR * 1.25)];
+    const W2 = (fx, fy) => [x + dir * fx, hipY + fy];
+    const arm = i => { const a = ph + i * Math.PI;
+      let aA = -amp * .95 * Math.sin(a), eB = .25 + .5 * Math.max(0, Math.sin(a + .6)) * on;
+      if (i === 0) { aA = lerp(aA, 1.5, reach); eB = lerp(eB, .12, reach); }
+      aA = lerp(aA, .42, sit); eB = lerp(eB, 1.05, sit);
+      const e = [sh[0] + Math.sin(aA) * upper, sh[1] + Math.cos(aA) * upper];
+      return { e, hnd: [e[0] + Math.sin(aA + eB) * fore, e[1] + Math.cos(aA + eB) * fore] }; };
+    const A = [arm(0), arm(1)];
+    ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const limb = (pts, w, c) => { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); pts.forEach((p, k) => { const q = W2(...p); k ? ctx.lineTo(...q) : ctx.moveTo(...q); }); ctx.stroke(); };
+    const far = o.far || o.color, c = o.color;
+    limb([[0, 0], L[1].k, L[1].f], lw, far); limb([sh, A[1].e, A[1].hnd], lw * .85, far);
+    /* torso, or a coat with a swinging hem */
+    if (o.coat) { const hem = o.hem || 0, tw = h * .085;
+      ctx.fillStyle = c; ctx.beginPath(); const p = [[sh[0] - tw, sh[1] + h * .02], [sh[0] + tw * .9, sh[1] + h * .02], [tw * 1.15 + hem * .4, h * .14], [-tw * 1.35 + hem, h * .16]];
+      p.forEach((q, k) => { const w = W2(...q); k ? ctx.lineTo(...w) : ctx.moveTo(...w); }); ctx.closePath(); ctx.fill(); limb([[0, -h * .02], sh], h * .15, c); }
+    else limb([[0, -h * .02], sh], h * .15, c);
+    /* head and a small nose: it turns as the head turns */
+    const hp = W2(...hd); ctx.fillStyle = c; ctx.beginPath(); ctx.arc(hp[0], hp[1], headR, 0, Math.PI * 2); ctx.fill();
+    const face = Math.cos(Math.PI * (o.turn || 0)), nx = hp[0] + dir * face * headR * .95, ny = hp[1] + headR * .12;
+    if (Math.abs(face) > .15) { ctx.beginPath(); ctx.moveTo(nx - dir * face * headR * .3, ny - headR * .28); ctx.lineTo(nx + dir * face * headR * .18, ny + headR * .02); ctx.lineTo(nx - dir * face * headR * .3, ny + headR * .18); ctx.fill(); }
+    limb([[0, 0], L[0].k, L[0].f], lw, c); limb([sh, A[0].e, A[0].hnd], lw * .85, c);
+    ctx.restore();
+    const hw = W2(...A[0].hnd); return { headX: hp[0], headY: hp[1], handX: hw[0], handY: hw[1], hipY };
+  }
+  /* rim light: the figure drawn once in light, offset toward the sun, then in shadow on top */
+  function figLit(x, gy, h, o, rim, off = 1.6) { fig(x + off, gy - off * .6, h, { ...o, color: rim, far: rim }); return fig(x, gy, h, o); }
+  const hash1 = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+  /* paper grain and vignette, rendered once per screen size and laid over as one image */
+  let finish = null;
+  function finishLayer() {
+    if (finish && finish.w === W && finish.h === H) return finish.c;
+    const c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d"), im = g.createImageData(W, H);
+    for (let i = 0; i < im.data.length; i += 4) { const light = Math.random() < .5; im.data[i] = im.data[i + 1] = im.data[i + 2] = light ? 255 : 0; im.data[i + 3] = Math.random() * 22; }
+    g.putImageData(im, 0, 0);
+    const v = g.createRadialGradient(W / 2, H * .5, Math.min(W, H) * .35, W / 2, H * .5, Math.max(W, H) * .75); v.addColorStop(0, "rgba(10,12,16,0)"); v.addColorStop(1, "rgba(10,12,16,.32)");
+    g.fillStyle = v; g.fillRect(0, 0, W, H); finish = { c, w: W, h: H }; return c;
+  }
+  function grainAndVignette() { ctx.drawImage(finishLayer(), 0, 0, W, H); }
+  /* a small painted tree, made once per variant */
+  const treeSprites = {};
+  function treeSprite(v, color, shade) {
+    const key = v + color; if (treeSprites[key]) return treeSprites[key];
+    const c = document.createElement("canvas"), S = 2; c.width = 120 * S; c.height = 170 * S; const g = c.getContext("2d"); g.scale(S, S);
+    g.fillStyle = color; g.strokeStyle = color; g.lineCap = "round";
+    g.lineWidth = 5; g.beginPath(); g.moveTo(60, 170); g.quadraticCurveTo(58 + (v - 1.5) * 3, 120, 60, 80); g.stroke();
+    g.lineWidth = 2.5; g.beginPath(); g.moveTo(60, 115); g.lineTo(42, 92); g.moveTo(60, 102); g.lineTo(78, 82); g.stroke();
+    const blobs = 9 + v * 2; for (let i = 0; i < blobs; i++) { const a = hash1(v * 31 + i) * Math.PI * 2, r = 14 + hash1(v * 7 + i * 3) * 30, bx = 60 + Math.cos(a) * r * .9, by = 64 + Math.sin(a) * r * .75 - 6, br = 13 + hash1(i * 5 + v) * 12;
+      g.fillStyle = i % 3 === 0 ? shade : color; g.beginPath(); g.arc(bx, by, br, 0, Math.PI * 2); g.fill(); }
+    return treeSprites[key] = c;
+  }
+  function ridge(cam, factor, base, amp, seed, color) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, H);
+    for (let i = 0; i <= 48; i++) { const sx = i / 48 * W, wx = sx + cam * factor;
+      const y = base - amp * (.55 * Math.sin(wx * .0042 + seed) + .3 * Math.sin(wx * .011 + seed * 2.1) + .15 * Math.sin(wx * .027 + seed * 3.3)); ctx.lineTo(sx, y); }
+    ctx.lineTo(W, H); ctx.fill();
+  }
+
   /* ---------- Chapter I · Ahead ----------
      A father walks ahead and never turns. The boy can call (tap) or run (hold); the gap only grows. */
   const ch1 = {
     num: "I", name: "Ahead",
-    start() { this.t = 0; this.x = 0; this.gap = 120; this.calls = 0; this.run = 0; this.stam = 1; this.ph = 0; this.fph = 0; this.ripples = []; this.tilt = 0; this.tiltT = -9;
-      this.gone = false; this.goneT = 0; this.sit = 0; this.lamp = 0; this.done = false; this.leaves = []; this.held = false; ambience(.05, 520, 0); },
+    start() { this.t = 0; this.cam = 0; this.gap = 120; this.calls = 0; this.stam = 1; this.ph = 0; this.fph = 0; this.ripples = []; this.turn = 0; this.tiltT = -9;
+      this.gone = false; this.goneT = 0; this.sit = 0; this.slump = 0; this.lamp = 0; this.litLamp = null; this.litT = 0; this.arriveT = 0; this.stopW = 0; this.done = false; this.leaves = []; this.held = false; this.bv = 40; this.fv = 46; this.hem = 0; this.reach = 0;
+      this.clouds = Array.from({ length: 5 }, (_, i) => ({ x: hash1(i) * W * 1.4, y: H * (.08 + hash1(i + 9) * .25), w: 140 + hash1(i + 3) * 200, s: 3 + hash1(i + 5) * 5 }));
+      ambience(.05, 520, 0); },
     down() { this.held = true; this.downT = this.t; },
     up() { this.held = false; if (this.t - this.downT < .28) this.call(); },
     call() {
@@ -160,33 +236,78 @@
       this.t += dt;
       const running = this.held && this.t - this.downT > .28 && this.stam > 0 && !this.gone;
       if (running) this.stam -= dt * .7; else this.stam = Math.min(1, this.stam + dt * .25);
-      const bs = this.gone ? Math.max(0, 40 - (this.t - this.goneT) * 20) : running ? 96 : this.stam <= 0 ? 24 : 40;
-      const fs = this.tiltT > 0 && this.t - this.tiltT < .9 ? 0 : 46; /* he pauses, half turns... and walks on */
-      this.x += bs * dt; if (!this.gone) this.gap += (fs - bs) * dt;
-      this.gap = Math.max(70, this.gap); this.ph += bs * dt * .085; this.fph += fs * dt * .07;
-      const dtl = this.t - this.tiltT; this.tilt = dtl > 0 && dtl < 1.4 ? Math.sin(dtl / 1.4 * Math.PI) * .9 : 0;
-      this.ripples.forEach(r => r.t += dt); this.ripples = this.ripples.filter(r => r.t < 1.6);
-      if (!this.gone && W * .3 + this.gap > W + 60) { this.gone = true; this.goneT = this.t; note(N.D4, { vol: .08, dur: 4 }); ambience(.035, 380, 0); }
-      if (this.gone) { const g = this.t - this.goneT; this.sit = clamp((g - 2.5) / 1.2, 0, 1); this.lamp = clamp((g - 4.5) / 2, 0, 1);
-        if (g > 4.5 && !this.lampNote) { this.lampNote = 1; note(N.C5, { vol: .07, dur: 4 }); note(N.G4, { vol: .05, dur: 4, delay: .3 }); }
-        if (g > 7.5) this.done = true; }
-      if (Math.random() < dt * .4) this.leaves.push({ x: Math.random() * W, y: -10, v: 18 + Math.random() * 14, s: Math.random() * 6 });
-      this.leaves.forEach(l => { l.y += l.v * dt; l.x += Math.sin(this.t + l.s) * 10 * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
+      const tired = this.stam <= .05 && !running;
+      const rem = this.gone ? this.stopW - (this.cam + W * .3) : 0;
+      const bTarget = this.gone ? clamp(rem * 1.1, 0, 40) : running ? 100 : tired ? 26 : 40;
+      const dtl = this.t - this.tiltT, pausing = dtl > 0 && dtl < 1.5;
+      const fTarget = pausing ? 0 : 46;
+      this.bv = lerp(this.bv, bTarget, clamp(dt * 3.5, 0, 1)); const prevF = this.fv; this.fv = lerp(this.fv, fTarget, clamp(dt * 4, 0, 1));
+      this.cam += this.bv * dt; if (!this.gone) this.gap += (this.fv - this.bv) * dt; this.gap = Math.max(Math.min(H * .3, 235) * .5, this.gap);
+      /* stride frequency follows speed: about one step per 0.55 m of travel */
+      this.ph += this.bv * dt * .085; this.fph += this.fv * dt * .062;
+      /* the coat's hem trails behind changes of speed, and swings a little with each step */
+      this.hem = lerp(this.hem, (this.fv - prevF) / Math.max(dt, .001) * -.35 + Math.sin(this.fph * 2) * 1.5, clamp(dt * 6, 0, 1));
+      this.turn = pausing ? Math.sin(clamp(dtl / 1.5, 0, 1) * Math.PI) * .42 : 0;
+      this.reach = lerp(this.reach, this.held && !this.gone ? 1 : 0, clamp(dt * 6, 0, 1));
+      this.speedB = this.bv / 40; this.speedF = this.fv / 46;
+      this.ripples.forEach(r => r.t += dt); this.ripples = this.ripples.filter(r => r.t < 1.8);
+      if (!this.gone && W * .3 + this.gap > W + 80) { this.gone = true; this.goneT = this.t; note(N.D4, { vol: .08, dur: 4 }); ambience(.035, 380, 0);
+        const bw = this.cam + W * .3; this.litLamp = Math.ceil((bw + 60 + 34) / 300); this.stopW = this.litLamp * 300 + 40 - 34; }
+      if (this.gone) {
+        if (!this.arriveT && this.stopW - (this.cam + W * .3) < 1.5) this.arriveT = this.t;
+        const g = this.arriveT ? this.t - this.arriveT : -1;
+        this.slump = clamp((g - .4) / 1, 0, 1) * (1 - this.sit) * .8; this.sit = ease(clamp((g - 1.4) / 1.4, 0, 1));
+        if (g > 3.2 && !this.litT) { this.litT = this.t; note(N.C5, { vol: .07, dur: 4 }); note(N.G4, { vol: .05, dur: 4, delay: .3 }); }
+        if (this.litT) { const lt = this.t - this.litT; this.lamp = lt < 1.1 ? (Math.sin(lt * 40) > .2 ? .6 : .1) * lt : Math.min(1, .6 + (lt - 1.1)); }
+        if (g > 6.8) this.done = true; }
+      if (Math.random() < dt * .5) this.leaves.push({ x: Math.random() * W * 1.2, y: -10, v: 16 + Math.random() * 14, s: Math.random() * 6, r: 3 + Math.random() * 2 });
+      this.leaves.forEach(l => { l.y += l.v * dt; l.x += (Math.sin(this.t * 1.3 + l.s) * 14 - this.bv * .3) * dt; }); this.leaves = this.leaves.filter(l => l.y < H);
+      this.clouds.forEach(c => { c.x -= (c.s + this.bv * .02) * dt; if (c.x + c.w < -20) c.x = W + 40; });
     },
     draw() {
-      const gy = H * .7, sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#8d9bab"); sk.addColorStop(1, "#d8d3ca"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
-      /* far hills and near trees scroll at different speeds */
-      ctx.fillStyle = "#a9b0b6"; ctx.beginPath(); ctx.moveTo(0, gy); for (let i = 0; i <= 20; i++) { const xx = i / 20 * W; ctx.lineTo(xx, gy - 60 - Math.sin((xx + this.x * .15) * .012) * 22 - Math.sin((xx + this.x * .15) * .031) * 10); } ctx.lineTo(W, gy); ctx.fill();
-      ctx.fillStyle = "#7d8790"; for (let i = -1; i < 7; i++) { const sp = 150, xx = ((i * sp - this.x * .6) % (sp * 7) + sp * 7) % (sp * 7) - sp; ctx.fillRect(xx, gy - 120, 7, 120); ctx.beginPath(); ctx.arc(xx + 3.5, gy - 128, 26, 0, Math.PI * 2); ctx.fill(); }
-      ctx.fillStyle = "#5d646a"; ctx.fillRect(0, gy, W, H - gy); ctx.fillStyle = "#6c737a"; ctx.fillRect(0, gy, W, 3);
-      /* the lamp that comes on at the end */
-      const lx = W * .3 - 46; ctx.fillStyle = "#3e444a"; ctx.fillRect(lx, gy - 190, 4, 190); ctx.fillRect(lx, gy - 190, 20, 4);
-      if (this.lamp) { glowDot(lx + 14, gy - 182, 120, "rgba(240,196,110,A)", .55 * this.lamp); ctx.fillStyle = `rgba(250,220,150,${this.lamp})`; ctx.beginPath(); ctx.arc(lx + 14, gy - 182, 5, 0, Math.PI * 2); ctx.fill(); }
-      const bx = W * .3, fx = bx + this.gap, fh = Math.min(H * .3, 230), bh = fh * .5;
-      if (!this.gone || fx < W + 80) person(fx, gy, fh, "#2b3138", { coat: 1, walk: !this.gone || true, phase: this.fph, tilt: -this.tilt });
-      const b = person(bx, gy, bh, "#4c5864", { walk: this.sit < .1 && !(this.gone && this.t - this.goneT > 2), phase: this.ph, sit: this.sit, reach: this.held && !this.gone ? .7 : 0 });
-      this.ripples.forEach(r => { ctx.strokeStyle = `rgba(250,246,238,${.7 * (1 - r.t / 1.6)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(b.headX + 6, b.headY, 8 + r.t * 70, -.9, .9); ctx.stroke(); });
-      ctx.fillStyle = "rgba(120,96,70,.55)"; this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(this.t * 2 + l.s); ctx.fillRect(-4, -2, 8, 4); ctx.restore(); });
+      const t = this.t, gy = H * .72, cam = this.cam;
+      /* sky: a cool dusk warming to the horizon, a low sun ahead */
+      const sk = ctx.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, "#5f6f86"); sk.addColorStop(.55, "#a9aab0"); sk.addColorStop(1, "#e6d4bd"); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, gy);
+      glowDot(W * .82, gy - H * .1, W * .9, "rgba(250,214,160,A)", .45); glowDot(W * .82, gy - H * .1, W * .16, "rgba(255,236,200,A)", .7);
+      this.clouds.forEach(c => { ctx.fillStyle = "rgba(236,226,214,.22)"; ctx.beginPath(); ctx.ellipse(c.x + c.w / 2, c.y, c.w / 2, c.w * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.ellipse(c.x + c.w * .4, c.y - c.w * .04, c.w * .28, c.w * .05, 0, 0, Math.PI * 2); ctx.fill(); });
+      /* layers of land, hazier with distance */
+      ridge(cam, .04, gy - H * .17, H * .06, 1, "#a7adb5");
+      ridge(cam, .12, gy - H * .09, H * .05, 4, "#8f98a1");
+      const fog = ctx.createLinearGradient(0, gy - H * .14, 0, gy); fog.addColorStop(0, "rgba(230,220,206,0)"); fog.addColorStop(1, "rgba(230,220,206,.45)"); ctx.fillStyle = fog; ctx.fillRect(0, gy - H * .14, W, H * .14);
+      /* a row of trees, swaying a little */
+      const tsp = 125, tf = .45; for (let k = Math.floor(cam * tf / tsp) - 1; k < (cam * tf + W) / tsp + 1; k++) { if (hash1(k * 3.1) < .25) continue;
+        const sx = k * tsp - cam * tf + hash1(k) * 50, v = Math.floor(hash1(k * 7) * 4), sp = treeSprite(v, "#6b757d", "#5d666e"), sc = .75 + hash1(k * 2) * .45;
+        ctx.save(); ctx.translate(sx, gy - 2); ctx.rotate(Math.sin(t * .8 + k) * .012); ctx.drawImage(sp, -60 * sc, -170 * sc, 120 * sc, 170 * sc); ctx.restore(); }
+      /* the road */
+      const rd = ctx.createLinearGradient(0, gy, 0, H); rd.addColorStop(0, "#565d64"); rd.addColorStop(1, "#33383d"); ctx.fillStyle = rd; ctx.fillRect(0, gy, W, H - gy);
+      ctx.fillStyle = "rgba(235,225,210,.18)"; ctx.fillRect(0, gy, W, 2);
+      ctx.strokeStyle = "rgba(235,225,210,.08)"; ctx.lineWidth = 2; for (let k = Math.floor(cam / 60) - 1; k < (cam + W) / 60 + 1; k++) { const sx = k * 60 - cam; ctx.beginPath(); ctx.moveTo(sx, gy + 28); ctx.lineTo(sx + 26, gy + 28); ctx.stroke(); }
+      /* lamp posts along the road; one lights at the end */
+      const lsp = 300; for (let k = Math.floor((cam - W) / lsp); k < (cam + W * 2) / lsp; k++) { const sx = k * lsp - cam + 40; if (sx < -60 || sx > W + 60) continue;
+        ctx.fillStyle = "#3b4147"; ctx.fillRect(sx - 2, gy - 196, 4, 196); ctx.strokeStyle = "#3b4147"; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(sx, gy - 192); ctx.quadraticCurveTo(sx, gy - 206, sx - 18, gy - 204); ctx.stroke();
+        ctx.fillStyle = "#2e3338"; ctx.beginPath(); ctx.moveTo(sx - 26, gy - 196); ctx.lineTo(sx - 10, gy - 196); ctx.lineTo(sx - 14, gy - 204); ctx.lineTo(sx - 22, gy - 204); ctx.fill();
+        if (k === this.litLamp && this.lamp > 0) { const a = this.lamp;
+          const cone = ctx.createLinearGradient(0, gy - 196, 0, gy); cone.addColorStop(0, `rgba(255,214,140,${.38 * a})`); cone.addColorStop(1, "rgba(255,214,140,0)");
+          ctx.fillStyle = cone; ctx.beginPath(); ctx.moveTo(sx - 24, gy - 196); ctx.lineTo(sx - 12, gy - 196); ctx.lineTo(sx + 50, gy); ctx.lineTo(sx - 86, gy); ctx.fill();
+          glowDot(sx - 18, gy - 194, 90, "rgba(255,206,130,A)", .55 * a); ctx.fillStyle = `rgba(255,236,190,${a})`; ctx.fillRect(sx - 24, gy - 197, 12, 3);
+          ctx.fillStyle = `rgba(255,214,140,${.18 * a})`; ctx.beginPath(); ctx.ellipse(sx - 18, gy + 4, 70, 9, 0, 0, Math.PI * 2); ctx.fill(); } }
+      /* the curb stone he sits on */
+      const bx = W * .3, fx = bx + this.gap, fh = Math.min(H * .3, 235), bh = fh * .5;
+      if (this.sit > 0) { ctx.fillStyle = `rgba(80,86,92,${this.sit})`; ctx.fillRect(bx - 22, gy - bh * .25 + 4, 30, bh * .25); }
+      /* soft shadows */
+      ctx.fillStyle = "rgba(20,22,26,.22)"; ctx.beginPath(); ctx.ellipse(fx - 4, gy + 2, fh * .16, 4, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.ellipse(bx - 2, gy + 2, bh * .18, 3, 0, 0, Math.PI * 2); ctx.fill();
+      /* the father, then the boy */
+      if (fx < W + 90) figLit(fx, gy, fh, { color: "#272c33", far: "#20252b", coat: 1, speed: this.speedF, phase: this.fph, hem: this.hem, turn: this.turn }, "rgba(255,226,180,.55)");
+      const b = figLit(bx, gy, bh, { color: "#465260", far: "#3c4753", speed: this.speedB, phase: this.ph, reach: this.reach, sit: this.sit, slump: this.slump }, "rgba(255,226,180,.5)", 1.2);
+      this.ripples.forEach(r => { const k = r.t / 1.8; ctx.strokeStyle = `rgba(255,246,232,${.75 * (1 - k)})`; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(b.headX + bh * .05, b.headY, 8 + ease(Math.min(1, k * 1.2)) * 80, -.75, .75); ctx.stroke(); });
+      /* leaves, fluttering as they fall */
+      this.leaves.forEach(l => { ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(Math.sin(t * 2 + l.s) * .8); ctx.scale(Math.cos(t * 3 + l.s), 1); ctx.fillStyle = "rgba(128,92,60,.7)"; ctx.beginPath(); ctx.ellipse(0, 0, l.r, l.r * .5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+      /* near grass, swaying, moving faster than the road */
+      ctx.strokeStyle = "#2a2f33"; ctx.lineWidth = 1.6; for (let k = Math.floor(cam * 1.3 / 22) - 1; k < (cam * 1.3 + W) / 22 + 1; k++) { if (hash1(k * 1.7) < .55) continue;
+        const sx = k * 22 - cam * 1.3, base = H - 6 - hash1(k) * 18, hh = 14 + hash1(k * 3) * 22, sw = Math.sin(t * 1.6 + k) * 4;
+        for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(sx + j * 3, base); ctx.quadraticCurveTo(sx + j * 4 + sw * .5, base - hh * .6, sx + j * 6 + sw, base - hh * (1 - Math.abs(j) * .25)); ctx.stroke(); } }
+      grainAndVignette();
       if (this.t < 6 && !this.calls) hint(b.headX + 40, b.headY - 20, this.t, clamp(this.t - 1.5, 0, 1));
       if (this.done) hint(W / 2, H * .86, this.t);
     },
