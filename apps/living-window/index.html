@@ -48,6 +48,18 @@
     .btn.gold { border-color: transparent; background: var(--gold); color: #241a10; }
     .fine { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.45; }
     .ver { text-align: center; font-size: 11px; color: rgba(242,236,226,.35); margin-top: 10px; }
+    .sheet-back { position: fixed; inset: 0; z-index: 30; background: rgba(8,6,12,.5); display: flex; align-items: flex-end; justify-content: center; animation: fadein .3s both; }
+    .sheet { width: min(520px, 100%); background: #1d1922; color: var(--ink); border-radius: 22px 22px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 20px); box-shadow: 0 -10px 40px rgba(0,0,0,.4); animation: up .45s cubic-bezier(.2,.9,.25,1.1) both; }
+    .sheet .grab { width: 38px; height: 4px; border-radius: 4px; background: rgba(242,236,226,.2); margin: 0 auto 18px; }
+    .sheet h2 { font: 400 26px/1.15 var(--serif); margin: 0; }
+    .sheet .eyebrow { font: 600 10.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .sheet p { color: var(--muted); font: 15px/1.5 var(--sans); margin: 14px 0 16px; }
+    .sheet .big { width: 100%; min-height: 50px; border: 0; border-radius: 999px; background: var(--gold); color: #241a10; font: 600 16px var(--sans); cursor: pointer; }
+    .sheet .later { width: 100%; min-height: 44px; border: 0; background: none; color: var(--muted); font: 500 14px var(--sans); cursor: pointer; margin-top: 6px; }
+    .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); color: var(--gold); font: 600 12px/22px var(--sans); text-align: center; }
+    @keyframes fadein { from { opacity: 0; } } @keyframes up { from { transform: translateY(100%); } }
     .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 14px); z-index: 20; border: 0; background: var(--gold); color: #241a10; padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); cursor: pointer; }
     @media (prefers-reduced-motion: reduce) { #panel { transition: none; } }
   </style>
@@ -69,6 +81,7 @@
     <div class="row"><span class="lbl">Thunder</span><div class="chips grow" id="thunder"></div></div>
     <div class="row"><span class="lbl">Fade out</span><div class="chips grow" id="timer"></div></div>
     <div class="row"><span class="lbl">Screen</span><div class="chips grow" id="awake"></div></div>
+    <div class="row" id="installrow"><span class="lbl">App</span><button class="btn gold" id="installbtn">Install on this phone</button></div>
     <div class="ver" id="ver"></div>
   </div></div>
   <script>
@@ -76,7 +89,7 @@
   /* Living Window. Every pixel and every sound is generated here: an original landscape whose light
      follows the real sun (computed from the clock, and from your location if you share it), and
      whose weather follows Open-Meteo's current conditions if you allow it. */
-  const APP_VERSION = "3";
+  const APP_VERSION = "4";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -353,6 +366,7 @@
     $("#vmus").value = S.mus; $("#vnat").value = S.nat;
     $("#timer").innerHTML = [[0, "Off"], [15, "15 min"], [30, "30"], [60, "1 h"], [90, "1½ h"]].map(([k, l]) => `<button class="${S.timer === k ? "on" : ""}" data-timer="${k}">${l}</button>`).join("");
     $("#thunder").innerHTML = [["distant", "Distant"], ["off", "Off"]].map(([k, l]) => `<button class="${S.thunder === k ? "on" : ""}" data-thunder="${k}">${l}</button>`).join("");
+    $("#installrow").style.display = isStandalone() ? "none" : "";
     $("#awake").innerHTML = `<button class="${S.awake ? "on" : ""}" data-awake="1">Keep awake</button><button class="${!S.awake ? "on" : ""}" data-awake="0">Let it sleep</button>`;
     $("#ver").textContent = `Living Window · version ${APP_VERSION}`;
   }
@@ -361,6 +375,7 @@
     if (b.dataset.wx) { S.wx = b.dataset.wx; store(); renderPanel(); }
     else if (b.dataset.timer != null) setTimer(+b.dataset.timer);
     else if (b.dataset.thunder) { S.thunder = b.dataset.thunder; store(); renderPanel(); }
+    else if (b.id === "installbtn") { hidePanel(); showInstall(true); }
     else if (b.dataset.awake != null) { S.awake = b.dataset.awake === "1"; store(); if (!S.awake && wakeLock) { wakeLock.release(); wakeLock = null; } else keepAwake(); renderPanel(); }
     else if (b.id === "usesky") { if (!navigator.geolocation) return; b.textContent = "Asking…";
       navigator.geolocation.getCurrentPosition(p => { S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.useSky = true; S.wx = "auto"; store(); fetchWeather(); renderPanel(); },
@@ -372,7 +387,43 @@
   $("#vmus").addEventListener("input", e => { touchPanel(); S.mus = +e.target.value; store(); applyVolumes(); });
   $("#vnat").addEventListener("input", e => { touchPanel(); S.nat = +e.target.value; store(); applyVolumes(); });
   cv.addEventListener("click", () => { if (!$("#open").classList.contains("hide")) return; if ($("#panel").classList.contains("hide")) showPanel(); else hidePanel(); });
-  $("#open").addEventListener("click", () => { $("#open").classList.add("hide"); startAudio(); keepAwake(); if (S.timer) setTimer(S.timer); if (S.useSky) fetchWeather(); setTimeout(showPanel, 1200); });
+  $("#open").addEventListener("click", () => { setTimeout(() => { if ($("#panel").classList.contains("hide")) showInstall(false); else setTimeout(() => showInstall(false), 7500); }, 4000); $("#open").classList.add("hide"); startAudio(); keepAwake(); if (S.timer) setTimer(S.timer); if (S.useSky) fetchWeather(); setTimeout(showPanel, 1200); });
+
+  /* ---------- Install prompt ----------
+     Chrome on Android (and desktop) hands us its install prompt, so it is one tap. Safari on iPhone does
+     not, so there the sheet shows the two Share-menu steps. "Not now" waits three days. */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "living-window-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    const share = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7"/></svg>`;
+    if (deferredInstall) return `<button class="big" data-inst="go">Install Living Window</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> ${share} in Safari’s toolbar.</span></li><li><span>Scroll down, tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol>
+      <p style="margin:10px 0 0;font-size:13px">If you opened this link inside another app, open it in Chrome first.</p>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon at the right of the address bar,</span></li><li><span>or choose <b>Install Living Window</b> in the browser menu.</span></li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="inst-t"><div class="grab"></div>
+      <div style="display:flex;gap:16px;align-items:center"><img src="icons/icon-192.png" alt="" width="62" height="62" style="border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.4)">
+        <div><div class="eyebrow">Free · works offline</div><h2 id="inst-t">Keep the window</h2></div></div>
+      <p>Open it full screen from your home screen, with no browser bar: just the view, the light and the sound. Your settings stay on this phone.</p>
+      <div id="inst-body">${installBody()}</div>
+      <button class="later" data-inst="later">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * 864e5)); } catch (e) {} }
+  document.addEventListener("click", e => { const b = e.target.closest("[data-inst]"); if (!b) return;
+    if (b.dataset.inst === "later") closeInstall(true);
+    else if (b.dataset.inst === "go" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); } });
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const body = $("#inst-body"); if (body) body.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); const t = document.createElement("div"); t.className = "update"; t.style.cursor = "default"; t.textContent = "Installed. Open it from your home screen."; document.body.appendChild(t); setTimeout(() => t.remove(), 3500); });
 
   /* ---------- Loop ---------- */
   const MAXDPR = 2;
