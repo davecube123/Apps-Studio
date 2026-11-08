@@ -164,7 +164,7 @@
     .sec { margin-top: 26px; }
     .sec > .eyebrow { margin: 0 2px 10px; }
 
-    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(420px, calc(100% - 24px));
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(460px, calc(100% - 20px));
                padding: 6px; border-radius: 28px; background: rgba(36,32,28,.82); backdrop-filter: blur(22px) saturate(1.6); -webkit-backdrop-filter: blur(22px) saturate(1.6);
                border: 1px solid var(--line2); box-shadow: 0 16px 40px rgba(0,0,0,.5); display: flex; }
     nav.tabs a { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 22px; color: var(--muted);
@@ -191,6 +191,18 @@
     .gainrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
     .gainrow b { min-width: 58px; text-align: center; font-size: 15px; }
     .round.sm { width: 36px; height: 36px; font-size: 20px; line-height: 1; }
+    .glights { display: grid; gap: 4px; margin: 14px 0 12px; }
+    .glights i { height: 12px; border-radius: 4px; background: rgba(255,255,255,.1); transition: background .04s; }
+    .glights i.sub { height: 7px; align-self: center; opacity: .8; }
+    .glights i.hit { background: var(--amber); } .glights i.hit.acc { background: var(--rec); } .glights i.hit.mute { background: rgba(255,255,255,.28); }
+    #gstrip { display: block; width: 100%; height: 130px; background: rgba(0,0,0,.18); border-radius: 14px; }
+    .gnums { display: grid; grid-template-columns: 1.1fr 1.4fr .6fr; gap: 10px; }
+    .gnums b { display: block; font: 300 28px/1.1 var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .gnums b small { font-size: 13px; color: var(--muted); } .gnums b.good { color: var(--green); } .gnums b.warn { color: var(--rec); }
+    .gnums span { font: 600 11.5px/1.3 var(--sans); color: var(--muted); }
+    .gpad { display: block; width: 100%; height: 120px; margin-top: 12px; border-radius: 20px; border: 1px dashed var(--line2); background: rgba(255,255,255,.03); color: var(--muted);
+            font: 600 15px var(--sans); touch-action: manipulation; user-select: none; -webkit-user-select: none; cursor: pointer; }
+    .gpad.live { border-style: solid; color: var(--ink2); } .gpad.tap { background: var(--amber-soft); border-color: var(--amber); }
     .focus { margin-top: 18px; }
     .focus label { display: block; font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 2px 6px; }
     .focusline { margin: 10px 2px 0; font-size: 14px; color: var(--ink2); } .focusline b { color: var(--amber); font-weight: 600; }
@@ -213,11 +225,12 @@
     <a href="#/" data-tab="rec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>Record</a>
     <a href="#/takes" data-tab="takes"><svg viewBox="0 0 24 24"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg>Takes</a>
     <a href="#/songs" data-tab="songs"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Songs</a>
+    <a href="#/groove" data-tab="groove"><svg viewBox="0 0 24 24"><path d="M3 12h3l2.5-6 4 12 2.5-6h6"/></svg>Groove</a>
     <a href="#/tools" data-tab="tools"><svg viewBox="0 0 24 24"><path d="M12 3v9M8 21l4-9 4 9M6 21h12"/><path d="M15 7l3-2"/></svg>Tune</a>
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "3", APP_DATE = "8 Nov 2026";
+  const APP_VERSION = "4", APP_DATE = "8 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -284,7 +297,8 @@
     refreshStage(); return true;
   }
   function closeMic(force) {
-    if (!mic || (!force && recState !== "idle") || tunerOn) return;
+    if (!mic || (!force && recState !== "idle") || tunerOn || (groove.on && G.input === "mic")) return;
+    dropOnset();
     mic.getTracks().forEach(t => t.stop()); mic = null; live = []; clearTimeout(levelT);
     try { src.disconnect(); gainN.disconnect(); limiter.disconnect(); } catch (e) {}
     refreshStage();
@@ -292,7 +306,7 @@
 
   /* ---------- Metronome: clicks scheduled ahead on the audio clock ---------- */
   const metro = { on: false, next: 0, beat: 0, timer: null, beatCb: null,
-    start(t0) { ensureAC(); this.on = true; this.next = t0 ?? AC.currentTime + .08; this.beat = 0; clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 25); this.tick(); syncMetroUI(); },
+    start(t0) { ensureAC(); if (groove.on) groove.stop(); this.on = true; this.next = t0 ?? AC.currentTime + .08; this.beat = 0; clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 25); this.tick(); syncMetroUI(); },
     stop() { this.on = false; clearInterval(this.timer); syncMetroUI(); },
     tick() {
       const spb = 60 / S.bpm;
@@ -379,7 +393,7 @@
   function releaseWake() { try { wake?.release(); } catch (e) {} wake = null; }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && recState !== "idle" && !wake) getWake();
-    if (document.visibilityState === "hidden" && recState === "idle") { if (tunerOn) stopTuner(); closeMic(); }
+    if (document.visibilityState === "hidden" && recState === "idle") { if (tunerOn) stopTuner(); if (groove.on) groove.stop(); closeMic(); }
   });
 
   /* ---------- The live loop: meter, waveform, peaks for the take, tuner ---------- */
@@ -641,13 +655,215 @@
     } };
   function syncDrone() { const b = $("#dronebtn"); if (b) { b.textContent = drone.on ? "Stop the drone" : `Start the drone · ${NOTES[S.droneKey]}`; b.classList.toggle("on", drone.on); b.classList.toggle("amber", !drone.on); } }
 
+  /* ---------- Groove: play along with the click and see where each note lands ----------
+     The click is scheduled on the audio clock. Your playing comes in through the microphone, is low-passed
+     (so the high, woodblock-like click is filtered out even through the speaker) and an AudioWorklet marks
+     each attack to the sample. Each hit is matched to the nearest beat or subdivision; the round-trip delay
+     of phone audio is measured once ("Calibrate") and subtracted, so early and late mean what they say. */
+  const GD = { bpm: 80, beats: 4, on: "all", sub: 1, swing: 50, gap: "0", ramp: null, ghost: true, input: "mic", ex: null };
+  S.g = Object.assign({}, GD, S.g || {}); S.glog ||= []; S.best ||= {};
+  const G = S.g;
+  const EXS = [
+    { id: "lock", name: "Lock in", goal: "Quarter notes, one strum on every click. Bury the click under your strum until you can’t hear it.", cfg: { bpm: 70, on: "all", sub: 1, gap: "0", swing: 50, ramp: null } },
+    { id: "motion", name: "Constant motion", goal: "Eighth notes: down on the beat, up on the “and”. Keep the hand swinging even when you don’t hit the strings.", cfg: { bpm: 70, on: "all", sub: 2, gap: "0", swing: 50, ramp: null } },
+    { id: "backbeat", name: "Backbeat", goal: "The click plays only 2 and 4, like a snare drum. You supply 1 and 3. Most popular music grooves from here.", cfg: { bpm: 80, on: "24", sub: 1, gap: "0", swing: 50, ramp: null } },
+    { id: "one", name: "Only the one", goal: "One click per bar. Hold beats 2, 3 and 4 yourself, and land the next 1 with it.", cfg: { bpm: 80, on: "1", sub: 1, gap: "0", swing: 50, ramp: null } },
+    { id: "gap", name: "Gap click", goal: "Two bars of click, two bars of silence. Keep playing; when the click returns, are you still with it?", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/2", swing: 50, ramp: null } },
+    { id: "gaplong", name: "Inner clock", goal: "Two bars on, six bars silent. The click becomes a check-in, not a crutch.", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/6", swing: 50, ramp: null } },
+    { id: "slow", name: "Slow is hard", goal: "50 bpm, eighth notes. Slow tempos expose rushing: feel the space between the clicks.", cfg: { bpm: 50, on: "all", sub: 2, gap: "0", swing: 50, ramp: null } },
+    { id: "offbeat", name: "Offbeats", goal: "The click plays only the “and”s. Play on the beats in between without being pulled onto the click.", cfg: { bpm: 75, on: "off", sub: 1, gap: "0", swing: 50, ramp: null } },
+    { id: "swing", name: "Swing feel", goal: "Long-short eighths (a triplet feel). The upstroke sits on the last note of the triplet, not halfway.", cfg: { bpm: 90, on: "all", sub: 2, gap: "0", swing: 66, ramp: null } },
+    { id: "sixteenths", name: "Sixteenths", goal: "Funk strumming: four strums per beat, mostly muted, with the hand never stopping.", cfg: { bpm: 80, on: "all", sub: 4, gap: "0", swing: 50, ramp: null } },
+    { id: "speed", name: "Speed trainer", goal: "Every 4 bars the click goes 2 bpm faster. Notice the tempo where your spread opens up: that’s your edge.", cfg: { bpm: 70, on: "all", sub: 1, gap: "0", swing: 50, ramp: { every: 4, step: 2, to: 140 } } },
+  ];
+  const gapPat = () => G.gap === "0" ? null : G.gap.split("/").map(Number);
+  const subDurs = spb => { const sw = (G.sub === 2 || G.sub === 4) ? G.swing / 100 : .5;
+    if (G.sub === 1) return [spb]; if (G.sub === 3) return [spb / 3, spb / 3, spb / 3];
+    if (G.sub === 2) return [spb * sw, spb * (1 - sw)]; const h = spb / 2; return [h * sw, h * (1 - sw), h * sw, h * (1 - sw)]; };
+  function gclick(t, kind) {
+    /* A short, high woodblock tick: above the microphone filter, so it doesn’t count as your playing. */
+    const f = kind === "acc" ? 5200 : kind === "ghost" ? 3900 : 4400, v = (kind === "ghost" ? .22 : kind === "acc" ? 1 : .75) * Math.max(.05, S.clickVol);
+    for (const [mul, g0] of [[1, 1], [1.5, .35]]) {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = "sine"; o.frequency.value = f * mul;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v * g0 * .5, t + .001); g.gain.exponentialRampToValueAtTime(.0001, t + .035);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + .05);
+    }
+  }
+  const groove = { on: false, timer: 0, next: 0, step: 0, bpm: 80, grid: [], hits: [], rampBar: -1, t0: 0, raf: 0,
+    start() {
+      ensureAC(); if (metro.on) metro.stop(); this.on = true; this.bpm = G.bpm; this.next = AC.currentTime + .2; this.t0 = this.next; this.step = 0; this.grid = []; this.hits = []; this.rampBar = -1;
+      clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 25); this.tick(); syncGroove(); grooveDraw();
+    },
+    stop() { if (!this.on) return; clearInterval(this.timer); this.on = false; logSession(); syncGroove(); grooveStats(); },
+    tick() {
+      while (this.next < AC.currentTime + .12) {
+        const durs = subDurs(60 / this.bpm), n = durs.length, k = this.step % n, beatIdx = Math.floor(this.step / n), b = beatIdx % G.beats, bar = Math.floor(beatIdx / G.beats);
+        if (k === 0 && b === 0 && G.ramp && bar > 0 && bar % G.ramp.every === 0 && this.rampBar !== bar) { this.rampBar = bar; this.bpm = Math.min(G.ramp.to, this.bpm + G.ramp.step); const d2 = subDurs(60 / this.bpm); durs.splice(0, durs.length, ...d2); }
+        const t = this.next, gp = gapPat(), muted = !!gp && (bar % (gp[0] + gp[1])) >= gp[0];
+        if (!muted) {
+          if (k === 0) { if (G.on === "all") gclick(t, b === 0 ? "acc" : "beat"); else if (G.on === "24" && b % 2 === 1) gclick(t, "beat"); else if (G.on === "1" && b === 0) gclick(t, "acc"); else if (G.on === "off") gclick(t + (60 / this.bpm) * (G.sub === 2 ? G.swing / 100 : .5), "beat"); }
+          else if (G.on === "all" && G.ghost) gclick(t, "ghost");
+        }
+        this.grid.push({ t, bar, b, k, muted, bpm: this.bpm }); if (this.grid.length > 600) this.grid.splice(0, 200);
+        const s = this.step; setTimeout(() => grooveLight(b, k, muted), Math.max(0, (t - AC.currentTime) * 1000));
+        this.next += durs[k]; this.step = s + 1;
+      }
+    },
+    hit(tAC) {
+      if (!this.on) return; const h = tAC - latency(); let best = null, bd = 1e9;
+      for (let i = this.grid.length - 1; i >= 0 && i > this.grid.length - 40; i--) { const d = Math.abs(h - this.grid[i].t); if (d < bd) { bd = d; best = this.grid[i]; } }
+      if (!best) return; const spb = 60 / best.bpm, lim = Math.min(...subDurs(spb)) * .45, off = h - best.t;
+      if (Math.abs(off) > lim || best.t < this.t0 - .05) return;
+      if (this.hits.length && this.hits[this.hits.length - 1].g === best.t) return; /* one hit per grid point */
+      const prev = this.grid.find(x => x.bar === best.bar - 1 && x.k === 0 && x.b === 0);
+      this.hits.push({ g: best.t, off, muted: best.muted, back: !best.muted && !!prev?.muted, bpm: best.bpm });
+      if (this.hits.length > 2000) this.hits.shift();
+      grooveStats(); haptic(3);
+    } };
+  /* Phone audio arrives late: the click leaves the speaker after a delay and your strum reaches the app after
+     another. Calibrate measures the whole round trip with the speaker; without it, a typical value is assumed. */
+  const latency = () => G.input === "tap" ? (AC.outputLatency || .03) + (AC.baseLatency || .01) + .035 : (S.rtLat ?? ((AC.outputLatency || .04) + (AC.baseLatency || .01) + .03));
+  let onsetNode = null, onsetChain = null, onsetReady = null, calib = null;
+  const ONSET_SRC = `class Onset extends AudioWorkletProcessor {
+    constructor() { super(); this.f = 0; this.s = 1e-7; this.last = -1; this.fc = 1 - Math.exp(-1 / (sampleRate * .002)); this.sc = 1 - Math.exp(-1 / (sampleRate * .12)); }
+    process(inputs) {
+      const x = inputs[0] && inputs[0][0]; if (!x) return true;
+      for (let i = 0; i < x.length; i++) {
+        const e = x[i] * x[i]; this.f += (e - this.f) * this.fc; this.s += (e - this.s) * this.sc;
+        const t = currentTime + i / sampleRate;
+        if (this.f > 5 * this.s && this.f > 2e-6 && t - this.last > .07) { this.last = t; this.port.postMessage(t); }
+      }
+      return true;
+    } }
+  registerProcessor("onset", Onset);`;
+  async function ensureOnset() {
+    if (!(await openMic())) return false;
+    onsetReady ||= AC.audioWorklet.addModule(URL.createObjectURL(new Blob([ONSET_SRC], { type: "text/javascript" })));
+    await onsetReady;
+    if (!onsetNode) {
+      onsetNode = new AudioWorkletNode(AC, "onset");
+      onsetNode.port.onmessage = e => { if (calib) calib.push(e.data); else if (groove.on && G.input === "mic") groove.hit(e.data); };
+      const l1 = AC.createBiquadFilter(), l2 = AC.createBiquadFilter(), z = AC.createGain(); z.gain.value = 0;
+      l1.type = l2.type = "lowpass"; l1.frequency.value = l2.frequency.value = 900; l1.Q.value = l2.Q.value = .7;
+      gainN.connect(l1); l1.connect(l2); l2.connect(onsetNode); onsetNode.connect(z); z.connect(AC.destination); onsetChain = [l1, l2, z];
+    }
+    return true;
+  }
+  function dropOnset() { try { onsetNode?.disconnect(); onsetChain?.forEach(n => n.disconnect()); } catch (e) {} onsetNode = null; onsetChain = null; }
+  async function calibrate() {
+    if (groove.on) groove.stop(); if (!(await ensureOnset())) return;
+    const b = $("#calbtn"); if (b) b.textContent = "Listening…";
+    calib = []; const t0 = AC.currentTime + .4, T = [];
+    for (let i = 0; i < 8; i++) { const t = t0 + i * .5; T.push(t);
+      const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = 520; o.type = "triangle";
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.9, t + .001); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + .08); }
+    setTimeout(() => {
+      const d = T.map(t => calib.find(h => h > t && h < t + .3)).map((h, i) => h ? h - T[i] : null).filter(x => x != null).sort((a, b) => a - b); calib = null;
+      if (!groove.on) closeMic();
+      if (b) b.textContent = "Calibrate";
+      if (d.length < 5) { toast("Couldn’t hear the test clicks. Unplug headphones, turn the volume up, keep quiet, and try again.", 4200); return; }
+      S.rtLat = +d[d.length >> 1].toFixed(4); saveS(); toast(`Audio delay measured: ${Math.round(S.rtLat * 1000)} ms. Hits are corrected for it.`, 3500); const c = $("#calv"); if (c) c.textContent = `${Math.round(S.rtLat * 1000)} ms`;
+    }, (t0 - AC.currentTime) * 1000 + 8 * 500 + 400);
+  }
+  /* What the numbers mean: mean is your push or lay-back, spread is how consistent you are. */
+  function stats(hs) {
+    if (hs.length < 4) return null; const o = hs.map(h => h.off * 1000), m = avg(o);
+    return { n: hs.length, mean: m, sd: Math.sqrt(avg(o.map(x => (x - m) * (x - m)))) };
+  }
+  const feel = m => Math.abs(m) < 8 ? "right on the beat" : m < 0 ? `${Math.round(-m)} ms ahead (pushing)` : `${Math.round(m)} ms behind (laid back)`;
+  const tight = sdv => sdv < 12 ? ["Locked in", "good"] : sdv < 20 ? ["Tight", "good"] : sdv < 32 ? ["Getting there", ""] : ["Loose", "warn"];
+  function grooveStats() {
+    const el = $("#gstats"); if (!el) return;
+    const recent = groove.hits.slice(-24), all = stats(groove.hits), r = stats(recent);
+    if (!r) { el.innerHTML = `<p class="muted small" style="margin:0">${groove.on ? (G.input === "tap" ? "Tap the pad in time…" : "Play along… (each strum or note shows as a dot)") : "Press Start, then play along."}</p>`; return; }
+    const [lab, cls] = tight(r.sd), withC = stats(groove.hits.filter(h => !h.muted)), sil = stats(groove.hits.filter(h => h.muted)), back = stats(groove.hits.filter(h => h.back));
+    el.innerHTML = `<div class="gnums"><div><b class="${cls}">±${Math.round(r.sd)}<small> ms</small></b><span>spread · ${lab}</span></div><div><b>${r.mean > 0 ? "+" : ""}${Math.round(r.mean)}<small> ms</small></b><span>${feel(r.mean)}</span></div><div><b>${all.n}</b><span>hits</span></div></div>
+      ${sil && withC ? `<p class="small" style="margin:10px 0 0;color:var(--ink2)">With the click ±${Math.round(withC.sd)} ms; in the silence ±${Math.round(sil.sd)} ms, drifting ${feel(sil.mean)}.${back ? ` When the click came back you were ${feel(back.mean)}.` : ""}</p>` : ""}`;
+  }
+  function grooveDraw() {
+    cancelAnimationFrame(groove.raf);
+    const draw = () => {
+      const cv = $("#gstrip"); if (!cv) return; groove.raf = requestAnimationFrame(draw);
+      const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, span = 6, now = AC ? AC.currentTime - .05 : 0, x = t => (t - (now - span)) / span * W, y = ms => H / 2 + Math.max(-70, Math.min(70, ms)) / 70 * (H / 2 - 8);
+      ctx.fillStyle = "rgba(134,207,143,.08)"; ctx.fillRect(0, y(-15), W, y(15) - y(-15));
+      for (const g of groove.grid) { if (g.t < now - span - 1 || g.t > now + .2) continue; const X = x(g.t);
+        if (g.muted) { ctx.fillStyle = "rgba(255,255,255,.035)"; ctx.fillRect(X, 0, W / span * (60 / g.bpm / subDurs(60 / g.bpm).length) + 1, H); }
+        ctx.fillStyle = g.k ? "rgba(255,255,255,.06)" : g.b === 0 ? "rgba(242,235,225,.35)" : "rgba(255,255,255,.16)"; ctx.fillRect(X, g.k ? H * .3 : 0, 1, g.k ? H * .4 : H); }
+      ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(0, H / 2, W, 1);
+      ctx.font = "600 9px system-ui"; ctx.fillStyle = "rgba(242,235,225,.4)"; ctx.fillText("early", 4, 11); ctx.fillText("late", 4, H - 4);
+      for (const h of groove.hits) { if (h.g < now - span - .5) continue; const ms = h.off * 1000, a = Math.abs(ms);
+        ctx.fillStyle = a <= 15 ? "#86cf8f" : a <= 30 ? "#f2b45a" : "#ef4b4b"; ctx.beginPath(); ctx.arc(x(h.g), y(ms), 4.5, 0, 7); ctx.fill(); }
+      ctx.fillStyle = "#f2ebe1"; ctx.fillRect(x(now), 0, 2, H);
+      const bv = $("#gbpm"); if (bv && groove.on && +bv.firstChild.textContent !== Math.round(groove.bpm)) bv.firstChild.textContent = Math.round(groove.bpm);
+    };
+    draw();
+  }
+  function grooveLight(b, k, muted) {
+    const box = $("#glights"); if (!box) return; const i = b * G.sub + k, el = box.children[i]; if (!el) return;
+    el.classList.add("hit"); el.classList.toggle("mute", muted); el.classList.toggle("acc", b === 0 && k === 0); setTimeout(() => el.classList.remove("hit"), 110);
+  }
+  function logSession() {
+    const s = stats(groove.hits); if (!s || s.n < 12) return;
+    const e = { at: Date.now(), ex: G.ex, bpm: Math.round(groove.bpm), sub: G.sub, n: s.n, mean: Math.round(s.mean), sd: Math.round(s.sd) };
+    S.glog.push(e); if (S.glog.length > 400) S.glog.shift();
+    if (G.ex && (!S.best[G.ex] || e.sd < S.best[G.ex].sd)) { S.best[G.ex] = { sd: e.sd, bpm: e.bpm, at: e.at }; toast(`New best for this exercise: ±${e.sd} ms`); }
+    saveS(); const h = $("#ghist"); if (h) h.innerHTML = historyHTML();
+  }
+  function historyHTML() {
+    const days = [...Array(14)].map((_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 13 + i); return d; });
+    const per = days.map(d => { const xs = S.glog.filter(e => dayKey(e.at) === dayKey(d)).map(e => e.sd).sort((a, b) => a - b); return xs.length ? xs[xs.length >> 1] : null; });
+    if (!per.some(v => v != null)) return `<p class="small muted" style="margin:0">Your spread for each day appears here. Lower is tighter.</p>`;
+    const mx = Math.max(40, ...per.filter(v => v != null));
+    return `<div class="bars" style="grid-template-columns:repeat(14,1fr);height:64px">${per.map((v, i) => `<div class="${i === 13 ? "today" : ""}"><i class="${v == null ? "zero" : ""}" style="height:${v == null ? 4 : Math.max(8, v / mx * 100)}%;${v != null && v < 20 ? "background:var(--green)" : ""}"></i><span>${v == null ? "" : v}</span></div>`).join("")}</div>
+      <p class="small muted" style="margin:6px 0 0">Median spread per day, in ms. Green is under ±20 ms.</p>`;
+  }
+  function syncGroove() {
+    const b = $("#gstart"); if (b) { b.textContent = groove.on ? "Stop" : "Start"; b.classList.toggle("amber", !groove.on); b.classList.toggle("on", groove.on); }
+    const pad = $("#gpad"); if (pad) pad.classList.toggle("live", groove.on);
+  }
+  function applyEx(id) {
+    const ex = EXS.find(e => e.id === id); if (!ex) return; if (groove.on) groove.stop();
+    Object.assign(G, ex.cfg, { ex: id }); saveS(); render(); toast(ex.name + ": press Start and play along", 2200);
+  }
+  function viewGroove() {
+    const ex = EXS.find(e => e.id === G.ex), seg = (act, opts, cur) => `<div class="seg">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? "on" : ""}" data-act="${act}" data-v="${v}">${l}</button>`).join("")}</div>`;
+    return `<div class="eyebrow">Time, feel, pocket</div><h1 style="margin-top:4px">Groove</h1>
+      ${ex ? `<div class="card" style="margin-top:14px;padding:13px 16px"><div class="row between"><b>${esc(ex.name)}</b><button class="btn ghost sm" data-act="gex" data-v="">Free play</button></div><p class="small" style="margin:4px 0 0;color:var(--ink2)">${esc(ex.goal)}</p>${S.best[ex.id] ? `<p class="small muted" style="margin:6px 0 0">Your best: ±${S.best[ex.id].sd} ms at ${S.best[ex.id].bpm} bpm</p>` : ""}</div>` : ""}
+      <div class="card" style="margin-top:14px">
+        <div class="bpm" style="margin:0"><button class="round" data-act="gbpm" data-v="-2">−</button><div class="v num" id="gbpm">${G.bpm}<small>BPM${G.ramp ? ` · +${G.ramp.step} every ${G.ramp.every} bars` : ""}</small></div><button class="round" data-act="gbpm" data-v="2">+</button></div>
+        <div class="glights" id="glights" style="grid-template-columns:repeat(${G.beats * G.sub},1fr)">${Array.from({ length: G.beats * G.sub }, (_, i) => `<i class="${i % G.sub ? "sub" : ""}"></i>`).join("")}</div>
+        <canvas id="gstrip"></canvas>
+        <div id="gstats" style="margin-top:10px"></div>
+        ${G.input === "tap" ? `<button class="gpad" id="gpad" data-act="gtap">Tap here in time</button>` : ""}
+        <button class="btn block ${groove.on ? "on" : "amber"}" id="gstart" data-act="gstart" style="width:100%;margin-top:12px;min-height:54px;font-size:16px">${groove.on ? "Stop" : "Start"}</button>
+        <div class="row between" style="margin-top:12px"><span class="small muted">Listen to</span>${seg("ginput", [["mic", "My playing (mic)"], ["tap", "Taps"], ["off", "Nothing"]], G.input)}</div>
+      </div>
+      <div class="sec"><div class="eyebrow">The click</div><div class="card">
+        <div class="srow" style="border:0;padding-top:0"><span>Clicks on</span>${seg("gon", [["all", "All"], ["24", "2 & 4"], ["1", "1 only"], ["off", "Offbeats"]], G.on)}</div>
+        <div class="srow"><span>You play</span>${seg("gsub", [[1, "♩"], [2, "♫ 8ths"], [3, "Triplets"], [4, "16ths"]], G.sub)}</div>
+        ${G.sub === 2 || G.sub === 4 ? `<div class="srow"><span>Swing <b class="num" id="gswv">${G.swing === 50 ? "straight" : G.swing + "%"}</b></span><input type="range" id="gsw" min="50" max="75" value="${G.swing}" style="width:46%"></div>` : ""}
+        <div class="srow"><span>Silent bars</span>${seg("ggap", [["0", "Off"], ["2/2", "2 on · 2 off"], ["4/4", "4 · 4"], ["2/6", "2 · 6"]], G.gap)}</div>
+        <div class="srow"><span>Beats per bar</span>${seg("gbeats", [[2, "2"], [3, "3"], [4, "4"], [6, "6"]], G.beats)}</div>
+        <div class="srow"><span>Hear the subdivisions</span><input type="checkbox" data-act="gghost" ${G.ghost ? "checked" : ""} style="width:20px;height:20px;accent-color:var(--amber)"></div>
+        <div class="srow"><span>Speed trainer</span>${seg("gramp", [["0", "Off"], ["2", "+2 / 4 bars"], ["4", "+4 / 4 bars"]], G.ramp ? G.ramp.step : "0")}</div>
+        <div class="srow"><span>Audio delay<br><span class="small muted">Speaker on, headphones out, quiet room</span></span><span class="row" style="gap:8px"><b class="num small" id="calv">${S.rtLat != null ? Math.round(S.rtLat * 1000) + " ms" : "not set"}</b><button class="btn sm" id="calbtn" data-act="gcal">Calibrate</button></span></div>
+        <p class="small muted" style="margin:8px 0 0">Calibrate once per phone (and again if you switch to wired headphones). Bluetooth headphones add too much delay for this: use wired ones or the speaker.</p></div></div>
+      <div class="sec"><div class="eyebrow">Exercises</div>${EXS.map(e => `<button class="pick${G.ex === e.id ? " on" : ""}" data-act="gex" data-v="${e.id}">${esc(e.name)}<small>${S.best[e.id] ? `best ±${S.best[e.id].sd} ms` : `${e.cfg.bpm} bpm`}</small></button>`).join("")}</div>
+      <div class="sec"><div class="eyebrow">Your progress</div><div class="card" id="ghist">${historyHTML()}</div></div>
+      <div class="sec"><div class="eyebrow">How to read it</div><div class="card small" style="color:var(--ink2)">
+        <p style="margin-top:0"><b style="color:var(--ink)">Spread</b> is how consistent you are: the smaller, the tighter. Under ±20 ms is tight; great players sit near ±10.</p>
+        <p><b style="color:var(--ink)">Early or late</b> is your feel. A steady push or lay-back can be a style; drifting between them is the thing to fix.</p>
+        <p style="margin-bottom:0">Practise slower than you think, a few minutes a day. Groove is your body learning where the beat is, and that comes from repetition at a tempo you can play cleanly.</p></div></div>`;
+  }
+
   /* ---------- Views ---------- */
   let lastHash = "";
   function route() {
     const h = location.hash || "#/";
     if (h.startsWith("#/take/")) return ["take", h.split("/")[2]];
     if (h.startsWith("#/song/")) return ["song", h.split("/")[2]];
-    if (h.startsWith("#/takes")) return ["takes"]; if (h.startsWith("#/songs")) return ["songs"]; if (h.startsWith("#/tools")) return ["tools"];
+    if (h.startsWith("#/takes")) return ["takes"]; if (h.startsWith("#/songs")) return ["songs"]; if (h.startsWith("#/tools")) return ["tools"]; if (h.startsWith("#/groove")) return ["groove"];
     return ["rec"];
   }
   function render() {
@@ -655,7 +871,7 @@
     if (nav) leavePlayer();
     let html;
     if (v === "take") html = viewTake(id); else if (v === "song") html = viewSong(id); else if (v === "takes") html = viewTakes();
-    else if (v === "songs") html = viewSongs(); else if (v === "tools") html = viewTools(); else html = viewRec();
+    else if (v === "songs") html = viewSongs(); else if (v === "tools") html = viewTools(); else if (v === "groove") html = viewGroove(); else html = viewRec();
     if (html == null) return;
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     const tab = { take: "takes", song: "songs" }[v] || v;
@@ -663,7 +879,10 @@
     if (nav) scrollTo(0, 0); lastHash = h;
     if (v !== "tools" && tunerOn) stopTuner();
     if (v !== "tools" && drone.on) drone.stop();
-    if (v !== "rec" && v !== "tools") closeMic();
+    if (v !== "groove" && groove.on) groove.stop();
+    if (v !== "groove") dropOnset();
+    if (v !== "tools" && (!nav || v !== "rec" || recState === "idle")) closeMic();
+    if (v === "groove") { grooveDraw(); grooveStats(); }
     if (v === "takes" || v === "song") drawMinis();
     if (v === "take") mountPlayer(id);
     syncMetroUI(); syncTabs();
@@ -1039,6 +1258,17 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     else if (a === "practise") chooseSong(d.id);
     else if (a === "qplay") { e.stopPropagation(); quickPlay(d.id); }
     else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/takes"; }
+    else if (a === "gstart") { if (groove.on) { groove.stop(); closeMic(); } else { if (G.input === "mic" && !(await ensureOnset())) return; groove.start(); } }
+    else if (a === "gex") { if (d.v) applyEx(d.v); else { G.ex = null; saveS(); render(); } }
+    else if (a === "gbpm") { G.bpm = Math.max(30, Math.min(260, G.bpm + +d.v)); if (groove.on) groove.bpm = G.bpm; saveS(); $("#gbpm").firstChild.textContent = G.bpm; }
+    else if (["gon", "gsub", "ggap", "gbeats", "ginput", "gramp"].includes(a)) {
+      const was = groove.on; if (was) groove.stop();
+      if (a === "gon") G.on = d.v; else if (a === "gsub") G.sub = +d.v; else if (a === "ggap") G.gap = d.v; else if (a === "gbeats") G.beats = +d.v;
+      else if (a === "ginput") { G.input = d.v; if (d.v !== "mic") { dropOnset(); closeMic(); } } else if (a === "gramp") G.ramp = d.v === "0" ? null : { every: 4, step: +d.v, to: 200 };
+      G.ex = null; saveS(); render(); if (was) { if (G.input === "mic") await ensureOnset(); groove.start(); }
+    }
+    else if (a === "gghost") { G.ghost = el.checked; saveS(); }
+    else if (a === "gcal") calibrate();
     else if (a === "pmode") { P.mode = d.v; document.querySelectorAll("#pmode button").forEach(b => b.classList.toggle("on", b === el)); drawP(); }
     else if (a === "cmp") cmpPicker();
     else if (a === "cmpset") setCompare(d.id);
@@ -1083,6 +1313,11 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     back.addEventListener("click", e => { if (e.target === back) back.remove(); });
     document.body.appendChild(back);
   }
+  document.addEventListener("pointerdown", e => {
+    if (!e.target.closest?.("#gpad") || !groove.on || G.input !== "tap" || !AC) return;
+    e.preventDefault(); const ts = AC.getOutputTimestamp?.(), tAC = ts && ts.performanceTime ? ts.contextTime + (e.timeStamp - ts.performanceTime) / 1000 : AC.currentTime;
+    groove.hit(tAC); const p = $("#gpad"); p.classList.add("tap"); setTimeout(() => p.classList.remove("tap"), 90);
+  });
   let saveT;
   document.addEventListener("input", e => {
     const el = e.target;
@@ -1091,6 +1326,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     if (el.dataset.f) { const s = song(route()[1]); if (!s) return; s[el.dataset.f] = el.dataset.f === "bpm" ? (el.value ? Math.max(30, Math.min(260, +el.value)) : "") : el.value; s.touched = Date.now(); clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); }
     if (el.id === "bpmr") setBpm(+el.value);
     if (el.id === "gainr") setGain(+el.value);
+    if (el.id === "gsw") { G.swing = +el.value; saveS(); $("#gswv").textContent = G.swing === 50 ? "straight" : G.swing + "%"; }
     if (el.id === "cvol") { S.clickVol = +el.value; saveS(); }
     if (el.id === "dvol") { S.droneVol = +el.value; saveS(); if (drone.g) drone.g.gain.setTargetAtTime(S.droneVol, AC.currentTime, .1); }
     if (el.id === "focus") { const s = song(S.curSong); if (s) { s.focus = el.value; clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); } else { S.focus = el.value; saveS(); } }
@@ -1111,7 +1347,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     const had = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update") || recState !== "idle") return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
   }
-  window.__ws = { S, get mic() { return !!mic; }, analyse, feedback, get TAKES() { return TAKES; }, get SONGS() { return SONGS; }, get recState() { return recState; }, detectPitch, metro };
+  window.__ws = { groove, G, EXS, get S2() { return S; }, S, get mic() { return !!mic; }, analyse, feedback, get TAKES() { return TAKES; }, get SONGS() { return SONGS; }, get recState() { return recState; }, detectPitch, metro };
   </script>
 </body>
 </html>
