@@ -16,4 +16,4 @@ translation is a new rendering from the Hebrew (Masoretic) text, with English ve
 7:1 in Hebrew Bibles). Speaker labels, passage divisions and titles are editorial. The commentary paraphrases and
 credits scholarly views rather than quoting modern works; the Hebrew text itself is in the public domain.
 
-Fonts: Newsreader (SIL Open Font License, see `fonts/OFL.txt`).
+Fonts: Cormorant Garamond (the poem and titles), EB Garamond (the commentary) and Frank Ruhl Libre (Hebrew), all under the SIL Open Font License (see `fonts/OFL-*.txt`).
