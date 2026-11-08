@@ -188,6 +188,9 @@
     .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
     .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
     .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--amber-soft); color: var(--amber); font: 700 12.5px/24px var(--sans); text-align: center; }
+    .gainrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .gainrow b { min-width: 58px; text-align: center; font-size: 15px; }
+    .round.sm { width: 36px; height: 36px; font-size: 20px; line-height: 1; }
     .focus { margin-top: 18px; }
     .focus label { display: block; font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 2px 6px; }
     .focusline { margin: 10px 2px 0; font-size: 14px; color: var(--ink2); } .focusline b { color: var(--amber); font-weight: 600; }
@@ -214,7 +217,7 @@
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "2", APP_DATE = "8 Nov 2026";
+  const APP_VERSION = "3", APP_DATE = "8 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -233,8 +236,9 @@
 
   /* ---------- Settings (small, in localStorage) ---------- */
   const SKEY = "woodshed";
-  const S = Object.assign({ bpm: 80, beats: 4, countIn: 1, clickDuring: false, clickVol: .7, boost: 0, voice: false, a4: 440, curSong: null, lyrics: true, lz: 1, focus: "", droneKey: 7, droneOct: 2, droneFifth: true, droneVol: .5 },
+  const S = Object.assign({ bpm: 80, beats: 4, countIn: 1, clickDuring: false, clickVol: .7, boost: 18, gainSet: false, voice: false, a4: 440, curSong: null, lyrics: true, lz: 1, focus: "", droneKey: 7, droneOct: 2, droneFifth: true, droneVol: .5 },
     (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  if (!S.gainSet && S.boost < 18) S.boost = 18; /* raw phone mics are quiet: start with a healthy boost */
   const saveS = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} };
 
   /* ---------- Recordings and songs (IndexedDB: audio can be large) ---------- */
@@ -256,7 +260,7 @@
   const putSong = s => idb.put("songs", s).catch(() => {});
 
   /* ---------- Audio: one context; the mic goes through a gain stage to the recorder and the meter ---------- */
-  let levelT = 0, AC = null, mic = null, src, gainN, analyser, dest, micErr = null, buf;
+  let limiter, rawAn, rawBuf, autoT = 0, levelT = 0, AC = null, mic = null, src, gainN, analyser, dest, micErr = null, buf;
   function ensureAC() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" }); if (AC.state === "suspended") AC.resume().catch(() => {}); return AC; }
   const dbGain = db => Math.pow(10, db / 20);
   async function openMic() {
@@ -270,16 +274,19 @@
     } catch (e) { micErr = e.name || "error"; refreshStage(); return false; }
     micErr = null; ensureAC();
     src = AC.createMediaStreamSource(mic); gainN = AC.createGain(); gainN.gain.value = dbGain(S.boost);
+    /* A brick-wall limiter after the gain, so a high input boost lifts quiet playing without loud strums distorting. */
+    limiter = AC.createDynamicsCompressor(); limiter.threshold.value = -2; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .002; limiter.release.value = .12;
+    rawAn = AC.createAnalyser(); rawAn.fftSize = 2048; rawBuf = new Float32Array(rawAn.fftSize); src.connect(rawAn);
     analyser = AC.createAnalyser(); analyser.fftSize = 4096; analyser.smoothingTimeConstant = 0; buf = new Float32Array(analyser.fftSize);
     dest = AC.createMediaStreamDestination(); dest.channelCount = 1; dest.channelCountMode = "explicit";
-    src.connect(gainN); gainN.connect(analyser); gainN.connect(dest);
+    src.connect(gainN); gainN.connect(limiter); limiter.connect(analyser); limiter.connect(dest);
     mic.getAudioTracks()[0]?.addEventListener("ended", () => { if (recState !== "idle") stopRec(); closeMic(true); toast("The microphone was disconnected"); });
     refreshStage(); return true;
   }
   function closeMic(force) {
     if (!mic || (!force && recState !== "idle") || tunerOn) return;
     mic.getTracks().forEach(t => t.stop()); mic = null; live = []; clearTimeout(levelT);
-    try { src.disconnect(); gainN.disconnect(); } catch (e) {}
+    try { src.disconnect(); gainN.disconnect(); limiter.disconnect(); } catch (e) {}
     refreshStage();
   }
 
@@ -404,7 +411,7 @@
     const lv = $("#lvl");
     if (lv) { const clip = performance.now() - clipT < 2000, db = dbOf(peakHold);
       lv.innerHTML = clip ? `<span class="warn">Too loud: back off the mic or lower the boost</span><span class="warn">CLIP</span>`
-        : `<span class="${db > -18 ? "ok" : ""}">${db < -45 ? "Very quiet: play, or raise the boost in Tune" : db > -18 ? "Good level" : "Level"}</span><span class="num">${db < -59 ? "−∞" : Math.round(db)} dB</span>`; }
+        : `<span class="${db > -18 ? "ok" : ""}">${db < -45 ? "Quiet: tap Auto-set, or raise the input" : db > -18 ? "Good level" : "Level"}</span><span class="num">${db < -59 ? "−∞" : Math.round(db)} dB</span>`; }
     const cv = $("#wave"); if (!cv) return;
     const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, n = LIVE_N, bw = W / n;
     ctx.fillStyle = recState === "rec" ? "#ef4b4b" : recState === "paused" ? "#6b625a" : "#f2b45a";
@@ -677,7 +684,7 @@
       <div class="chips"><button class="chip" data-act="countin">Count-in <b>${["off", "1 bar", "2 bars"][S.countIn]}</b></button>
         <a class="chip" href="#/tools">♩ = <b id="bpmchip">${S.bpm}</b> · ${S.beats}/4</a>
         <button class="chip" data-act="clickduring">Click in take <b>${S.clickDuring ? "on" : "off"}</b></button></div>
-      <div class="focus"><label for="focus">Next take, focus on one thing</label><input type="text" id="focus" value="${esc(curFocus())}" placeholder="e.g. steady tempo, or breathe before the chorus" autocomplete="off"></div>
+      <div class="focus"><label for="focus">Next take, focus on one thing</label><input type="text" id="focus" value="${esc(curFocus())}" placeholder="e.g. keep a steady tempo" autocomplete="off"></div>
       <div id="review">${reviewHTML()}</div>
       ${s?.lyrics ? `<div class="lyrics" style="--lz:${S.lz}"><div class="row between"><div class="eyebrow">Lyrics and chords</div>
           <div class="row" style="gap:4px"><button class="btn ghost sm" data-act="lz" data-v="-1">A−</button><button class="btn ghost sm" data-act="lz" data-v="1">A+</button><button class="btn ghost sm" data-act="lyrics">${S.lyrics ? "Hide" : "Show"}</button></div></div>
@@ -686,19 +693,43 @@
   /* Lines that are only chords (G, Am7, D/F#…) are coloured, so they stand out above the words. */
   const CHORD = /^(?:[A-G](?:#|b|♯|♭)?(?:maj|min|m|dim|aug|sus|add|M)?\d*(?:\/[A-G](?:#|b)?)?|\||x\d|N\.C\.)$/;
   const chordify = txt => txt.split("\n").map(l => { const w = l.trim().split(/\s+/).filter(Boolean); return w.length && w.every(x => CHORD.test(x)) ? `<span class="ch">${esc(l)}</span>` : esc(l); }).join("\n");
+  const gainTxt = () => S.boost ? `+${S.boost} dB` : "0 dB";
+  function setGain(db) {
+    S.boost = Math.max(0, Math.min(36, Math.round(db))); S.gainSet = true; saveS();
+    if (gainN) gainN.gain.setTargetAtTime(dbGain(S.boost), AC.currentTime, .05);
+    document.querySelectorAll("#gainv, #gainv2").forEach(e => e.textContent = gainTxt()); const r = $("#gainr"); if (r) r.value = S.boost;
+  }
+  /* Auto-set: listen to the loudest playing for 5 seconds and set the input so its peaks reach about −6 dB. */
+  async function autoGain() {
+    if (!(await openMic())) return; clearTimeout(levelT);
+    let left = 5, peak = 0; const b = $("#autobtn");
+    const tick = () => { if (!mic) return; rawAn.getFloatTimeDomainData(rawBuf); for (const v of rawBuf) { const a = Math.abs(v); if (a > peak) peak = a; } };
+    const iv = setInterval(tick, 40); toast("Play your loudest part now…", 5000);
+    const step = () => { if (b) b.textContent = `Listening… ${left}`; if (left-- > 0) autoT = setTimeout(step, 1000); else done(); };
+    const done = () => {
+      clearInterval(iv); if (b) b.textContent = "Auto-set";
+      if (peak < .0005) { toast("I heard nothing. Check the microphone isn’t covered."); return; }
+      setGain(-6 - 20 * Math.log10(peak)); toast(`Input set to ${gainTxt()}`);
+      if (recState === "idle" && !tunerOn) levelT = setTimeout(() => { if (recState === "idle" && !tunerOn) closeMic(true); }, 30000);
+    };
+    step();
+  }
   function stageHTML() {
     if (!mic) {
       const msg = micErr === "NotAllowedError" ? `Microphone access is blocked. Allow it in the browser’s site settings (the icon left of the address).`
         : micErr === "NotFoundError" ? "No microphone found." : micErr === "unsupported" ? "This browser can’t use the microphone here." : "";
       return `<div class="timer" id="timer">${fmt(0, true)}</div><div class="state">Microphone off</div>
         <div class="micgate"><p class="muted small" style="margin:0 0 12px">${msg || "It turns on only while you record, and off the moment you stop."}</p>
-        <button class="btn sm" data-act="mic">Check my level</button></div>`;
+        <div class="row" style="justify-content:center;gap:8px"><button class="btn sm" data-act="mic">Check my level</button><button class="btn sm" data-act="autogain">Auto-set input</button></div>
+        <p class="small muted" style="margin:10px 0 0">Input <b class="num" id="gainv">${gainTxt()}</b></p></div>`;
     }
     const st = recState === "rec" ? "Recording" : recState === "paused" ? "Paused" : recState === "count" ? "Count-in" : recState === "saving" ? "Saving" : "Listening · not recording";
     return `<div class="timer" id="timer">${fmt(elapsed(), true)}</div><div class="state ${recState === "rec" ? "rec" : ""}">${st}</div>
       <canvas id="wave"></canvas>
       <div class="meter"><div class="fillmask" id="mfill"></div><div class="tick" style="left:70%"></div><div class="tick" style="left:90%"></div><div class="pk" id="mpk"></div></div>
       <div class="lvl" id="lvl"></div>
+      <div class="gainrow"><span class="small muted">Input</span><button class="round sm" data-act="gain" data-v="-3" aria-label="Less input">−</button><b class="num" id="gainv">${gainTxt()}</b><button class="round sm" data-act="gain" data-v="3" aria-label="More input">+</button>
+        <button class="btn sm" data-act="autogain" id="autobtn" style="margin-left:auto">Auto-set</button></div>
       ${recState === "count" ? `<div class="countdown" id="cd">${countTotal}<small>Count-in · ${S.bpm} bpm</small></div>` : ""}`;
   }
   function ctrlsHTML() {
@@ -771,7 +802,7 @@
   async function quickPlay(id) {
     if (quick.id === id && quick.a) { quick.a.paused ? quick.a.play() : quick.a.pause(); return; }
     quickStop(); const rec = await idb.get("blobs", id); if (!rec) { toast("This recording is missing"); return; }
-    quick.id = id; quick.url = URL.createObjectURL(rec.blob); quick.a = new Audio(quick.url);
+    quick.id = id; quick.url = URL.createObjectURL(rec.blob); quick.a = new Audio(quick.url); louden(quick.a, take(id));
     const t = take(id), upd = () => { quick.prog = t ? Math.min(1, quick.a.currentTime / t.dur) : -1; const c = document.querySelector(`canvas[data-mini="${id}"]`); if (c && t) drawTake(c, t, { prog: quick.prog }); };
     quick.a.addEventListener("timeupdate", upd); quick.a.addEventListener("play", syncQuick); quick.a.addEventListener("pause", syncQuick);
     quick.a.addEventListener("ended", () => { quick.prog = -1; upd(); syncQuick(); });
@@ -808,9 +839,12 @@
     if (!P.b) return `<button class="btn sm" data-act="cmp">Choose a take</button>`;
     return `<div class="row" style="gap:6px"><div class="seg"><button class="${P.side === "a" ? "on" : ""}" data-act="ab" data-v="a">A · this</button><button class="${P.side === "b" ? "on" : ""}" data-act="ab" data-v="b">B · ${esc(P.b.t.name.length > 14 ? P.b.t.name.slice(0, 14) + "…" : P.b.t.name)}</button></div><button class="btn ghost sm" data-act="cmpoff" aria-label="Stop comparing">×</button></div>`;
   }
+  /* Play every take at a healthy level: lift quiet recordings so their peaks reach about −1 dB. */
+  const normGain = t => { const p = Math.max(1, ...(t.peaks || [255])) / 255; return Math.max(1, Math.min(16, .89 / p)); };
+  function louden(a, t) { try { ensureAC(); const s = AC.createMediaElementSource(a), g = AC.createGain(); g.gain.value = normGain(t); s.connect(g); g.connect(AC.destination); } catch (e) {} }
   async function loadAudio(t) {
     const rec = await idb.get("blobs", t.id); if (!rec) return null;
-    const url = URL.createObjectURL(rec.blob), a = new Audio(url); a.preload = "auto"; a.preservesPitch = true;
+    const url = URL.createObjectURL(rec.blob), a = new Audio(url); a.preload = "auto"; a.preservesPitch = true; louden(a, t);
     /* Chrome’s WebM recordings carry no duration, which can stop seeking; asking for a far-off time makes it read the file once. */
     a.addEventListener("loadedmetadata", () => { if (a.duration === Infinity) { a.currentTime = 1e101; a.addEventListener("timeupdate", function f() { a.removeEventListener("timeupdate", f); a.currentTime = 0; }); } }, { once: true });
     a.addEventListener("play", syncPlay); a.addEventListener("pause", syncPlay); a.addEventListener("ended", syncPlay);
@@ -941,7 +975,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
         <div class="srow" style="margin-top:12px"><span>Click volume</span><input type="range" id="cvol" min="0.05" max="1" step="0.05" value="${S.clickVol}" style="width:46%"></div>
         <p class="small muted">With headphones the click stays out of your recording. Through the speaker, the microphone will hear it.</p></div></div>
       <div class="sec"><div class="eyebrow">Recording</div><div class="card">
-        <div class="srow" style="border:0;padding-top:0"><span>Input boost</span><div class="seg">${[0, 6, 12].map(v => `<button class="${S.boost === v ? "on" : ""}" data-act="boost" data-v="${v}">${v ? `+${v} dB` : "Off"}</button>`).join("")}</div></div>
+        <div class="srow" style="border:0;padding-top:0"><span>Input <b class="num" id="gainv2">${gainTxt()}</b></span><input type="range" id="gainr" min="0" max="36" step="1" value="${S.boost}" style="width:52%"></div>
         <div class="srow"><span>Microphone<br><span class="small muted">${S.voice ? "Phone’s voice clean-up on" : "Raw: best for guitar"}</span></span><div class="seg"><button class="${!S.voice ? "on" : ""}" data-act="voice" data-v="0">Music</button><button class="${S.voice ? "on" : ""}" data-act="voice" data-v="1">Voice</button></div></div>
         <div class="srow"><span>Tuning reference</span><div class="row" style="gap:6px"><button class="round" style="width:36px;height:36px;font-size:18px" data-act="a4" data-v="-1">−</button><span class="num" id="a4v">A = ${S.a4} Hz</span><button class="round" style="width:36px;height:36px;font-size:18px" data-act="a4" data-v="1">+</button></div></div>
         <div class="srow"><span>Storage</span><span class="small muted" id="storage">…</span></div>
@@ -1033,7 +1067,8 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     else if (a === "bpm") setBpm(S.bpm + +d.v);
     else if (a === "tap") tapTempo();
     else if (a === "beats") { S.beats = +d.v; saveS(); render(); }
-    else if (a === "boost") { S.boost = +d.v; saveS(); if (gainN) gainN.gain.setTargetAtTime(dbGain(S.boost), AC.currentTime, .05); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
+    else if (a === "gain") setGain(S.boost + +d.v);
+    else if (a === "autogain") autoGain();
     else if (a === "voice") { S.voice = d.v === "1"; saveS(); if (mic && recState === "idle") { const t = tunerOn; closeMic(true); tunerOn = false; await openMic(); if (t) startTuner(); } render(); }
     else if (a === "a4") { S.a4 = Math.max(415, Math.min(466, S.a4 + +d.v)); saveS(); $("#a4v").textContent = `A = ${S.a4} Hz`; }
     else if (a === "installsheet") showInstall(true);
@@ -1055,6 +1090,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     if (el.id === "tnote" && P.t) { P.t.note = el.value; clearTimeout(saveT); saveT = setTimeout(() => putTake(P.t), 400); }
     if (el.dataset.f) { const s = song(route()[1]); if (!s) return; s[el.dataset.f] = el.dataset.f === "bpm" ? (el.value ? Math.max(30, Math.min(260, +el.value)) : "") : el.value; s.touched = Date.now(); clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); }
     if (el.id === "bpmr") setBpm(+el.value);
+    if (el.id === "gainr") setGain(+el.value);
     if (el.id === "cvol") { S.clickVol = +el.value; saveS(); }
     if (el.id === "dvol") { S.droneVol = +el.value; saveS(); if (drone.g) drone.g.gain.setTargetAtTime(S.droneVol, AC.currentTime, .1); }
     if (el.id === "focus") { const s = song(S.curSong); if (s) { s.focus = el.value; clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); } else { S.focus = el.value; saveS(); } }
