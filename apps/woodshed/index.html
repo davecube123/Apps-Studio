@@ -188,6 +188,19 @@
     .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
     .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
     .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--amber-soft); color: var(--amber); font: 700 12.5px/24px var(--sans); text-align: center; }
+    .focus { margin-top: 18px; }
+    .focus label { display: block; font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 2px 6px; }
+    .focusline { margin: 10px 2px 0; font-size: 14px; color: var(--ink2); } .focusline b { color: var(--amber); font-weight: 600; }
+    .starbtns.sm button { font-size: 19px; }
+    .fbgrid { display: grid; gap: 10px; }
+    .fbc { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 13px 16px 12px; }
+    .fbsub { font: 600 12px var(--sans); color: var(--muted); text-align: right; }
+    .fbbig { font: 300 30px/1.1 var(--sans); letter-spacing: -.02em; margin-top: 4px; }
+    .fbbig.good { color: var(--green); }
+    .fbtip { margin: 6px 0 0; font-size: 14.5px; line-height: 1.45; color: var(--ink2); }
+    .keys { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .keys button { border: 1px solid var(--line2); background: var(--card2); color: var(--ink2); border-radius: 12px; padding: 9px 0; font: 700 14px var(--sans); cursor: pointer; }
+    .keys button.on { background: var(--amber-soft); color: var(--amber); border-color: rgba(242,180,90,.45); }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
@@ -201,7 +214,7 @@
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "1", APP_DATE = "8 Nov 2026";
+  const APP_VERSION = "2", APP_DATE = "8 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -220,7 +233,7 @@
 
   /* ---------- Settings (small, in localStorage) ---------- */
   const SKEY = "woodshed";
-  const S = Object.assign({ bpm: 80, beats: 4, countIn: 1, clickDuring: false, clickVol: .7, boost: 0, voice: false, a4: 440, curSong: null, lyrics: true, lz: 1 },
+  const S = Object.assign({ bpm: 80, beats: 4, countIn: 1, clickDuring: false, clickVol: .7, boost: 0, voice: false, a4: 440, curSong: null, lyrics: true, lz: 1, focus: "", droneKey: 7, droneOct: 2, droneFifth: true, droneVol: .5 },
     (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
   const saveS = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} };
 
@@ -243,7 +256,7 @@
   const putSong = s => idb.put("songs", s).catch(() => {});
 
   /* ---------- Audio: one context; the mic goes through a gain stage to the recorder and the meter ---------- */
-  let AC = null, mic = null, src, gainN, analyser, dest, micErr = null, buf;
+  let levelT = 0, AC = null, mic = null, src, gainN, analyser, dest, micErr = null, buf;
   function ensureAC() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" }); if (AC.state === "suspended") AC.resume().catch(() => {}); return AC; }
   const dbGain = db => Math.pow(10, db / 20);
   async function openMic() {
@@ -265,8 +278,9 @@
   }
   function closeMic(force) {
     if (!mic || (!force && recState !== "idle") || tunerOn) return;
-    mic.getTracks().forEach(t => t.stop()); mic = null;
+    mic.getTracks().forEach(t => t.stop()); mic = null; live = []; clearTimeout(levelT);
     try { src.disconnect(); gainN.disconnect(); } catch (e) {}
+    refreshStage();
   }
 
   /* ---------- Metronome: clicks scheduled ahead on the audio clock ---------- */
@@ -327,7 +341,7 @@
     rec.start(1000); recStart = performance.now(); recState = "rec"; lastPeakT = recStart;
     getWake(); refreshStage(); refreshCtrls(); syncTabs();
   }
-  function cancelCount() { clearTimeout(countTimer); countTimer = null; recState = "idle"; if (!metroWas) metro.stop(); refreshStage(); refreshCtrls(); }
+  function cancelCount() { clearTimeout(countTimer); countTimer = null; recState = "idle"; if (!metroWas) metro.stop(); closeMic(true); refreshStage(); refreshCtrls(); }
   function pauseRec() {
     if (recState === "rec") { rec.pause(); pausedAt = performance.now(); recState = "paused"; }
     else if (recState === "paused") { rec.resume(); pausedTotal += performance.now() - pausedAt; recState = "rec"; }
@@ -343,10 +357,12 @@
     const mime = rec?.mimeType || pickMime() || "audio/webm";
     const blob = new Blob(chunks, { type: mime }); chunks = [];
     recState = "idle"; releaseWake(); syncTabs();
+    if (!tunerOn) closeMic(true); /* the microphone is off again the moment a take ends */
     if (finalDur < .6 || !blob.size) { refreshStage(); refreshCtrls(); toast("Too short to keep"); return; }
     const sid = S.curSong && song(S.curSong) ? S.curSong : null;
     const n = TAKES.filter(t => t.songId === sid).length + 1;
-    const t = { id: uid(), songId: sid, at: Date.now(), dur: finalDur, mime, size: blob.size, name: `${sid ? song(sid).title : "Practice"} · take ${n}`, stars: 0, note: "", marks: [...marks], peaks: peaks.slice() };
+    const t = { id: uid(), songId: sid, at: Date.now(), dur: finalDur, mime, size: blob.size, name: `${sid ? song(sid).title : "Practice"} · take ${n}`, stars: 0, note: "", marks: [...marks], peaks: peaks.slice(),
+      clicked: S.countIn > 0 || metroWas, bpm: (S.countIn > 0 || metroWas) ? S.bpm : (+song(sid)?.bpm || null), focus: curFocus() };
     TAKES.push(t); lastTakeId = t.id;
     await idb.put("blobs", { id: t.id, blob }).catch(() => {}); await putTake(t);
     navigator.storage?.persist?.().catch(() => {});
@@ -356,7 +372,6 @@
   function releaseWake() { try { wake?.release(); } catch (e) {} wake = null; }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && recState !== "idle" && !wake) getWake();
-    if (document.visibilityState === "visible" && micAllowed && !mic) { const v = route()[0]; if (v === "rec") openMic(); else if (v === "tools") startTuner(); }
     if (document.visibilityState === "hidden" && recState === "idle") { if (tunerOn) stopTuner(); closeMic(); }
   });
 
@@ -450,14 +465,174 @@
     const near = STRINGS.reduce((best, s, i) => Math.abs(s[2] - m) < Math.abs(STRINGS[best][2] - m) ? i : best, 0);
     document.querySelectorAll(".strings button").forEach((b, i) => b.classList.toggle("near", i === near && Math.abs(STRINGS[near][2] - m) < 2.5));
   }
-  async function startTuner() { if (!(await openMic())) return; tunerOn = true; fHist = []; showPitch(null); const b = $("#tunerbtn"); if (b) b.style.display = "none"; }
-  function stopTuner() { tunerOn = false; }
+  async function startTuner() { if (!(await openMic())) return; tunerOn = true; fHist = []; showPitch(null); const b = $("#tunerbtn"); if (b) b.textContent = "Stop the tuner"; }
+  function stopTuner() { tunerOn = false; closeMic(); const b = $("#tunerbtn"); if (b) b.textContent = "Start the tuner"; showPitch(null); const c = $("#tcents"); if (c) c.textContent = "Tuner off"; }
   function refTone(midi) {
     ensureAC(); const f = S.a4 * Math.pow(2, (midi - 69) / 12), t = AC.currentTime + .02;
     [1, 2, 3].forEach((h, k) => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = f * h; o.type = "sine";
       g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime([.35, .12, .05][k], t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + 2.4);
       o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 2.5); });
   }
+
+  /* ---------- Listening back: pitch, time and dynamics of a take ----------
+     The take is decoded and resampled to 12 kHz, then analysed off the main thread:
+     pitch every 25 ms (McLeod's normalised autocorrelation), held notes (≥125 ms within a semitone),
+     onsets from the rise in high-passed energy, tempo by autocorrelating the onset curve (overall,
+     then in 8-second windows), how tightly onsets sit on the beat grid, and loudness every 50 ms. */
+  const ANA_V = 1;
+  const WORKER_SRC = `onmessage = e => {
+    const { id, x, sr, bpm, a4 } = e.data, n = x.length, out = { pitch: [], notes: [], onsets: [], tempo: [], bpm: 0, spread: 0, loud: [] };
+    const L = Math.round(sr * .05); let maxR = 0; const rms = [];
+    for (let i = 0; i + L <= n; i += L) { let s = 0; for (let j = i; j < i + L; j++) s += x[j] * x[j]; const r = Math.sqrt(s / L); rms.push(r); if (r > maxR) maxR = r; }
+    out.loud = rms.map(r => Math.round(Math.max(-60, 20 * Math.log10(r / (maxR || 1) + 1e-9))));
+    const N = 512, H = Math.round(sr * .025), minLag = Math.floor(sr / 1100), maxLag = Math.ceil(sr / 65), gate = maxR * .1, nsdf = new Float32Array(maxLag + 2);
+    for (let i = 0; i + N <= n; i += H) {
+      let ms = 0; for (let j = 0; j < N; j++) ms += x[i + j] * x[i + j]; if (Math.sqrt(ms / N) < gate) continue;
+      for (let t = minLag; t <= maxLag + 1; t++) { let ac = 0, m = 0; for (let j = 0; j < N - t; j++) { const a = x[i + j], b = x[i + j + t]; ac += a * b; m += a * a + b * b; } nsdf[t] = m ? 2 * ac / m : 0; }
+      let t = minLag; while (t < maxLag && nsdf[t] > 0) t++;
+      let mx = 0; const pk = []; for (; t <= maxLag; t++) if (nsdf[t] > 0 && nsdf[t] >= nsdf[t - 1] && nsdf[t] >= nsdf[t + 1]) { pk.push(t); if (nsdf[t] > mx) mx = nsdf[t]; }
+      if (!pk.length) continue; const p = pk.find(q => nsdf[q] >= .9 * mx); if (nsdf[p] < .8) continue;
+      const a = nsdf[p - 1], b = nsdf[p], c = nsdf[p + 1], d = a - 2 * b + c, sh = d ? (a - c) / (2 * d) : 0, f = sr / (p + (Math.abs(sh) < 1 ? sh : 0));
+      out.pitch.push([+(i / sr).toFixed(3), +(12 * Math.log2(f / a4) + 69).toFixed(2)]);
+    }
+    let cur = null; const flush = () => { if (cur && cur.ms.length >= 5) { const s = cur.ms.slice().sort((a, b) => a - b); out.notes.push([cur.t0, +(cur.t1 + .025).toFixed(3), +s[s.length >> 1].toFixed(2)]); } cur = null; };
+    for (const [t, m] of out.pitch) { if (cur && t - cur.t1 <= .06 && Math.abs(m - cur.last) < .6) { cur.ms.push(m); cur.t1 = t; cur.last = m; } else { flush(); cur = { t0: t, t1: t, ms: [m], last: m }; } }
+    flush();
+    const hop = Math.round(sr * .01), F = hop * 4, env = [];
+    for (let i = 1; i + F <= n; i += hop) { let s = 0; for (let j = i; j < i + F; j++) { const d = x[j] - x[j - 1]; s += d * d; } env.push(Math.log(1e-9 + s / F)); }
+    const m = env.length, od = new Float32Array(m); let emax = -1e9; for (let i = 0; i < m; i++) { if (env[i] > emax) emax = env[i]; if (i) od[i] = Math.max(0, env[i] - env[i - 1]); }
+    let tot = 0; for (let i = 0; i < m; i++) tot += od[i]; const gmean = tot / Math.max(1, m);
+    let last = -99;
+    for (let i = 5; i < m - 5; i++) {
+      let isMax = true; for (let k = -5; k <= 5; k++) if (od[i + k] > od[i]) { isMax = false; break; } if (!isMax) continue;
+      let lm = 0, c = 0; for (let k = Math.max(0, i - 50); k < Math.min(m, i + 50); k++) { lm += od[k]; c++; } lm /= c;
+      if (od[i] > lm * 1.6 + gmean * .4 && env[i] > emax - 9 && i - last >= 8) { out.onsets.push(+(i * .01).toFixed(2)); last = i; }
+    }
+    const ac = (a0, a1, lag) => { let r = 0; for (let i = a0; i < a1 - lag; i++) r += od[i] * od[i + lag]; return r; };
+    const peakLag = (a0, a1, lo, hi, w) => { let best = 0, bl = 0; const r = []; for (let l = lo; l <= hi; l++) { r[l] = ac(a0, a1, l) * (w ? w(l) : 1); if (r[l] > best) { best = r[l]; bl = l; } }
+      if (!bl) return 0; const y0 = r[bl - 1] ?? r[bl], y1 = r[bl], y2 = r[bl + 1] ?? r[bl], d = y0 - 2 * y1 + y2; return bl + (d ? (y0 - y2) / (2 * d) : 0); };
+    if (out.onsets.length >= 8) {
+      let g;
+      if (bpm) { const c = 6000 / bpm; g = peakLag(0, m, Math.floor(c * .88), Math.ceil(c * 1.12)); }
+      else g = peakLag(0, m, 30, 109, l => Math.exp(-.5 * Math.pow(Math.log2(6000 / l / 105) / .8, 2)));
+      if (g) {
+        out.bpm = +(6000 / g).toFixed(1);
+        const devs = [];
+        for (let w0 = 0; w0 + 600 <= m || (w0 === 0 && m >= 400); w0 += 200) {
+          const w1 = Math.min(m, w0 + 800), ons = out.onsets.filter(o => o * 100 >= w0 && o * 100 < w1); if (ons.length < 4) continue;
+          const l = peakLag(w0, w1, Math.floor(g * .88), Math.ceil(g * 1.12)); if (!l) continue;
+          out.tempo.push([+((w0 + w1) / 200).toFixed(2), +(6000 / l).toFixed(1)]);
+          let cx = 0, cy = 0; for (const o of ons) { const ph = 2 * Math.PI * ((o * 100) % l) / l; cx += Math.cos(ph); cy += Math.sin(ph); }
+          const phi = (Math.atan2(cy, cx) + 2 * Math.PI) % (2 * Math.PI) / (2 * Math.PI) * l;
+          for (const o of ons) { let d = ((o * 100 - phi) % l + l) % l; if (d > l / 2) d -= l; if (Math.abs(d) < l / 4) devs.push(Math.abs(d) * 10); }
+          if (w1 === m) break;
+        }
+        devs.sort((a, b) => a - b); out.spread = devs.length ? Math.round(devs[devs.length >> 1]) : 0;
+      }
+    }
+    postMessage({ id, res: out });
+  };`;
+  let worker = null; const anaJobs = {}, anaP = {};
+  function getWorker() {
+    if (!worker) { worker = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }))); worker.onmessage = e => { anaJobs[e.data.id]?.(e.data.res); delete anaJobs[e.data.id]; }; }
+    return worker;
+  }
+  function analyse(t) {
+    if (t.ana?.v === ANA_V) return Promise.resolve(t.ana);
+    return anaP[t.id] ||= (async () => {
+      const rec = await idb.get("blobs", t.id); if (!rec) return null;
+      const oac = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 12000, 12000);
+      const buf = await oac.decodeAudioData(await rec.blob.arrayBuffer()), x = new Float32Array(buf.getChannelData(0));
+      const res = await new Promise(r => { anaJobs[t.id] = r; getWorker().postMessage({ id: t.id, x, sr: buf.sampleRate, bpm: t.bpm || 0, a4: S.a4 }, [x.buffer]); });
+      t.ana = { v: ANA_V, ...res }; putTake(t); return t.ana;
+    })().catch(() => null).finally(() => { delete anaP[t.id]; });
+  }
+  const avg = a => a.reduce((x, y) => x + y, 0) / (a.length || 1);
+  const sd = a => { const m = avg(a); return Math.sqrt(avg(a.map(x => (x - m) * (x - m)))); };
+  /* The three things that make it musical, each with one concrete thing to do next. */
+  function feedback(t) {
+    const a = t.ana; if (!a) return null; const f = {};
+    if (a.notes.length >= 4) {
+      const devs = a.notes.map(n => (n[2] - Math.round(n[2])) * 100), inT = devs.filter(d => Math.abs(d) <= 20).length / devs.length, lean = avg(devs);
+      f.pitch = { big: `${Math.round(inT * 100)}%`, sub: `of ${a.notes.length} held notes within 20 cents`, score: inT,
+        tip: inT >= .8 ? "Your notes land well. Listen to the ends of phrases, where pitch tends to sag as the breath runs out."
+          : Math.abs(lean) > 8 ? `You lean ${lean < 0 ? "flat" : "sharp"}, about ${Math.round(Math.abs(lean))} cents on average. ${lean < 0 ? "Support the breath and aim each note from slightly above" : "Ease off; pushing for volume often drives pitch up"}. Sing the phrase slowly against the drone in Tune.`
+          : "Notes scatter around their targets. Slow the phrase down, sing it on one vowel against the drone, then record it again." };
+    } else f.pitch = { big: "–", sub: "not enough held notes", tip: "The pitch view follows a sung melody. Strummed chords alone don’t give it a line to measure; sing a phrase and try again." };
+    if (a.bpm && a.tempo.length) {
+      const tv = a.tempo.map(x => x[1]), first = avg(tv.slice(0, 2)), lastv = avg(tv.slice(-2)), drift = (lastv - first) / first * 100, wob = sd(tv) / a.bpm * 100;
+      const steady = wob < 1.5 && Math.abs(drift) < 3 ? "Very steady" : wob < 3 && Math.abs(drift) < 6 ? "Fairly steady" : "Drifting";
+      const vsClick = t.clicked && t.bpm ? (a.bpm - t.bpm) / t.bpm * 100 : null;
+      f.time = { big: steady, sub: `${Math.round(first)} → ${Math.round(lastv)} bpm${a.spread ? ` · beats within ±${a.spread} ms` : ""}`, score: wob < 1.5 ? 1 : wob < 3 ? .6 : .3,
+        tip: Math.abs(drift) >= 4 ? `You ${drift > 0 ? "sped up" : "slowed down"} by about ${Math.round(Math.abs(drift))}% over the take. ${drift > 0 ? "Rushing usually starts at the chorus or a hard change: loop that part with the click on" : "Dragging often comes from hesitating on chord changes: practise the changes alone, in time"}.`
+          : vsClick != null && Math.abs(vsClick) >= 3 ? `Steady, but ${vsClick > 0 ? "ahead of" : "behind"} the click on average (${Math.abs(vsClick).toFixed(1)}%). Lock your strumming hand to the click before you add the voice.`
+          : a.spread > 40 ? "The tempo holds, but strums land loosely around the beat. Practise with the click at 70% speed and aim to bury it under your strum."
+          : "Good time. Next, try the take without the click and see if it stays this steady." };
+    } else f.time = { big: "–", sub: "not enough strums or beats found", tip: "Timing needs a clear pulse. Strum or pick in rhythm for at least 20 seconds." };
+    const lv = a.loud.filter(v => v > -45).sort((x, y) => x - y);
+    if (lv.length > 20) {
+      const range = lv[Math.floor(lv.length * .95)] - lv[Math.floor(lv.length * .1)];
+      f.dyn = { big: `${range} dB`, sub: "between your quiet and loud passages", score: range >= 10 ? 1 : range >= 6 ? .6 : .3,
+        tip: range < 6 ? "Everything sits at one level. Give the song a shape: pull the verse back, let the chorus open up." : range < 10 ? "Some light and shade. Exaggerate it: musicians always hear less contrast than they think they play." : "A real dynamic shape. Check it serves the song: the quiet parts should still carry." };
+    }
+    return f;
+  }
+  function fbHTML(t) {
+    const f = feedback(t); if (!f) return "";
+    const card = (k, ic, x) => x ? `<div class="fbc"><div class="row between"><span class="eyebrow">${ic} ${k}</span><span class="fbsub">${esc(x.sub)}</span></div><div class="fbbig${x.score >= .8 ? " good" : ""}">${esc(x.big)}</div><p class="fbtip">${esc(x.tip)}</p></div>` : "";
+    return `<div class="fbgrid">${card("Pitch", "♪", f.pitch)}${card("Time", "♩", f.time)}${card("Dynamics", "◐", f.dyn)}</div>
+      <p class="small muted" style="margin:8px 2px 0">Switch the view above to Pitch or Timing to see where it happens.</p>`;
+  }
+  function msgCanvas(ctx, W, H, m) { ctx.fillStyle = "#8a7f72"; ctx.font = "600 13px system-ui"; ctx.textAlign = "center"; ctx.fillText(m, W / 2, H / 2 + 4); ctx.textAlign = "left"; }
+  function drawPitch(cv, t, prog) {
+    const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, a = t.ana;
+    if (!a) return msgCanvas(ctx, W, H, "Listening to your take…");
+    if (a.pitch.length < 6) return msgCanvas(ctx, W, H, "No clear sung pitches in this take");
+    const ms = (a.notes.length ? a.notes.map(n => n[2]) : a.pitch.map(p => p[1])).sort((x, y) => x - y);
+    let lo = Math.floor(ms[Math.floor(ms.length * .02)]) - 2, hi = Math.ceil(ms[Math.floor(ms.length * .98)]) + 2;
+    if (hi - lo < 10) { const c = (hi + lo) / 2; lo = Math.floor(c - 5); hi = Math.ceil(c + 5); }
+    const y = mm => H - 4 - (mm - lo) / (hi - lo) * (H - 8), x = s => s / t.dur * W;
+    ctx.font = "600 9px system-ui";
+    for (let mm = lo; mm <= hi; mm++) { const nat = ![1, 3, 6, 8, 10].includes(((mm % 12) + 12) % 12); ctx.fillStyle = mm % 12 === 0 ? "rgba(255,255,255,.16)" : nat ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.03)"; ctx.fillRect(0, Math.round(y(mm)), W, 1);
+      if (nat && (hi - lo < 16 || mm % 12 === 0)) { ctx.fillStyle = "rgba(242,235,225,.4)"; ctx.fillText(NOTES[((mm % 12) + 12) % 12] + (Math.floor(mm / 12) - 1), 2, y(mm) - 2); } }
+    for (const [t0, t1, mm] of a.notes) { ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.fillRect(x(t0), y(Math.round(mm)) - 3, Math.max(2, x(t1) - x(t0)), 6); }
+    for (const [s, mm] of a.pitch) { const d = Math.abs(mm - Math.round(mm)) * 100; ctx.fillStyle = d <= 20 ? "#86cf8f" : d <= 35 ? "#f2b45a" : "#ef4b4b"; ctx.fillRect(x(s) - 1, y(mm) - 1.5, 2.5, 3); }
+    ctx.fillStyle = "#f2ebe1"; ctx.fillRect(prog * W - 1, 0, 2, H);
+  }
+  function drawTime(cv, t, prog) {
+    const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, a = t.ana;
+    if (!a) return msgCanvas(ctx, W, H, "Listening to your take…");
+    const x = s => s / t.dur * W, n = a.loud.length;
+    ctx.fillStyle = "rgba(242,235,225,.07)"; a.loud.forEach((v, i) => { const h = (v + 60) / 60 * H * .9; ctx.fillRect(i / n * W, H - h, W / n + .5, h); });
+    ctx.fillStyle = "rgba(242,180,90,.55)"; a.onsets.forEach(o => ctx.fillRect(x(o), H - 10, 1.2, 10));
+    if (!a.tempo.length) msgCanvas(ctx, W, H, "No steady pulse found");
+    else {
+      const tv = a.tempo.map(p => p[1]).concat(t.clicked && t.bpm ? [t.bpm] : []), lo = Math.min(...tv) - 3, hi = Math.max(...tv) + 3, y = b => 8 + (hi - b) / (hi - lo) * (H - 30);
+      if (t.clicked && t.bpm) { ctx.strokeStyle = "rgba(134,207,143,.7)"; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(0, y(t.bpm)); ctx.lineTo(W, y(t.bpm)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = "#86cf8f"; ctx.font = "600 10px system-ui"; ctx.fillText(`click ${t.bpm}`, W - 52, y(t.bpm) - 4); }
+      ctx.strokeStyle = "#f2b45a"; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.beginPath();
+      a.tempo.forEach(([s, b], i) => i ? ctx.lineTo(x(s), y(b)) : ctx.moveTo(x(s), y(b))); if (a.tempo.length === 1) ctx.lineTo(x(a.tempo[0][0]) + 4, y(a.tempo[0][1])); ctx.stroke(); ctx.lineWidth = 1;
+      ctx.fillStyle = "rgba(242,235,225,.55)"; ctx.font = "600 10px system-ui"; ctx.fillText(`${Math.round(hi - 3)} bpm`, 3, 12); ctx.fillText(`${Math.round(lo + 3)}`, 3, H - 16);
+    }
+    ctx.fillStyle = "#f2ebe1"; ctx.fillRect(prog * W - 1, 0, 2, H);
+  }
+
+  /* ---------- Drone: a sustained root (and fifth) to sing against ---------- */
+  const drone = { g: null, nodes: [], on: false,
+    start() {
+      ensureAC(); this.stop(true);
+      const root = S.droneKey + 12 * (S.droneOct + 1), master = AC.createGain(), lp = AC.createBiquadFilter();
+      master.gain.value = .0001; master.connect(AC.destination); lp.type = "lowpass"; lp.frequency.value = 1100; lp.Q.value = .5; lp.connect(master);
+      [root - 12, root, ...(S.droneFifth ? [root + 7] : [])].forEach((mm, k) => [-4, 4].forEach(dt => {
+        const o = AC.createOscillator(), g = AC.createGain(); o.type = "sawtooth"; o.frequency.value = S.a4 * Math.pow(2, (mm - 69) / 12); o.detune.value = dt;
+        g.gain.value = k === 0 ? .09 : .06; o.connect(g); g.connect(lp); o.start(); this.nodes.push(o); }));
+      const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = .11; lg.gain.value = 260; lfo.connect(lg); lg.connect(lp.frequency); lfo.start(); this.nodes.push(lfo);
+      master.gain.setTargetAtTime(S.droneVol, AC.currentTime, .5); this.g = master; this.on = true; syncDrone();
+    },
+    stop(quick) {
+      if (this.g) { const g = this.g, ns = this.nodes; g.gain.setTargetAtTime(.0001, AC.currentTime, quick ? .02 : .3); setTimeout(() => { ns.forEach(o => { try { o.stop(); } catch (e) {} }); g.disconnect(); }, quick ? 120 : 1500); }
+      this.g = null; this.nodes = []; this.on = false; syncDrone();
+    } };
+  function syncDrone() { const b = $("#dronebtn"); if (b) { b.textContent = drone.on ? "Stop the drone" : `Start the drone · ${NOTES[S.droneKey]}`; b.classList.toggle("on", drone.on); b.classList.toggle("amber", !drone.on); } }
 
   /* ---------- Views ---------- */
   let lastHash = "";
@@ -480,17 +655,17 @@
     document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
     if (nav) scrollTo(0, 0); lastHash = h;
     if (v !== "tools" && tunerOn) stopTuner();
+    if (v !== "tools" && drone.on) drone.stop();
     if (v !== "rec" && v !== "tools") closeMic();
-    if (v === "rec" && !mic && micAllowed) openMic();
     if (v === "takes" || v === "song") drawMinis();
     if (v === "take") mountPlayer(id);
-    if (v === "tools" && micAllowed) startTuner();
     syncMetroUI(); syncTabs();
   }
   addEventListener("hashchange", render);
   function syncTabs() { $('nav.tabs a[data-tab="rec"]').classList.toggle("live", recState === "rec" || recState === "paused"); }
 
   /* Record */
+  const curFocus = () => { const s = song(S.curSong); return (s ? s.focus : S.focus) || ""; };
   function todaySecs() { const k = dayKey(Date.now()); return TAKES.filter(t => dayKey(t.at) === k).reduce((a, t) => a + t.dur, 0); }
   function viewRec() {
     const s = song(S.curSong);
@@ -502,6 +677,7 @@
       <div class="chips"><button class="chip" data-act="countin">Count-in <b>${["off", "1 bar", "2 bars"][S.countIn]}</b></button>
         <a class="chip" href="#/tools">♩ = <b id="bpmchip">${S.bpm}</b> · ${S.beats}/4</a>
         <button class="chip" data-act="clickduring">Click in take <b>${S.clickDuring ? "on" : "off"}</b></button></div>
+      <div class="focus"><label for="focus">Next take, focus on one thing</label><input type="text" id="focus" value="${esc(curFocus())}" placeholder="e.g. steady tempo, or breathe before the chorus" autocomplete="off"></div>
       <div id="review">${reviewHTML()}</div>
       ${s?.lyrics ? `<div class="lyrics" style="--lz:${S.lz}"><div class="row between"><div class="eyebrow">Lyrics and chords</div>
           <div class="row" style="gap:4px"><button class="btn ghost sm" data-act="lz" data-v="-1">A−</button><button class="btn ghost sm" data-act="lz" data-v="1">A+</button><button class="btn ghost sm" data-act="lyrics">${S.lyrics ? "Hide" : "Show"}</button></div></div>
@@ -512,12 +688,13 @@
   const chordify = txt => txt.split("\n").map(l => { const w = l.trim().split(/\s+/).filter(Boolean); return w.length && w.every(x => CHORD.test(x)) ? `<span class="ch">${esc(l)}</span>` : esc(l); }).join("\n");
   function stageHTML() {
     if (!mic) {
-      const msg = micErr === "NotAllowedError" ? `Microphone access is blocked. Allow it in the browser’s site settings (the icon left of the address), then tap below.`
-        : micErr === "NotFoundError" ? "No microphone found." : micErr === "unsupported" ? "This browser can’t use the microphone here." : "Check your level before you record.";
-      return `<div class="micgate"><div class="timer" style="font-size:44px;color:var(--muted)">0:00</div><p class="muted small" style="margin:12px 0 14px">${msg}</p>
-        <button class="btn amber" data-act="mic">${ICON.rec} Turn on the microphone</button></div>`;
+      const msg = micErr === "NotAllowedError" ? `Microphone access is blocked. Allow it in the browser’s site settings (the icon left of the address).`
+        : micErr === "NotFoundError" ? "No microphone found." : micErr === "unsupported" ? "This browser can’t use the microphone here." : "";
+      return `<div class="timer" id="timer">${fmt(0, true)}</div><div class="state">Microphone off</div>
+        <div class="micgate"><p class="muted small" style="margin:0 0 12px">${msg || "It turns on only while you record, and off the moment you stop."}</p>
+        <button class="btn sm" data-act="mic">Check my level</button></div>`;
     }
-    const st = recState === "rec" ? "Recording" : recState === "paused" ? "Paused" : recState === "count" ? "Count-in" : recState === "saving" ? "Saving" : "Ready";
+    const st = recState === "rec" ? "Recording" : recState === "paused" ? "Paused" : recState === "count" ? "Count-in" : recState === "saving" ? "Saving" : "Listening · not recording";
     return `<div class="timer" id="timer">${fmt(elapsed(), true)}</div><div class="state ${recState === "rec" ? "rec" : ""}">${st}</div>
       <canvas id="wave"></canvas>
       <div class="meter"><div class="fillmask" id="mfill"></div><div class="tick" style="left:70%"></div><div class="tick" style="left:90%"></div><div class="pk" id="mpk"></div></div>
@@ -538,8 +715,9 @@
     const t = take(lastTakeId); if (!t || recState !== "idle") return "";
     return `<div class="card review">
       <button class="skip" data-act="qplay" data-id="${t.id}" style="flex:none;width:46px;height:46px" aria-label="Play">${quick.id === t.id && !quick.a?.paused ? ICON.pause : ICON.play}</button>
-      <div class="grow"><div style="font-weight:650">Saved · ${esc(t.name)}</div><div class="small muted">${fmt(t.dur)}${t.marks.length ? ` · ${t.marks.length} mark${t.marks.length > 1 ? "s" : ""}` : ""}</div></div>
-      <a class="btn sm" href="#/take/${t.id}">Open</a></div>`;
+      <div class="grow"><div style="font-weight:650">Saved · ${esc(t.name)}</div><div class="small muted">${fmt(t.dur)}${t.marks.length ? ` · ${t.marks.length} mark${t.marks.length > 1 ? "s" : ""}` : ""}</div>
+        <div class="starbtns sm">${[1, 2, 3, 4, 5].map(n => `<button class="${t.stars >= n ? "on" : ""}" data-act="rstar" data-id="${t.id}" data-v="${n}" aria-label="${n} stars">★</button>`).join("")}</div></div>
+      <a class="btn sm" href="#/take/${t.id}">Listen back</a></div>`;
   }
   function refreshStage() { const s = $("#stage"); if (!s) return; s.innerHTML = stageHTML(); s.classList.toggle("recording", recState === "rec"); }
   function refreshCtrls() { const c = $("#ctrls"); if (c) c.innerHTML = ctrlsHTML(); syncMetroUI(); }
@@ -604,45 +782,92 @@
     document.querySelectorAll("[data-act=qplay]").forEach(b => { const on = b.dataset.id === quick.id && quick.a && !quick.a.paused; b.innerHTML = on ? ICON.pause : ICON.play; b.classList.toggle("playing", on); });
   }
 
-  /* One take: the player */
-  const P = { t: null, a: null, url: null, A: null, B: null, raf: 0, drag: false };
+  /* One take: the player, with feedback on pitch, time and dynamics */
+  const P = { t: null, ta: null, a: null, main: null, b: null, side: "a", A: null, B: null, raf: 0, drag: false, mode: "wave" };
   function viewTake(id) {
     const t = take(id); if (!t) { location.hash = "#/takes"; return null; }
     const s = song(t.songId);
     return `<a class="back" data-act="back">← Back</a>
       <input type="text" id="tname" value="${esc(t.name)}" style="font:650 22px var(--sans);background:transparent;border-color:transparent;padding:4px 2px" aria-label="Name">
       <div class="small muted" style="margin:2px 2px 0">${new Date(t.at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} · ${fmt(t.dur)}${s ? ` · <a href="#/song/${s.id}">${esc(s.title)}</a>` : ""}</div>
-      <div class="pwave"><canvas id="pw"></canvas><div class="ptime"><span id="pcur">0:00</span><span id="ploop"></span><span>${fmt(t.dur)}</span></div></div>
+      ${t.focus ? `<p class="focusline">Focus for this take: <b>${esc(t.focus)}</b></p>` : ""}
+      <div class="seg" style="margin-top:14px" id="pmode">${[["wave", "Waveform"], ["pitch", "Pitch"], ["time", "Timing"]].map(([k, l]) => `<button class="${P.mode === k ? "on" : ""}" data-act="pmode" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="pwave" style="margin-top:10px"><canvas id="pw"></canvas><div class="ptime"><span id="pcur">0:00</span><span id="ploop"></span><span id="pdur">${fmt(t.dur)}</span></div></div>
       <div class="pctrls"><button class="skip" data-act="seekby" data-v="-5">−5</button><button class="play" data-act="pplay" id="pplay" aria-label="Play">${ICON.play}</button><button class="skip" data-act="seekby" data-v="5">+5</button></div>
-      ${t.marks.length ? `<div class="row wrap" style="justify-content:center;gap:6px">${t.marks.map((m, i) => `<button class="chip" data-act="tomark" data-v="${m}"><span style="color:var(--rec)">⚑</span> ${fmt(m)}</button>`).join("")}</div>` : ""}
+      ${t.marks.length ? `<div class="row wrap" style="justify-content:center;gap:6px">${t.marks.map(m => `<button class="chip" data-act="tomark" data-v="${m}"><span style="color:var(--rec)">⚑</span> ${fmt(m)}</button>`).join("")}</div>` : ""}
+      <div class="sec"><div class="eyebrow">Feedback <span id="fbwho"></span></div><div id="fbbody"><p class="muted small">Listening to your take…</p></div></div>
       <div class="sec"><div class="srow"><span>Speed <span class="small muted">(same pitch)</span></span><div class="seg" id="speed">${[.5, .75, .85, 1].map(v => `<button class="${v === 1 ? "on" : ""}" data-act="speed" data-v="${v}">${v === 1 ? "1×" : v + "×"}</button>`).join("")}</div></div>
         <div class="srow"><span>Loop a part</span><div class="row" style="gap:6px"><button class="btn sm" data-act="loop" id="loopbtn">Set start</button><button class="btn sm ghost" data-act="loopclear" id="loopclr" style="display:none">Clear</button></div></div>
+        <div class="srow"><span>Compare<br><span class="small muted">switch between two takes</span></span><div id="cmp">${cmpHTML()}</div></div>
         <div class="srow"><span>How was it?</span><div class="starbtns">${[1, 2, 3, 4, 5].map(n => `<button class="${t.stars >= n ? "on" : ""}" data-act="star" data-v="${n}" aria-label="${n} stars">★</button>`).join("")}</div></div></div>
       <div class="sec"><div class="eyebrow">Notes to self</div><textarea id="tnote" rows="3" placeholder="Rushed the chorus, the bridge is getting there, breathe before the high note…">${esc(t.note)}</textarea></div>
       <div class="row wrap" style="margin-top:18px;gap:8px"><button class="btn" data-act="share">Share or save</button><button class="btn" data-act="tosong">${s ? "Change song" : "Add to a song"}</button>
         <button class="btn ghost danger" data-act="deltake" style="margin-left:auto">Delete</button></div>`;
   }
-  async function mountPlayer(id) {
-    const t = take(id); P.t = t; P.A = P.B = null;
-    const rec = await idb.get("blobs", id); if (!rec || P.t !== t) { if (!rec) toast("This recording is missing"); return; }
-    quickStop();
-    P.url = URL.createObjectURL(rec.blob); P.a = new Audio(P.url); P.a.preload = "auto"; P.a.preservesPitch = true;
+  function cmpHTML() {
+    if (!P.b) return `<button class="btn sm" data-act="cmp">Choose a take</button>`;
+    return `<div class="row" style="gap:6px"><div class="seg"><button class="${P.side === "a" ? "on" : ""}" data-act="ab" data-v="a">A · this</button><button class="${P.side === "b" ? "on" : ""}" data-act="ab" data-v="b">B · ${esc(P.b.t.name.length > 14 ? P.b.t.name.slice(0, 14) + "…" : P.b.t.name)}</button></div><button class="btn ghost sm" data-act="cmpoff" aria-label="Stop comparing">×</button></div>`;
+  }
+  async function loadAudio(t) {
+    const rec = await idb.get("blobs", t.id); if (!rec) return null;
+    const url = URL.createObjectURL(rec.blob), a = new Audio(url); a.preload = "auto"; a.preservesPitch = true;
     /* Chrome’s WebM recordings carry no duration, which can stop seeking; asking for a far-off time makes it read the file once. */
-    P.a.addEventListener("loadedmetadata", () => { if (P.a.duration === Infinity) { P.a.currentTime = 1e101; P.a.addEventListener("timeupdate", function f() { P.a.removeEventListener("timeupdate", f); P.a.currentTime = 0; }); } }, { once: true });
-    P.a.addEventListener("play", syncPlay); P.a.addEventListener("pause", syncPlay); P.a.addEventListener("ended", syncPlay);
+    a.addEventListener("loadedmetadata", () => { if (a.duration === Infinity) { a.currentTime = 1e101; a.addEventListener("timeupdate", function f() { a.removeEventListener("timeupdate", f); a.currentTime = 0; }); } }, { once: true });
+    a.addEventListener("play", syncPlay); a.addEventListener("pause", syncPlay); a.addEventListener("ended", syncPlay);
+    return { t, a, url };
+  }
+  async function mountPlayer(id) {
+    const t = take(id); P.t = P.ta = t; P.A = P.B = null; P.b = null; P.side = "a";
+    const m = await loadAudio(t); if (P.t !== t) { if (m) URL.revokeObjectURL(m.url); return; } if (!m) { toast("This recording is missing"); return; }
+    quickStop(); P.main = m; P.a = m.a;
     const cv = $("#pw");
-    const seekTo = e => { const r = cv.getBoundingClientRect(); P.a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * t.dur; drawP(); };
+    const seekTo = e => { const r = cv.getBoundingClientRect(); P.a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * P.ta.dur; drawP(); };
     cv.addEventListener("pointerdown", e => { P.drag = true; cv.setPointerCapture(e.pointerId); seekTo(e); });
     cv.addEventListener("pointermove", e => { if (P.drag) seekTo(e); });
     cv.addEventListener("pointerup", () => { P.drag = false; });
     const tick = () => { if (!P.a) return; P.raf = requestAnimationFrame(tick);
       if (P.A != null && P.B != null && P.a.currentTime >= P.B) P.a.currentTime = P.A;
       drawP(); };
-    tick();
+    tick(); showFeedback();
   }
-  function drawP() { const cv = $("#pw"); if (!cv || !P.t || !P.a) return; const cur = P.a.currentTime || 0; drawTake(cv, P.t, { prog: Math.min(1, cur / P.t.dur), a: P.A, b: P.B }); const c = $("#pcur"); if (c) c.textContent = fmt(cur); }
+  async function showFeedback() {
+    const t = P.ta, el = $("#fbbody"); if (!t || !el) return;
+    $("#fbwho").textContent = P.b ? `· ${P.side === "a" ? "A" : "B"}` : "";
+    if (!t.ana) el.innerHTML = `<p class="muted small">Listening to your take…</p>`;
+    const a = await analyse(t); if (P.ta !== t) return;
+    const e2 = $("#fbbody"); if (e2) e2.innerHTML = a ? fbHTML(t) : `<p class="muted small">Couldn’t analyse this recording.</p>`;
+  }
+  function drawP() {
+    const cv = $("#pw"); if (!cv || !P.ta || !P.a) return; const cur = P.a.currentTime || 0, prog = Math.min(1, cur / P.ta.dur);
+    if (P.mode === "pitch") drawPitch(cv, P.ta, prog); else if (P.mode === "time") drawTime(cv, P.ta, prog);
+    else drawTake(cv, P.ta, { prog, a: P.A, b: P.B });
+    const c = $("#pcur"); if (c) c.textContent = fmt(cur);
+  }
   function syncPlay() { const b = $("#pplay"); if (b) b.innerHTML = P.a && !P.a.paused ? ICON.pause : ICON.play; }
-  function leavePlayer() { if (P.a) { P.a.pause(); URL.revokeObjectURL(P.url); } cancelAnimationFrame(P.raf); P.a = null; P.t = null; }
+  function leavePlayer() { for (const m of [P.main, P.b]) if (m) { m.a.pause(); URL.revokeObjectURL(m.url); } cancelAnimationFrame(P.raf); P.a = null; P.t = P.ta = null; P.main = P.b = null; }
+  function switchSide(side) {
+    if (!P.b || side === P.side) return;
+    const from = P.a, t0 = from.currentTime, playing = !from.paused, to = side === "a" ? P.main : P.b;
+    from.pause(); P.side = side; P.a = to.a; P.ta = to.t; P.a.playbackRate = from.playbackRate;
+    P.a.currentTime = Math.min(t0, Math.max(0, to.t.dur - .05)); if (playing) P.a.play().catch(() => {});
+    $("#pdur").textContent = fmt(to.t.dur); $("#cmp").innerHTML = cmpHTML(); syncPlay(); drawP(); showFeedback();
+  }
+  function cmpPicker() {
+    const t = P.t, others = TAKES.filter(x => x.id !== t.id).sort((a, b) => (b.songId === t.songId) - (a.songId === t.songId) || b.at - a.at).slice(0, 40);
+    if (!others.length) { toast("Record another take to compare"); return; }
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><h2 style="margin-bottom:6px">Compare with…</h2>
+      ${others.map(o => `<button class="pick" data-act="cmpset" data-id="${o.id}">${esc(o.name)}<small>${dayLabel(o.at)} · ${fmt(o.dur)}${o.stars ? ` · ${starsTxt(o.stars)}` : ""}</small></button>`).join("")}</div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); });
+    document.body.appendChild(back);
+  }
+  async function setCompare(id) {
+    $(".sheet-back")?.remove(); const o = take(id); if (!o || !P.main) return;
+    if (P.b) { if (P.side === "b") switchSide("a"); P.b.a.pause(); URL.revokeObjectURL(P.b.url); }
+    P.b = await loadAudio(o); if (!P.b) return; $("#cmp").innerHTML = cmpHTML(); analyse(o);
+    toast("Tap A and B while it plays to hear the difference", 3000);
+  }
+  function cmpOff() { if (!P.b) return; if (P.side === "b") switchSide("a"); P.b.a.pause(); URL.revokeObjectURL(P.b.url); P.b = null; $("#cmp").innerHTML = cmpHTML(); showFeedback(); }
   function syncLoop() {
     const b = $("#loopbtn"), c = $("#loopclr"), l = $("#ploop"); if (!b) return;
     b.textContent = P.A == null ? "Set start" : P.B == null ? "Set end" : "Looping"; b.classList.toggle("on", P.A != null);
@@ -695,10 +920,17 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     return `<div class="eyebrow">Before you play</div><h1 style="margin-top:4px">Tune</h1>
       <div class="card tuner" style="margin-top:16px"><div class="note" id="tnote">–</div>
         <div class="gauge"><div class="scale"></div>${[-50, -25, 25, 50].map(c => `<div class="tk" style="left:${50 + c}%"></div>`).join("")}<div class="mid"></div><div class="needle" id="needle"></div></div>
-        <div class="cents" id="tcents">${micAllowed ? "Play one string" : ""}</div>
-        <button class="btn amber" id="tunerbtn" data-act="tuner" style="margin-top:10px;${micAllowed ? "display:none" : ""}">Start the tuner</button>
+        <div class="cents" id="tcents">${tunerOn ? "Play one string" : "Tuner off"}</div>
+        <button class="btn amber" id="tunerbtn" data-act="tuner" style="margin-top:10px">${tunerOn ? "Stop the tuner" : "Start the tuner"}</button>
         <div class="strings">${STRINGS.map(s => `<button data-act="ref" data-v="${s[2]}">${s[0]}<small>${s[0]}${s[1]}</small></button>`).join("")}</div>
         <p class="small muted" style="margin-top:10px">Standard tuning. Tap a string to hear its note.</p></div>
+      <div class="sec"><div class="eyebrow">Drone · sing against it</div><div class="card">
+        <div class="keys">${NOTES.map((nm, i) => `<button class="${S.droneKey === i ? "on" : ""}" data-act="dkey" data-v="${i}">${nm}</button>`).join("")}</div>
+        <div class="row between wrap" style="margin-top:12px;gap:8px"><div class="seg">${[[1, "Low"], [2, "Mid"]].map(([v, l]) => `<button class="${S.droneOct === v ? "on" : ""}" data-act="doct" data-v="${v}">${l}</button>`).join("")}</div>
+          <div class="seg"><button class="${!S.droneFifth ? "on" : ""}" data-act="dfifth" data-v="0">Root</button><button class="${S.droneFifth ? "on" : ""}" data-act="dfifth" data-v="1">Root + fifth</button></div></div>
+        <button class="btn block ${drone.on ? "on" : "amber"}" data-act="drone" id="dronebtn" style="width:100%;margin-top:14px;min-height:50px">${drone.on ? "Stop the drone" : `Start the drone · ${NOTES[S.droneKey]}`}</button>
+        <div class="srow" style="margin-top:12px"><span>Drone volume</span><input type="range" id="dvol" min="0.1" max="1" step="0.05" value="${S.droneVol}" style="width:46%"></div>
+        <p class="small muted">Choose the song’s key. Hold a long note on the root and listen: when you’re out of tune you hear a slow wobble (beating); when it stops, you’re there. Then sing the scale up and down, slowly, against it.</p></div></div>
       <div class="sec"><div class="eyebrow">Metronome</div><div class="card">
         <div class="bpm"><button class="round" data-act="bpm" data-v="-1">−</button><div class="v num" id="bpmv">${S.bpm}<small>BPM</small></div><button class="round" data-act="bpm" data-v="1">+</button></div>
         <input type="range" id="bpmr" min="30" max="240" value="${S.bpm}" aria-label="Tempo">
@@ -756,7 +988,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     const a = el.dataset.act, d = el.dataset;
     if (el.tagName === "BUTTON") { e.preventDefault(); haptic(6); }
     ensureAC();
-    if (a === "mic") { if (await openMic()) { micAllowed = true; } }
+    if (a === "mic") { if (await openMic()) { micAllowed = true; clearTimeout(levelT); levelT = setTimeout(() => { if (recState === "idle" && !tunerOn) closeMic(true); }, 30000); } }
     else if (a === "rec") startRec();
     else if (a === "stop") stopRec();
     else if (a === "pause") pauseRec();
@@ -773,8 +1005,18 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     else if (a === "practise") chooseSong(d.id);
     else if (a === "qplay") { e.stopPropagation(); quickPlay(d.id); }
     else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/takes"; }
+    else if (a === "pmode") { P.mode = d.v; document.querySelectorAll("#pmode button").forEach(b => b.classList.toggle("on", b === el)); drawP(); }
+    else if (a === "cmp") cmpPicker();
+    else if (a === "cmpset") setCompare(d.id);
+    else if (a === "ab") switchSide(d.v);
+    else if (a === "cmpoff") cmpOff();
+    else if (a === "rstar") { const t = take(d.id); if (!t) return; t.stars = t.stars === +d.v ? 0 : +d.v; putTake(t); el.parentElement.querySelectorAll("button").forEach((b, i) => b.classList.toggle("on", i < t.stars)); }
+    else if (a === "drone") { drone.on ? drone.stop() : drone.start(); }
+    else if (a === "dkey") { S.droneKey = +d.v; saveS(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); if (drone.on) drone.start(); else syncDrone(); }
+    else if (a === "doct") { S.droneOct = +d.v; saveS(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); if (drone.on) drone.start(); }
+    else if (a === "dfifth") { S.droneFifth = d.v === "1"; saveS(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); if (drone.on) drone.start(); }
     else if (a === "pplay") { if (!P.a) return; P.a.paused ? P.a.play().catch(() => {}) : P.a.pause(); }
-    else if (a === "seekby") { if (P.a) P.a.currentTime = Math.max(0, Math.min(P.t.dur, P.a.currentTime + +d.v)); }
+    else if (a === "seekby") { if (P.a) P.a.currentTime = Math.max(0, Math.min(P.ta.dur, P.a.currentTime + +d.v)); }
     else if (a === "tomark") { if (P.a) { P.a.currentTime = Math.max(0, +d.v - 2); if (P.a.paused) P.a.play().catch(() => {}); } }
     else if (a === "speed") { if (P.a) { P.a.playbackRate = +d.v; P.a.preservesPitch = true; } el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
     else if (a === "loop") { if (!P.a) return; const c = P.a.currentTime; if (P.A == null) P.A = c; else if (P.B == null) { if (c <= P.A + .3) { toast("Play on a little, then set the end"); return; } P.B = c; P.a.currentTime = P.A; if (P.a.paused) P.a.play().catch(() => {}); } syncLoop(); }
@@ -786,7 +1028,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     else if (a === "deltake") { const t = P.t; if (!t || !confirm(`Delete “${t.name}”?`)) return; TAKES = TAKES.filter(x => x.id !== t.id); await idb.del("takes", t.id); await idb.del("blobs", t.id); if (lastTakeId === t.id) lastTakeId = null; history.length > 1 && navCount ? history.back() : (location.hash = "#/takes"); }
     else if (a === "delsong") { const s = song(d.id); if (!s || !confirm(`Delete “${s.title}”? Its takes are kept as free practice.`)) return; SONGS = SONGS.filter(x => x.id !== s.id); await idb.del("songs", s.id);
       for (const t of TAKES.filter(t => t.songId === s.id)) { t.songId = null; putTake(t); } if (S.curSong === s.id) { S.curSong = null; saveS(); } location.hash = "#/songs"; }
-    else if (a === "tuner") { if (await openMic()) { micAllowed = true; startTuner(); } }
+    else if (a === "tuner") { if (tunerOn) stopTuner(); else { await startTuner(); if (mic) micAllowed = true; } }
     else if (a === "ref") refTone(+d.v);
     else if (a === "bpm") setBpm(S.bpm + +d.v);
     else if (a === "tap") tapTempo();
@@ -814,6 +1056,8 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     if (el.dataset.f) { const s = song(route()[1]); if (!s) return; s[el.dataset.f] = el.dataset.f === "bpm" ? (el.value ? Math.max(30, Math.min(260, +el.value)) : "") : el.value; s.touched = Date.now(); clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); }
     if (el.id === "bpmr") setBpm(+el.value);
     if (el.id === "cvol") { S.clickVol = +el.value; saveS(); }
+    if (el.id === "dvol") { S.droneVol = +el.value; saveS(); if (drone.g) drone.g.gain.setTargetAtTime(S.droneVol, AC.currentTime, .1); }
+    if (el.id === "focus") { const s = song(S.curSong); if (s) { s.focus = el.value; clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); } else { S.focus = el.value; saveS(); } }
   });
   addEventListener("keydown", e => { if (e.target.closest?.("input,textarea")) return; if (e.code === "Space" && route()[0] === "rec") { e.preventDefault(); recState === "idle" ? startRec() : recState === "count" ? cancelCount() : stopRec(); } });
   addEventListener("beforeunload", e => { if (recState === "rec" || recState === "paused") { e.preventDefault(); e.returnValue = ""; } });
@@ -831,7 +1075,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
     const had = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update") || recState !== "idle") return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
   }
-  window.__ws = { S, get TAKES() { return TAKES; }, get SONGS() { return SONGS; }, get recState() { return recState; }, detectPitch, metro };
+  window.__ws = { S, get mic() { return !!mic; }, analyse, feedback, get TAKES() { return TAKES; }, get SONGS() { return SONGS; }, get recState() { return recState; }, detectPitch, metro };
   </script>
 </body>
 </html>
