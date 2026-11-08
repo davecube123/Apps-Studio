@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#12100e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Woodshed">
+  <meta name="description" content="A practice recorder for guitar and voice: record takes, see your level, count in with a metronome, read your lyrics and chords, tune up, and listen back slowly.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Woodshed</title>
+  <style>
+    :root {
+      --bg: #12100e; --card: #1c1916; --card2: #25211d; --ink: #f2ebe1; --ink2: #c4b8a8; --muted: #8a7f72;
+      --line: rgba(255,240,220,.08); --line2: rgba(255,240,220,.15);
+      --rec: #ef4b4b; --rec-soft: rgba(239,75,75,.14); --amber: #f2b45a; --amber-soft: rgba(242,180,90,.13); --green: #86cf8f;
+      --r: 20px; --spring: cubic-bezier(.2,.9,.25,1.15); --ease: cubic-bezier(.2,.7,.2,1);
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { background: var(--bg); }
+    body { margin: 0; min-height: 100vh; color: var(--ink); font: 16px/1.45 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip;
+           background: radial-gradient(110% 50% at 50% -8%, rgba(242,180,90,.08), transparent 60%) no-repeat, var(--bg); }
+    main { max-width: 600px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 112px); }
+    a { color: inherit; }
+    h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -.02em; }
+    h1 { font-size: 30px; line-height: 1.1; } h2 { font-size: 22px; } h3 { font-size: 17px; }
+    p { margin: .4em 0; }
+    .muted { color: var(--muted); } .small { font-size: 13.5px; } .num { font-variant-numeric: tabular-nums; }
+    .eyebrow { font: 700 11px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+    .btn { appearance: none; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); border-radius: 999px; min-height: 42px; padding: 9px 16px;
+           font: 600 14.5px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+           transition: transform .25s var(--spring), background .2s; }
+    .btn:active { transform: scale(.95); transition-duration: .08s; }
+    .btn.sm { min-height: 34px; padding: 6px 13px; font-size: 13px; }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.amber { background: var(--amber); color: #1d1408; border-color: transparent; }
+    .btn.on { background: var(--amber-soft); color: var(--amber); border-color: rgba(242,180,90,.35); }
+    .btn.danger { color: var(--rec); }
+    .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .seg { display: inline-flex; background: rgba(255,255,255,.05); border-radius: 999px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+    .seg button { border: 0; background: transparent; color: var(--ink2); border-radius: 999px; padding: 7px 13px; font: 600 13px var(--sans); cursor: pointer; }
+    .seg button.on { background: var(--card2); color: var(--ink); box-shadow: 0 0 0 1px var(--line2); }
+    input[type=text], input[type=number], textarea { width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; color: var(--ink);
+           font: 16px var(--sans); padding: 10px 12px; outline: 0; }
+    input:focus, textarea:focus { border-color: rgba(242,180,90,.45); }
+    textarea.chords { font: 15px/1.5 var(--mono); min-height: 260px; resize: vertical; white-space: pre; overflow-x: auto; }
+    label.f { display: block; } label.f > span { display: block; font: 600 12px var(--sans); color: var(--muted); margin: 0 0 5px 2px; letter-spacing: .04em; }
+    .view.enter > * { animation: rise .4s var(--ease) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Record */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .songchip { display: inline-flex; align-items: center; gap: 8px; max-width: 70%; background: var(--card); border: 1px solid var(--line2); border-radius: 999px;
+                padding: 8px 14px 8px 12px; color: var(--ink); font: 600 14.5px var(--sans); cursor: pointer; }
+    .songchip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .songchip svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--amber); stroke-width: 2; }
+    .today { text-align: right; font: 600 12.5px var(--sans); color: var(--muted); }
+    .today b { display: block; color: var(--ink); font-size: 17px; font-variant-numeric: tabular-nums; }
+    .stage { position: relative; margin-top: 16px; padding: 18px 16px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 26px; overflow: hidden; }
+    .stage.recording { border-color: rgba(239,75,75,.4); box-shadow: 0 0 0 4px var(--rec-soft); }
+    .timer { font: 300 58px/1 var(--sans); letter-spacing: -.03em; text-align: center; font-variant-numeric: tabular-nums; }
+    .timer small { font-size: 26px; color: var(--muted); }
+    .state { text-align: center; font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-top: 6px; height: 14px; }
+    .state.rec { color: var(--rec); } .state.rec::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rec); margin-right: 7px; animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: .2; } }
+    #wave { display: block; width: 100%; height: 92px; margin-top: 12px; }
+    .meter { position: relative; height: 8px; border-radius: 6px; background: rgba(255,255,255,.06); overflow: hidden; margin-top: 10px; }
+    .meter .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #6fbf7a 0%, #6fbf7a 62%, var(--amber) 80%, var(--rec) 96%); background-size: 100% 100%; }
+    .meter .fillmask { position: absolute; inset: 0; background: linear-gradient(90deg, #6fbf7a 0%, #a9c968 60%, var(--amber) 80%, var(--rec) 97%); clip-path: inset(0 100% 0 0); transition: clip-path .05s linear; }
+    .meter .pk { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); left: 0; opacity: .8; }
+    .meter .tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,.5); }
+    .lvl { display: flex; justify-content: space-between; font: 600 11.5px var(--sans); color: var(--muted); margin-top: 6px; min-height: 16px; }
+    .lvl .warn { color: var(--rec); } .lvl .ok { color: var(--green); }
+    .micgate { text-align: center; padding: 20px 6px 8px; }
+    .countdown { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(18,16,14,.86); font: 200 110px/1 var(--sans); color: var(--amber); animation: fade .2s both; }
+    .countdown small { display: block; font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); text-align: center; margin-top: 10px; }
+    .ctrls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin: 22px 0 6px; }
+    .ctrls > :first-child { justify-self: start; } .ctrls > :last-child { justify-self: end; }
+    .recbtn { width: 84px; height: 84px; border-radius: 50%; border: 4px solid var(--ink); background: transparent; display: grid; place-items: center; cursor: pointer; padding: 0;
+              transition: transform .25s var(--spring); }
+    .recbtn:active { transform: scale(.92); }
+    .recbtn i { display: block; width: 62px; height: 62px; border-radius: 50%; background: var(--rec); transition: all .3s var(--spring); }
+    .recbtn.stop i { width: 30px; height: 30px; border-radius: 7px; }
+    .side { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: 0; color: var(--ink2); font: 600 11.5px var(--sans); cursor: pointer; min-width: 74px; }
+    .side .ic { width: 50px; height: 50px; border-radius: 50%; background: var(--card); border: 1px solid var(--line2); display: grid; place-items: center; }
+    .side.on .ic { background: var(--amber-soft); border-color: rgba(242,180,90,.4); color: var(--amber); }
+    .side svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+    .chip { border: 1px solid var(--line2); background: transparent; color: var(--ink2); border-radius: 999px; padding: 7px 12px; font: 600 12.5px var(--sans); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+    .chip b { color: var(--ink); font-weight: 700; }
+    .dots { display: flex; gap: 6px; justify-content: center; height: 8px; margin-top: 10px; }
+    .dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.12); transition: background .05s; }
+    .dots i.hit { background: var(--amber); } .dots i.hit.acc { background: var(--rec); }
+    .review { margin-top: 18px; display: flex; gap: 12px; align-items: center; animation: rise .35s var(--spring) both; }
+    .lyrics { margin-top: 18px; }
+    .lyrics pre { margin: 10px 0 0; white-space: pre-wrap; font: calc(15px * var(--lz, 1))/1.55 var(--mono); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; overflow-wrap: anywhere; }
+    .lyrics pre .ch { color: var(--amber); font-weight: 700; }
+
+    /* Takes */
+    .stats { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: end; }
+    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 70px; }
+    .bars div { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .bars i { width: 100%; max-width: 26px; border-radius: 5px; background: var(--amber); min-height: 3px; opacity: .85; }
+    .bars i.zero { background: rgba(255,255,255,.08); }
+    .bars span { font: 700 10px var(--sans); color: var(--muted); }
+    .bars div.today span { color: var(--amber); }
+    .big { font: 300 34px/1 var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .day { margin: 22px 2px 6px; }
+    .take { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 10px 6px 10px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .take .pb { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; }
+    .take .pb svg { width: 18px; height: 18px; fill: currentColor; }
+    .take .pb.playing { background: var(--amber); color: #1d1408; border-color: transparent; }
+    .take .nm { font: 600 15.5px var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .take .meta { font: 500 12.5px var(--sans); color: var(--muted); display: flex; gap: 8px; align-items: center; }
+    .take canvas { display: block; width: 100%; height: 26px; margin-top: 4px; }
+    .stars { color: var(--amber); letter-spacing: 1px; font-size: 12px; }
+    .empty { text-align: center; padding: 50px 16px; color: var(--muted); }
+
+    /* Player */
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); text-decoration: none; font: 500 15px var(--sans); margin: -4px 0 14px -4px;
+            padding: 6px 12px 6px 8px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); cursor: pointer; }
+    .pwave { position: relative; margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 14px 12px 10px; }
+    #pw { display: block; width: 100%; height: 120px; touch-action: none; cursor: pointer; }
+    .ptime { display: flex; justify-content: space-between; font: 600 12.5px var(--sans); color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .pctrls { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 18px 0 8px; }
+    .play { width: 76px; height: 76px; border-radius: 50%; background: var(--ink); color: var(--bg); border: 0; display: grid; place-items: center; cursor: pointer; transition: transform .25s var(--spring); }
+    .play:active { transform: scale(.92); }
+    .play svg { width: 30px; height: 30px; fill: currentColor; }
+    .skip { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 700 13px var(--sans); cursor: pointer; }
+    .srow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .starbtns button { background: none; border: 0; font-size: 26px; color: rgba(255,255,255,.18); cursor: pointer; padding: 0 2px; }
+    .starbtns button.on { color: var(--amber); }
+
+    /* Tools */
+    .tuner { text-align: center; padding: 22px 16px 18px; }
+    .note { font: 300 96px/1 var(--sans); letter-spacing: -.04em; }
+    .note sub { font-size: 28px; color: var(--muted); vertical-align: baseline; margin-left: 2px; }
+    .note.in { color: var(--green); }
+    .gauge { position: relative; height: 54px; margin: 16px 6px 4px; }
+    .gauge .scale { position: absolute; left: 0; right: 0; top: 26px; height: 1px; background: var(--line2); }
+    .gauge .mid { position: absolute; left: 50%; top: 8px; height: 38px; width: 2px; margin-left: -1px; background: var(--green); opacity: .7; border-radius: 2px; }
+    .gauge .tk { position: absolute; top: 20px; height: 13px; width: 1px; background: var(--line2); }
+    .gauge .needle { position: absolute; top: 4px; left: 50%; width: 4px; height: 46px; margin-left: -2px; border-radius: 3px; background: var(--amber); transition: left .12s linear, background .2s; }
+    .gauge .needle.in { background: var(--green); }
+    .cents { font: 600 14px var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; min-height: 20px; }
+    .strings { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 16px; }
+    .strings button { border: 1px solid var(--line2); background: var(--card2); color: var(--ink2); border-radius: 12px; padding: 9px 0 7px; font: 700 15px var(--sans); cursor: pointer; }
+    .strings button small { display: block; font: 600 10px var(--sans); color: var(--muted); }
+    .strings button.near { border-color: rgba(134,207,143,.6); color: var(--green); }
+    .bpm { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 10px 0; }
+    .bpm .v { font: 300 64px/1 var(--sans); font-variant-numeric: tabular-nums; min-width: 120px; text-align: center; }
+    .bpm .v small { display: block; font: 700 11px var(--sans); letter-spacing: .14em; color: var(--muted); margin-top: 4px; }
+    .round { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 400 26px var(--sans); cursor: pointer; }
+    input[type=range] { width: 100%; accent-color: var(--amber); }
+    .sec { margin-top: 26px; }
+    .sec > .eyebrow { margin: 0 2px 10px; }
+
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(420px, calc(100% - 24px));
+               padding: 6px; border-radius: 28px; background: rgba(36,32,28,.82); backdrop-filter: blur(22px) saturate(1.6); -webkit-backdrop-filter: blur(22px) saturate(1.6);
+               border: 1px solid var(--line2); box-shadow: 0 16px 40px rgba(0,0,0,.5); display: flex; }
+    nav.tabs a { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 22px; color: var(--muted);
+                 font: 600 10.5px var(--sans); padding: 7px 0 6px; }
+    nav.tabs a svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--ink); background: rgba(255,255,255,.07); }
+    nav.tabs a.live::after { content: ""; position: absolute; top: 6px; right: calc(50% - 18px); width: 8px; height: 8px; border-radius: 50%; background: var(--rec); animation: blink 1s steps(2) infinite; }
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 96px);
+             background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 18px; font: 600 14px var(--sans); z-index: 60; animation: rise .3s var(--spring) both; }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 55; border: 0; cursor: pointer;
+              background: var(--amber); color: #1d1408; padding: 11px 20px; border-radius: 999px; font: 700 14px var(--sans); }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
+    .sheet { width: min(520px, 100%); background: var(--card); border-radius: 26px 26px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); max-height: 85vh; overflow-y: auto;
+             animation: up .4s var(--spring) both; border-top: 1px solid var(--line2); }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 16px; }
+    @keyframes up { from { transform: translateY(100%); } to { transform: none; } }
+    .pick { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line);
+            color: var(--ink); padding: 14px 4px; font: 600 16px var(--sans); cursor: pointer; }
+    .pick small { color: var(--muted); font-weight: 500; font-size: 12.5px; }
+    .pick.on { color: var(--amber); }
+    .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--amber-soft); color: var(--amber); font: 700 12.5px/24px var(--sans); text-align: center; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs">
+    <a href="#/" data-tab="rec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>Record</a>
+    <a href="#/takes" data-tab="takes"><svg viewBox="0 0 24 24"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg>Takes</a>
+    <a href="#/songs" data-tab="songs"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Songs</a>
+    <a href="#/tools" data-tab="tools"><svg viewBox="0 0 24 24"><path d="M12 3v9M8 21l4-9 4 9M6 21h12"/><path d="M15 7l3-2"/></svg>Tune</a>
+  </nav>
+  <script>
+  "use strict";
+  const APP_VERSION = "1", APP_DATE = "8 Nov 2026";
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5;
+  const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  function toast(m, ms = 2600) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+  const fmt = (s, tenths) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60), r = s - m * 60; return tenths ? `${m}:${String(Math.floor(r)).padStart(2, "0")}<small>.${Math.floor((r % 1) * 10)}</small>` : `${m}:${String(Math.floor(r)).padStart(2, "0")}`; };
+  const fmtMin = s => { const m = Math.round(s / 60); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`; };
+  const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+  const ICON = {
+    play: `<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>`, pause: `<svg viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>`,
+    metro: `<svg viewBox="0 0 24 24"><path d="M9 3h6l3 18H6z"/><path d="M12 15l5-8"/></svg>`, text: `<svg viewBox="0 0 24 24"><path d="M4 6h16M4 11h16M4 16h10"/></svg>`,
+    flag: `<svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>`, pauseO: `<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>`, rec: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg>`,
+    music: `<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>`,
+  };
+
+  /* ---------- Settings (small, in localStorage) ---------- */
+  const SKEY = "woodshed";
+  const S = Object.assign({ bpm: 80, beats: 4, countIn: 1, clickDuring: false, clickVol: .7, boost: 0, voice: false, a4: 440, curSong: null, lyrics: true, lz: 1 },
+    (() => { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } })());
+  const saveS = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- Recordings and songs (IndexedDB: audio can be large) ---------- */
+  const idb = (() => {
+    let dbp;
+    const open = () => dbp ||= new Promise((res, rej) => {
+      const r = indexedDB.open("woodshed", 1);
+      r.onupgradeneeded = () => { const d = r.result; d.createObjectStore("takes", { keyPath: "id" }); d.createObjectStore("blobs", { keyPath: "id" }); d.createObjectStore("songs", { keyPath: "id" }); };
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+    const run = async (store, mode, fn) => { const d = await open(); return new Promise((res, rej) => { const t = d.transaction(store, mode), q = fn(t.objectStore(store)); t.oncomplete = () => res(q?.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); }); };
+    return { all: s => run(s, "readonly", st => st.getAll()), get: (s, k) => run(s, "readonly", st => st.get(k)), put: (s, v) => run(s, "readwrite", st => st.put(v)), del: (s, k) => run(s, "readwrite", st => st.delete(k)) };
+  })();
+  let TAKES = [], SONGS = [];
+  const song = id => SONGS.find(s => s.id === id);
+  const take = id => TAKES.find(t => t.id === id);
+  const songTakes = id => TAKES.filter(t => t.songId === id);
+  const putTake = t => idb.put("takes", t).catch(() => toast("Couldn’t save. Is the phone’s storage full?"));
+  const putSong = s => idb.put("songs", s).catch(() => {});
+
+  /* ---------- Audio: one context; the mic goes through a gain stage to the recorder and the meter ---------- */
+  let AC = null, mic = null, src, gainN, analyser, dest, micErr = null, buf;
+  function ensureAC() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" }); if (AC.state === "suspended") AC.resume().catch(() => {}); return AC; }
+  const dbGain = db => Math.pow(10, db / 20);
+  async function openMic() {
+    if (mic) { ensureAC(); return true; }
+    if (!navigator.mediaDevices?.getUserMedia) { micErr = "unsupported"; return false; }
+    try {
+      /* Phones clean up voices by default (echo cancellation, noise suppression, automatic gain). On a guitar
+         those squash the sound and pump the volume, so the default here is the raw microphone. */
+      const clean = !!S.voice;
+      mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: clean, noiseSuppression: clean, autoGainControl: clean, channelCount: 1 } });
+    } catch (e) { micErr = e.name || "error"; refreshStage(); return false; }
+    micErr = null; ensureAC();
+    src = AC.createMediaStreamSource(mic); gainN = AC.createGain(); gainN.gain.value = dbGain(S.boost);
+    analyser = AC.createAnalyser(); analyser.fftSize = 4096; analyser.smoothingTimeConstant = 0; buf = new Float32Array(analyser.fftSize);
+    dest = AC.createMediaStreamDestination(); dest.channelCount = 1; dest.channelCountMode = "explicit";
+    src.connect(gainN); gainN.connect(analyser); gainN.connect(dest);
+    mic.getAudioTracks()[0]?.addEventListener("ended", () => { if (recState !== "idle") stopRec(); closeMic(true); toast("The microphone was disconnected"); });
+    refreshStage(); return true;
+  }
+  function closeMic(force) {
+    if (!mic || (!force && recState !== "idle") || tunerOn) return;
+    mic.getTracks().forEach(t => t.stop()); mic = null;
+    try { src.disconnect(); gainN.disconnect(); } catch (e) {}
+  }
+
+  /* ---------- Metronome: clicks scheduled ahead on the audio clock ---------- */
+  const metro = { on: false, next: 0, beat: 0, timer: null, beatCb: null,
+    start(t0) { ensureAC(); this.on = true; this.next = t0 ?? AC.currentTime + .08; this.beat = 0; clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 25); this.tick(); syncMetroUI(); },
+    stop() { this.on = false; clearInterval(this.timer); syncMetroUI(); },
+    tick() {
+      const spb = 60 / S.bpm;
+      while (this.next < AC.currentTime + .12) {
+        const acc = this.beat % S.beats === 0, t = this.next, b = this.beat;
+        click(t, acc); setTimeout(() => onBeat(b, acc), Math.max(0, (t - AC.currentTime) * 1000));
+        this.next += spb; this.beat++;
+      }
+    } };
+  function click(t, acc) {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = "triangle"; o.frequency.value = acc ? 1760 : 1175;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.001, S.clickVol) * (acc ? 1 : .7), t + .002); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + .08);
+  }
+  function onBeat(b, acc) {
+    document.querySelectorAll(".dots").forEach(d => { const i = d.children[b % S.beats]; if (!i) return; i.classList.add("hit"); i.classList.toggle("acc", acc); setTimeout(() => i.classList.remove("hit", "acc"), 120); });
+    if (recState === "count") { const left = countTotal - b; const c = $("#cd"); if (c && left > 0) c.firstChild.textContent = left; }
+  }
+  function syncMetroUI() { document.querySelectorAll("[data-act=metro]").forEach(b => b.classList.toggle("on", metro.on)); const t = $("#metrobig"); if (t) t.textContent = metro.on ? "Stop" : "Start"; }
+  const dotsHTML = () => `<div class="dots">${Array.from({ length: S.beats }, () => "<i></i>").join("")}</div>`;
+  let taps = [];
+  function tapTempo() {
+    const now = performance.now(); taps = taps.filter(t => now - t < 2500); taps.push(now);
+    if (taps.length >= 3) { const iv = []; for (let i = 1; i < taps.length; i++) iv.push(taps[i] - taps[i - 1]); setBpm(Math.round(60000 / (iv.reduce((a, b) => a + b) / iv.length))); }
+  }
+  function setBpm(v) { S.bpm = Math.max(30, Math.min(260, Math.round(v))); saveS(); const el = $("#bpmv"); if (el) el.firstChild.textContent = S.bpm; const r = $("#bpmr"); if (r) r.value = S.bpm; const c = $("#bpmchip"); if (c) c.textContent = S.bpm; }
+
+  /* ---------- Recording ---------- */
+  let finalDur = 0, recState = "idle", rec = null, chunks = [], recStart = 0, pausedAt = 0, pausedTotal = 0, peaks = [], marks = [], countTotal = 0, countTimer = null, wake = null, lastTakeId = null, metroWas = false;
+  const elapsed = () => recState === "saving" ? finalDur : recState === "idle" || recState === "count" ? 0 : (((recState === "paused" ? pausedAt : performance.now()) - recStart - pausedTotal) / 1000);
+  const pickMime = () => ["audio/webm;codecs=opus", "audio/mp4", "audio/ogg;codecs=opus", "audio/webm"].find(m => window.MediaRecorder?.isTypeSupported?.(m)) || "";
+  async function startRec() {
+    if (!window.MediaRecorder) { toast("This browser can’t record audio. Try Chrome."); return; }
+    if (!(await openMic())) return;
+    ensureAC(); await AC.resume().catch(() => {});
+    haptic(12); metroWas = metro.on;
+    const n = S.countIn * S.beats;
+    if (n > 0) {
+      recState = "count"; countTotal = n;
+      const spb = 60 / S.bpm, t0 = AC.currentTime + .25; metro.start(t0);
+      refreshStage(); refreshCtrls();
+      countTimer = setTimeout(() => { countTimer = null; if (recState !== "count") return; beginRec(); if (!S.clickDuring && !metroWas) metro.stop(); }, (t0 + n * spb - AC.currentTime) * 1000 - 30);
+    } else beginRec();
+  }
+  function beginRec() {
+    const mime = pickMime();
+    try { rec = new MediaRecorder(dest.stream, mime ? { mimeType: mime, audioBitsPerSecond: 160000 } : {}); }
+    catch (e) { rec = new MediaRecorder(dest.stream); }
+    chunks = []; peaks = []; marks = []; pausedTotal = 0; peakAcc = 0;
+    rec.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
+    rec.onstop = finishTake;
+    rec.start(1000); recStart = performance.now(); recState = "rec"; lastPeakT = recStart;
+    getWake(); refreshStage(); refreshCtrls(); syncTabs();
+  }
+  function cancelCount() { clearTimeout(countTimer); countTimer = null; recState = "idle"; if (!metroWas) metro.stop(); refreshStage(); refreshCtrls(); }
+  function pauseRec() {
+    if (recState === "rec") { rec.pause(); pausedAt = performance.now(); recState = "paused"; }
+    else if (recState === "paused") { rec.resume(); pausedTotal += performance.now() - pausedAt; recState = "rec"; }
+    haptic(8); refreshStage(); refreshCtrls();
+  }
+  function stopRec() {
+    if (!rec || (recState !== "rec" && recState !== "paused")) return;
+    finalDur = elapsed(); recState = "saving"; haptic([10, 40, 10]);
+    try { rec.stop(); } catch (e) { finishTake(); }
+    if (metro.on && !metroWas) metro.stop();
+  }
+  async function finishTake() {
+    const mime = rec?.mimeType || pickMime() || "audio/webm";
+    const blob = new Blob(chunks, { type: mime }); chunks = [];
+    recState = "idle"; releaseWake(); syncTabs();
+    if (finalDur < .6 || !blob.size) { refreshStage(); refreshCtrls(); toast("Too short to keep"); return; }
+    const sid = S.curSong && song(S.curSong) ? S.curSong : null;
+    const n = TAKES.filter(t => t.songId === sid).length + 1;
+    const t = { id: uid(), songId: sid, at: Date.now(), dur: finalDur, mime, size: blob.size, name: `${sid ? song(sid).title : "Practice"} · take ${n}`, stars: 0, note: "", marks: [...marks], peaks: peaks.slice() };
+    TAKES.push(t); lastTakeId = t.id;
+    await idb.put("blobs", { id: t.id, blob }).catch(() => {}); await putTake(t);
+    navigator.storage?.persist?.().catch(() => {});
+    refreshStage(); refreshCtrls(); refreshReview(); refreshToday();
+  }
+  async function getWake() { try { wake = await navigator.wakeLock?.request("screen"); } catch (e) {} }
+  function releaseWake() { try { wake?.release(); } catch (e) {} wake = null; }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && recState !== "idle" && !wake) getWake();
+    if (document.visibilityState === "visible" && micAllowed && !mic) { const v = route()[0]; if (v === "rec") openMic(); else if (v === "tools") startTuner(); }
+    if (document.visibilityState === "hidden" && recState === "idle") { if (tunerOn) stopTuner(); closeMic(); }
+  });
+
+  /* ---------- The live loop: meter, waveform, peaks for the take, tuner ---------- */
+  let live = [], peakAcc = 0, lastPeakT = 0, peakHold = 0, peakHoldT = 0, clipT = 0, frame = 0;
+  const LIVE_N = 120, PEAK_MS = 50;
+  function loop() {
+    requestAnimationFrame(loop);
+    if (!mic || !analyser) return;
+    analyser.getFloatTimeDomainData(buf);
+    let pk = 0; for (let i = buf.length - 1024; i < buf.length; i++) { const a = Math.abs(buf[i]); if (a > pk) pk = a; }
+    const now = performance.now();
+    peakAcc = Math.max(peakAcc, pk);
+    if (now - lastPeakT >= PEAK_MS) {
+      lastPeakT = now; live.push(peakAcc); if (live.length > LIVE_N) live.shift();
+      if (recState === "rec") peaks.push(Math.min(255, Math.round(peakAcc * 255)));
+      peakAcc = 0;
+    }
+    if (pk >= .985) clipT = now;
+    if (pk > peakHold || now - peakHoldT > 1500) { peakHold = pk; peakHoldT = now; }
+    if (frame++ % 2 === 0) drawLive(pk);
+    if (tunerOn && frame % 4 === 0) tunerStep();
+  }
+  const dbOf = a => 20 * Math.log10(Math.max(a, 1e-6));
+  const pos = a => Math.max(0, Math.min(1, (dbOf(a) + 60) / 60));
+  function drawLive(pk) {
+    const t = $("#timer"); if (t) t.innerHTML = fmt(elapsed(), true);
+    const f = $("#mfill"); if (!f) return;
+    f.style.clipPath = `inset(0 ${(1 - pos(pk)) * 100}% 0 0)`; $("#mpk").style.left = `calc(${pos(peakHold) * 100}% - 2px)`;
+    const lv = $("#lvl");
+    if (lv) { const clip = performance.now() - clipT < 2000, db = dbOf(peakHold);
+      lv.innerHTML = clip ? `<span class="warn">Too loud: back off the mic or lower the boost</span><span class="warn">CLIP</span>`
+        : `<span class="${db > -18 ? "ok" : ""}">${db < -45 ? "Very quiet: play, or raise the boost in Tune" : db > -18 ? "Good level" : "Level"}</span><span class="num">${db < -59 ? "−∞" : Math.round(db)} dB</span>`; }
+    const cv = $("#wave"); if (!cv) return;
+    const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, n = LIVE_N, bw = W / n;
+    ctx.fillStyle = recState === "rec" ? "#ef4b4b" : recState === "paused" ? "#6b625a" : "#f2b45a";
+    const start = n - live.length;
+    for (let i = 0; i < live.length; i++) { const v = Math.max(.02, Math.sqrt(live[i])) * H * .92; ctx.fillRect((start + i) * bw + bw * .2, (H - v) / 2, Math.max(1, bw * .6), v); }
+  }
+  function fitCanvas(cv) {
+    const d = Math.min(2, devicePixelRatio || 1), w = Math.round(cv.clientWidth * d), h = Math.round(cv.clientHeight * d);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const ctx = cv.getContext("2d"); ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, cv.clientWidth, cv.clientHeight); return ctx;
+  }
+  /* A take's whole waveform, with what has been played, markers and the A-B loop. */
+  function drawTake(cv, t, { prog = -1, a = null, b = null } = {}) {
+    const ctx = fitCanvas(cv), W = cv.clientWidth, H = cv.clientHeight, p = t.peaks || [], n = Math.max(1, Math.min(p.length, Math.floor(W / 2.5)));
+    if (a != null) { const x0 = a / t.dur * W, x1 = (b ?? t.dur) / t.dur * W; ctx.fillStyle = "rgba(242,180,90,.13)"; ctx.fillRect(x0, 0, Math.max(2, x1 - x0), H); }
+    for (let i = 0; i < n; i++) {
+      let m = 0; const s = Math.floor(i * p.length / n), e = Math.max(s + 1, Math.floor((i + 1) * p.length / n)); for (let j = s; j < e; j++) m = Math.max(m, p[j] || 0);
+      const v = Math.max(.03, Math.sqrt(m / 255)) * H * .9, x = i * W / n;
+      ctx.fillStyle = prog >= 0 && x / W <= prog ? "#f2b45a" : "rgba(242,235,225,.32)";
+      ctx.fillRect(x + .4, (H - v) / 2, Math.max(1, W / n - 1), v);
+    }
+    ctx.fillStyle = "#ef4b4b"; (t.marks || []).forEach(m => { const x = m / t.dur * W; ctx.fillRect(x - 1, 0, 2, H); ctx.beginPath(); ctx.arc(x, 4, 3.5, 0, 7); ctx.fill(); });
+    if (prog >= 0) { ctx.fillStyle = "#f2ebe1"; ctx.fillRect(prog * W - 1, 0, 2, H); }
+  }
+
+  /* ---------- Tuner (McLeod pitch method on the live microphone) ---------- */
+  let tunerOn = false, fHist = [];
+  const NOTES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+  const STRINGS = [["E", 2, 40], ["A", 2, 45], ["D", 3, 50], ["G", 3, 55], ["B", 3, 59], ["E", 4, 64]];
+  function detectPitch(x, sr) {
+    const N = x.length; let ms = 0; for (let i = 0; i < N; i++) ms += x[i] * x[i];
+    if (Math.sqrt(ms / N) < .006) return null;
+    const minLag = Math.floor(sr / 1100), maxLag = Math.min(Math.floor(N / 2), Math.ceil(sr / 60)), nsdf = new Float32Array(maxLag + 2);
+    for (let t = minLag; t <= maxLag + 1; t++) { let ac = 0, m = 0; for (let i = 0; i < N - t; i++) { const a = x[i], b = x[i + t]; ac += a * b; m += a * a + b * b; } nsdf[t] = m ? 2 * ac / m : 0; }
+    let t = minLag; while (t < maxLag && nsdf[t] > 0) t++;
+    const pk = []; for (; t <= maxLag; t++) if (nsdf[t] > 0 && nsdf[t] >= nsdf[t - 1] && nsdf[t] >= nsdf[t + 1]) pk.push(t);
+    if (!pk.length) return null;
+    const mx = Math.max(...pk.map(p => nsdf[p])), p = pk.find(q => nsdf[q] >= .9 * mx);
+    if (nsdf[p] < .6) return null;
+    const a = nsdf[p - 1], b = nsdf[p], c = nsdf[p + 1], d = a - 2 * b + c, sh = d ? (a - c) / (2 * d) : 0;
+    return sr / (p + (Math.abs(sh) < 1 ? sh : 0));
+  }
+  function tunerStep() {
+    const f = detectPitch(buf.subarray(buf.length - 2048), AC.sampleRate), el = $("#tnote"); if (!el) return;
+    if (!f) { if (fHist.length && performance.now() - (tunerStep.last || 0) > 1200) { fHist = []; showPitch(null); } return; }
+    tunerStep.last = performance.now();
+    if (fHist.length && Math.abs(12 * Math.log2(f / fHist[fHist.length - 1])) > .7) fHist = [];
+    fHist.push(f); if (fHist.length > 5) fHist.shift();
+    const s = [...fHist].sort((a, b) => a - b); showPitch(s[Math.floor(s.length / 2)]);
+  }
+  function showPitch(f) {
+    const el = $("#tnote"), nd = $("#needle"), ce = $("#tcents"); if (!el) return;
+    if (!f) { el.innerHTML = "–"; el.className = "note"; nd.style.left = "50%"; nd.className = "needle"; ce.textContent = "Play one string"; document.querySelectorAll(".strings button").forEach(b => b.classList.remove("near")); return; }
+    const m = 12 * Math.log2(f / S.a4) + 69, n = Math.round(m), cents = Math.round((m - n) * 100), inT = Math.abs(cents) <= 5;
+    el.innerHTML = `${NOTES[((n % 12) + 12) % 12]}<sub>${Math.floor(n / 12) - 1}</sub>`; el.className = "note" + (inT ? " in" : "");
+    nd.style.left = `${50 + Math.max(-50, Math.min(50, cents))}%`; nd.className = "needle" + (inT ? " in" : "");
+    ce.textContent = inT ? `In tune · ${f.toFixed(1)} Hz` : `${cents > 0 ? "+" : "−"}${Math.abs(cents)} cents ${cents > 0 ? "sharp" : "flat"} · ${f.toFixed(1)} Hz`;
+    const near = STRINGS.reduce((best, s, i) => Math.abs(s[2] - m) < Math.abs(STRINGS[best][2] - m) ? i : best, 0);
+    document.querySelectorAll(".strings button").forEach((b, i) => b.classList.toggle("near", i === near && Math.abs(STRINGS[near][2] - m) < 2.5));
+  }
+  async function startTuner() { if (!(await openMic())) return; tunerOn = true; fHist = []; showPitch(null); const b = $("#tunerbtn"); if (b) b.style.display = "none"; }
+  function stopTuner() { tunerOn = false; }
+  function refTone(midi) {
+    ensureAC(); const f = S.a4 * Math.pow(2, (midi - 69) / 12), t = AC.currentTime + .02;
+    [1, 2, 3].forEach((h, k) => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = f * h; o.type = "sine";
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime([.35, .12, .05][k], t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + 2.4);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 2.5); });
+  }
+
+  /* ---------- Views ---------- */
+  let lastHash = "";
+  function route() {
+    const h = location.hash || "#/";
+    if (h.startsWith("#/take/")) return ["take", h.split("/")[2]];
+    if (h.startsWith("#/song/")) return ["song", h.split("/")[2]];
+    if (h.startsWith("#/takes")) return ["takes"]; if (h.startsWith("#/songs")) return ["songs"]; if (h.startsWith("#/tools")) return ["tools"];
+    return ["rec"];
+  }
+  function render() {
+    const [v, id] = route(), h = location.hash || "#/", nav = h !== lastHash;
+    if (nav) leavePlayer();
+    let html;
+    if (v === "take") html = viewTake(id); else if (v === "song") html = viewSong(id); else if (v === "takes") html = viewTakes();
+    else if (v === "songs") html = viewSongs(); else if (v === "tools") html = viewTools(); else html = viewRec();
+    if (html == null) return;
+    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    const tab = { take: "takes", song: "songs" }[v] || v;
+    document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+    if (nav) scrollTo(0, 0); lastHash = h;
+    if (v !== "tools" && tunerOn) stopTuner();
+    if (v !== "rec" && v !== "tools") closeMic();
+    if (v === "rec" && !mic && micAllowed) openMic();
+    if (v === "takes" || v === "song") drawMinis();
+    if (v === "take") mountPlayer(id);
+    if (v === "tools" && micAllowed) startTuner();
+    syncMetroUI(); syncTabs();
+  }
+  addEventListener("hashchange", render);
+  function syncTabs() { $('nav.tabs a[data-tab="rec"]').classList.toggle("live", recState === "rec" || recState === "paused"); }
+
+  /* Record */
+  function todaySecs() { const k = dayKey(Date.now()); return TAKES.filter(t => dayKey(t.at) === k).reduce((a, t) => a + t.dur, 0); }
+  function viewRec() {
+    const s = song(S.curSong);
+    return `<div class="top"><button class="songchip" data-act="pick">${ICON.music}<span>${s ? esc(s.title) : "Free practice"}</span><svg viewBox="0 0 24 24" style="stroke:var(--muted)"><path d="M7 10l5 5 5-5"/></svg></button>
+        <div class="today" id="today"><b>${fmtMin(todaySecs())}</b>today</div></div>
+      <div class="stage" id="stage">${stageHTML()}</div>
+      <div class="ctrls" id="ctrls">${ctrlsHTML()}</div>
+      ${dotsHTML()}
+      <div class="chips"><button class="chip" data-act="countin">Count-in <b>${["off", "1 bar", "2 bars"][S.countIn]}</b></button>
+        <a class="chip" href="#/tools">♩ = <b id="bpmchip">${S.bpm}</b> · ${S.beats}/4</a>
+        <button class="chip" data-act="clickduring">Click in take <b>${S.clickDuring ? "on" : "off"}</b></button></div>
+      <div id="review">${reviewHTML()}</div>
+      ${s?.lyrics ? `<div class="lyrics" style="--lz:${S.lz}"><div class="row between"><div class="eyebrow">Lyrics and chords</div>
+          <div class="row" style="gap:4px"><button class="btn ghost sm" data-act="lz" data-v="-1">A−</button><button class="btn ghost sm" data-act="lz" data-v="1">A+</button><button class="btn ghost sm" data-act="lyrics">${S.lyrics ? "Hide" : "Show"}</button></div></div>
+          ${S.lyrics ? `<pre>${chordify(s.lyrics)}</pre>` : ""}</div>` : s ? `<p class="small muted" style="text-align:center;margin-top:18px"><a href="#/song/${s.id}">Add the lyrics and chords</a> to read them while you play.</p>` : ""}`;
+  }
+  /* Lines that are only chords (G, Am7, D/F#…) are coloured, so they stand out above the words. */
+  const CHORD = /^(?:[A-G](?:#|b|♯|♭)?(?:maj|min|m|dim|aug|sus|add|M)?\d*(?:\/[A-G](?:#|b)?)?|\||x\d|N\.C\.)$/;
+  const chordify = txt => txt.split("\n").map(l => { const w = l.trim().split(/\s+/).filter(Boolean); return w.length && w.every(x => CHORD.test(x)) ? `<span class="ch">${esc(l)}</span>` : esc(l); }).join("\n");
+  function stageHTML() {
+    if (!mic) {
+      const msg = micErr === "NotAllowedError" ? `Microphone access is blocked. Allow it in the browser’s site settings (the icon left of the address), then tap below.`
+        : micErr === "NotFoundError" ? "No microphone found." : micErr === "unsupported" ? "This browser can’t use the microphone here." : "Check your level before you record.";
+      return `<div class="micgate"><div class="timer" style="font-size:44px;color:var(--muted)">0:00</div><p class="muted small" style="margin:12px 0 14px">${msg}</p>
+        <button class="btn amber" data-act="mic">${ICON.rec} Turn on the microphone</button></div>`;
+    }
+    const st = recState === "rec" ? "Recording" : recState === "paused" ? "Paused" : recState === "count" ? "Count-in" : recState === "saving" ? "Saving" : "Ready";
+    return `<div class="timer" id="timer">${fmt(elapsed(), true)}</div><div class="state ${recState === "rec" ? "rec" : ""}">${st}</div>
+      <canvas id="wave"></canvas>
+      <div class="meter"><div class="fillmask" id="mfill"></div><div class="tick" style="left:70%"></div><div class="tick" style="left:90%"></div><div class="pk" id="mpk"></div></div>
+      <div class="lvl" id="lvl"></div>
+      ${recState === "count" ? `<div class="countdown" id="cd">${countTotal}<small>Count-in · ${S.bpm} bpm</small></div>` : ""}`;
+  }
+  function ctrlsHTML() {
+    if (recState === "rec" || recState === "paused") return `<button class="side" data-act="mark"><span class="ic">${ICON.flag}</span>Mark</button>
+      <button class="recbtn stop" data-act="stop" aria-label="Stop"><i></i></button>
+      <button class="side${recState === "paused" ? " on" : ""}" data-act="pause"><span class="ic">${recState === "paused" ? ICON.rec : ICON.pauseO}</span>${recState === "paused" ? "Resume" : "Pause"}</button>`;
+    if (recState === "count") return `<span></span><button class="recbtn stop" data-act="cancelcount" aria-label="Cancel"><i style="background:var(--muted)"></i></button><span></span>`;
+    const s = song(S.curSong);
+    return `<button class="side${metro.on ? " on" : ""}" data-act="metro"><span class="ic">${ICON.metro}</span>Click</button>
+      <button class="recbtn" data-act="rec" aria-label="Record"><i></i></button>
+      <a class="side" href="${s ? `#/song/${s.id}` : "#/songs"}"><span class="ic">${ICON.text}</span>${s ? "Song" : "Songs"}</a>`;
+  }
+  function reviewHTML() {
+    const t = take(lastTakeId); if (!t || recState !== "idle") return "";
+    return `<div class="card review">
+      <button class="skip" data-act="qplay" data-id="${t.id}" style="flex:none;width:46px;height:46px" aria-label="Play">${quick.id === t.id && !quick.a?.paused ? ICON.pause : ICON.play}</button>
+      <div class="grow"><div style="font-weight:650">Saved · ${esc(t.name)}</div><div class="small muted">${fmt(t.dur)}${t.marks.length ? ` · ${t.marks.length} mark${t.marks.length > 1 ? "s" : ""}` : ""}</div></div>
+      <a class="btn sm" href="#/take/${t.id}">Open</a></div>`;
+  }
+  function refreshStage() { const s = $("#stage"); if (!s) return; s.innerHTML = stageHTML(); s.classList.toggle("recording", recState === "rec"); }
+  function refreshCtrls() { const c = $("#ctrls"); if (c) c.innerHTML = ctrlsHTML(); syncMetroUI(); }
+  function refreshReview() { const r = $("#review"); if (r) r.innerHTML = reviewHTML(); }
+  function refreshToday() { const t = $("#today"); if (t) t.innerHTML = `<b>${fmtMin(todaySecs())}</b>today`; }
+
+  function songPicker() {
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><h2 style="margin-bottom:6px">What are you practising?</h2>
+      <button class="pick${!S.curSong ? " on" : ""}" data-act="choose" data-id="">Free practice <small>no song</small></button>
+      ${[...SONGS].sort((a, b) => (b.touched || 0) - (a.touched || 0)).map(s => `<button class="pick${S.curSong === s.id ? " on" : ""}" data-act="choose" data-id="${s.id}">${esc(s.title)}
+        <small>${[s.key && `key ${esc(s.key)}`, s.capo && `capo ${esc(s.capo)}`, s.bpm && `${s.bpm} bpm`, `${songTakes(s.id).length} takes`].filter(Boolean).join(" · ")}</small></button>`).join("")}
+      <button class="btn block" data-act="newsong" style="width:100%;margin-top:14px">+ New song</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); });
+    document.body.appendChild(back);
+  }
+  function chooseSong(id) {
+    S.curSong = id || null; const s = song(id); if (s) { s.touched = Date.now(); putSong(s); if (s.bpm) S.bpm = +s.bpm; }
+    saveS(); $(".sheet-back")?.remove(); if (route()[0] === "rec") render(); else location.hash = "#/";
+  }
+
+  /* Takes */
+  function viewTakes() {
+    const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 6 + i); return d; });
+    const secs = days.map(d => TAKES.filter(t => dayKey(t.at) === dayKey(d)).reduce((a, t) => a + t.dur, 0)), mx = Math.max(60, ...secs);
+    const week = secs.reduce((a, b) => a + b, 0);
+    const has = d => TAKES.some(t => dayKey(t.at) === dayKey(d)), d = new Date(); let streak = 0;
+    if (!has(d)) d.setDate(d.getDate() - 1);
+    while (has(d) && streak < 3650) { streak++; d.setDate(d.getDate() - 1); }
+    const sorted = [...TAKES].sort((a, b) => b.at - a.at);
+    let lastDay = "", list = "";
+    for (const t of sorted) { const k = dayKey(t.at); if (k !== lastDay) { lastDay = k; list += `<div class="eyebrow day">${dayLabel(t.at)}</div>`; } list += takeRow(t); }
+    return `<div class="eyebrow">Your practice</div><h1 style="margin-top:4px">Takes</h1>
+      <div class="card stats" style="margin-top:16px"><div><div class="bars">${days.map((d, i) => `<div class="${i === 6 ? "today" : ""}"><i class="${secs[i] ? "" : "zero"}" style="height:${secs[i] ? Math.max(6, secs[i] / mx * 100) : 4}%"></i><span>${"SMTWTFS"[d.getDay()]}</span></div>`).join("")}</div></div>
+        <div style="text-align:right"><div class="big">${fmtMin(week)}</div><div class="small muted">this week</div><div style="margin-top:10px;font-weight:650">${streak} day${streak === 1 ? "" : "s"}</div><div class="small muted">streak</div></div></div>
+      ${TAKES.length ? list : `<div class="empty"><p style="font-size:18px;color:var(--ink2)">No takes yet.</p><p>Record one, listen back, record again. That’s the whole method.</p><a class="btn amber" href="#/" style="margin-top:10px">Record a take</a></div>`}`;
+  }
+  const dayLabel = t => { const k = dayKey(t); if (k === dayKey(Date.now())) return "Today"; if (k === dayKey(Date.now() - DAY)) return "Yesterday"; return new Date(t).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" }); };
+  const starsTxt = n => n ? "★".repeat(n) : "";
+  function takeRow(t) {
+    const s = song(t.songId);
+    return `<a class="take" href="#/take/${t.id}"><button class="pb${quick.id === t.id && quick.a && !quick.a.paused ? " playing" : ""}" data-act="qplay" data-id="${t.id}" aria-label="Play">${quick.id === t.id && quick.a && !quick.a.paused ? ICON.pause : ICON.play}</button>
+      <div style="min-width:0"><div class="row between"><div class="nm">${esc(t.name)}</div><span class="stars">${starsTxt(t.stars)}</span></div>
+        <div class="meta"><span class="num">${fmt(t.dur)}</span><span>${new Date(t.at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</span>${s ? `<span>${esc(s.title)}</span>` : ""}${t.note ? "<span>· note</span>" : ""}</div>
+        <canvas data-mini="${t.id}"></canvas></div></a>`;
+  }
+  function drawMinis() { requestAnimationFrame(() => document.querySelectorAll("canvas[data-mini]").forEach(c => { const t = take(c.dataset.mini); if (t) drawTake(c, t, { prog: quick.id === t.id ? quick.prog : -1 }); })); }
+
+  /* Quick play from a list */
+  const quick = { id: null, a: null, url: null, prog: -1 };
+  async function quickPlay(id) {
+    if (quick.id === id && quick.a) { quick.a.paused ? quick.a.play() : quick.a.pause(); return; }
+    quickStop(); const rec = await idb.get("blobs", id); if (!rec) { toast("This recording is missing"); return; }
+    quick.id = id; quick.url = URL.createObjectURL(rec.blob); quick.a = new Audio(quick.url);
+    const t = take(id), upd = () => { quick.prog = t ? Math.min(1, quick.a.currentTime / t.dur) : -1; const c = document.querySelector(`canvas[data-mini="${id}"]`); if (c && t) drawTake(c, t, { prog: quick.prog }); };
+    quick.a.addEventListener("timeupdate", upd); quick.a.addEventListener("play", syncQuick); quick.a.addEventListener("pause", syncQuick);
+    quick.a.addEventListener("ended", () => { quick.prog = -1; upd(); syncQuick(); });
+    quick.a.play().catch(() => {});
+  }
+  function quickStop() { if (quick.a) { quick.a.pause(); URL.revokeObjectURL(quick.url); } const old = quick.id; quick.id = null; quick.a = null; quick.prog = -1; if (old) { const c = document.querySelector(`canvas[data-mini="${old}"]`), t = take(old); if (c && t) drawTake(c, t); } syncQuick(); }
+  function syncQuick() {
+    document.querySelectorAll("[data-act=qplay]").forEach(b => { const on = b.dataset.id === quick.id && quick.a && !quick.a.paused; b.innerHTML = on ? ICON.pause : ICON.play; b.classList.toggle("playing", on); });
+  }
+
+  /* One take: the player */
+  const P = { t: null, a: null, url: null, A: null, B: null, raf: 0, drag: false };
+  function viewTake(id) {
+    const t = take(id); if (!t) { location.hash = "#/takes"; return null; }
+    const s = song(t.songId);
+    return `<a class="back" data-act="back">← Back</a>
+      <input type="text" id="tname" value="${esc(t.name)}" style="font:650 22px var(--sans);background:transparent;border-color:transparent;padding:4px 2px" aria-label="Name">
+      <div class="small muted" style="margin:2px 2px 0">${new Date(t.at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} · ${fmt(t.dur)}${s ? ` · <a href="#/song/${s.id}">${esc(s.title)}</a>` : ""}</div>
+      <div class="pwave"><canvas id="pw"></canvas><div class="ptime"><span id="pcur">0:00</span><span id="ploop"></span><span>${fmt(t.dur)}</span></div></div>
+      <div class="pctrls"><button class="skip" data-act="seekby" data-v="-5">−5</button><button class="play" data-act="pplay" id="pplay" aria-label="Play">${ICON.play}</button><button class="skip" data-act="seekby" data-v="5">+5</button></div>
+      ${t.marks.length ? `<div class="row wrap" style="justify-content:center;gap:6px">${t.marks.map((m, i) => `<button class="chip" data-act="tomark" data-v="${m}"><span style="color:var(--rec)">⚑</span> ${fmt(m)}</button>`).join("")}</div>` : ""}
+      <div class="sec"><div class="srow"><span>Speed <span class="small muted">(same pitch)</span></span><div class="seg" id="speed">${[.5, .75, .85, 1].map(v => `<button class="${v === 1 ? "on" : ""}" data-act="speed" data-v="${v}">${v === 1 ? "1×" : v + "×"}</button>`).join("")}</div></div>
+        <div class="srow"><span>Loop a part</span><div class="row" style="gap:6px"><button class="btn sm" data-act="loop" id="loopbtn">Set start</button><button class="btn sm ghost" data-act="loopclear" id="loopclr" style="display:none">Clear</button></div></div>
+        <div class="srow"><span>How was it?</span><div class="starbtns">${[1, 2, 3, 4, 5].map(n => `<button class="${t.stars >= n ? "on" : ""}" data-act="star" data-v="${n}" aria-label="${n} stars">★</button>`).join("")}</div></div></div>
+      <div class="sec"><div class="eyebrow">Notes to self</div><textarea id="tnote" rows="3" placeholder="Rushed the chorus, the bridge is getting there, breathe before the high note…">${esc(t.note)}</textarea></div>
+      <div class="row wrap" style="margin-top:18px;gap:8px"><button class="btn" data-act="share">Share or save</button><button class="btn" data-act="tosong">${s ? "Change song" : "Add to a song"}</button>
+        <button class="btn ghost danger" data-act="deltake" style="margin-left:auto">Delete</button></div>`;
+  }
+  async function mountPlayer(id) {
+    const t = take(id); P.t = t; P.A = P.B = null;
+    const rec = await idb.get("blobs", id); if (!rec || P.t !== t) { if (!rec) toast("This recording is missing"); return; }
+    quickStop();
+    P.url = URL.createObjectURL(rec.blob); P.a = new Audio(P.url); P.a.preload = "auto"; P.a.preservesPitch = true;
+    /* Chrome’s WebM recordings carry no duration, which can stop seeking; asking for a far-off time makes it read the file once. */
+    P.a.addEventListener("loadedmetadata", () => { if (P.a.duration === Infinity) { P.a.currentTime = 1e101; P.a.addEventListener("timeupdate", function f() { P.a.removeEventListener("timeupdate", f); P.a.currentTime = 0; }); } }, { once: true });
+    P.a.addEventListener("play", syncPlay); P.a.addEventListener("pause", syncPlay); P.a.addEventListener("ended", syncPlay);
+    const cv = $("#pw");
+    const seekTo = e => { const r = cv.getBoundingClientRect(); P.a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * t.dur; drawP(); };
+    cv.addEventListener("pointerdown", e => { P.drag = true; cv.setPointerCapture(e.pointerId); seekTo(e); });
+    cv.addEventListener("pointermove", e => { if (P.drag) seekTo(e); });
+    cv.addEventListener("pointerup", () => { P.drag = false; });
+    const tick = () => { if (!P.a) return; P.raf = requestAnimationFrame(tick);
+      if (P.A != null && P.B != null && P.a.currentTime >= P.B) P.a.currentTime = P.A;
+      drawP(); };
+    tick();
+  }
+  function drawP() { const cv = $("#pw"); if (!cv || !P.t || !P.a) return; const cur = P.a.currentTime || 0; drawTake(cv, P.t, { prog: Math.min(1, cur / P.t.dur), a: P.A, b: P.B }); const c = $("#pcur"); if (c) c.textContent = fmt(cur); }
+  function syncPlay() { const b = $("#pplay"); if (b) b.innerHTML = P.a && !P.a.paused ? ICON.pause : ICON.play; }
+  function leavePlayer() { if (P.a) { P.a.pause(); URL.revokeObjectURL(P.url); } cancelAnimationFrame(P.raf); P.a = null; P.t = null; }
+  function syncLoop() {
+    const b = $("#loopbtn"), c = $("#loopclr"), l = $("#ploop"); if (!b) return;
+    b.textContent = P.A == null ? "Set start" : P.B == null ? "Set end" : "Looping"; b.classList.toggle("on", P.A != null);
+    c.style.display = P.A != null ? "" : "none"; l.textContent = P.A != null ? `loop ${fmt(P.A)}–${P.B != null ? fmt(P.B) : "…"}` : "";
+  }
+  async function shareTake(t) {
+    const rec = await idb.get("blobs", t.id); if (!rec) return;
+    const ext = t.mime.includes("mp4") ? "m4a" : t.mime.includes("ogg") ? "ogg" : "webm";
+    const name = `${t.name.replace(/[\\/:*?"<>|]/g, "-")} (${new Date(t.at).toISOString().slice(0, 10)}).${ext}`;
+    const file = new File([rec.blob], name, { type: t.mime.split(";")[0] });
+    if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: t.name }); return; } catch (e) { if (e.name === "AbortError") return; } }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  /* Songs */
+  function viewSongs() {
+    const list = [...SONGS].sort((a, b) => (b.touched || 0) - (a.touched || 0));
+    return `<div class="row between"><div><div class="eyebrow">Your repertoire</div><h1 style="margin-top:4px">Songs</h1></div><button class="btn amber sm" data-act="newsong">+ New song</button></div>
+      ${list.length ? `<div style="margin-top:14px">${list.map(s => { const ts = songTakes(s.id), best = Math.max(0, ...ts.map(t => t.stars)), tot = ts.reduce((a, t) => a + t.dur, 0);
+          return `<a class="pick" href="#/song/${s.id}" style="text-decoration:none"><span>${esc(s.title)}<br><small>${[s.key && `key ${esc(s.key)}`, s.capo && `capo ${esc(s.capo)}`, s.bpm && `${s.bpm} bpm`].filter(Boolean).join(" · ") || "&nbsp;"}</small></span>
+            <small style="text-align:right">${ts.length} take${ts.length === 1 ? "" : "s"}${tot ? `<br>${fmtMin(tot)}` : ""}${best ? `<br><span class="stars">${starsTxt(best)}</span>` : ""}</small></a>`; }).join("")}</div>`
+        : `<div class="empty"><p style="font-size:18px;color:var(--ink2)">No songs yet.</p><p>Add a song you’re learning: its key, capo and tempo, and the lyrics with chords to read while you play. Its takes collect in one place, so you can hear yourself improve.</p></div>`}`;
+  }
+  function viewSong(id) {
+    const s = song(id); if (!s) { location.hash = "#/songs"; return null; }
+    const ts = songTakes(id).sort((a, b) => b.at - a.at);
+    return `<a class="back" data-act="back">← Back</a>
+      <input type="text" data-f="title" value="${esc(s.title)}" placeholder="Song title" style="font:650 24px var(--sans);background:transparent;border-color:transparent;padding:4px 2px">
+      <div class="row" style="gap:8px;margin-top:10px"><label class="f grow"><span>KEY</span><input type="text" data-f="key" value="${esc(s.key || "")}" placeholder="G"></label>
+        <label class="f grow"><span>CAPO</span><input type="text" data-f="capo" value="${esc(s.capo || "")}" placeholder="2" inputmode="numeric"></label>
+        <label class="f grow"><span>BPM</span><input type="number" data-f="bpm" value="${esc(s.bpm || "")}" placeholder="96" inputmode="numeric"></label></div>
+      <button class="btn amber block" data-act="practise" data-id="${s.id}" style="width:100%;margin-top:16px;min-height:52px">${ICON.rec} Practise this song</button>
+      <div class="sec"><div class="eyebrow">Lyrics and chords</div><textarea class="chords" data-f="lyrics" placeholder="[Verse]
+G              D
+Write the words with the chords
+Em             C
+on the line above them…">${esc(s.lyrics || "")}</textarea>
+        <p class="small muted" style="margin:6px 2px 0">Type your own, or paste from your songbook. Lines that are only chords show in colour on the Record screen.</p></div>
+      <div class="sec"><div class="eyebrow">Takes · ${ts.length}</div>${ts.length ? ts.map(takeRow).join("") : `<p class="muted small">No takes yet for this song.</p>`}</div>
+      <div style="margin-top:22px"><button class="btn ghost danger" data-act="delsong" data-id="${s.id}">Delete song</button></div>`;
+  }
+  function newSong() {
+    const s = { id: uid(), title: "New song", key: "", capo: "", bpm: "", lyrics: "", at: Date.now(), touched: Date.now() };
+    SONGS.push(s); putSong(s); $(".sheet-back")?.remove(); location.hash = "#/song/" + s.id;
+    setTimeout(() => { const i = document.querySelector('[data-f="title"]'); if (i) { i.focus(); i.select(); } }, 350);
+  }
+
+  /* Tools */
+  function viewTools() {
+    return `<div class="eyebrow">Before you play</div><h1 style="margin-top:4px">Tune</h1>
+      <div class="card tuner" style="margin-top:16px"><div class="note" id="tnote">–</div>
+        <div class="gauge"><div class="scale"></div>${[-50, -25, 25, 50].map(c => `<div class="tk" style="left:${50 + c}%"></div>`).join("")}<div class="mid"></div><div class="needle" id="needle"></div></div>
+        <div class="cents" id="tcents">${micAllowed ? "Play one string" : ""}</div>
+        <button class="btn amber" id="tunerbtn" data-act="tuner" style="margin-top:10px;${micAllowed ? "display:none" : ""}">Start the tuner</button>
+        <div class="strings">${STRINGS.map(s => `<button data-act="ref" data-v="${s[2]}">${s[0]}<small>${s[0]}${s[1]}</small></button>`).join("")}</div>
+        <p class="small muted" style="margin-top:10px">Standard tuning. Tap a string to hear its note.</p></div>
+      <div class="sec"><div class="eyebrow">Metronome</div><div class="card">
+        <div class="bpm"><button class="round" data-act="bpm" data-v="-1">−</button><div class="v num" id="bpmv">${S.bpm}<small>BPM</small></div><button class="round" data-act="bpm" data-v="1">+</button></div>
+        <input type="range" id="bpmr" min="30" max="240" value="${S.bpm}" aria-label="Tempo">
+        ${dotsHTML()}
+        <div class="row between" style="margin-top:14px"><div class="seg">${[2, 3, 4, 6].map(b => `<button class="${S.beats === b ? "on" : ""}" data-act="beats" data-v="${b}">${b}/4</button>`).join("")}</div>
+          <button class="btn sm" data-act="tap">Tap</button></div>
+        <button class="btn block amber" data-act="metro" style="width:100%;margin-top:14px;min-height:50px"><span id="metrobig">${metro.on ? "Stop" : "Start"}</span></button>
+        <div class="srow" style="margin-top:12px"><span>Click volume</span><input type="range" id="cvol" min="0.05" max="1" step="0.05" value="${S.clickVol}" style="width:46%"></div>
+        <p class="small muted">With headphones the click stays out of your recording. Through the speaker, the microphone will hear it.</p></div></div>
+      <div class="sec"><div class="eyebrow">Recording</div><div class="card">
+        <div class="srow" style="border:0;padding-top:0"><span>Input boost</span><div class="seg">${[0, 6, 12].map(v => `<button class="${S.boost === v ? "on" : ""}" data-act="boost" data-v="${v}">${v ? `+${v} dB` : "Off"}</button>`).join("")}</div></div>
+        <div class="srow"><span>Microphone<br><span class="small muted">${S.voice ? "Phone’s voice clean-up on" : "Raw: best for guitar"}</span></span><div class="seg"><button class="${!S.voice ? "on" : ""}" data-act="voice" data-v="0">Music</button><button class="${S.voice ? "on" : ""}" data-act="voice" data-v="1">Voice</button></div></div>
+        <div class="srow"><span>Tuning reference</span><div class="row" style="gap:6px"><button class="round" style="width:36px;height:36px;font-size:18px" data-act="a4" data-v="-1">−</button><span class="num" id="a4v">A = ${S.a4} Hz</span><button class="round" style="width:36px;height:36px;font-size:18px" data-act="a4" data-v="1">+</button></div></div>
+        <div class="srow"><span>Storage</span><span class="small muted" id="storage">…</span></div>
+        ${isStandalone() ? "" : `<div class="srow"><span>Install on this phone</span><button class="btn sm" data-act="installsheet">Install</button></div>`}
+      </div></div>
+      <p class="small muted" style="text-align:center;margin-top:24px">Woodshed · version ${APP_VERSION} · ${APP_DATE}<br>Your recordings stay on this phone.</p>`;
+  }
+  async function showStorage() { const el = $("#storage"); if (!el) return; const bytes = TAKES.reduce((a, t) => a + (t.size || 0), 0); let txt = `${TAKES.length} takes · ${(bytes / 1048576).toFixed(1)} MB`;
+    try { const p = await navigator.storage?.persisted?.(); if (p) txt += " · kept safe"; } catch (e) {} el.textContent = txt; }
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "woodshed-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn amber block" data-act="install" style="width:100%;min-height:52px">Install Woodshed</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> in Safari’s toolbar.</span></li><li><span>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol><p class="small muted">Opened inside another app? Open this page in Chrome first.</p>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon in the address bar,</span></li><li><span>or choose <b>Install Woodshed</b> in the browser menu.</span></li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || recState !== "idle" || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="62" height="62" style="border-radius:15px">
+        <div><div class="eyebrow">Free · works offline</div><h2>Keep Woodshed handy</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Open it from your home screen like any app, full screen, with your takes saved on the phone.</p>
+      <div id="sheet-body">${installBody()}</div><button class="btn ghost" data-act="installlater" style="width:100%;margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed. Open it from your home screen."); });
+
+  /* ---------- Actions ---------- */
+  let micAllowed = false, navCount = 0;
+  addEventListener("hashchange", () => { navCount++; });
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, d = el.dataset;
+    if (el.tagName === "BUTTON") { e.preventDefault(); haptic(6); }
+    ensureAC();
+    if (a === "mic") { if (await openMic()) { micAllowed = true; } }
+    else if (a === "rec") startRec();
+    else if (a === "stop") stopRec();
+    else if (a === "pause") pauseRec();
+    else if (a === "cancelcount") cancelCount();
+    else if (a === "mark") { if (recState === "rec") { marks.push(elapsed()); haptic([6, 30, 6]); toast(`Marked at ${fmt(elapsed())}`, 1200); } }
+    else if (a === "metro") { metro.on ? metro.stop() : metro.start(); refreshCtrls(); }
+    else if (a === "countin") { S.countIn = (S.countIn + 1) % 3; saveS(); el.innerHTML = `Count-in <b>${["off", "1 bar", "2 bars"][S.countIn]}</b>`; }
+    else if (a === "clickduring") { S.clickDuring = !S.clickDuring; saveS(); el.innerHTML = `Click in take <b>${S.clickDuring ? "on" : "off"}</b>`; if (S.clickDuring) toast("Use headphones, or the microphone will hear the click", 3200); }
+    else if (a === "lyrics") { S.lyrics = !S.lyrics; saveS(); render(); }
+    else if (a === "lz") { S.lz = Math.max(.8, Math.min(1.6, +(S.lz + .1 * +d.v).toFixed(1))); saveS(); const l = $(".lyrics"); if (l) l.style.setProperty("--lz", S.lz); }
+    else if (a === "pick") songPicker();
+    else if (a === "choose") chooseSong(d.id);
+    else if (a === "newsong") newSong();
+    else if (a === "practise") chooseSong(d.id);
+    else if (a === "qplay") { e.stopPropagation(); quickPlay(d.id); }
+    else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/takes"; }
+    else if (a === "pplay") { if (!P.a) return; P.a.paused ? P.a.play().catch(() => {}) : P.a.pause(); }
+    else if (a === "seekby") { if (P.a) P.a.currentTime = Math.max(0, Math.min(P.t.dur, P.a.currentTime + +d.v)); }
+    else if (a === "tomark") { if (P.a) { P.a.currentTime = Math.max(0, +d.v - 2); if (P.a.paused) P.a.play().catch(() => {}); } }
+    else if (a === "speed") { if (P.a) { P.a.playbackRate = +d.v; P.a.preservesPitch = true; } el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
+    else if (a === "loop") { if (!P.a) return; const c = P.a.currentTime; if (P.A == null) P.A = c; else if (P.B == null) { if (c <= P.A + .3) { toast("Play on a little, then set the end"); return; } P.B = c; P.a.currentTime = P.A; if (P.a.paused) P.a.play().catch(() => {}); } syncLoop(); }
+    else if (a === "loopclear") { P.A = P.B = null; syncLoop(); }
+    else if (a === "star") { const t = P.t; if (!t) return; t.stars = t.stars === +d.v ? 0 : +d.v; putTake(t); el.parentElement.querySelectorAll("button").forEach((b, i) => b.classList.toggle("on", i < t.stars)); }
+    else if (a === "share") { if (P.t) shareTake(P.t); }
+    else if (a === "tosong") { if (P.t) takeSongPicker(P.t); }
+    else if (a === "settake") { const t = take(d.t); if (t) { t.songId = d.id || null; putTake(t); } $(".sheet-back")?.remove(); render(); }
+    else if (a === "deltake") { const t = P.t; if (!t || !confirm(`Delete “${t.name}”?`)) return; TAKES = TAKES.filter(x => x.id !== t.id); await idb.del("takes", t.id); await idb.del("blobs", t.id); if (lastTakeId === t.id) lastTakeId = null; history.length > 1 && navCount ? history.back() : (location.hash = "#/takes"); }
+    else if (a === "delsong") { const s = song(d.id); if (!s || !confirm(`Delete “${s.title}”? Its takes are kept as free practice.`)) return; SONGS = SONGS.filter(x => x.id !== s.id); await idb.del("songs", s.id);
+      for (const t of TAKES.filter(t => t.songId === s.id)) { t.songId = null; putTake(t); } if (S.curSong === s.id) { S.curSong = null; saveS(); } location.hash = "#/songs"; }
+    else if (a === "tuner") { if (await openMic()) { micAllowed = true; startTuner(); } }
+    else if (a === "ref") refTone(+d.v);
+    else if (a === "bpm") setBpm(S.bpm + +d.v);
+    else if (a === "tap") tapTempo();
+    else if (a === "beats") { S.beats = +d.v; saveS(); render(); }
+    else if (a === "boost") { S.boost = +d.v; saveS(); if (gainN) gainN.gain.setTargetAtTime(dbGain(S.boost), AC.currentTime, .05); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
+    else if (a === "voice") { S.voice = d.v === "1"; saveS(); if (mic && recState === "idle") { const t = tunerOn; closeMic(true); tunerOn = false; await openMic(); if (t) startTuner(); } render(); }
+    else if (a === "a4") { S.a4 = Math.max(415, Math.min(466, S.a4 + +d.v)); saveS(); $("#a4v").textContent = `A = ${S.a4} Hz`; }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+  });
+  function takeSongPicker(t) {
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet"><div class="grab"></div><h2 style="margin-bottom:6px">Which song?</h2>
+      <button class="pick${!t.songId ? " on" : ""}" data-act="settake" data-t="${t.id}" data-id="">Free practice</button>
+      ${SONGS.map(s => `<button class="pick${t.songId === s.id ? " on" : ""}" data-act="settake" data-t="${t.id}" data-id="${s.id}">${esc(s.title)}</button>`).join("")}</div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); });
+    document.body.appendChild(back);
+  }
+  let saveT;
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el.id === "tname" && P.t) { P.t.name = el.value.trim() || P.t.name; clearTimeout(saveT); saveT = setTimeout(() => putTake(P.t), 400); }
+    if (el.id === "tnote" && P.t) { P.t.note = el.value; clearTimeout(saveT); saveT = setTimeout(() => putTake(P.t), 400); }
+    if (el.dataset.f) { const s = song(route()[1]); if (!s) return; s[el.dataset.f] = el.dataset.f === "bpm" ? (el.value ? Math.max(30, Math.min(260, +el.value)) : "") : el.value; s.touched = Date.now(); clearTimeout(saveT); saveT = setTimeout(() => putSong(s), 400); }
+    if (el.id === "bpmr") setBpm(+el.value);
+    if (el.id === "cvol") { S.clickVol = +el.value; saveS(); }
+  });
+  addEventListener("keydown", e => { if (e.target.closest?.("input,textarea")) return; if (e.code === "Space" && route()[0] === "rec") { e.preventDefault(); recState === "idle" ? startRec() : recState === "count" ? cancelCount() : stopRec(); } });
+  addEventListener("beforeunload", e => { if (recState === "rec" || recState === "paused") { e.preventDefault(); e.returnValue = ""; } });
+
+  /* ---------- Start ---------- */
+  (async () => {
+    try { [TAKES, SONGS] = await Promise.all([idb.all("takes"), idb.all("songs")]); } catch (e) { toast("Couldn’t open your saved takes"); }
+    try { const p = await navigator.permissions?.query({ name: "microphone" }); micAllowed = p?.state === "granted"; p && (p.onchange = () => { micAllowed = p.state === "granted"; }); } catch (e) {}
+    render(); loop(); showStorage();
+    addEventListener("hashchange", showStorage);
+    setTimeout(() => showInstall(false), 20000);
+  })();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update") || recState !== "idle") return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+  window.__ws = { S, get TAKES() { return TAKES; }, get SONGS() { return SONGS; }, get recState() { return recState; }, detectPitch, metro };
+  </script>
+</body>
+</html>
