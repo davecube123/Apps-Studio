@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#f5ede3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151012" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Song of Songs">
+  <meta name="description" content="The Song of Songs in a fresh modern translation, with a full commentary: the Hebrew, how it has been read, and what it asks of you.">
+  <link rel="preload" href="fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Song of Songs</title>
+  <style>
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader.woff2) format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader-italic.woff2) format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+    :root {
+      --paper: #f5ede3; --card: #fffbf6; --ink: #2a1b1e; --ink2: #5e4a4c; --muted: #9a8583;
+      --line: rgba(90,40,45,.1); --line2: rgba(90,40,45,.19);
+      --rose: #9b2c3b; --rose-ink: #fff; --rose-soft: rgba(155,44,59,.08);
+      --she: #9b2c3b; --he: #4c6a4f; --they: #a07636; --poet: #8a7a78;
+      --myrrh: #a87a3c; --glow: rgba(220,150,140,.22);
+      --e1: 0 1px 1px rgba(70,20,25,.04), 0 2px 6px rgba(70,20,25,.04);
+      --e2: 0 1px 2px rgba(70,20,25,.05), 0 6px 16px rgba(70,20,25,.06), 0 18px 40px rgba(70,20,25,.06);
+      --e3: 0 2px 6px rgba(50,10,15,.1), 0 16px 40px rgba(50,10,15,.16);
+      --r: 22px; --spring: cubic-bezier(.2,.9,.25,1.15); --ease: cubic-bezier(.2,.7,.2,1);
+      --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --heb: "SBL Hebrew", "Ezra SIL", "Noto Serif Hebrew", "Frank Ruehl CLM", "Times New Roman", "Noto Sans Hebrew", serif;
+      --fs: 1; color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #151012; --card: #1e171a; --ink: #f0e4e0; --ink2: #c4b0ad; --muted: #8c7a78;
+        --line: rgba(255,225,220,.08); --line2: rgba(255,225,220,.16); --rose: #e0808a; --rose-ink: #1a0d10; --rose-soft: rgba(224,128,138,.12);
+        --she: #e0808a; --he: #94b896; --they: #d4ad6c; --poet: #a3938f; --myrrh: #d4ad6c; --glow: rgba(224,128,138,.1);
+        --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.3); --e3: 0 16px 40px rgba(0,0,0,.55); color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #151012; --card: #1e171a; --ink: #f0e4e0; --ink2: #c4b0ad; --muted: #8c7a78;
+      --line: rgba(255,225,220,.08); --line2: rgba(255,225,220,.16); --rose: #e0808a; --rose-ink: #1a0d10; --rose-soft: rgba(224,128,138,.12);
+      --she: #e0808a; --he: #94b896; --they: #d4ad6c; --poet: #a3938f; --myrrh: #d4ad6c; --glow: rgba(224,128,138,.1);
+      --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.3); --e3: 0 16px 40px rgba(0,0,0,.55); color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--paper); }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(120% 55% at 50% -12%, var(--glow), transparent 62%) no-repeat, var(--paper);
+           color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+    main { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 22px) 20px calc(env(safe-area-inset-bottom) + 120px); }
+    a { color: inherit; }
+    ::selection { background: color-mix(in srgb, var(--rose) 20%, transparent); }
+    :focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; border-radius: 8px; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 420; margin: 0; text-wrap: balance; }
+    h1 { font-size: 40px; line-height: 1.06; letter-spacing: -.02em; }
+    h2 { font-size: 30px; line-height: 1.12; letter-spacing: -.015em; }
+    h3 { font-size: 20px; line-height: 1.25; letter-spacing: -.01em; }
+    p { margin: .45em 0; text-wrap: pretty; }
+    .muted { color: var(--muted); } .small { font-size: 13.5px; } .serif { font-family: var(--serif); } .heb { font-family: var(--heb); direction: rtl; unicode-bidi: isolate; }
+    .eyebrow { font: 600 11px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .center { text-align: center; }
+    .view.enter > * { animation: rise .5s var(--ease) both; }
+    .view.enter > *:nth-child(2) { animation-delay: 40ms; } .view.enter > *:nth-child(3) { animation-delay: 80ms; } .view.enter > *:nth-child(n+4) { animation-delay: 120ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    .card { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; box-shadow: var(--e2); }
+    .card.flat { box-shadow: var(--e1); }
+    .btn { appearance: none; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 999px; min-height: 42px; padding: 10px 18px;
+           font: 600 14.5px var(--sans); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+           transition: transform .3s var(--spring), background .2s; }
+    .btn:active { transform: scale(.95); transition-duration: .1s; }
+    .btn.rose { background: var(--rose); color: var(--rose-ink); border-color: transparent; box-shadow: 0 6px 18px color-mix(in srgb, var(--rose) 32%, transparent); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.block { width: 100%; min-height: 54px; font-size: 16px; }
+    .btn.sm { min-height: 34px; padding: 6px 14px; font-size: 13px; }
+    .seg { display: inline-flex; background: color-mix(in srgb, var(--ink) 6%, transparent); border-radius: 999px; padding: 4px; gap: 2px; flex-wrap: wrap; }
+    .seg button { border: 0; background: transparent; color: var(--ink2); border-radius: 999px; padding: 8px 15px; font: 600 13px var(--sans); cursor: pointer; }
+    .seg button.on { background: var(--card); color: var(--ink); box-shadow: var(--e1), 0 0 0 1px var(--line); }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); text-decoration: none; font: 500 15px var(--sans); margin: -6px 0 16px -4px;
+            padding: 6px 12px 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--card) 70%, transparent); border: 1px solid var(--line); cursor: pointer; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 26px 0; }
+    textarea, input[type=search] { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink); caret-color: var(--rose); font: 400 19px/1.55 var(--serif); padding: 6px 0; }
+    textarea::placeholder, input::placeholder { color: var(--muted); opacity: .75; font-style: italic; }
+    .pillin { font: 15.5px var(--sans) !important; background: color-mix(in srgb, var(--ink) 5%, transparent) !important; border-radius: 14px; padding: 12px 16px !important; }
+    .pillin::placeholder { font-style: normal; }
+
+    /* Ornament: a small pomegranate, the Song's own fruit */
+    .orn { display: flex; align-items: center; gap: 12px; color: var(--rose); margin: 30px 0 22px; }
+    .orn::before, .orn::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--line2)); }
+    .orn::after { background: linear-gradient(270deg, transparent, var(--line2)); }
+    .orn svg { width: 18px; height: 18px; flex: none; }
+
+    /* Home */
+    .hero { position: relative; padding-top: 8px; }
+    .hero .hebt { position: absolute; right: -8px; top: -14px; font-family: var(--heb); font-size: 64px; line-height: 1; color: var(--rose); opacity: .09; pointer-events: none; user-select: none; direction: rtl; }
+    .hero .sub { font: italic 400 19px/1.45 var(--serif); color: var(--ink2); margin-top: 10px; text-wrap: pretty; }
+    .today { margin-top: 22px; padding: 22px 22px 18px; overflow: hidden; }
+    .today .vtext { font: italic 400 22px/1.45 var(--serif); margin: 8px 0 12px; text-wrap: pretty; }
+    .today .vref { font: 600 12.5px var(--sans); color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .chip { font: 600 12.5px var(--sans); color: var(--ink2); border: 1px solid var(--line2); border-radius: 999px; padding: 7px 13px; text-decoration: none; background: var(--card); }
+
+    /* The text */
+    .song { margin-top: 6px; }
+    .ch { display: flex; align-items: baseline; gap: 12px; margin: 34px 0 6px; }
+    .ch .chn { font: 400 34px/1 var(--serif); color: var(--rose); }
+    .phead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 26px 0 8px; text-decoration: none; }
+    .phead .pt { font: 500 italic 18px/1.25 var(--serif); color: var(--ink); }
+    .phead .go { font: 600 12px var(--sans); color: var(--rose); white-space: nowrap; }
+    .v { position: relative; font: 400 calc(19.5px * var(--fs))/1.62 var(--serif); margin: 0; padding: 3px 0 3px 15px; border-left: 2px solid transparent; text-wrap: pretty; }
+    .v.she { border-left-color: color-mix(in srgb, var(--she) 55%, transparent); }
+    .v.he { border-left-color: color-mix(in srgb, var(--he) 60%, transparent); }
+    .v.friends, .v.brothers { border-left-color: color-mix(in srgb, var(--they) 60%, transparent); }
+    .v.poet, .v.title { border-left-color: color-mix(in srgb, var(--poet) 45%, transparent); }
+    .v.title { font-style: italic; color: var(--ink2); }
+    .v sup { font: 700 10px var(--sans); color: var(--muted); margin-right: 5px; letter-spacing: .02em; vertical-align: .55em; }
+    .who { font: 700 10.5px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; margin: 14px 0 4px 17px; }
+    .who.she { color: var(--she); } .who.he { color: var(--he); } .who.friends, .who.brothers { color: var(--they); } .who.poet, .who.title { color: var(--poet); }
+    .nolabels .who { display: none; } .nolabels .v { border-left-color: transparent !important; }
+    .v.flash { animation: flash 2.2s var(--ease); }
+    @keyframes flash { 0%, 40% { background: color-mix(in srgb, var(--rose) 12%, transparent); } 100% { background: transparent; } }
+
+    /* Passage */
+    .ptop .ref { font: 700 12px var(--sans); letter-spacing: .12em; color: var(--rose); }
+    .kw { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .kw span { font: 600 12px var(--sans); color: var(--ink2); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 11px; }
+    .essence { font: 400 21px/1.5 var(--serif); margin: 18px 0 0; text-wrap: pretty; }
+    .textbox { margin-top: 22px; padding: 14px 18px 16px 12px; }
+    .sec { margin-top: 36px; position: relative; }
+    .sec > .eyebrow { color: var(--rose); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .sec > .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--rose); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+    .expl { font: 400 calc(17.5px * var(--fs))/1.66 var(--serif); color: var(--ink2); }
+    .expl p { margin: 0 0 .8em; position: relative; }
+    .word { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; box-shadow: var(--e1); position: relative; }
+    .word + .word { margin-top: 10px; }
+    .word .wh { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .word .hw { font-family: var(--heb); font-size: 28px; line-height: 1.3; color: var(--rose); direction: rtl; }
+    .word .tr { font: italic 500 18px var(--serif); color: var(--ink); }
+    .word .gl { font: 600 12.5px var(--sans); color: var(--muted); margin-top: 1px; }
+    .word .expl { font-size: calc(16.5px * var(--fs)); margin-top: 8px; }
+    .life { display: grid; gap: 10px; }
+    .life div { background: color-mix(in srgb, var(--ink) 4%, transparent); border-radius: 16px; padding: 13px 16px; font: calc(16.5px * var(--fs))/1.58 var(--serif); color: var(--ink2); }
+    .life b { display: block; font: 600 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .askq { font: italic 400 22px/1.45 var(--serif); text-align: center; padding: 22px 10px; text-wrap: balance; }
+    .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px; }
+    .pager a { text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; box-shadow: var(--e1); }
+    .pager a:last-child { text-align: right; }
+    .pager .pname { font: italic 450 16px/1.25 var(--serif); }
+
+    /* Lists */
+    .prow { display: flex; gap: 14px; align-items: flex-start; padding: 13px 4px; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .prow .n { width: 24px; font: 700 12px/26px var(--sans); color: var(--muted); text-align: right; flex: none; }
+    .prow .nm { font: italic 450 19px/1.25 var(--serif); }
+    .prow .rf { font: 600 11.5px var(--sans); color: var(--rose); letter-spacing: .06em; margin-left: 6px; font-style: normal; white-space: nowrap; }
+    .prow .es { font-size: 13.5px; color: var(--muted); line-height: 1.38; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; }
+    .prow .hit { font: italic 15px/1.45 var(--serif); color: var(--ink2); margin-top: 4px; }
+    .prow mark { background: color-mix(in srgb, var(--rose) 16%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+    .prow.done .n::after { content: "·"; color: var(--rose); margin-left: 2px; }
+    .tgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .tcard { text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px 13px; box-shadow: var(--e1); display: flex; flex-direction: column; gap: 4px; min-height: 104px; }
+    .tcard .hw { font-family: var(--heb); color: var(--rose); font-size: 22px; line-height: 1.2; direction: rtl; text-align: right; opacity: .85; }
+    .tcard .tn { font: 450 18px/1.2 var(--serif); margin-top: auto; }
+    .tcard .tc { font: 600 11px var(--sans); color: var(--muted); letter-spacing: .06em; }
+    .empty { text-align: center; padding: 44px 16px; color: var(--muted); }
+    .prose { font: calc(17px * var(--fs))/1.66 var(--serif); color: var(--ink2); } .prose h3 { color: var(--ink); margin: 26px 0 6px; }
+    .toc a { display: block; padding: 11px 2px; border-bottom: 1px solid var(--line); text-decoration: none; font: 450 18px var(--serif); }
+
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(430px, calc(100% - 28px));
+               padding: 6px; border-radius: 30px; background: color-mix(in srgb, var(--card) 78%, transparent); backdrop-filter: blur(24px) saturate(1.8);
+               -webkit-backdrop-filter: blur(24px) saturate(1.8); border: 1px solid var(--line2); box-shadow: var(--e3); display: flex; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 24px; color: var(--muted);
+                 font: 600 10.5px var(--sans); padding: 7px 0 6px; transition: background .3s var(--ease), color .3s; }
+    nav.tabs a svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--rose); background: var(--rose-soft); }
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 100px);
+             background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: 20px; font: 500 14px var(--sans); z-index: 50; box-shadow: var(--e3); animation: rise .35s var(--spring) both; }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 55; border: 0; cursor: pointer;
+              background: var(--rose); color: var(--rose-ink); padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--e3); }
+    .resume { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(env(safe-area-inset-bottom) + 96px); z-index: 30; border: 1px solid var(--line2); cursor: pointer;
+              background: var(--card); color: var(--ink); padding: 10px 18px; border-radius: 999px; font: 600 13.5px var(--sans); box-shadow: var(--e3); animation: rise .35s var(--spring) both; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(30,10,14,.38); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(520px, 100%); background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px); box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; max-height: 88vh; overflow-y: auto; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    @keyframes sheetup { from { transform: translateY(100%); } to { transform: none; } }
+    .steps { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15.5px; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--rose-soft); color: var(--rose); font: 700 12.5px/24px var(--sans); text-align: center; }
+    .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .toggle input { width: 20px; height: 20px; accent-color: var(--rose); }
+    #qbar { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(env(safe-area-inset-bottom) + 96px); z-index: 40;
+            background: var(--ink); border-radius: 999px; padding: 5px; box-shadow: var(--e3); display: none; gap: 4px; animation: rise .25s var(--spring) both; }
+    #qbar.on { display: flex; }
+    #qbar button { border: 0; background: transparent; color: var(--paper); border-radius: 999px; padding: 10px 18px; font: 600 15px var(--sans); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    #qbar button + button { background: color-mix(in srgb, var(--paper) 14%, transparent); }
+    #qbar svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    [data-q] { position: relative; }
+    .nmark { position: absolute; left: -20px; top: 2px; width: 20px; height: 28px; border: 0; padding: 0; background: none; cursor: pointer; color: var(--myrrh); }
+    .nmark::before { content: ""; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 3.5px; border-radius: 3px; background: currentColor; }
+    .nmark b { position: absolute; left: 0; top: -4px; font: 700 9px var(--sans); color: var(--myrrh); }
+    .v > .nmark { left: -24px; }
+    .nentry { border-left: 2px solid var(--line2); padding: 2px 0 2px 12px; margin-top: 10px; }
+    .nentry .nd { font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .nentry .nt { font: 16.5px/1.55 var(--serif); color: var(--ink2); white-space: pre-wrap; }
+    .nentry textarea { font-size: 17px; padding: 2px 0; }
+    .nentry textarea:focus-visible, .sheet textarea:focus-visible { outline: 0; }
+    .phrase { font: italic 400 19px/1.5 var(--serif); color: var(--ink); border-left: 2px solid var(--myrrh); padding-left: 12px; margin: 6px 0 4px; text-wrap: pretty; }
+    .tagk { font: 700 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--myrrh); }
+    .qcard { display: block; text-decoration: none; padding: 16px 18px; cursor: pointer; }
+    .qcard + .qcard { margin-top: 10px; }
+    .qcard .qt { font: italic 400 19px/1.5 var(--serif); color: var(--ink); text-wrap: pretty; }
+    .qcard .qs { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
+    .qcard .del { border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; padding: 2px 4px; cursor: pointer; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <div id="qbar" role="toolbar" aria-label="Save the selected words">
+    <button type="button" data-save="quote"><svg viewBox="0 0 24 24"><path d="M10 7H6.5A1.5 1.5 0 0 0 5 8.5V12h5zM10 12c0 3-1.5 5-4 6M19 7h-3.5A1.5 1.5 0 0 0 14 8.5V12h5zM19 12c0 3-1.5 5-4 6"/></svg>Quote</button>
+    <button type="button" data-save="note"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>Note</button></div>
+  <nav class="tabs" id="tabs">
+    <a href="#/" data-tab="read"><svg viewBox="0 0 24 24"><path d="M12 6c-2-1.6-5-2-8-1.5v13c3-.5 6-.1 8 1.5 2-1.6 5-2 8-1.5v-13c-3-.5-6-.1-8 1.5zM12 6v13"/></svg>Read</a>
+    <a href="#/list" data-tab="list"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>Passages</a>
+    <a href="#/themes" data-tab="themes"><svg viewBox="0 0 24 24"><path d="M12 21c-4.4 0-8-3.2-8-7.6C4 9 7.6 6 12 6s8 3 8 7.4c0 4.4-3.6 7.6-8 7.6z"/><path d="M9.5 6.5L9 3.5l2 1.5L12 3l1 2 2-1.5-.5 3"/></svg>Themes</a>
+    <a href="#/notebook" data-tab="notebook"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M6 3v18M9.5 8h5M9.5 12h5"/></svg>Notebook</a>
+    <a href="#/about" data-tab="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>About</a>
+  </nav>
+  <script>
+  "use strict";
+  const APP_VERSION = "1", APP_DATE = "8 Nov 2026";
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5;
+  const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
+  function toast(m, ms = 2600) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+  const POM = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22c-4.6 0-8-3.3-8-7.8C4 9.9 7.3 7 12 7s8 2.9 8 7.2c0 4.5-3.4 7.8-8 7.8z"/><path fill="currentColor" d="M9.6 7.6L9 4.2l1.9 1.3L12 3.4l1.1 2.1L15 4.2l-.6 3.4z"/></svg>`;
+  const orn = () => `<div class="orn">${POM}</div>`;
+
+  /* ---------- The text and commentary (data/song.json) ---------- */
+  let SONG = { passages: [], themes: [], intro: [] };
+  const P = id => SONG.passages.find(p => p.id === id);
+  const WHO = { she: "She", he: "He", friends: "The daughters of Jerusalem", brothers: "Her brothers", poet: "A voice", title: "Title" };
+  const vnum = v => v.replace(/[ab]$/, "");
+  const passageOfVerse = v => SONG.passages.find(p => p.verses.some(x => vnum(x.v) === v || x.v === v));
+
+  /* ---------- Storage ---------- */
+  const KEY = "song-of-songs";
+  const db = Object.assign({ quotes: [], read: {}, pos: null, settings: { theme: "auto", labels: true, size: 1 } }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  db.settings = Object.assign({ theme: "auto", labels: true, size: 1 }, db.settings);
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const dstr = t => new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+
+  /* ---------- Verses ---------- */
+  function versesHTML(p, { anchor = false, st = null } = {}) {
+    let prev = null;
+    return p.verses.map(x => {
+      let ch = "";
+      if (st) { const c = vnum(x.v).split(":")[0]; if (c !== st.c) { if (st.c) { ch = `<div class="ch"><span class="chn">${c}</span><span class="eyebrow">Chapter ${c}</span></div>`; prev = null; } st.c = c; } }
+      const lab = x.who !== prev && x.who !== "title" ? `<div class="who ${x.who}">${WHO[x.who]}</div>` : ""; prev = x.who;
+      const n = vnum(x.v), showNum = !/b$/.test(x.v);
+      return `${ch}${lab}<p class="v ${x.who}" data-q="${p.id}:v${x.v}"${anchor ? ` id="v${x.v.replace(":", "-")}"` : ""}>${showNum ? `<sup>${n}</sup>` : ""}${esc(x.t)}</p>`;
+    }).join("");
+  }
+  /* A verse for today: the same for everyone on a given day, walking the whole Song in order. */
+  function verseOfDay() {
+    const all = SONG.passages.flatMap(p => p.verses.filter(x => x.who !== "title").map(x => ({ p, x })));
+    if (!all.length) return null;
+    const d = new Date(), k = Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())) / DAY);
+    return all[(k * 37) % all.length];
+  }
+
+  /* ---------- Views ---------- */
+  let lastHash = "";
+  function render() {
+    const h = location.hash || "#/";
+    let html, tab;
+    if (h.startsWith("#/p/")) { html = viewPassage(+h.split("/")[2]); tab = "list"; }
+    else if (h.startsWith("#/t/")) { html = viewTheme(decodeURIComponent(h.split("/")[2])); tab = "themes"; }
+    else if (h.startsWith("#/list")) { html = viewList(); tab = "list"; }
+    else if (h.startsWith("#/themes")) { html = viewThemes(); tab = "themes"; }
+    else if (h.startsWith("#/about")) { html = viewAbout(); tab = "about"; }
+    else if (h.startsWith("#/notebook")) { html = viewNotebook(); tab = "notebook"; }
+    else { html = viewRead(); tab = "read"; }
+    if (html == null) return;
+    const nav = h !== lastHash; $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+    markNotes();
+    $(".resume")?.remove();
+    if (nav) scrollTo(0, 0); lastHash = h;
+    if (goQuote) { const q = goQuote; goQuote = null; requestAnimationFrame(() => scrollToQuote(q)); }
+    else if (goVerse) { const v = goVerse; goVerse = null; requestAnimationFrame(() => scrollToVerse(v)); }
+    else if (tab === "read" && nav && db.pos) offerResume();
+    if (h.startsWith("#/p/")) { const p = P(+h.split("/")[2]); if (p) { db.read[p.id] = Date.now(); save(); } }
+    document.title = h.startsWith("#/p/") && P(+h.split("/")[2]) ? `${P(+h.split("/")[2]).title} · Song of Songs` : "Song of Songs";
+  }
+  addEventListener("hashchange", render);
+
+  function viewRead() {
+    const t = verseOfDay();
+    const st = { c: "1" };
+    let body = `<div class="ch"><span class="chn">1</span><span class="eyebrow">Chapter 1</span></div>`;
+    for (const p of SONG.passages) {
+      const c = vnum(p.verses[0].v).split(":")[0];
+      if (c !== st.c) { st.c = c; body += `<div class="ch"><span class="chn">${c}</span><span class="eyebrow">Chapter ${c}</span></div>`; }
+      body += `<a class="phead" href="#/p/${p.id}"><span class="pt">${esc(p.title)}</span><span class="go">${p.ref} · Commentary →</span></a>${versesHTML(p, { anchor: true, st })}`;
+    }
+    return `<div class="hero"><span class="hebt">שִׁיר הַשִּׁירִים</span><div class="eyebrow">A new translation, with commentary</div>
+        <h1 style="margin-top:8px">The Song of Songs</h1>
+        <p class="sub">Eight short chapters of love poetry: a woman and a man, a garden, a city at night, and the claim that love is as strong as death.</p></div>
+      ${t ? `<a class="card today" href="#/p/${t.p.id}" style="display:block;text-decoration:none"><div class="eyebrow" style="color:var(--rose)">A verse for today</div>
+        <div class="vtext">${esc(t.x.t)}</div><div class="vref">${vnum(t.x.v)} · ${esc(t.p.title)} · read the commentary →</div></a>` : ""}
+      <div class="chips"><a class="chip" href="#/about/intro">New here? Start with the introduction</a><a class="chip" href="#/themes">The images</a></div>
+      ${orn()}
+      <div class="row between"><div class="eyebrow">The whole Song</div>
+        <button class="btn ghost sm" data-act="labels">${db.settings.labels ? "Hide voices" : "Show voices"}</button></div>
+      <div class="song${db.settings.labels ? "" : " nolabels"}">${body}</div>
+      ${orn()}<p class="center small muted">The end of the Song. <a href="#/list">Study it passage by passage</a></p>`;
+  }
+
+  function viewPassage(id) {
+    const p = P(id); if (!p) { location.hash = "#/list"; return null; }
+    const n = SONG.passages.length, prev = P(id > 1 ? id - 1 : n), next = P(id < n ? id + 1 : 1);
+    const themes = SONG.themes.filter(t => (t.refs || []).includes(id));
+    const mine = db.quotes.filter(x => x.n === id && x.kind === "note").sort((a, b) => a.at - b.at);
+    const paras = (arr, k) => (arr || []).map((s, i) => `<p data-q="${id}:${k}${i}">${esc(s)}</p>`).join("");
+    const L = p.life || {};
+    return `<a class="back" data-act="back">← Back</a>
+      <div class="ptop"><div class="ref">PASSAGE ${id} · ${p.ref}</div><h2 style="margin-top:4px">${esc(p.title)}</h2>
+        <div class="kw">${(p.keywords || []).map(k => `<span>${esc(k)}</span>`).join("")}</div>
+        <p class="essence" data-q="${id}:e">${esc(p.essence)}</p></div>
+      <div class="card flat textbox song${db.settings.labels ? "" : " nolabels"}">${versesHTML(p)}</div>
+      ${p.reading ? `<div class="sec"><div class="eyebrow">Reading the passage</div><div class="expl">${paras(p.reading, "r")}</div></div>` : ""}
+      ${p.words?.length ? `<div class="sec"><div class="eyebrow">In the Hebrew</div>${p.words.map((w, i) => `<div class="word" data-q="${id}:w${i}">
+          <div class="wh"><div><div class="tr">${esc(w.tr)}</div><div class="gl">${esc(w.gl)}</div></div><div class="hw">${esc(w.he)}</div></div>
+          <div class="expl"><p>${esc(w.note)}</p></div></div>`).join("")}</div>` : ""}
+      ${p.history ? `<div class="sec"><div class="eyebrow">How it has been read</div><div class="expl">${paras(p.history, "h")}</div></div>` : ""}
+      ${p.life ? `<div class="sec" data-q="${id}:f"><div class="eyebrow">In your life</div><div class="life">
+        <div><b>Love and the people in your life</b>${esc(L.love)}</div><div><b>The body and the senses</b>${esc(L.body)}</div><div><b>Inner life</b>${esc(L.inner)}</div></div></div>` : ""}
+      ${p.question ? `<div class="sec" data-q="${id}:q"><div class="eyebrow">To sit with</div><p class="askq">${esc(p.question)}</p></div>` : ""}
+      ${themes.length ? `<div class="sec"><div class="eyebrow">Images in this passage</div><div class="chips" style="margin-top:0">${themes.map(t => `<a class="chip" href="#/t/${t.id}">${esc(t.name)}</a>`).join("")}</div></div>` : ""}
+      ${mine.length ? `<div class="sec"><div class="eyebrow">Your notes on this passage</div>${mine.map(x => entryCard(x, { here: true })).join("")}</div>` : ""}
+      <div class="row" style="margin-top:22px"><a class="btn sm" href="#/" data-act="inread" data-v="${p.verses[0].v}">See it in the whole Song</a></div>
+      <div class="pager"><a href="#/p/${prev.id}"><div class="eyebrow">← ${prev.ref}</div><div class="pname">${esc(prev.title)}</div></a><a href="#/p/${next.id}"><div class="eyebrow">${next.ref} →</div><div class="pname">${esc(next.title)}</div></a></div>`;
+  }
+
+  let listQ = "";
+  function hl(s, q) { const i = s.toLowerCase().indexOf(q); if (i < 0) return esc(s); return esc(s.slice(0, i)) + "<mark>" + esc(s.slice(i, i + q.length)) + "</mark>" + esc(s.slice(i + q.length)); }
+  function snippet(s, q) { const i = s.toLowerCase().indexOf(q), a = Math.max(0, i - 50), b = Math.min(s.length, i + q.length + 70); return (a ? "…" : "") + s.slice(a, b) + (b < s.length ? "…" : ""); }
+  function listRows() {
+    const q = listQ.trim().toLowerCase();
+    if (!q) return SONG.passages.map(p => `<a class="prow${db.read[p.id] ? " done" : ""}" href="#/p/${p.id}"><span class="n">${p.id}</span>
+        <div class="grow"><div><span class="nm">${esc(p.title)}</span><span class="rf">${p.ref}</span></div><div class="es">${esc(p.essence || p.verses[0].t)}</div></div></a>`).join("");
+    /* Verse words first, then titles and themes, then the commentary. */
+    const ref = q.match(/^(\d)[:.](\d{1,2})$/);
+    if (ref) { const p = passageOfVerse(`${ref[1]}:${ref[2]}`); if (p) return `<a class="prow" href="#/p/${p.id}" data-act="toverse" data-v="${ref[1]}:${ref[2]}"><span class="n">${p.id}</span><div class="grow"><div><span class="nm">${esc(p.title)}</span><span class="rf">${p.ref}</span></div><div class="hit">${esc(p.verses.find(x => vnum(x.v) === `${ref[1]}:${ref[2]}`)?.t)}</div></div></a>`; }
+    const rows = [];
+    for (const p of SONG.passages) {
+      const vs = p.verses.filter(x => x.t.toLowerCase().includes(q));
+      const head = `${p.title} ${(p.keywords || []).join(" ")} ${p.essence || ""}`.toLowerCase().includes(q);
+      const body = [...(p.reading || []), ...(p.history || []), ...(p.words || []).map(w => `${w.tr} ${w.gl} ${w.note}`)].find(s => s.toLowerCase().includes(q));
+      const score = vs.length ? 3 : head ? 2 : body ? 1 : 0; if (!score) continue;
+      const hit = vs.length ? vs.slice(0, 2).map(x => `<div class="hit"><b class="small muted" style="font-style:normal">${vnum(x.v)}</b> ${hl(x.t, q)}</div>`).join("")
+        : body && !head ? `<div class="hit">${hl(snippet(body, q), q)}</div>` : `<div class="es">${esc(p.essence)}</div>`;
+      rows.push([score, `<a class="prow" href="#/p/${p.id}"><span class="n">${p.id}</span><div class="grow"><div><span class="nm">${esc(p.title)}</span><span class="rf">${p.ref}</span></div>${hit}</div></a>`]);
+    }
+    return rows.length ? rows.sort((a, b) => b[0] - a[0]).map(r => r[1]).join("") : `<p class="empty">Nothing in the Song or the commentary matches “${esc(listQ.trim())}”.</p>`;
+  }
+  function viewList() {
+    const done = Object.keys(db.read).length;
+    return `<div class="eyebrow">Study</div><h1 style="margin-top:6px">Passages</h1>
+      <p class="small muted" style="margin:8px 2px 0">${SONG.passages.length} passages, each with the Hebrew, how it has been read, and what it asks of you.${done ? ` You have opened ${done}.` : ""}</p>
+      <div class="row" style="margin-top:16px"><input type="search" id="psearch" class="pillin" placeholder="Search a word, a verse (4:12) or a theme" value="${esc(listQ)}" autocomplete="off"></div>
+      <div id="plist" style="margin-top:8px">${listRows()}</div>`;
+  }
+
+  function viewThemes() {
+    return `<div class="eyebrow">Images</div><h1 style="margin-top:6px">Themes</h1>
+      <p class="small muted" style="margin:8px 2px 0">The Song thinks in pictures: a few images return again and again, each time a little changed. Follow one through the poem.</p>
+      <div class="tgrid">${SONG.themes.map(t => `<a class="tcard" href="#/t/${t.id}"><div class="hw">${esc(t.he || "")}</div><div class="tn">${esc(t.name)}</div><div class="tc">${(t.refs || []).length} passage${(t.refs || []).length === 1 ? "" : "s"}</div></a>`).join("")}</div>`;
+  }
+  function viewTheme(id) {
+    const t = SONG.themes.find(x => x.id === id); if (!t) { location.hash = "#/themes"; return null; }
+    return `<a class="back" data-act="back">← Back</a>
+      <div class="ptop"><div class="ref">THEME</div><h2 style="margin-top:4px">${esc(t.name)}</h2>
+        ${t.he ? `<div class="row" style="margin-top:6px;gap:10px"><span class="heb" style="font-size:24px;color:var(--rose)">${esc(t.he)}</span><span class="serif muted" style="font-style:italic">${esc(t.tr || "")}</span></div>` : ""}</div>
+      <div class="sec" style="margin-top:22px"><div class="expl">${(t.essay || []).map((s, i) => `<p data-q="0:t${t.id}${i}">${esc(s)}</p>`).join("")}</div></div>
+      <div class="sec"><div class="eyebrow">Where it appears</div>${(t.refs || []).map(P).filter(Boolean).map(p => `<a class="prow" href="#/p/${p.id}"><span class="n">${p.id}</span>
+        <div class="grow"><div><span class="nm">${esc(p.title)}</span><span class="rf">${p.ref}</span></div><div class="es">${esc(p.essence || p.verses[0].t)}</div></div></a>`).join("")}</div>`;
+  }
+
+  function viewAbout() {
+    const intro = SONG.intro || [];
+    return `<div class="eyebrow">About</div><h1 style="margin-top:6px">Introduction</h1>
+      <div class="toc" style="margin-top:16px">${intro.map(s => `<a href="#/about" data-act="toabout" data-v="${s.id}">${esc(s.title)}</a>`).join("")}</div>
+      <div class="prose">${intro.map(s => `<h3 id="a-${s.id}">${esc(s.title)}</h3>${s.p.map((x, i) => `<p data-q="0:a${s.id}${i}">${esc(x)}</p>`).join("")}`).join("")}</div>
+      ${orn()}
+      <div class="sec" style="margin-top:0"><div class="eyebrow">Settings</div>
+        <div class="seg">${[["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button class="${db.settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+        <div class="toggle" style="margin-top:12px"><span>Text size</span><div class="seg">${[[.92, "Small"], [1, "Medium"], [1.1, "Large"]].map(([k, l]) => `<button class="${db.settings.size === k ? "on" : ""}" data-act="size" data-v="${k}">${l}</button>`).join("")}</div></div>
+        <label class="toggle"><span>Show who is speaking <span class="small muted">(She, He, the daughters)</span></span><input type="checkbox" data-act="labelsck" ${db.settings.labels ? "checked" : ""}></label>
+        ${isStandalone() ? "" : `<div class="toggle"><span>Install on this phone</span><button class="btn sm" data-act="installsheet">Install</button></div>`}
+        <p class="small muted" style="margin-top:10px">Your notes and reading place stay on this device.</p></div>
+      <p class="small muted center" style="margin-top:30px">Song of Songs · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+
+  /* ---------- Quotes and notes ----------
+     Select any words, then keep them as a Quote or a Note (your own writing, added to over time, each
+     addition dated). Every entry remembers its passage and part (data-q="<passage>:<part>"), so it leads
+     back there. Passages with notes get a small myrrh-coloured mark in the margin. */
+  const partName = (k, n) => {
+    if (k[0] === "v") return `Verse ${vnum(k.slice(1))}`;
+    if (k[0] === "t") { const t = SONG.themes.find(x => k.slice(1).startsWith(x.id)); return t ? `Theme: ${t.name}` : "Themes"; }
+    if (k[0] === "a") { const s = (SONG.intro || []).find(x => k.slice(1).startsWith(x.id)); return s ? `Introduction: ${s.title}` : "Introduction"; }
+    return ({ e: "In brief", r: "Reading the passage", w: "In the Hebrew", h: "How it has been read", f: "In your life", q: "To sit with" })[k[0]] || "";
+  };
+  let pendingQ = null, goQuote = null, goVerse = null, qHideT;
+  function selQuote() {
+    const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    const text = sel.toString().replace(/\s+/g, " ").replace(/^\d{1,2}(?=\S)/, "").trim(); if (text.length < 2) return null;
+    const node = sel.getRangeAt(0).startContainer, el = (node.nodeType === 1 ? node : node.parentElement)?.closest("[data-q]");
+    if (!el || !$("#main").contains(el) || el.closest(".nmark")) return null;
+    const q = el.dataset.q, n = q.slice(0, q.indexOf(":")), part = q.slice(q.indexOf(":") + 1);
+    /* verses in the whole-Song view lead to the Read page; everything else to its own page */
+    return { text: text.slice(0, 1200), n: +n, part, hash: location.hash || "#/" };
+  }
+  document.addEventListener("selectionchange", () => {
+    if ($(".sheet-back")) return;
+    const q = selQuote(), b = $("#qbar");
+    clearTimeout(qHideT);
+    if (q) { pendingQ = q; b.classList.add("on"); $(".resume")?.remove(); }
+    else qHideT = setTimeout(() => { pendingQ = null; b.classList.remove("on"); }, 450);
+  });
+  $("#qbar").addEventListener("pointerdown", e => e.preventDefault());
+  $("#qbar").addEventListener("click", e => {
+    const kind = e.target.closest("[data-save]")?.dataset.save, q = pendingQ || selQuote(); if (!kind || !q) return;
+    getSelection()?.removeAllRanges(); pendingQ = null; $("#qbar").classList.remove("on");
+    const same = db.quotes.find(x => x.text === q.text && x.n === q.n && x.part === q.part);
+    if (kind === "quote") {
+      if (same) { toast(same.kind === "note" ? "Already in your notes" : "Already in your quotes"); return; }
+      db.quotes.push({ id: uid(), at: Date.now(), kind: "quote", entries: [], ...q }); save(); haptic([8, 30, 12]); toast("Saved to your Notebook");
+    } else noteSheet(same ? same.id : null, q);
+  });
+
+  const entryKind = x => x.kind === "note" ? "Note" : "Quote";
+  function quoteSource(q) {
+    const p = q.n ? P(q.n) : null;
+    return p ? `${p.ref} · ${esc(p.title)} · ${partName(q.part)}` : esc(partName(q.part));
+  }
+  function entryCard(x, { here = false } = {}) {
+    const notes = x.entries.map(en => `<div class="nentry"><div class="nd">${dstr(en.at)}</div><div class="nt">${esc(en.text)}</div></div>`).join("");
+    return `<div class="card flat qcard" data-act="${here || x.kind === "note" ? "editnote" : "openquote"}" data-id="${x.id}">
+      <div class="tagk">${here ? partName(x.part) : entryKind(x)}</div><div class="qt" style="margin-top:4px">“${esc(x.text)}”</div>${notes}
+      <div class="qs"><span class="grow">${here ? dstr(x.at) : `${quoteSource(x)} · ${dstr(x.at)}`}</span>
+        ${here ? "" : x.kind === "note" ? `<button class="btn sm ghost" data-act="openquote" data-id="${x.id}" style="color:var(--rose);padding:4px 8px">Go to passage</button>`
+          : `<button class="btn sm ghost" data-act="editnote" data-id="${x.id}" style="padding:4px 8px">Add a note</button><button class="del" data-act="delquote" data-id="${x.id}" aria-label="Delete this quote">×</button>`}</div></div>`;
+  }
+  let nbFilter = "all";
+  function viewNotebook() {
+    const all = [...db.quotes].sort((a, b) => Math.max(b.at, ...b.entries.map(e => e.at)) - Math.max(a.at, ...a.entries.map(e => e.at)));
+    const list = all.filter(x => nbFilter === "all" || x.kind === nbFilter), nq = all.filter(x => x.kind === "quote").length, nn = all.length - nq;
+    return `<div class="eyebrow">Your collection</div><h1 style="margin-top:6px">Notebook</h1>
+      ${all.length ? `<div class="seg" style="margin-top:14px">${[["all", `All · ${all.length}`], ["quote", `Quotes · ${nq}`], ["note", `Notes · ${nn}`]].map(([k, l]) => `<button class="${nbFilter === k ? "on" : ""}" data-act="nbfilter" data-v="${k}">${l}</button>`).join("")}</div>
+        <p class="small muted" style="margin:10px 2px 14px">Tap a quote to return to where you found it. Tap a note to read or add to it.</p>
+        ${list.map(x => entryCard(x)).join("") || `<p class="empty">Nothing here yet.</p>`}`
+      : `<div class="empty"><p class="serif" style="font-size:20px;color:var(--ink2)">Your notebook is empty.</p>
+          <p>Anywhere in the Song or the commentary, press and hold a word and drag to select a phrase. Then tap <b>Quote</b> to keep the words, or <b>Note</b> to write about them: a thought, a question, an answer later.</p>
+          <a class="btn" href="#/" style="margin-top:10px">Read the Song</a></div>`}`;
+  }
+
+  let sheetOpen = false;
+  function noteSheet(id, fresh) {
+    const x = id ? db.quotes.find(q => q.id === id) : null, src = x || fresh; if (!src) return;
+    closeSheet(true);
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Note"><div class="grab"></div>
+      <div class="small muted">${quoteSource(src)}</div>
+      <div class="phrase">“${esc(src.text)}”</div>
+      ${(x?.entries || []).map((en, k) => `<div class="nentry"><div class="nd">${dstr(en.at)}</div><textarea rows="2" data-k="${k}" class="oldnote">${esc(en.text)}</textarea></div>`).join("")}
+      <div class="nentry" style="border-color:var(--rose)"><div class="nd">${x?.entries.length ? "Add to this note" : "Your note"} · ${dstr(Date.now())}</div>
+        <textarea id="newnote" rows="4" placeholder="A thought, a question to sit with, what it means in my life…"></textarea></div>
+      <div class="row" style="margin-top:16px;gap:10px"><button class="btn grow" data-act="sheetclose">Cancel</button><button class="btn rose grow" data-act="savenote" data-id="${x?.id || ""}">Save</button></div>
+      <div class="row between" style="margin-top:8px">${x ? `<button class="btn ghost sm" data-act="gopassage" data-id="${x.id}">Go to passage</button><button class="btn ghost sm" data-act="delentry" data-id="${x.id}" style="color:var(--rose)">Delete</button>` : ""}</div></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeSheet(); });
+    back._fresh = fresh || null;
+    document.body.appendChild(back); sheetOpen = true; history.pushState({ sheet: 1 }, "");
+    const ta = back.querySelector("#newnote"); ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; });
+    back.querySelectorAll("textarea.oldnote").forEach(t => { t.style.height = t.scrollHeight + "px"; });
+    ta.addEventListener("focus", () => setTimeout(() => ta.scrollIntoView({ block: "nearest" }), 320));
+    fitSheet(); setTimeout(() => ta.focus({ preventScroll: true }), 350);
+  }
+  /* Keep a sheet above the on-screen keyboard where the browser doesn't shrink the page for it. */
+  function fitSheet() {
+    const b = $(".sheet-back"), vv = window.visualViewport; if (!b || !vv) return;
+    const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop));
+    b.style.bottom = kb + "px"; const s = b.querySelector(".sheet"); if (s) s.style.maxHeight = Math.round(vv.height - 16) + "px";
+    const f = document.activeElement; if (kb && f?.closest?.(".sheet")) f.scrollIntoView({ block: "nearest" });
+  }
+  window.visualViewport?.addEventListener("resize", fitSheet);
+  window.visualViewport?.addEventListener("scroll", fitSheet);
+  function closeSheet(silent) {
+    const b = $(".sheet-back"); if (!b) return;
+    b.remove(); if (sheetOpen) { sheetOpen = false; if (!silent) history.back(); else history.replaceState(null, ""); }
+  }
+  addEventListener("popstate", () => { if (sheetOpen) { sheetOpen = false; $(".sheet-back")?.remove(); } });
+  function saveNote(id) {
+    const back = $(".sheet-back"), add = $("#newnote").value.trim(); let x = id && db.quotes.find(q => q.id === id);
+    if (x) {
+      back.querySelectorAll("textarea.oldnote").forEach(t => { const en = x.entries[+t.dataset.k]; if (en) en.text = t.value.trim(); });
+      x.entries = x.entries.filter(en => en.text);
+      if (add) x.entries.push({ at: Date.now(), text: add });
+      x.kind = x.entries.length ? "note" : "quote";
+    } else {
+      if (!add) { toast("Write something first, or tap Cancel"); return; }
+      x = { id: uid(), at: Date.now(), kind: "note", ...back._fresh, entries: [{ at: Date.now(), text: add }] }; db.quotes.push(x);
+    }
+    save(); closeSheet(); haptic([8, 30, 12]); toast("Note saved"); setTimeout(render, 60);
+  }
+  function markNotes() {
+    const notes = db.quotes.filter(x => x.kind === "note"); if (!notes.length) return;
+    document.querySelectorAll("#main [data-q]").forEach(el => {
+      const dq = el.dataset.q, n = dq.slice(0, dq.indexOf(":")), part = dq.slice(dq.indexOf(":") + 1), mine = notes.filter(x => x.n === +n && x.part === part); if (!mine.length) return;
+      const b = document.createElement("button"); b.className = "nmark"; b.dataset.act = "editnote"; b.dataset.id = mine[mine.length - 1].id;
+      b.setAttribute("aria-label", `Your note${mine.length > 1 ? `s (${mine.length})` : ""} on this passage`); if (mine.length > 1) b.innerHTML = `<b>${mine.length}</b>`;
+      el.prepend(b);
+    });
+  }
+  function openQuote(id) {
+    const q = db.quotes.find(x => x.id === id); if (!q) return;
+    const to = q.hash || (q.n ? `#/p/${q.n}` : "#/");
+    if ((location.hash || "#/") === to) scrollToQuote(q); else { goQuote = q; location.hash = to; }
+  }
+  function scrollToQuote(q) {
+    const el = document.querySelector(`#main [data-q="${q.n}:${q.part}"]`); if (!el) return;
+    const y = el.getBoundingClientRect().top + scrollY - 90; scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    if (el.classList.contains("v")) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  }
+  function scrollToVerse(v) {
+    const el = document.getElementById("v" + v.replace(":", "-")) || document.getElementById("v" + v.replace(":", "-") + "a"); if (!el) return;
+    scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + scrollY - 90), behavior: "smooth" });
+    el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  }
+
+  /* ---------- Your place in the Song ---------- */
+  let posT;
+  addEventListener("scroll", () => {
+    if (location.hash && location.hash !== "#/") return;
+    clearTimeout(posT); posT = setTimeout(() => {
+      const vs = [...document.querySelectorAll("#main .song .v[id]")]; if (!vs.length) return;
+      const first = vs.find(el => el.getBoundingClientRect().bottom > 110);
+      if (!first || vs.indexOf(first) < 2) return;
+      db.pos = first.id.slice(1).replace("-", ":"); save(); $(".resume")?.remove();
+    }, 400);
+  }, { passive: true });
+  function offerResume() {
+    const v = db.pos, p = passageOfVerse(vnum(v)); if (!p) return;
+    const b = document.createElement("button"); b.className = "resume"; b.textContent = `Continue at ${vnum(v)} · ${p.title}`;
+    b.onclick = () => { b.remove(); scrollToVerse(v); };
+    document.body.appendChild(b); setTimeout(() => b.remove(), 9000);
+  }
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "song-of-songs-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn rose block" data-act="install">Install Song of Songs</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>Tap <b>Share</b> in Safari’s toolbar.</span></li><li><span>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li><span>Tap the <b>⋮</b> menu at the top right of Chrome.</span></li><li><span>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></li></ol><p class="small muted">Opened inside another app? Open this page in Chrome first.</p>`;
+    return `<ol class="steps"><li><span>Click the <b>install</b> icon at the right of the address bar,</span></li><li><span>or choose <b>Install Song of Songs</b> in the browser menu.</span></li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
+        <div><div class="eyebrow">Free · works offline</div><h2>Keep the Song</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Open it full screen from your home screen, like any app. The whole text and commentary live on the phone, so it works without a connection.</p>
+      <div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed. Open it from your home screen."); });
+
+  function applySettings() {
+    const t = db.settings.theme; t === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = t);
+    document.documentElement.style.setProperty("--fs", db.settings.size);
+  }
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, d = el.dataset;
+    if (el.tagName === "BUTTON") haptic(6);
+    if (a === "openquote") openQuote(d.id);
+    else if (a === "delquote") { if (!confirm("Delete this quote?")) return; db.quotes = db.quotes.filter(x => x.id !== d.id); save(); render(); }
+    else if (a === "editnote") { e.preventDefault(); noteSheet(d.id); }
+    else if (a === "savenote") saveNote(d.id);
+    else if (a === "sheetclose") closeSheet();
+    else if (a === "gopassage") { const id = d.id; closeSheet(); setTimeout(() => openQuote(id), 150); }
+    else if (a === "delentry") { if (!confirm("Delete this note and its phrase from your notebook?")) return; db.quotes = db.quotes.filter(x => x.id !== d.id); save(); closeSheet(); setTimeout(render, 60); }
+    else if (a === "nbfilter") { nbFilter = d.v; render(); }
+    else if (a === "back") { if (navCount > 0) history.back(); else location.hash = "#/list"; }
+    else if (a === "labels" || a === "labelsck") { db.settings.labels = a === "labels" ? !db.settings.labels : el.checked; save(); if (a === "labels") { const y = scrollY; render(); scrollTo(0, y); } }
+    else if (a === "theme") { db.settings.theme = d.v; save(); applySettings(); render(); }
+    else if (a === "size") { db.settings.size = +d.v; save(); applySettings(); render(); }
+    else if (a === "inread" || a === "toverse") { e.preventDefault(); goVerse = d.v; if ((location.hash || "#/") === "#/") { const v = goVerse; goVerse = null; scrollToVerse(v); } else location.hash = "#/"; }
+    else if (a === "toabout") { e.preventDefault(); document.getElementById("a-" + d.v)?.scrollIntoView({ behavior: "smooth" }); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+  });
+  let navCount = 0;
+  addEventListener("hashchange", () => { navCount++; });
+  document.addEventListener("input", e => {
+    if (e.target.id === "psearch") { listQ = e.target.value; const l = $("#plist"); if (l) l.innerHTML = listRows(); }
+  });
+
+  /* ---------- Start ---------- */
+  applySettings();
+  if (location.hash === "#/about/intro") history.replaceState(null, "", "#/about");
+  fetch("data/song.json").then(r => r.json()).then(j => { SONG = j; render(); }).catch(() => { render(); toast("Couldn’t load the text. Connect once, then it works offline."); });
+  setTimeout(() => { if (!getSelection()?.toString()) showInstall(false); }, 6000);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "A new version is ready · Reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+  window.__song = { db, get SONG() { return SONG; } };
+  </script>
+</body>
+</html>
