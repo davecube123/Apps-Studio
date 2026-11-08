@@ -514,7 +514,7 @@
     if (out.onsets.length >= 8) {
       let g;
       if (bpm) { const c = 6000 / bpm; g = peakLag(0, m, Math.floor(c * .88), Math.ceil(c * 1.12)); }
-      else g = peakLag(0, m, 30, 120, l => Math.exp(-.5 * Math.pow(Math.log2(6000 / l / 105) / .8, 2)));
+      else g = peakLag(0, m, 30, 109, l => Math.exp(-.5 * Math.pow(Math.log2(6000 / l / 105) / .8, 2)));
       if (g) {
         out.bpm = +(6000 / g).toFixed(1);
         const devs = [];
@@ -677,7 +677,7 @@
       <div class="chips"><button class="chip" data-act="countin">Count-in <b>${["off", "1 bar", "2 bars"][S.countIn]}</b></button>
         <a class="chip" href="#/tools">♩ = <b id="bpmchip">${S.bpm}</b> · ${S.beats}/4</a>
         <button class="chip" data-act="clickduring">Click in take <b>${S.clickDuring ? "on" : "off"}</b></button></div>
-      <div class="focus"><label for="focus">Next take, focus on one thing</label><input type="text" id="focus" value="${esc(curFocus())}" placeholder="steady tempo · breathe before the chorus · land the high note" autocomplete="off"></div>
+      <div class="focus"><label for="focus">Next take, focus on one thing</label><input type="text" id="focus" value="${esc(curFocus())}" placeholder="e.g. steady tempo, or breathe before the chorus" autocomplete="off"></div>
       <div id="review">${reviewHTML()}</div>
       ${s?.lyrics ? `<div class="lyrics" style="--lz:${S.lz}"><div class="row between"><div class="eyebrow">Lyrics and chords</div>
           <div class="row" style="gap:4px"><button class="btn ghost sm" data-act="lz" data-v="-1">A−</button><button class="btn ghost sm" data-act="lz" data-v="1">A+</button><button class="btn ghost sm" data-act="lyrics">${S.lyrics ? "Hide" : "Show"}</button></div></div>
