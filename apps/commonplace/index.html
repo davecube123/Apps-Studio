@@ -285,7 +285,7 @@
     <a href="#/quotes" data-tab="quotes"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg>Quotes</a>
     <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Settings</a>
   </div></nav>
-  <input type="file" id="file" accept=".epub,.pdf,.txt,.md,.markdown,application/epub+zip,application/pdf,text/plain" multiple hidden>
+  <input type="file" id="file" accept=".epub,.mobi,.azw3,.azw,.prc,.pdb,.pdf,.txt,.md,.markdown,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook,application/pdf,text/plain" multiple hidden>
 
   <script>
   "use strict";
@@ -295,7 +295,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "12", APP_DATE = "11 Nov 2026";
+  const APP_VERSION = "13", APP_DATE = "11 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -360,6 +360,28 @@
   function breaksToSpaces(doc) {
     doc.querySelectorAll("br").forEach(br => { const prev = br.previousSibling?.textContent || ""; br.replaceWith(/[A-Za-z\u00C0-\u024F]-$/.test(prev) ? "" : " "); });
   }
+  /* The paragraphs of one HTML document, and its first heading. */
+  function docObjs(doc) {
+    const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
+    let objs = els.map(el => ({ t: clean(el.textContent), k: KIND[el.tagName] || "p", el })).filter(o => o.t);
+    if (!objs.length) objs = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean).map(t => ({ t, k: "p", el: null }));
+    const h = doc.body.querySelector("h1,h2,h3"); return { objs, heading: h ? clean(h.textContent) : "" };
+  }
+  /* Documents to chapters: repeated boilerplate (running heads) is dropped, tiny documents fold into the next. */
+  function buildChapters(docs) {
+    const freq = new Map(); for (const d of docs) for (const t of new Set(d.objs.map(o => o.t))) freq.set(t, (freq.get(t) || 0) + 1);
+    const limit = Math.max(3, docs.length * .25), chapters = [], docCh = new Map();
+    for (const d of docs) {
+      let objs = d.objs.filter(o => freq.get(o.t) < limit);
+      if (wc(objs.map(o => o.t).join(" ")) < 25) { docCh.set(d.path, { ch: chapters.length, objs: null }); continue; } // short doc: maps to the next chapter
+      let title = d.heading && d.heading.length <= 120 ? d.heading : "";
+      if (title && objs[0].t === title) objs = objs.slice(1); else if (!title && objs[0].t.length <= 80 && objs.length > 1) { title = objs[0].t; objs = objs.slice(1); }
+      docCh.set(d.path, { ch: chapters.length, objs, doc: d.doc });
+      const c = { title: title || `Section ${chapters.length + 1}`, paras: objs.map(o => o.t) }, k = objs.map(o => o.k).join("");
+      if (/[^p]/.test(k)) c.k = k; chapters.push(c);
+    }
+    return { chapters, docCh };
+  }
   async function parseEpub(file) {
     await needJSZip();
     const zip = await JSZip.loadAsync(file);
@@ -387,22 +409,9 @@
     for (const href of spine) {
       const path = resolve(href); let html; try { html = await text(path); } catch (e) { continue; }
       const doc = new DOMParser().parseFromString(html, "text/html"); breaksToSpaces(doc);
-      const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
-      let objs = els.map(el => ({ t: clean(el.textContent), k: KIND[el.tagName] || "p", el })).filter(o => o.t);
-      if (!objs.length) objs = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean).map(t => ({ t, k: "p", el: null }));
-      const h = doc.body.querySelector("h1,h2,h3"); docs.push({ path, doc, objs, heading: h ? clean(h.textContent) : "" });
+      docs.push({ path, doc, ...docObjs(doc) });
     }
-    const freq = new Map(); for (const d of docs) for (const t of new Set(d.objs.map(o => o.t))) freq.set(t, (freq.get(t) || 0) + 1);
-    const limit = Math.max(3, docs.length * .25), chapters = [], docCh = new Map();
-    for (const d of docs) {
-      let objs = d.objs.filter(o => freq.get(o.t) < limit);
-      if (wc(objs.map(o => o.t).join(" ")) < 25) { docCh.set(d.path, { ch: chapters.length, objs: null }); continue; } // short doc: maps to the next chapter
-      let title = d.heading && d.heading.length <= 120 ? d.heading : "";
-      if (title && objs[0].t === title) objs = objs.slice(1); else if (!title && objs[0].t.length <= 80 && objs.length > 1) { title = objs[0].t; objs = objs.slice(1); }
-      docCh.set(d.path, { ch: chapters.length, objs, doc: d.doc });
-      const c = { title: title || `Section ${chapters.length + 1}`, paras: objs.map(o => o.t) }, k = objs.map(o => o.k).join("");
-      if (/[^p]/.test(k)) c.k = k; chapters.push(c);
-    }
+    const { chapters, docCh } = buildChapters(docs);
     if (!chapters.length) throw new Error("no readable text found");
     // The book's own table of contents: EPUB 3 nav document, or EPUB 2 NCX.
     const toc = [];
@@ -436,6 +445,137 @@
     // A chapter whose opening has a contents entry takes that entry's title.
     for (const t of toc) if (t.p === 0 && /^Section \d+$/.test(chapters[t.ch].title) && t.title) chapters[t.ch].title = t.title;
     return { kind: "epub", title: meta("title") || file.name.replace(/\.epub$/i, ""), author: meta("creator"), cover, chapters, toc: toc.filter(t => t.title) };
+  }
+  /* ---------- MOBI, AZW3 and PalmDOC (DRM-free Kindle formats) ----------
+     A Palm database: record 0 holds the PalmDOC header, the MOBI header and EXTH metadata (title, author,
+     cover); the following records hold the book's HTML in 4 KB pieces, compressed with PalmDOC LZ77 or with
+     Huffman/CDIC dictionaries, each followed by trailing entries that are stripped. Images come after.
+     Older MOBI books mark chapters with <mbp:pagebreak/> and link with filepos byte offsets; KF8 (AZW3) books
+     keep the main HTML as flow 0 of the FDST table, one HTML file after another. */
+  function palmdocUnpack(src) {
+    const out = new Uint8Array(src.length * 8 + 16); let o = 0;
+    for (let i = 0; i < src.length;) {
+      const c = src[i++];
+      if (c >= 1 && c <= 8) { for (let k = 0; k < c && i < src.length; k++) out[o++] = src[i++]; }
+      else if (c < 0x80) out[o++] = c;
+      else if (c >= 0xc0) { out[o++] = 32; out[o++] = c ^ 0x80; }
+      else { const m = ((c << 8) | src[i++]) & 0x3fff, dist = m >> 3, n = (m & 7) + 3; for (let k = 0; k < n; k++, o++) out[o] = o - dist >= 0 ? out[o - dist] : 32; }
+    }
+    return out.subarray(0, o);
+  }
+  function huffUnpacker(huff, cdics) {
+    const hv = new DataView(huff.buffer, huff.byteOffset, huff.byteLength), tag = String.fromCharCode(...huff.subarray(0, 4));
+    if (tag !== "HUFF") throw new Error("this MOBI file's compression tables are damaged");
+    const o1 = hv.getUint32(8), o2 = hv.getUint32(12), d1 = [], minc = [0], maxc = [2 ** 32 - 1], dict = [];
+    for (let i = 0; i < 256; i++) { const v = hv.getUint32(o1 + i * 4), len = v & 0x1f; d1.push([len, v & 0x80, (Math.floor(v / 256) + 1) * 2 ** (32 - len) - 1]); }
+    for (let L = 1; L <= 32; L++) { minc[L] = hv.getUint32(o2 + (L - 1) * 8) * 2 ** (32 - L); maxc[L] = (hv.getUint32(o2 + (L - 1) * 8 + 4) + 1) * 2 ** (32 - L) - 1; }
+    for (const c of cdics) {
+      const cv = new DataView(c.buffer, c.byteOffset, c.byteLength); if (String.fromCharCode(...c.subarray(0, 4)) !== "CDIC") continue;
+      const n = Math.min(2 ** cv.getUint32(12), cv.getUint32(8) - dict.length);
+      for (let i = 0; i < n; i++) { const off = cv.getUint16(16 + i * 2), bl = cv.getUint16(16 + off); dict.push([c.subarray(18 + off, 18 + off + (bl & 0x7fff)), bl & 0x8000]); }
+    }
+    const unpack = (data, depth = 0) => {
+      if (depth > 32) throw new Error("this MOBI file's compression is damaged");
+      const d = new Uint8Array(data.length + 8); d.set(data); const parts = []; let pos = 0, left = data.length * 8, total = 0;
+      for (;;) {
+        const b = pos >>> 3, sh = pos & 7;
+        let code = ((d[b] << 24) | (d[b + 1] << 16) | (d[b + 2] << 8) | d[b + 3]) >>> 0;
+        if (sh) code = ((code << sh) | (d[b + 4] >>> (8 - sh))) >>> 0;
+        let [len, term, max] = d1[code >>> 24];
+        if (!term) { while (len < 32 && code < minc[len]) len++; max = maxc[len]; }
+        pos += len; left -= len; if (left < 0 || !len) break;
+        const r = Math.floor((max - code) / 2 ** (32 - len)), e = dict[r]; if (!e) throw new Error("this MOBI file's compression is damaged");
+        if (!e[1]) { e[0] = unpack(e[0], depth + 1); e[1] = 1; }
+        parts.push(e[0]); total += e[0].length;
+      }
+      const out = new Uint8Array(total); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out;
+    };
+    return unpack;
+  }
+  function mobiTrailing(d, flags) {
+    let n = 0;
+    for (let f = flags >> 1; f; f >>= 1) if (f & 1) { let v = 0; const end = d.length - n; for (let i = Math.max(0, end - 4); i < end; i++) { if (d[i] & 0x80) v = 0; v = (v << 7) | (d[i] & 0x7f); } n += v; }
+    if (flags & 1 && d.length - n - 1 >= 0) n += (d[d.length - n - 1] & 3) + 1;
+    return Math.min(n, d.length);
+  }
+  async function parseMobi(file) {
+    const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer), str = (a, b) => String.fromCharCode(...buf.subarray(a, b));
+    if (buf.length < 86) throw new Error("this file is too short to be a Kindle book");
+    const kind = str(60, 68);
+    if (kind !== "BOOKMOBI" && kind !== "TEXtREAd") throw new Error(/^TPZ|^\xEA\x44\x52\x4D/.test(str(0, 4)) ? "this is a Kindle store book (Topaz or KFX), which is copy-protected" : "this doesn't look like a MOBI or AZW3 book");
+    const nrec = dv.getUint16(76), off = i => dv.getUint32(78 + i * 8), rec = i => buf.subarray(off(i), i + 1 < nrec ? off(i + 1) : buf.length);
+    const r0 = rec(0), d0 = new DataView(r0.buffer, r0.byteOffset, r0.byteLength), name = file.name.replace(/\.(mobi|azw3?|prc|pdb)$/i, "");
+    const comp = d0.getUint16(0), textRecs = d0.getUint16(8), crypt = d0.getUint16(12);
+    if (crypt) throw new Error("this book is copy-protected (DRM), so it can only be opened in the Kindle app");
+    const isMobi = r0.length >= 24 && String.fromCharCode(...r0.subarray(16, 20)) === "MOBI";
+    let enc = "windows-1252", title = "", author = "", coverOff = -1, thumbOff = -1, extra = 0, version = 0, fdst = 0xffffffff, firstImg = 0xffffffff, huffRec = 0, huffCnt = 0;
+    if (isMobi) {
+      const hl = d0.getUint32(20); enc = d0.getUint32(28) === 65001 ? "utf-8" : "windows-1252"; version = d0.getUint32(36);
+      if (hl >= 0x5c) firstImg = d0.getUint32(108);
+      if (hl >= 0x64) { huffRec = d0.getUint32(112); huffCnt = d0.getUint32(116); }
+      if (hl >= 0xe4 && version >= 5) extra = d0.getUint16(0xf2);
+      if (version >= 8 && hl >= 0xb4) fdst = d0.getUint32(0xc0);
+      const no = d0.getUint32(84), nl = d0.getUint32(88); if (no + nl <= r0.length) title = new TextDecoder(enc).decode(r0.subarray(no, no + nl));
+      if (d0.getUint32(0x80) & 0x40) {
+        let p = 16 + hl;
+        if (String.fromCharCode(...r0.subarray(p, p + 4)) === "EXTH") {
+          const count = d0.getUint32(p + 8); p += 12; const authors = [];
+          for (let i = 0; i < count && p + 8 <= r0.length; i++) {
+            const t = d0.getUint32(p), l = d0.getUint32(p + 4), data = r0.subarray(p + 8, p + l), txt = () => new TextDecoder(enc).decode(data).trim();
+            if (t === 100) authors.push(txt()); else if (t === 503) title = txt() || title;
+            else if (t === 201 && l >= 12) coverOff = d0.getUint32(p + 8); else if (t === 202 && l >= 12) thumbOff = d0.getUint32(p + 8);
+            if (l < 8) break; p += l;
+          }
+          author = authors.filter(Boolean).join(", ");
+        }
+      }
+    }
+    let unpack;
+    if (comp === 1) unpack = d => d; else if (comp === 2) unpack = palmdocUnpack;
+    else if (comp === 17480) { const cd = []; for (let i = 1; i < huffCnt; i++) cd.push(rec(huffRec + i)); unpack = huffUnpacker(rec(huffRec), cd); }
+    else throw new Error("this book uses a compression Commonplace doesn't know");
+    const parts = []; let total = 0;
+    for (let i = 1; i <= textRecs && i < nrec; i++) { const r = rec(i), u = unpack(r.subarray(0, r.length - mobiTrailing(r, extra))); parts.push(u); total += u.length; }
+    let bytes = new Uint8Array(total); { let o = 0; for (const p of parts) { bytes.set(p, o); o += p.length; } }
+    if (fdst !== 0xffffffff && fdst < nrec) { const f = rec(fdst), fv = new DataView(f.buffer, f.byteOffset, f.byteLength);
+      if (String.fromCharCode(...f.subarray(0, 4)) === "FDST" && fv.getUint32(8) > 0) { const a = fv.getUint32(fv.getUint32(4)), b = fv.getUint32(fv.getUint32(4) + 4); if (b > a && b <= bytes.length) bytes = bytes.subarray(a, b); } }
+    let cover = null;
+    for (const co of [coverOff, thumbOff]) if (co >= 0 && firstImg !== 0xffffffff && firstImg + co < nrec) { cover = await shrinkImage(new Blob([rec(firstImg + co)])); if (cover) break; }
+    if (!isMobi) { const t = new TextDecoder(enc).decode(bytes); const p = await parseText(new File([t], name + ".txt")); return { ...p, kind: "mobi", title: str(0, 32).replace(/\0.*$/, "") || name }; }
+    // Split into documents at page breaks (MOBI) or at each HTML file (KF8), keeping byte offsets for filepos links.
+    const starts = [0], pat = version >= 8 ? /<html[\s>]/gi : /<mbp:pagebreak/gi, latin = new TextDecoder("latin1").decode(bytes);
+    for (let m; (m = pat.exec(latin));) if (m.index > 0) starts.push(m.index);
+    const docs = [], dec = new TextDecoder(enc);
+    for (let i = 0; i < starts.length; i++) {
+      const html = dec.decode(bytes.subarray(starts[i], starts[i + 1] ?? bytes.length)).replace(/^<mbp:pagebreak\s*\/?>/i, "");
+      const doc = new DOMParser().parseFromString(html, "text/html"); breaksToSpaces(doc);
+      doc.querySelectorAll("style,script,head").forEach(e => e.remove());
+      docs.push({ path: String(i), doc, ...docObjs(doc) });
+    }
+    const { chapters, docCh } = buildChapters(docs);
+    if (!chapters.length) throw new Error("no readable text found");
+    // Contents: filepos links (MOBI); otherwise each chapter's title.
+    const chOf = pos => { let k = 0; while (k + 1 < starts.length && starts[k + 1] <= pos) k++; return docCh.get(String(k)); };
+    let toc = [];
+    if (version < 8) { const seen = new Set();
+      for (const d of docs) for (const a of d.doc.querySelectorAll("a[filepos]")) { const t = clean(a.textContent), dc = chOf(+a.getAttribute("filepos"));
+        if (!t || !dc) continue; const ch = Math.min(dc.ch, chapters.length - 1), key = ch + "|" + t; if (seen.has(key)) continue; seen.add(key); toc.push({ title: t, level: 0, ch, p: 0 }); }
+      if (toc.length < 2) toc = [];
+      for (const t of toc) if (/^Section \d+$/.test(chapters[t.ch].title)) chapters[t.ch].title = t.title;
+    }
+    const final = splitLong(chapters);
+    if (!toc.length || final !== chapters) toc = final.map((c, i) => ({ title: c.title, level: 0, ch: i, p: 0 }));
+    return { kind: "mobi", title: clean(title) || name, author: clean(author), cover, chapters: final, toc };
+  }
+  /* A book with no page breaks arrives as one long document: split it at headings, or every ~3,000 words. */
+  function splitLong(chs) {
+    if (chs.length > 1) return chs;
+    const c = chs[0], ks = c.k || "", out = []; let cur = null, w = 0;
+    c.paras.forEach((t, i) => { const h = ks[i] === "h";
+      if (!cur || (h && w > 300) || w > 3000) { cur = { title: h ? t : cur ? `Part ${out.length + 1}` : c.title, paras: [], k: "" }; out.push(cur); w = 0; if (h) return; }
+      cur.paras.push(t); cur.k += ks[i] || "p"; w += wc(t); });
+    out.forEach(o => { if (!/[^p]/.test(o.k)) delete o.k; });
+    return out.length > 1 ? out : chs;
   }
   async function pdfOutline(pdf) {
     const out = [], ol = await pdf.getOutline().catch(() => null);
@@ -502,7 +642,8 @@
     if (old) library[library.indexOf(old)] = meta; else library.push(meta);
     await saveLib(); return meta;
   }
-  const parseAny = f => { const n = f.name.toLowerCase(); return n.endsWith(".epub") ? parseEpub(f) : n.endsWith(".pdf") ? parsePdf(f) : parseText(f); };
+  const parseAny = f => { const n = f.name.toLowerCase(); return n.endsWith(".epub") ? parseEpub(f) : n.endsWith(".pdf") ? parsePdf(f) : /\.(mobi|azw3?|prc|pdb)$/.test(n) ? parseMobi(f) : parseText(f); };
+  window.__cp = { parseAny }; /* for testing imports */
   async function importFiles(files, replaceId) {
     let last = null;
     for (const f of [...files]) {
@@ -740,7 +881,7 @@
         <div id="shelf">${shelfHTML()}</div>
         <p class="fine" style="text-align:center;margin-top:22px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
-          <p class="sub">Add an EPUB, a PDF with selectable text, or a plain-text book. It stays on this device.</p>
+          <p class="sub">Add an EPUB, a Kindle MOBI or AZW3 (DRM-free), a PDF with selectable text, or a plain-text book. It stays on this device.</p>
           <div class="row" style="justify-content:center;margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="import">Add a book</button><button class="btn gray" data-act="sample">Try a sample</button></div>
           <p class="fine" style="margin-top:14px">The sample is the Tao Te Ching in James Legge's public-domain translation.</p></div>`}
       <p class="fine" style="text-align:center;margin-top:18px">Commonplace · version ${APP_VERSION} · ${APP_DATE}</p>`;
