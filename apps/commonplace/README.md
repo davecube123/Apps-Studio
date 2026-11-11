@@ -69,8 +69,7 @@ chapter, paragraph and character offsets.
 
 ## Formats
 
-EPUB (DRM-free), PDF with selectable text, TXT and Markdown. Not supported: Kindle formats (MOBI,
-AZW), DRM-protected EPUBs, scanned PDFs without a text layer.
+EPUB (DRM-free), Kindle MOBI, AZW3 and PalmDOC/PRC (DRM-free), PDF with selectable text, TXT and Markdown. MOBI books are read by a built-in parser (PalmDOC and Huffman/CDIC compression, EXTH title, author and cover, page breaks as chapters, filepos links as contents; AZW3/KF8 via its main HTML flow). Not supported: books bought from the Kindle store (DRM, Topaz or KFX), DRM-protected EPUBs, scanned PDFs without a text layer.
 
 ## Data
 
