@@ -63,6 +63,16 @@
     .btn.block { width: 100%; }
     .icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--fill); color: var(--label); display: grid; place-items: center; cursor: pointer; flex: none; }
     .icon-btn svg, .tb svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .dict h2.dword { font: 600 30px/1.1 var(--serif); letter-spacing: -.01em; }
+    .dict .dhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+    .dict .dsrc { font: 700 11px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--tint); margin: 18px 0 4px; }
+    .dict .dpos { font: italic 600 15px var(--serif); color: var(--label2); margin: 10px 0 2px; }
+    .dict ol.dsenses { margin: 0; padding-left: 22px; } .dict ol.dsenses li { font: 16.5px/1.5 var(--serif); margin: 5px 0; } .dict li.dmore, .dict .dweb p.dmore { display: none; }
+    .dict .dex { display: block; font-style: italic; color: var(--label2); font-size: 15px; }
+    .dict .dsyn { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .dict .dchip { border: 0; background: var(--fill); color: var(--label2); border-radius: 999px; padding: 3px 9px; font: 500 12.5px var(--sans); cursor: pointer; }
+    .dict .dshow { border: 0; background: none; color: var(--tint); font: 600 13.5px var(--sans); padding: 4px 0; cursor: pointer; }
+    .dict .dweb p { font: 15.5px/1.5 var(--serif); color: var(--label); margin: 4px 0; } .dict .dweb + .dweb { border-top: 1px solid var(--sep); margin-top: 8px; padding-top: 6px; }
     .chip { border: 0; background: var(--fill); color: var(--label); border-radius: 999px; padding: 6px 12px; font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; transition: all .2s var(--ease); }
     .chip.on { background: var(--label); color: var(--bg); }
     .chips { display: flex; gap: 7px; flex-wrap: wrap; }
@@ -295,7 +305,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "13", APP_DATE = "11 Nov 2026";
+  const APP_VERSION = "14", APP_DATE = "11 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -644,6 +654,7 @@
   }
   const parseAny = f => { const n = f.name.toLowerCase(); return n.endsWith(".epub") ? parseEpub(f) : n.endsWith(".pdf") ? parsePdf(f) : /\.(mobi|azw3?|prc|pdb)$/.test(n) ? parseMobi(f) : parseText(f); };
   window.__cp = { parseAny }; /* for testing imports */
+  window.__lu = w => { dictStack = []; return lookUp(w); }; /* for testing the dictionary */
   async function importFiles(files, replaceId) {
     let last = null;
     for (const f of [...files]) {
@@ -678,6 +689,7 @@
     const tab = h.startsWith("#/quotes") ? "quotes" : h.startsWith("#/settings") ? "settings" : "library";
     if (tab === "library") settle();
     const html = tab === "quotes" ? viewQuotes() : tab === "settings" ? viewSettings() : viewLibrary();
+    if (tab === "settings") setTimeout(dictStatus, 0);
     const isNav = h !== lastHash; $("#main").innerHTML = `<div class="view${isNav ? " enter" : ""}">${html}</div>`;
     document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
     if (isNav) scrollTo(0, 0); lastHash = h;
@@ -946,6 +958,9 @@
       <p class="fine" style="margin:8px 4px">How many books can be open at once. The rest wait on the Shelf; fewer open choices means more books finished.</p>
       <div class="group" style="margin-top:12px"><button class="cell" data-act="openlast"><span class="grow">Open to my current book</span><span class="fine" style="color:${settings.openLast ? "var(--tint)" : "var(--label3)"};font-weight:600">${settings.openLast ? "On" : "Off"}</span></button></div>
       <p class="fine" style="margin:8px 4px">When on, launching the app puts you straight on your page, with no choosing.</p>
+      <div class="ghead caps">Dictionary</div><div class="group">
+        <div class="cell"><span class="grow">WordNet and Webster’s 1913<br><span class="fine" id="dictstat">…</span></span><button class="chip" id="dictdl" data-act="dictdl">Download for offline</button></div></div>
+      <p class="fine" style="margin:8px 4px">Select a word while reading and tap Look up. Modern senses come from Princeton’s WordNet 3.1; the classic definitions, with their quotations, from Webster’s Unabridged Dictionary of 1913 (public domain). Save word adds it to your quotes under #words.</p>
       <div class="ghead caps">Your data</div><div class="group">
         <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
         <button class="cell" data-act="backup"><span class="grow">Back up quotes, notes and bookmarks (.json)</span></button>
@@ -1397,6 +1412,112 @@
   }
   addEventListener("popstate", () => { if (sheetEntry) { sheetEntry = false; document.querySelector(".sheet-back")?.remove(); } if (afterBack) { const f = afterBack; afterBack = null; f(); } });
 
+  /* ---------- Dictionary: WordNet 3.1 (modern senses) and Webster's Unabridged 1913 (classic), offline ----------
+     Both are split by first letter (dict/wn-a.json, dict/web-a.json …). A lookup loads only that letter's files;
+     the service worker keeps them, and "Download for offline" fetches the rest. Inflected forms are found by
+     WordNet's suffix rules and by Webster's own entries for irregular forms ("Struck: imp. & p. p. of Strike"). */
+  const DICT_CACHE = "commonplace-dict-v1", dictData = { wn: {}, web: {} }, dictP = {};
+  const dictShard = w => /^[a-z]/.test(w) ? w[0] : "0";
+  function loadShard(kind, s) {
+    if (dictData[kind][s]) return Promise.resolve(dictData[kind][s]);
+    return dictP[kind + s] ||= fetch(`dict/${kind}-${s}.json`).then(r => { if (!r.ok) throw new Error("missing"); return r.json(); })
+      .then(j => (dictData[kind][s] = j)).catch(e => { delete dictP[kind + s]; throw e; });
+  }
+  const SUFFIX = [["ies", "y"], ["ied", "y"], ["ier", "y"], ["iest", "y"], ["ily", "y"], ["ves", "f"], ["ves", "fe"], ["ses", "s"], ["xes", "x"], ["zes", "z"], ["ches", "ch"], ["shes", "sh"], ["men", "man"],
+    ["ing", ""], ["ing", "e"], ["ed", ""], ["ed", "e"], ["es", "e"], ["es", ""], ["est", ""], ["est", "e"], ["er", ""], ["er", "e"], ["ly", ""], ["s", ""], ["’s", ""], ["'s", ""]];
+  function wordForms(w) {
+    const out = [w], plain = w.normalize("NFD").replace(/\p{M}/gu, ""); if (plain !== w) out.push(plain);
+    for (const x of [w, plain]) for (const [a, b] of SUFFIX) if (x.endsWith(a) && x.length > a.length + 1) {
+      const base = x.slice(0, -a.length) + b; out.push(base); if (/([b-df-hj-np-tv-z])\1$/.test(base)) out.push(base.slice(0, -1)); }
+    if (w.includes("-")) out.push(w.replace(/-/g, " "), w.replace(/-/g, ""));
+    return [...new Set(out)];
+  }
+  const IRREG = Object.fromEntries("arose:arise awoke:awake was:be were:be been:be bore:bear borne:bear beat:beat became:become began:begin begun:begin bent:bend bound:bind bit:bite bitten:bite bled:bleed blew:blow blown:blow broke:break broken:break bred:breed brought:bring built:build burnt:burn burst:burst bought:buy caught:catch chose:choose chosen:choose clung:cling came:come crept:creep dealt:deal dug:dig did:do done:do drew:draw drawn:draw dreamt:dream drank:drink drunk:drink drove:drive driven:drive dwelt:dwell ate:eat eaten:eat fell:fall fallen:fall fed:feed felt:feel fought:fight found:find fled:flee flung:fling flew:fly flown:fly forbade:forbid forgot:forget forgotten:forget forgave:forgive forgiven:forgive froze:freeze frozen:freeze got:get gotten:get gave:give given:give went:go gone:go ground:grind grew:grow grown:grow hung:hang had:have has:have heard:hear hid:hide hidden:hide held:hold kept:keep knelt:kneel knew:know known:know laid:lay led:lead leapt:leap learnt:learn left:leave lent:lend lay:lie lain:lie lit:light lost:lose made:make meant:mean met:meet paid:pay rode:ride ridden:ride rang:ring rung:ring rose:rise risen:rise ran:run said:say saw:see seen:see sought:seek sold:sell sent:send shook:shake shaken:shake shone:shine shot:shoot shrank:shrink shut:shut sang:sing sung:sing sank:sink sunk:sink sat:sit slept:sleep slid:slide slung:sling smote:smite smitten:smite spoke:speak spoken:speak sped:speed spent:spend spun:spin spat:spit split:split sprang:spring sprung:spring stood:stand stole:steal stolen:steal stuck:stick stung:sting strode:stride struck:strike stricken:strike strove:strive striven:strive swore:swear sworn:swear swept:sweep swam:swim swum:swim swung:swing took:take taken:take taught:teach tore:tear torn:tear told:tell thought:think threw:throw thrown:throw trod:tread trodden:tread understood:understand woke:wake woken:wake wore:wear worn:wear wove:weave woven:weave wept:weep won:win wound:wind wrung:wring wrote:write written:write children:child feet:foot teeth:tooth geese:goose oxen:ox men:man women:woman mice:mouse lice:louse dice:die people:person better:good best:good worse:bad worst:bad".split(" ").map(p => p.split(":")));
+  /* Webster's entries for irregular forms point to their root: "imp. & p. p. of Strike." */
+  const webRoot = def => { const m = /^(?:(?:imp|p\. ?p|p\. ?pr|pret|pl|compar|superl|3d pers\. sing\. pres|obs\. imp|obs\. p\. p|vb\. n|obs\. pl|of)\.?\s*(?:&|and|,|or)?\s*)+of\s+([A-Za-z][A-Za-z-]*)\s*[.;,]?\s*(?:\[|--|$)/i.exec(def.slice(0, 120)); return m ? m[1].toLowerCase().trim() : null; };
+  async function dictFind(w) {
+    const wnOf = (j, x) => (j?.w?.[x] || []).map(i => j.s[i]);
+    const forms = wordForms(w); if (IRREG[w] && !forms.includes(IRREG[w])) forms.splice(1, 0, IRREG[w]);
+    for (const f of forms) {
+      const s = dictShard(f); const [wn, web] = await Promise.all([loadShard("wn", s), loadShard("web", s)]);
+      let senses = wnOf(wn, f), wdef = web[f] || "", root = IRREG[f] || (wdef && webRoot(wdef)), note = "";
+      if (root && root !== f && !senses.length) {
+        const rs = dictShard(root), [wn2, web2] = await Promise.all([loadShard("wn", rs), loadShard("web", rs)]);
+        if (wnOf(wn2, root).length || web2[root]) { note = IRREG[f] ? `from “${w}”` : `${f}: ${wdef.replace(/\s*\[.*$/, "").replace(/\.$/, "")}`; return { head: root, from: w, note, wn: wnOf(wn2, root), web: web2[root] || "" }; }
+      }
+      if (senses.length || wdef) {
+        /* The word is a dictionary word itself ("struck", "running"); still offer its root. */
+        const alsoOf = [root, IRREG[f], ...wordForms(f).slice(1)].filter(x => x && x !== f), also = [];
+        for (const a of alsoOf) { const as = dictShard(a); try { const [wa, wb] = await Promise.all([loadShard("wn", as), loadShard("web", as)]); if (wnOf(wa, a).length || wb[a]) { also.push(a); break; } } catch (e) {} }
+        return { head: f, from: w, note: f !== w ? `from “${w}”` : "", wn: senses, web: wdef, also };
+      }
+    }
+    return null;
+  }
+  let dictStack = [], dictSel = null;
+  async function lookUp(word, { push = true, sel } = {}) {
+    word = clean(word).toLowerCase().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
+    if (sel !== undefined) dictSel = sel;
+    if (!word) return;
+    if (word.split(/\s+/).length > 4) { toast("Select one word, or a short phrase, to look it up"); return; }
+    if (push) dictStack.push(word);
+    const open = document.querySelector(".sheet-back .dict");
+    if (!open) sheet(`<div class="dict"><p class="fine">Looking up “${esc(word)}”…</p></div>`);
+    let r; try { r = await dictFind(word); }
+    catch (e) { dictSheet(`<h2>${esc(word)}</h2><p class="sub" style="margin:8px 0 14px">The dictionary isn’t on this phone yet. Connect to the internet once and it downloads the part it needs; Settings → Dictionary keeps all of it offline.</p>${dictButtons(word, null)}`); return; }
+    if (!r && word.includes(" ")) { const ws = word.split(/\s+/);
+      dictSheet(`<h2>${esc(word)}</h2><p class="sub" style="margin:8px 0 12px">No entry for the whole phrase. Look up a word:</p><div class="row wrap" style="gap:8px">${ws.map(x => `<button class="chip" data-act="dlook" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>${dictButtons(word, null)}`); return; }
+    if (!r) { dictSheet(`<h2>${esc(word)}</h2><p class="sub" style="margin:8px 0 14px">Not in WordNet or Webster’s 1913. Names, foreign words and very new words are often missing.</p>${dictButtons(word, null)}`); return; }
+    dictSheet(dictHTML(r, dictButtons(word, r)));
+  }
+  function dictSheet(html) {
+    const back = dictStack.length > 1 ? `<button class="tb" data-act="dback" aria-label="Back" style="margin:-6px 0 4px -8px"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>` : "";
+    const open = document.querySelector(".sheet-back .dict");
+    if (open) { open.innerHTML = back + html; open.closest(".sheet").scrollTop = 0; } else sheet(`<div class="dict">${back}${html}</div>`);
+  }
+  const POS_ORDER = ["noun", "verb", "adjective", "adverb"];
+  function dictHTML(r, buttons = "") {
+    let h = `<div class="dhead"><h2 class="dword">${esc(r.head)}</h2>${r.note ? `<span class="fine">${esc(r.note)}</span>` : ""}</div>${buttons}`;
+    if (r.also?.length) h += `<div class="row" style="gap:6px;margin-top:4px"><span class="fine">See also</span>${r.also.map(a => `<button class="dchip" data-act="dlook" data-v="${esc(a)}">${esc(a)}</button>`).join("")}</div>`;
+    if (r.wn.length) {
+      h += `<div class="dsrc">Modern · WordNet</div>`;
+      const verbFirst = r.from !== r.head && (/(ed|ing)$/.test(r.from) || (IRREG[r.from] && !/^(children|feet|teeth|geese|oxen|men|women|mice|lice|dice|people|better|best|worse|worst)$/.test(r.from)));
+      for (const pos of verbFirst ? ["verb", "noun", "adjective", "adverb"] : POS_ORDER) { const ss = r.wn.filter(s => s[0] === pos); if (!ss.length) continue;
+        h += `<div class="dpos">${pos}</div><ol class="dsenses">${ss.map((s, i) => { const [def, ...ex] = s[1].split(/;\s*(?=")/), syn = s[2].split(", ").filter(x => x && x.toLowerCase() !== r.head);
+          return `<li class="${i >= 4 ? "dmore" : ""}">${esc(def)}${ex.length ? `<span class="dex">${ex.map(x => esc(x.replace(/^"|"$/g, ""))).join(" · ")}</span>` : ""}${syn.length ? `<span class="dsyn">${syn.slice(0, 6).map(x => `<button class="dchip" data-act="dlook" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</span>` : ""}</li>`; }).join("")}</ol>
+          ${ss.length > 4 ? `<button class="dshow" data-act="dshow">Show all ${ss.length} senses</button>` : ""}`; }
+    }
+    if (r.web) {
+      h += `<div class="dsrc">Classic · Webster’s 1913</div>`;
+      let n = 0;
+      h += r.web.split(/\n\n+/).slice(0, 8).map(block => { const parts = block.split(/\s(?=\d{1,2}\. )|\s--\s(?=[A-Z])/);
+        return `<div class="dweb">${parts.map(p => `<p class="${n++ >= 5 ? "dmore" : ""}">${esc(p).replace(/^(\d{1,2}\.)/, "<b>$1</b>").replace(/\(([A-Z][a-zöæ]+\.(?: [A-Za-z]+\.)?)\)/g, "<i>($1)</i>")}</p>`).join("")}</div>`; }).join("");
+      if (n > 5) h += `<button class="dshow" data-act="dshowweb">Show more of Webster’s</button>`;
+    }
+    return h;
+  }
+  const dictButtons = (word, r) => `<div class="row" style="gap:8px;margin-top:10px">${r && dictSel ? `<button class="btn" data-act="dsave" data-v="${esc(r.head)}">Save word</button>` : ""}<button class="btn ghost" data-act="donline" data-v="${esc(word)}">Look up online</button></div>`;
+  function saveWord(head) {
+    const i = dictSel; if (!i || !R) return;
+    const first = dictData.wn[dictShard(head)]?.w?.[head]?.[0], def = first != null ? dictData.wn[dictShard(head)].s[first][1].split(/;\s*(?=")/)[0] : "";
+    quotes.push({ ...i, id: uid("q"), at: Date.now(), book: R.meta.id, page: i.kind === "pdf" ? i.page : pageAt(R.meta, i.ch, i.p, i.s), color: 4, tags: ["words"], note: def ? `${head}: ${def}` : head });
+    saveQuotes(); dictSel = null; getSelection()?.removeAllRanges(); hideQbar(); refreshMarks();
+    const b = document.querySelector("[data-act=dsave]"); if (b) { b.textContent = "Saved to #words"; b.disabled = true; }
+  }
+  async function dictStatus() {
+    const el = $("#dictstat"); if (!el) return;
+    try { const idx = await fetch("dict/index.json").then(r => r.json()), c = await caches.open(DICT_CACHE), have = (await c.keys()).filter(k => /\/dict\/(wn|web)-/.test(k.url)).length, all = idx.wn.length + idx.web.length;
+      el.textContent = have >= all ? "All on this phone · works offline" : have ? `${have} of ${all} parts on this phone` : `Downloads as you look words up (about 17 MB in all)`; el.dataset.all = all; el.dataset.have = have;
+    } catch (e) { el.textContent = "Downloads as you look words up"; }
+  }
+  async function dictDownloadAll() {
+    const b = $("#dictdl"); if (!b || b.disabled) return; b.disabled = true;
+    try { const idx = await fetch("dict/index.json").then(r => r.json()), c = await caches.open(DICT_CACHE), urls = [...idx.wn.map(s => `dict/wn-${s}.json`), ...idx.web.map(s => `dict/web-${s}.json`)];
+      let n = 0; for (const u of urls) { if (!(await c.match(u))) { const r = await fetch(u); if (!r.ok) throw new Error(); await c.put(u, r); } n++; b.textContent = `Downloading… ${Math.round(n / urls.length * 100)}%`; }
+      b.textContent = "Downloaded"; toast("The dictionary works offline now"); dictStatus();
+    } catch (e) { b.disabled = false; b.textContent = "Download for offline"; toast("Download stopped. Check the connection and try again."); }
+  }
+
   /* The quote sheet: new or edit */
   let draft = null;
   function quoteSheet(q) {
@@ -1606,7 +1727,14 @@
     else if (a === "theme") { settings.theme = d.v; saveSettings(); applyTheme(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); }
     else if (a === "quote") { const i = selInfo(); if (!i) return; quoteSheet({ ...i, book: R.meta.id, page: i.kind === "pdf" ? i.page : pageAt(R.meta, i.ch, i.p, i.s), color: settings.lastColor || 1, tags: [], note: "" }); }
     else if (a === "copysel") { try { await navigator.clipboard.writeText(getSelection().toString()); toast("Copied"); } catch (err) { toast("Couldn't copy"); } }
-    else if (a === "lookup") { const t = clean(getSelection().toString()).slice(0, 80); if (t) window.open("https://en.wiktionary.org/wiki/Special:Search?search=" + encodeURIComponent(t), "_blank", "noopener"); }
+    else if (a === "lookup") { const t = clean(getSelection().toString()).slice(0, 80); if (t) { dictStack = []; lookUp(t, { sel: selInfo() }); } }
+    else if (a === "dlook") lookUp(d.v);
+    else if (a === "dback") { dictStack.pop(); const w = dictStack[dictStack.length - 1]; if (w) lookUp(w, { push: false }); }
+    else if (a === "dshowweb") { document.querySelectorAll(".dweb .dmore").forEach(x => x.classList.remove("dmore")); el.remove(); }
+    else if (a === "dshow") { el.previousElementSibling?.querySelectorAll(".dmore").forEach(x => x.classList.remove("dmore")); el.remove(); }
+    else if (a === "dsave") saveWord(d.v);
+    else if (a === "donline") window.open("https://en.wiktionary.org/wiki/Special:Search?search=" + encodeURIComponent(d.v), "_blank", "noopener");
+    else if (a === "dictdl") dictDownloadAll();
     else if (a === "qcolor") { draft.color = +d.v; el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === el)); $("#qprev").style.borderLeftColor = `var(--c${draft.color}s)`; }
     else if (a === "qtag") { const t = d.v; draft.tags.includes(t) ? draft.tags.splice(draft.tags.indexOf(t), 1) : draft.tags.push(t); el.classList.toggle("on"); }
     else if (a === "saveq") {

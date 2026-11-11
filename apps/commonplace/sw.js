@@ -1,5 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "commonplace-v13";
+const VERSION = "commonplace-v14";
+// The dictionary lives in its own cache, kept across app updates (it is large and rarely changes).
+const DICT_CACHE = "commonplace-dict-v1";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2", "./data/sample-tao-te-ching.json"];
 // The EPUB/PDF parsers are kept offline once fetched.
 const RUNTIME_HOSTS = ["cdnjs.cloudflare.com"];
@@ -11,7 +13,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== DICT_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -21,6 +23,11 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
+  // Dictionary parts: from the dictionary cache, fetched once.
+  if (url.origin === location.origin && /\/dict\/(wn|web)-[a-z0]\.json$/.test(url.pathname)) {
+    e.respondWith(caches.open(DICT_CACHE).then(async cache => (await cache.match(req, { ignoreSearch: true })) || fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; })));
+    return;
+  }
   // App files: serve from cache instantly, refresh in the background.
   if (url.origin === location.origin) {
     e.respondWith(

@@ -21,6 +21,12 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 
 ## Finding your way
 
+- **Built-in dictionary:** select a word and tap **Look up** for a card over the page, with modern senses, examples and synonyms
+  from Princeton's **WordNet 3.1** and the classic definitions, with their quotations, from **Webster's Unabridged (1913)**.
+  It finds the root of inflected and irregular forms (elephants → elephant, went → go, struck → see also strike),
+  tapping a synonym looks it up, and **Save word** keeps it with its sentence under #words. The dictionary loads one
+  letter at a time and stays on the phone; Settings → Dictionary downloads all of it (about 17 MB) for offline use.
+  "Look up online" opens Wiktionary for names and foreign words.
 - **The book's own table of contents:** EPUB 3 nav or EPUB 2 NCX, with parts, chapters and sections
   nested and linked mid-chapter; PDF bookmarks (outline). Each entry shows its page. The contents collapse:
   entries with sections inside have a chevron, the path to where you are reading opens by itself (the
