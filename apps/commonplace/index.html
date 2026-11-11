@@ -295,7 +295,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "11", APP_DATE = "5 Nov 2026";
+  const APP_VERSION = "12", APP_DATE = "11 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -355,6 +355,11 @@
     try { const img = await createImageBitmap(blob), c = document.createElement("canvas"); c.width = width; c.height = Math.round(img.height * width / img.width);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c.toDataURL("image/jpeg", .82); } catch (e) { return null; }
   }
+  /* Many EPUBs (especially ones converted from PDF or scans) end every printed line with <br>. Text extraction
+     ignores <br>, which glued "away<br>by" into "awayby"; each break becomes a space, except after a hyphen. */
+  function breaksToSpaces(doc) {
+    doc.querySelectorAll("br").forEach(br => { const prev = br.previousSibling?.textContent || ""; br.replaceWith(/[A-Za-z\u00C0-\u024F]-$/.test(prev) ? "" : " "); });
+  }
   async function parseEpub(file) {
     await needJSZip();
     const zip = await JSZip.loadAsync(file);
@@ -381,7 +386,7 @@
     const docs = [];
     for (const href of spine) {
       const path = resolve(href); let html; try { html = await text(path); } catch (e) { continue; }
-      const doc = new DOMParser().parseFromString(html, "text/html");
+      const doc = new DOMParser().parseFromString(html, "text/html"); breaksToSpaces(doc);
       const els = [...doc.body.querySelectorAll(BLOCKS)].filter(el => !el.querySelector(BLOCKS));
       let objs = els.map(el => ({ t: clean(el.textContent), k: KIND[el.tagName] || "p", el })).filter(o => o.t);
       if (!objs.length) objs = (doc.body.textContent || "").split(/\n+/).map(clean).filter(Boolean).map(t => ({ t, k: "p", el: null }));
