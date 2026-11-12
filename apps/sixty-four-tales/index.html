@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sixty-Four Tales</title>
+  <meta name="description" content="A tale from somewhere in the world for each of the 64 hexagrams of the I Ching, retold to be told aloud.">
+  <meta name="theme-color" content="#f3ece0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="64 Tales">
+  <style>
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader.woff2) format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Newsreader"; src: url(fonts/newsreader-italic.woff2) format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+    :root {
+      --paper: #f3ece0; --card: #fffcf6; --ink: #1d1813; --ink2: #554b40; --muted: #93877a;
+      --line: rgba(80,55,25,.11); --line2: rgba(80,55,25,.22);
+      --ember: #b4532a; --ember-soft: rgba(180,83,42,.1); --ember-ink: #fff;
+      --teal: #2f6466; --teal-soft: rgba(47,100,102,.1); --gold: #b8892e;
+      --e1: 0 1px 2px rgba(60,40,15,.06), 0 2px 8px rgba(60,40,15,.05);
+      --e2: 0 2px 6px rgba(60,40,15,.08), 0 10px 28px rgba(60,40,15,.09);
+      --e3: 0 12px 48px rgba(30,20,8,.22);
+      --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --spring: cubic-bezier(.2, .9, .25, 1.15);
+      --r: 22px;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+      --paper: #16130f; --card: #211c17; --ink: #efe6d8; --ink2: #c4b8a6; --muted: #8d8172;
+      --line: rgba(240,220,190,.09); --line2: rgba(240,220,190,.18);
+      --ember: #e0855a; --ember-soft: rgba(224,133,90,.13); --ember-ink: #1b120c; --teal: #7fb6b2; --teal-soft: rgba(127,182,178,.12); --gold: #d9ae5c;
+      --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 4px 18px rgba(0,0,0,.35); --e3: 0 12px 48px rgba(0,0,0,.55); color-scheme: dark; } }
+    :root[data-theme="dark"] {
+      --paper: #16130f; --card: #211c17; --ink: #efe6d8; --ink2: #c4b8a6; --muted: #8d8172;
+      --line: rgba(240,220,190,.09); --line2: rgba(240,220,190,.18);
+      --ember: #e0855a; --ember-soft: rgba(224,133,90,.13); --ember-ink: #1b120c; --teal: #7fb6b2; --teal-soft: rgba(127,182,178,.12); --gold: #d9ae5c;
+      --e1: 0 1px 2px rgba(0,0,0,.3); --e2: 0 4px 18px rgba(0,0,0,.35); --e3: 0 12px 48px rgba(0,0,0,.55); color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+    #main { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 110px); }
+    a { color: var(--ember); }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; margin: 0; line-height: 1.15; }
+    h1 { font-size: 36px; } h2 { font-size: 26px; } h3 { font-size: 20px; }
+    p { margin: 0 0 12px; }
+    .muted { color: var(--muted); } .small { font-size: 14px; } .center { text-align: center; }
+    .eyebrow { font: 650 11.5px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .card { background: var(--card); border-radius: var(--r); padding: 20px; box-shadow: var(--e1); border: 1px solid var(--line); }
+    .card + .card, .sec + .sec { margin-top: 14px; }
+    .sec { margin-top: 26px; } .sec > .eyebrow { margin: 0 4px 10px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 600 15.5px var(--sans); text-decoration: none; cursor: pointer; transition: transform .15s; white-space: nowrap; }
+    .btn:active { transform: scale(.97); }
+    .btn.ember { background: var(--ember); border-color: var(--ember); color: var(--ember-ink); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.block { display: flex; width: 100%; }
+    .btn.sm { min-height: 36px; padding: 6px 13px; font-size: 14px; }
+    .btn svg, .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .btn.on { background: var(--teal); border-color: var(--teal); color: var(--card); }
+    .view.enter { animation: rise .35s var(--spring) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes sheetup { from { transform: translateY(100%); } }
+    /* hexagram glyph */
+    .hx { display: inline-flex; flex-direction: column; gap: var(--g, 4px); width: var(--w, 34px); flex: none; }
+    .hx i { display: flex; justify-content: space-between; height: var(--h, 4px); }
+    .hx i::before, .hx i::after { content: ""; background: currentColor; border-radius: 1px; }
+    .hx i.y::before { width: 100%; } .hx i.y::after { display: none; }
+    .hx i.n::before, .hx i.n::after { width: 42%; }
+    .hx i.m::before { box-shadow: 0 0 0 2px var(--ember-soft); }
+    .hx.big { --w: 92px; --h: 11px; --g: 9px; color: var(--ink); }
+    .hx.med { --w: 52px; --h: 6px; --g: 5px; }
+    /* top bar */
+    .top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-bottom: 8px; }
+    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); text-decoration: none; font: 600 15px var(--sans); padding: 8px 4px; }
+    .iconbtn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink2); background: transparent; border: 0; cursor: pointer; text-decoration: none; }
+    /* hero */
+    .hero { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; margin: 10px 2px 22px; }
+    .hero h1 { font-size: 34px; }
+    .zh { font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif", serif; }
+    .theme { font: italic 400 19px/1.45 var(--serif); color: var(--ink2); margin-top: 10px; }
+    /* tale */
+    .tale h2 { font-size: 28px; }
+    .src { display: inline-block; margin-top: 8px; font: 500 13px/1.4 var(--sans); color: var(--teal); background: var(--teal-soft); padding: 5px 11px; border-radius: 999px; }
+    .text { font: 400 19.5px/1.68 var(--serif); margin-top: 16px; }
+    .text p { margin: 0 0 14px; }
+    .text p:first-child::first-letter { float: left; font: 500 56px/.85 var(--serif); padding: 6px 8px 0 0; color: var(--ember); }
+    .text.fold { max-height: 11.5em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .actions .btn { flex: 1; }
+    .howto dt { font: 650 11.5px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ember); margin-top: 16px; }
+    .howto dt:first-child { margin-top: 0; }
+    .howto dd { margin: 6px 0 0; }
+    .say { font: italic 400 18px/1.5 var(--serif); border-left: 3px solid var(--ember); padding: 2px 0 2px 14px; }
+    ul.when { margin: 6px 0 0; padding-left: 20px; } ul.when li { margin: 4px 0; }
+    .lesson { text-align: center; cursor: pointer; background: var(--ember-soft); border-color: transparent; }
+    .lesson .shh { font: italic 400 18px/1.5 var(--serif); }
+    .lesson.hidden .shh { filter: blur(7px); user-select: none; }
+    .fits { font: 400 17px/1.6 var(--serif); color: var(--ink2); }
+    .also h3 { font-size: 22px; margin-top: 6px; }
+    .pn { display: flex; justify-content: space-between; gap: 10px; margin-top: 26px; }
+    .pn a { flex: 1; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; box-shadow: var(--e1); }
+    .pn a small { display: block; color: var(--muted); font-size: 12px; }
+    .pn a:last-child { text-align: right; }
+    /* lists */
+    .search { width: 100%; font: 400 17px var(--sans); padding: 13px 16px 13px 44px; border-radius: 16px; border: 1px solid var(--line2); background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2393877a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 14px 50% / 20px no-repeat; color: var(--ink); }
+    .search:focus { outline: 2px solid var(--ember); outline-offset: 1px; }
+    .chips { display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px 4px; scrollbar-width: none; } .chips::-webkit-scrollbar { display: none; }
+    .chip { flex: none; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card); color: var(--ink2); font: 550 13.5px var(--sans); cursor: pointer; white-space: nowrap; }
+    .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .list { margin-top: 12px; }
+    .item { display: grid; grid-template-columns: 34px 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--e1); }
+    .item + .item { margin-top: 8px; }
+    .item .t { font: 500 18px/1.25 var(--serif); }
+    .item .m { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .item .n { font: 500 15px var(--serif); color: var(--muted); text-align: right; }
+    .item .done { color: var(--teal); }
+    /* today */
+    .today { padding: 22px; }
+    .today .hx { color: var(--ember); }
+    .ring { position: relative; width: 74px; height: 74px; flex: none; }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 500 20px var(--serif); }
+    /* cast */
+    .castbox { display: flex; flex-direction: column-reverse; gap: 10px; align-items: center; min-height: 170px; justify-content: flex-start; margin: 10px 0 18px; }
+    .castbox .hx { --w: 120px; --h: 13px; --g: 10px; }
+    .cline { width: 120px; height: 13px; display: flex; justify-content: space-between; animation: rise .4s var(--spring) both; }
+    .cline::before, .cline::after { content: ""; background: var(--ink); border-radius: 2px; }
+    .cline.y::before { width: 100%; } .cline.y::after { display: none; }
+    .cline.n::before, .cline.n::after { width: 42%; }
+    .cline.m::before, .cline.m::after { background: var(--ember); }
+    .coins { display: flex; gap: 14px; justify-content: center; margin: 8px 0 16px; min-height: 58px; }
+    .coin { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font: 600 22px var(--serif); background: radial-gradient(circle at 35% 30%, #e9c77d, #b8892e 70%); color: #3a2a0c; box-shadow: inset 0 0 0 4px rgba(255,255,255,.25), var(--e1); animation: flip .5s ease both; }
+    .coin.t { background: radial-gradient(circle at 35% 30%, #d6c7a8, #8e7d5e 70%); }
+    @keyframes flip { from { transform: rotateY(540deg) scale(.6); opacity: 0; } }
+    /* tell mode */
+    .tell { position: fixed; inset: 0; z-index: 60; background: #120f0c; color: #f1e8da; overflow-y: auto; padding: calc(env(safe-area-inset-top) + 18px) 22px calc(env(safe-area-inset-bottom) + 30px); }
+    .tell .inner { max-width: 640px; margin: 0 auto; }
+    .tell .beats { counter-reset: b; list-style: none; padding: 0; margin: 22px 0; }
+    .tell .beats li { counter-increment: b; display: grid; grid-template-columns: 34px 1fr; gap: 10px; font: 400 23px/1.4 var(--serif); padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.08); transition: opacity .3s; }
+    .tell .beats li::before { content: counter(b); font: 600 15px var(--sans); color: #e0855a; padding-top: 6px; }
+    .tell .beats.hide li:not(.shown) { opacity: .12; }
+    .tell .say { border-color: #e0855a; color: #f1e8da; }
+    .tell .btn { background: rgba(255,255,255,.08); color: #f1e8da; border-color: rgba(255,255,255,.15); }
+    .tell .btn.ember { background: #e0855a; color: #1b120c; border-color: #e0855a; }
+    .tell .clock { font: 300 46px var(--serif); font-variant-numeric: tabular-nums; text-align: center; margin: 6px 0 2px; }
+    /* practice */
+    .flash { min-height: 300px; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 28px 22px; }
+    .flash .q { font: 500 27px/1.25 var(--serif); }
+    .flash .hx { margin: 0 auto 16px; }
+    .flash .a { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--line2); text-align: left; }
+    .rate { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .rate .btn { white-space: normal; text-align: center; line-height: 1.2; font-size: 14.5px; }
+    .seg { display: flex; background: var(--card); border: 1px solid var(--line2); border-radius: 999px; padding: 4px; gap: 4px; }
+    .seg button { flex: 1; border: 0; background: transparent; padding: 9px 8px; border-radius: 999px; font: 600 13.5px var(--sans); color: var(--ink2); cursor: pointer; }
+    .seg button.on { background: var(--ink); color: var(--paper); }
+    .bar { height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; } .bar i { display: block; height: 100%; background: var(--teal); border-radius: 8px; }
+    /* journal */
+    .entry { padding: 14px 16px; }
+    .entry .d { font-size: 13px; color: var(--muted); }
+    .landed { display: inline-block; font: 600 12px var(--sans); padding: 3px 9px; border-radius: 999px; background: var(--teal-soft); color: var(--teal); }
+    textarea, input[type=text] { width: 100%; font: 400 16px/1.45 var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line2); background: var(--paper); color: var(--ink); }
+    textarea { min-height: 90px; resize: vertical; }
+    label.f { display: block; margin-top: 14px; } label.f > span { display: block; font: 600 13px var(--sans); color: var(--ink2); margin-bottom: 6px; }
+    /* tabs */
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 40; display: flex; gap: 2px; padding: 6px; border-radius: 999px; background: color-mix(in srgb, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--line2); box-shadow: var(--e2); width: min(440px, calc(100% - 24px)); }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 999px; text-decoration: none; color: var(--muted); font: 600 11.5px var(--sans); }
+    nav.tabs a.on { color: var(--ink); background: var(--ember-soft); }
+    nav.tabs a.on svg { color: var(--ember); }
+    nav.tabs[hidden] { display: none; }
+    /* sheet, toast */
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,14,8,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px); box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 8px 0; }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--paper); padding: 11px 18px; border-radius: 999px; font: 550 14.5px var(--sans); box-shadow: var(--e2); animation: rise .3s var(--spring) both; max-width: calc(100% - 40px); text-align: center; }
+    .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+    .loading { padding: 80px 0; text-align: center; color: var(--muted); font-family: var(--serif); font-style: italic; }
+    @media (max-width: 380px) { h1, .hero h1 { font-size: 29px; } .text { font-size: 18.5px; } .hx.big { --w: 72px; --h: 9px; --g: 7px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"><div class="loading">Gathering the tales…</div></main>
+  <nav class="tabs" id="tabs" hidden></nav>
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const DAY = 864e5;
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+  const dstr = t => new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  const toast = (m, ms = 2400) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  /* Everything personal stays on this device. */
+  const KEY = "sixty-four-tales";
+  const db = Object.assign({ learned: {}, cards: {}, log: [], seen: {}, theme: "auto", mode: "h2t" },
+    (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+
+  /* ---------- Hexagram structure (King Wen order); bits run bottom to top ---------- */
+  const TRI = { qian: ["111", "Heaven"], dui: ["110", "Lake"], li: ["101", "Fire"], zhen: ["100", "Thunder"], xun: ["011", "Wind"], kan: ["010", "Water"], gen: ["001", "Mountain"], kun: ["000", "Earth"] };
+  const RAW = "qian qian,kun kun,kan zhen,gen kan,kan qian,qian kan,kun kan,kan kun,xun qian,qian dui,kun qian,qian kun,qian li,li qian,kun gen,zhen kun,dui zhen,gen xun,kun dui,xun kun,li zhen,gen li,gen kun,kun zhen,qian zhen,gen qian,gen zhen,dui xun,kan kan,li li,dui gen,zhen xun,qian gen,zhen qian,li kun,kun li,xun li,li dui,kan gen,zhen kan,gen dui,xun zhen,dui qian,qian xun,dui kun,kun xun,dui kan,kan xun,dui li,li xun,zhen zhen,gen gen,xun gen,zhen dui,zhen li,li gen,xun xun,dui dui,xun kan,kan dui,xun dui,zhen gen,kan li,li kan".split(",");
+  const STRUCT = RAW.map((r, i) => { const [up, lo] = r.split(" "); return { n: i + 1, up, lo, bits: TRI[lo][0] + TRI[up][0] }; });
+  const BY_BITS = Object.fromEntries(STRUCT.map(h => [h.bits, h.n]));
+  const glyph = (n, cls = "", moving = []) => `<span class="hx ${cls}" aria-hidden="true">${[...STRUCT[n - 1].bits].map((b, i) => `<i class="${b === "1" ? "y" : "n"}${moving.includes(i) ? " m" : ""}"></i>`).reverse().join("")}</span>`;
+  const pair = n => { const h = STRUCT[n - 1]; return h.up === h.lo ? `${TRI[h.up][1]} doubled` : `${TRI[h.up][1]} over ${TRI[h.lo][1]}`; };
+
+  const ic = n => `<svg class="i" viewBox="0 0 24 24">${{
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+    book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
+    cards: '<rect x="6" y="3.5" width="13" height="17" rx="2.5"/><path d="M3.5 7v11.5A2.5 2.5 0 0 0 6 21"/>',
+    pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+    back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    coins: '<circle cx="9" cy="9" r="5.5"/><path d="M14.8 8.6A5.5 5.5 0 1 1 9.4 15"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' }[n] || ""}</svg>`;
+
+  /* ---------- Data ---------- */
+  let T = null; /* the 64 entries */
+  const tale = n => T[n - 1];
+  const culture = src => String(src).split(" · ")[0];
+  const REGIONS = ["East Asia", "South Asia", "Middle East", "Bible & Talmud", "Greece & Rome", "Europe", "Africa", "Americas & Pacific"];
+
+  /* A stable "tale of the day": walks a fixed shuffle of the 64 so no tale repeats for 64 days. */
+  const ORDER = (() => { const a = [...Array(64)].map((_, i) => i + 1); let s = 64; for (let i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; })();
+  const todayN = () => ORDER[Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / DAY) % 64];
+
+  /* ---------- Routing ---------- */
+  let lastHash = "";
+  function route() { const p = (location.hash || "#/").slice(2).split("/"); return { v: p[0] || "today", a: p[1], b: p[2] }; }
+  function render() {
+    if (!T) return;
+    const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    closeTell();
+    let html;
+    if (v === "h") html = viewHex(+a); else if (v === "tales") html = viewTales(); else if (v === "practice") html = viewPractice();
+    else if (v === "journal") html = viewJournal(); else if (v === "cast") html = viewCast(); else if (v === "about") html = viewAbout();
+    else if (v === "tell") { html = viewHex(+a); setTimeout(() => openTell(+a), 0); } else html = viewToday();
+    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    tabs(v); if (nav && v !== "tell") scrollTo(0, 0); lastHash = h;
+    document.title = v === "h" && tale(+a) ? `${tale(+a).name} · Sixty-Four Tales` : "Sixty-Four Tales";
+  }
+  addEventListener("hashchange", render);
+  function tabs(v) {
+    const t = $("#tabs"); t.hidden = false;
+    const cur = { h: "tales", tell: "tales", cast: "today", about: "today" }[v] || v;
+    t.innerHTML = [["today", "sun", "Today"], ["tales", "book", "Tales"], ["practice", "cards", "Practice"], ["journal", "pen", "Journal"]]
+      .map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
+  }
+  const backLink = (href, label) => `<a class="back" href="${href}">${ic("back")}${label}</a>`;
+
+  /* ---------- Today ---------- */
+  function viewToday() {
+    const n = todayN(), x = tale(n), learned = Object.keys(db.learned).length, next = T.find(t => !db.learned[t.n]);
+    const due = dueCards().length, hr = new Date().getHours();
+    const greet = hr < 5 ? "A late-night tale" : hr < 12 ? "A tale for the morning" : hr < 18 ? "A tale for the afternoon" : "A tale for the evening";
+    const r = 31, c = 2 * Math.PI * r;
+    return `<div class="top"><div class="eyebrow">Sixty-Four Tales</div><a class="iconbtn" href="#/about" aria-label="About and settings">${ic("gear")}</a></div>
+      <h1 style="margin:6px 2px 18px">${greet}</h1>
+      <a class="card today" href="#/h/${n}" style="display:block;text-decoration:none;color:var(--ink)">
+        <div class="row between" style="align-items:flex-start"><div class="grow"><div class="eyebrow" style="color:var(--ember)">Hexagram ${n} · ${esc(x.name)}</div>
+          <h2 style="margin-top:8px">${esc(x.tale.title)}</h2><div class="src">${esc(culture(x.tale.source))}</div></div>${glyph(n, "med")}</div>
+        <p class="theme" style="margin:14px 0 0">${esc(x.theme)}</p></a>
+      <div class="actions"><a class="btn ember" href="#/h/${n}">${ic("book")} Read it</a><a class="btn" href="#/cast">${ic("coins")} Cast a hexagram</a></div>
+      <div class="sec"><div class="eyebrow">Your sixty-four</div><div class="card row" style="gap:16px">
+        <div class="ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="${r}" fill="none" stroke="var(--line)" stroke-width="7"/><circle cx="37" cy="37" r="${r}" fill="none" stroke="var(--teal)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - learned / 64)).toFixed(1)}"/></svg><b>${learned}</b></div>
+        <div class="grow"><b style="font-family:var(--serif);font-size:19px;font-weight:500">${learned === 64 ? "All sixty-four are yours." : `${learned} of 64 tales learned`}</b>
+          <p class="small muted" style="margin:4px 0 0">${due ? `${due} practice card${due === 1 ? "" : "s"} due today.` : "Learn a tale, then practise it until you can tell it without looking."}</p></div></div>
+        ${next ? `<a class="item" href="#/h/${next.n}" style="margin-top:10px">${glyph(next.n)}<div><div class="eyebrow" style="font-size:10.5px">Next to learn</div><div class="t">${esc(next.tale.title)}</div><div class="m">${next.n} · ${esc(next.name)}</div></div><span class="n">${ic("chev")}</span></a>` : ""}
+        ${due ? `<a class="btn block" href="#/practice" style="margin-top:10px">${ic("cards")} Practise ${due} card${due === 1 ? "" : "s"}</a>` : ""}</div>
+      ${db.log.length ? `<div class="sec"><div class="eyebrow">Last told</div>${[...db.log].sort((a, b) => b.at - a.at).slice(0, 2).map(entryHTML).join("")}</div>` : ""}`;
+  }
+
+  /* ---------- Browse ---------- */
+  let q = "", region = "";
+  function score(x, words) {
+    const hay = [x.name, x.tale.title, x.also.title, x.theme, x.tale.source, x.also.source, x.region, x.alsoRegion, (x.tags || []).join(" "), (x.tale.when || []).join(" "), x.zh, x.py, String(x.n)].join(" ").toLowerCase();
+    return words.every(w => hay.includes(w)) ? 1 : 0;
+  }
+  function results() {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    return T.filter(x => (!region || x.region === region || x.alsoRegion === region) && (!words.length || score(x, words)));
+  }
+  /* When a region filter matches only the second tale, show that one. */
+  const itemHTML = x => { const alt = region && x.region !== region; return `<a class="item" href="#/h/${x.n}">${glyph(x.n)}<div class="grow"><div class="t">${esc(alt ? x.also.title : x.tale.title)}</div><div class="m">${x.n} · ${esc(x.name)} · ${alt ? `${esc(culture(x.also.source))} · second tale` : esc(culture(x.tale.source))}</div></div><span class="n">${db.learned[x.n] ? `<span class="done">${ic("check")}</span>` : ""}</span></a>`; };
+  function viewTales() {
+    const r = results();
+    return `<h1 style="margin:8px 2px 4px">The tales</h1><p class="muted" style="margin:0 2px 16px">One for each hexagram. Search a situation, a feeling, a place or a name.</p>
+      <input class="search" id="q" type="search" placeholder="e.g. impatience, grief, a new job, Japan" value="${esc(q)}" autocomplete="off">
+      <div class="chips">${["", ...REGIONS].map(g => `<button class="chip${region === g ? " on" : ""}" data-act="region" data-v="${esc(g)}">${g || "All"}</button>`).join("")}</div>
+      <div class="list" id="list">${r.map(itemHTML).join("") || `<p class="muted center" style="margin-top:30px">No tale matches yet. Try another word.</p>`}</div>`;
+  }
+
+  /* ---------- One hexagram ---------- */
+  const paras = s => String(s).split(/\n\n+/).map(p => `<p>${esc(p)}</p>`).join("");
+  function viewHex(n) {
+    const x = tale(n); if (!x) { location.hash = "#/tales"; return ""; }
+    const t = x.tale, a = x.also, prev = n > 1 ? tale(n - 1) : null, nxt = n < 64 ? tale(n + 1) : null;
+    db.seen[n] = Date.now(); save();
+    return `<div class="top">${backLink("#/tales", "Tales")}<a class="iconbtn" href="../book-of-changes/#/h/${n}" aria-label="Study this hexagram in Book of Changes">${ic("link")}</a></div>
+      <div class="hero"><div><div class="eyebrow">Hexagram ${n} · <span class="zh">${esc(x.zh)}</span> ${esc(x.py)}</div><h1 style="margin-top:8px">${esc(x.name)}</h1>
+        <div class="small muted" style="margin-top:6px">${pair(n)}</div></div>${glyph(n, "big")}</div>
+      <p class="theme" style="margin:-6px 2px 20px">${esc(x.theme)}</p>
+      <article class="card tale"><div class="eyebrow" style="color:var(--ember)">The tale</div><h2 style="margin-top:8px">${esc(t.title)}</h2><div class="src">${esc(t.source)}</div>
+        <div class="text${db.learned[n] ? " fold" : ""}" id="text">${paras(t.text)}</div>
+        ${db.learned[n] ? `<button class="btn ghost sm" data-act="unfold" style="padding-left:0">Show the whole tale</button>` : ""}
+        <div class="actions"><a class="btn ember" href="#/tell/${n}">${ic("mic")} Rehearse it</a>
+          <button class="btn${db.learned[n] ? " on" : ""}" data-act="learn" data-v="${n}">${ic("check")} ${db.learned[n] ? "Learned" : "Mark learned"}</button></div></article>
+      <div class="sec"><div class="eyebrow">How to tell it</div><div class="card"><dl class="howto" style="margin:0">
+        <dt>When it fits</dt><dd><ul class="when">${(t.when || []).map(w => `<li>${esc(w)}</li>`).join("")}</ul></dd>
+        <dt>Slip it in</dt><dd class="say">${esc(t.open)}</dd>
+        <dt>Where to pause</dt><dd>${esc(t.pause)}</dd>
+        <dt>How to end</dt><dd>${esc(t.close)}</dd></dl></div></div>
+      <div class="sec"><button class="card lesson hidden" data-act="lesson" style="width:100%;font:inherit;color:inherit">
+        <div class="eyebrow" style="color:var(--ember)">The lesson · keep it to yourself</div><p class="shh" style="margin:10px 0 4px">${esc(t.lesson)}</p>
+        <div class="small muted" id="lhint">Tap to reveal. Never say it aloud: let the tale say it.</div></button></div>
+      <div class="sec"><div class="eyebrow">Why this tale is this hexagram</div><div class="card fits">${esc(t.fits)}</div></div>
+      <div class="sec"><div class="eyebrow">Another tale for this hexagram</div><div class="card also"><div class="src" style="margin-top:0">${esc(a.source)}</div><h3>${esc(a.title)}</h3>
+        <p class="text" style="font-size:17.5px;margin-top:10px">${esc(a.gist)}</p><p class="small muted" style="margin:0">${esc(a.fits)}</p></div></div>
+      <div class="sec"><button class="btn block" data-act="logsheet" data-v="${n}">${ic("pen")} I told this tale</button>
+        <a class="btn ghost block" href="../book-of-changes/#/h/${n}" style="margin-top:6px">${ic("link")} Study hexagram ${n} in Book of Changes</a></div>
+      <div class="pn">${prev ? `<a href="#/h/${prev.n}"><small>${ic("back").replace('class="i"', 'class="i" style="width:12px;height:12px"')} ${prev.n}</small>${esc(prev.tale.title)}</a>` : "<span></span>"}${nxt ? `<a href="#/h/${nxt.n}"><small>${nxt.n} ${ic("chev").replace('class="i"', 'class="i" style="width:12px;height:12px"')}</small>${esc(nxt.tale.title)}</a>` : "<span></span>"}</div>`;
+  }
+
+  /* ---------- Rehearse: the beats, a clock, and the opening and closing lines ---------- */
+  let clockT = 0, clock0 = 0, shown = 0;
+  function openTell(n) {
+    const x = tale(n); if (!x) return; closeTell(); shown = 0;
+    const el = document.createElement("div"); el.className = "tell"; el.id = "tell";
+    el.innerHTML = `<div class="inner"><div class="row between"><a class="btn sm" href="#/h/${n}">${ic("x")} Close</a><span class="eyebrow" style="color:#a8998a">Rehearse · ${n}</span></div>
+      <h2 style="margin-top:22px;font-size:30px">${esc(x.tale.title)}</h2>
+      <p class="small" style="color:#a8998a;margin-top:6px">Tell it out loud in your own words, beat by beat. Aim for two or three minutes.</p>
+      <div class="clock" id="clock">0:00</div>
+      <div class="row" style="justify-content:center;gap:10px"><button class="btn ember sm" data-act="clock" id="clockbtn">Start</button><button class="btn sm" data-act="hidebeats" id="hidebtn">Hide the beats</button></div>
+      <div class="eyebrow" style="color:#e0855a;margin-top:24px">Begin</div><p class="say" style="margin-top:8px">${esc(x.tale.open)}</p>
+      <ol class="beats" id="beats">${x.tale.beats.map(b => `<li>${esc(b)}</li>`).join("")}</ol>
+      <div class="eyebrow" style="color:#e0855a">End</div><p class="say" style="margin-top:8px">${esc(x.tale.close)}</p>
+      <button class="btn block" data-act="showtext" style="margin-top:26px">Read the full tale</button><div id="fulltext" class="text" hidden style="color:#e7dccb">${paras(x.tale.text)}</div></div>`;
+    document.body.appendChild(el); document.body.style.overflow = "hidden";
+  }
+  function closeTell() { clearInterval(clockT); clockT = 0; $("#tell")?.remove(); document.body.style.overflow = ""; }
+  const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  /* ---------- Cast: three coins, six times ---------- */
+  let cast = [];
+  function viewCast() {
+    const done = cast.length === 6, moving = cast.map((v, i) => v === 6 || v === 9 ? i : -1).filter(i => i >= 0);
+    const bits = cast.map(v => v % 2 ? "1" : "0").join(""), n = done ? BY_BITS[bits] : 0;
+    const n2 = done && moving.length ? BY_BITS[cast.map(v => v === 6 ? "1" : v === 9 ? "0" : v % 2 ? "1" : "0").join("")] : 0;
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 4px">Cast a hexagram</h1>
+      <p class="muted" style="margin:0 2px 10px">Hold a question or a person in mind. Toss the three coins six times; the hexagram builds from the bottom up.</p>
+      <div class="coins" id="coins">${last.map(c => `<span class="coin${c === 2 ? " t" : ""}">${c === 3 ? "陽" : "陰"}</span>`).join("")}</div>
+      <div class="castbox">${cast.map(v => `<div class="cline ${v % 2 ? "y" : "n"}${v === 6 || v === 9 ? " m" : ""}"></div>`).join("")}</div>
+      ${done ? `<a class="item" href="#/h/${n}">${glyph(n, "", moving)}<div class="grow"><div class="eyebrow" style="font-size:10.5px">Your hexagram</div><div class="t">${esc(tale(n).tale.title)}</div><div class="m">${n} · ${esc(tale(n).name)}</div></div><span class="n">${ic("chev")}</span></a>
+        ${n2 ? `<p class="small muted" style="margin:14px 4px 8px">${moving.length} moving line${moving.length > 1 ? "s" : ""} (shown in colour): the situation is turning into</p><a class="item" href="#/h/${n2}">${glyph(n2)}<div class="grow"><div class="t">${esc(tale(n2).tale.title)}</div><div class="m">${n2} · ${esc(tale(n2).name)}</div></div><span class="n">${ic("chev")}</span></a>` : ""}
+        <button class="btn block" data-act="recast" style="margin-top:16px">Cast again</button>`
+      : `<button class="btn ember block" data-act="toss">${ic("coins")} Toss the coins (${cast.length + 1} of 6)</button>`}`;
+  }
+  let last = [];
+
+  /* ---------- Practice: spaced repetition, three ways round ---------- */
+  const MODES = { h2t: "Hexagram → tale", t2h: "Tale → hexagram", s2t: "Situation → tale" };
+  const GAPS = [0, 1, 3, 7, 16, 35, 80]; /* days before a card comes back, by box */
+  const pool = () => T.filter(x => db.learned[x.n]);
+  const cardKey = (m, n) => `${m}:${n}`;
+  function dueCards(m = db.mode) { const now = Date.now(); return pool().filter(x => { const c = db.cards[cardKey(m, x.n)]; return !c || c.due <= now; }); }
+  let card = null, revealed = false;
+  function pickCard() { const d = dueCards(); card = d.length ? d[Math.floor(Math.random() * d.length)].n : null; revealed = false; }
+  function viewPractice() {
+    const p = pool(), m = db.mode;
+    if (card && !db.learned[card]) card = null;
+    if (!card) pickCard();
+    const mastered = p.filter(x => (db.cards[cardKey(m, x.n)]?.box || 0) >= 4).length;
+    const head = `<h1 style="margin:8px 2px 14px">Practice</h1>
+      <div class="seg">${Object.entries(MODES).map(([k, l]) => `<button class="${m === k ? "on" : ""}" data-act="mode" data-v="${k}">${l}</button>`).join("")}</div>`;
+    if (!p.length) return head + `<div class="card" style="margin-top:16px"><h3>Learn a tale first</h3><p class="muted" style="margin:8px 0 14px">Read a tale, rehearse it, and tap <b>Mark learned</b>. It then joins your practice cards, and comes back just before you would forget it.</p><a class="btn ember" href="#/h/${todayN()}">Start with today’s tale</a></div>`;
+    const stats = `<div class="row between small muted" style="margin:16px 4px 6px"><span>${p.length} learned · ${mastered} firmly known</span><span>${dueCards().length} due</span></div><div class="bar"><i style="width:${p.length ? mastered / p.length * 100 : 0}%"></i></div>`;
+    if (!card) return head + stats + `<div class="card center" style="margin-top:16px"><h3>Nothing due right now</h3><p class="muted" style="margin:8px 0 0">Cards return on their own schedule. Learn another tale, or come back tomorrow.</p></div>`;
+    const x = tale(card), t = x.tale;
+    const sit = (t.when || [])[Math.floor(Date.now() / 3.6e6 + card) % Math.max(1, (t.when || []).length)] || x.theme;
+    const qHTML = m === "h2t" ? `${glyph(card, "big")}<div class="eyebrow">Hexagram ${card}</div><div class="q" style="margin-top:8px">${esc(x.name)}</div><p class="muted small" style="margin:10px 0 0">Which tale? Tell its beats to yourself before you look.</p>`
+      : m === "t2h" ? `<div class="eyebrow">The tale</div><div class="q" style="margin-top:8px">${esc(t.title)}</div><p class="muted small" style="margin:10px 0 0">Which hexagram, and why does it fit?</p>`
+      : `<div class="eyebrow">Someone you know</div><div class="q" style="margin-top:8px;font-style:italic">${esc(sit)}</div><p class="muted small" style="margin:10px 0 0">Which tale would you tell?</p>`;
+    const aHTML = `<div class="row" style="gap:14px">${glyph(card, "med")}<div><div class="eyebrow">${card} · ${esc(x.name)}</div><div style="font:500 21px/1.25 var(--serif);margin-top:4px">${esc(t.title)}</div></div></div>
+      <ol style="margin:14px 0 0;padding-left:22px">${t.beats.map(b => `<li style="margin:5px 0">${esc(b)}</li>`).join("")}</ol>`;
+    return head + stats + `<div class="card flash" style="margin-top:16px">${qHTML}${revealed ? `<div class="a">${aHTML}</div>` : ""}</div>
+      ${revealed ? `<div class="rate"><button class="btn" data-act="rate" data-v="0">Didn’t know</button><button class="btn" data-act="rate" data-v="1">Almost</button><button class="btn ember" data-act="rate" data-v="2">Knew it</button></div>`
+        : `<button class="btn ember block" data-act="reveal" style="margin-top:14px">Show the answer</button>`}`;
+  }
+
+  /* ---------- Journal: every telling, and how it landed ---------- */
+  const LAND = ["It landed", "Partly", "It missed", "Not sure yet"];
+  const entryHTML = e => { const x = tale(e.n); return `<div class="card entry" style="margin-top:8px"><div class="row between"><span class="d">${dstr(e.at)}</span>${e.land != null ? `<span class="landed">${LAND[e.land]}</span>` : ""}</div>
+    <a href="#/h/${e.n}" style="display:block;text-decoration:none;color:var(--ink);font:500 18px var(--serif);margin-top:4px">${esc(x ? x.tale.title : "")}</a>
+    ${e.who ? `<div class="small" style="margin-top:2px">To ${esc(e.who)}</div>` : ""}${e.note ? `<p class="small muted" style="margin:6px 0 0;white-space:pre-wrap">${esc(e.note)}</p>` : ""}</div>`; };
+  function viewJournal() {
+    const L = [...db.log].sort((a, b) => b.at - a.at), told = new Set(L.map(e => e.n)).size;
+    return `<h1 style="margin:8px 2px 4px">Journal</h1><p class="muted" style="margin:0 2px 16px">Every time you tell a tale: to whom, and how it landed. Over time you learn which tales work, and for whom.</p>
+      ${L.length ? `<div class="card row between"><span><b style="font:500 24px var(--serif)">${L.length}</b> <span class="muted">telling${L.length === 1 ? "" : "s"}</span></span><span><b style="font:500 24px var(--serif)">${told}</b> <span class="muted">different tales</span></span></div>
+        <div class="sec">${L.map(e => entryHTML(e).replace('<div class="row between">', `<div class="row between"><button class="btn ghost sm" data-act="dellog" data-v="${e.id}" aria-label="Delete" style="order:3;min-height:28px;padding:0 4px">${ic("x")}</button>`)).join("")}</div>`
+        : `<div class="card"><p style="margin:0">No tellings yet. After you tell a tale, open it and tap <b>I told this tale</b>.</p></div>`}`;
+  }
+  function logSheet(n) {
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="eyebrow">I told this tale</div><h2 style="margin-top:6px">${esc(tale(n).tale.title)}</h2>
+      <label class="f"><span>To whom (optional)</span><input type="text" id="lwho" placeholder="e.g. my sister, a colleague after the meeting"></label>
+      <label class="f"><span>How did it land?</span></label><div class="opts" id="lland">${LAND.map((l, i) => `<button class="chip" data-act="land" data-v="${i}">${l}</button>`).join("")}</div>
+      <label class="f"><span>Notes</span><textarea id="lnote" placeholder="What did they say? What would you tell differently?"></textarea></label>
+      <button class="btn ember block" data-act="savelog" data-v="${n}" style="margin-top:16px">Save</button><button class="btn ghost block" data-act="closesheet">Cancel</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); });
+    document.body.appendChild(back);
+  }
+  let land = null;
+
+  /* ---------- About ---------- */
+  function viewAbout() {
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 14px">About</h1>
+      <div class="card"><p>The 64 hexagrams of the I Ching can be read as 64 kinds of situation that people meet again and again. Folk tales are the same situations, carried in a form people remember. This app pairs each hexagram with a tale from somewhere in the world, retold so that you can tell it aloud.</p>
+        <p>The art is in what you leave out. Tell the tale, end on its last image, and let the listener find the lesson. Each tale has the lesson written down, hidden, so that you know it without ever saying it.</p>
+        <p style="margin:0"><b>A way to learn them:</b> read today’s tale; rehearse it aloud with the beats until you can tell it without looking; mark it learned; then let Practice bring it back at growing intervals. Write in the Journal each time you tell one.</p></div>
+      <div class="sec"><div class="eyebrow">Settings</div><div class="card"><div class="small muted" style="margin-bottom:8px">Appearance</div>
+        <div class="seg">${[["auto", "Automatic"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button class="${db.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
+        ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:14px">Install on this device</button>`}</div></div>
+      <div class="sec"><div class="eyebrow">The tales and the sources</div><div class="card small" style="line-height:1.6">
+        <p>Every tale is traditional or long in the public domain: Chinese classics (Zhuangzi, Liezi, Han Feizi, Mencius, the Shiji), Japanese, Korean and Philippine folk tales, Indian Jatakas, the Panchatantra and the Mahabharata, Persian and Arab tales, the Hebrew Bible, the Gospels and the Talmud, Greek and Roman writers, European folk tales, and tales from Africa, the Cherokee and Polynesia.</p>
+        <p>All of them are retold here in new words, written for this app, with each source named. They follow the traditional tellings; where versions differ, the best-known one is used. The notes on why each tale fits refer to the hexagram texts as explained in the companion app, <a href="../book-of-changes/">Book of Changes</a>.</p>
+        <p style="margin:0">Your learned tales, practice cards and journal stay on this device.</p></div></div>
+      <p class="small muted center" style="margin-top:22px">Sixty-Four Tales · v${VER}<br>Font: Newsreader (SIL Open Font License)</p>`;
+  }
+  const VER = "1";
+
+  /* ---------- Install prompt ---------- */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const SNOOZE = "sixty-four-tales-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn ember block" data-act="install">Install the app</button>`;
+    if (isIOS) return `<ol class="steps"><li>Tap <b>Share</b> in Safari’s toolbar.</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li>Tap the <b>⋮</b> menu at the top right of Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li></ol>`;
+    return `<ol class="steps"><li>Click the <b>install</b> icon at the right of the address bar,</li><li>or choose <b>Install Sixty-Four Tales</b> in the browser menu.</li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
+      <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
+        <div><div class="eyebrow">Free · works offline</div><h2>Install Sixty-Four Tales</h2></div></div>
+      <p class="muted" style="margin:14px 0 16px">Keep all sixty-four tales on your phone, ready for the moment you need one, even without a connection.</p>
+      <div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed. Open it from your home screen."); });
+  const applyTheme = () => db.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = db.theme);
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, v = el.dataset.v;
+    if (a === "region") { region = v; render(); }
+    else if (a === "learn") { const n = +v; if (db.learned[n]) delete db.learned[n]; else { db.learned[n] = Date.now(); toast("Learned. It will come back in Practice."); } save(); render(); }
+    else if (a === "unfold") { $("#text")?.classList.remove("fold"); el.remove(); }
+    else if (a === "lesson") { el.classList.toggle("hidden"); const h = $("#lhint"); if (h) h.textContent = el.classList.contains("hidden") ? "Tap to reveal. Never say it aloud: let the tale say it." : "Tap to hide it again."; }
+    else if (a === "clock") { if (clockT) { clearInterval(clockT); clockT = 0; el.textContent = "Again"; } else { clock0 = Date.now(); el.textContent = "Stop"; clockT = setInterval(() => { const c = $("#clock"); if (c) c.textContent = mmss((Date.now() - clock0) / 1000); }, 250); } }
+    else if (a === "hidebeats") { const b = $("#beats"); b.classList.toggle("hide"); shown = 0; b.querySelectorAll("li").forEach(li => li.classList.remove("shown")); el.textContent = b.classList.contains("hide") ? "Show the beats" : "Hide the beats"; }
+    else if (a === "showtext") { const f = $("#fulltext"); f.hidden = !f.hidden; el.textContent = f.hidden ? "Read the full tale" : "Hide the full tale"; }
+    else if (a === "toss") { last = [0, 0, 0].map(() => Math.random() < .5 ? 3 : 2); cast.push(last.reduce((s, c) => s + c, 0)); render(); }
+    else if (a === "recast") { cast = []; last = []; render(); }
+    else if (a === "mode") { db.mode = v; save(); card = null; render(); }
+    else if (a === "reveal") { revealed = true; render(); }
+    else if (a === "rate") { const k = cardKey(db.mode, card), c = db.cards[k] || { box: 0 }; c.box = +v === 2 ? Math.min(GAPS.length - 1, c.box + 1) : +v === 1 ? Math.max(1, c.box) : 0; c.due = Date.now() + GAPS[c.box] * DAY - 36e5; db.cards[k] = c; save(); card = null; render(); }
+    else if (a === "logsheet") { land = null; logSheet(+v); }
+    else if (a === "land") { land = +v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
+    else if (a === "savelog") { db.log.push({ id: uid(), n: +v, at: Date.now(), who: $("#lwho").value.trim(), note: $("#lnote").value.trim(), land }); save(); $(".sheet-back")?.remove(); toast("Saved in your journal."); render(); }
+    else if (a === "closesheet") $(".sheet-back")?.remove();
+    else if (a === "dellog") { if (!confirm("Delete this entry?")) return; db.log = db.log.filter(x => x.id !== v); save(); render(); }
+    else if (a === "theme") { db.theme = v; save(); applyTheme(); render(); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+  });
+  /* With the beats hidden, tap anywhere on the list to reveal the next one. */
+  document.addEventListener("click", e => { const b = e.target.closest("#beats.hide"); if (!b) return; const lis = b.querySelectorAll("li"); if (shown < lis.length) lis[shown++].classList.add("shown"); });
+  document.addEventListener("input", e => {
+    if (e.target.id !== "q") return; q = e.target.value; const L = $("#list"); const r = results();
+    L.innerHTML = r.map(itemHTML).join("") || `<p class="muted center" style="margin-top:30px">No tale matches yet. Try another word.</p>`;
+  });
+
+  /* ---------- Start ---------- */
+  applyTheme();
+  fetch("data/tales.json").then(r => r.json()).then(d => { T = d; render(); if (Object.keys(db.seen).length >= 2) setTimeout(() => showInstall(false), 2500); })
+    .catch(() => { $("#main").innerHTML = `<div class="loading">The tales could not be loaded. Check your connection and reload.</div>`; });
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+})();
+</script>
+</body>
+</html>
