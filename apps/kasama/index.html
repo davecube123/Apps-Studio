@@ -28,10 +28,10 @@
       --h-talk: linear-gradient(165deg, #fbe2d4 0%, #fbede4 60%, #f8f4ef 100%);
       --h-help: linear-gradient(165deg, #f9dcd8 0%, #fbe9e6 60%, #f8f4ef 100%);
       --h-care: linear-gradient(165deg, #e6e0f6 0%, #f0ecf9 60%, #f8f4ef 100%);
-      --h-today: linear-gradient(165deg, #fdeac0 0%, #fdf3dc 60%, #f8f4ef 100%);
-      --h-sleep: linear-gradient(170deg, #26305a 0%, #3b4a7a 55%, #5b6f98 100%);
-      --h-music: linear-gradient(165deg, #f9dccb 0%, #fbe9df 60%, #f8f4ef 100%);
-      --h-calm: linear-gradient(165deg, #d9eaf1 0%, #e6f1ee 60%, #f8f4ef 100%);
+     
+     
+     
+     
       --shadow: 0 1px 2px rgba(28,40,38,.04), 0 8px 26px rgba(28,40,38,.07); --shadow2: 0 2px 6px rgba(28,40,38,.06), 0 18px 44px rgba(28,40,38,.12);
       --r: 24px; --ease: cubic-bezier(.2,.7,.2,1); --spring: cubic-bezier(.2,.9,.25,1.2);
       --display: "Fraunces", "Iowan Old Style", Georgia, serif; --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -43,9 +43,9 @@
       --sage: #1c2a23; --peach: #2e2420; --sky: #1c2531; --lav: #24213a; --sun: #2e2919; --rose: #33201f;
       --h-home: linear-gradient(165deg, #2f2620 0%, #1d1c19 60%, #121615 100%); --h-learn: linear-gradient(165deg, #1d2c25 0%, #161d1a 60%, #121615 100%);
       --h-talk: linear-gradient(165deg, #33241d 0%, #1d1917 60%, #121615 100%); --h-help: linear-gradient(165deg, #35201f 0%, #1e1716 60%, #121615 100%);
-      --h-care: linear-gradient(165deg, #262238 0%, #18171f 60%, #121615 100%); --h-today: linear-gradient(165deg, #322a17 0%, #1c1a14 60%, #121615 100%);
-      --h-sleep: linear-gradient(170deg, #161b35 0%, #202a4c 55%, #121615 100%); --h-music: linear-gradient(165deg, #33241d 0%, #1d1917 60%, #121615 100%);
-      --h-calm: linear-gradient(165deg, #182833 0%, #15201f 60%, #121615 100%);
+      --h-care: linear-gradient(165deg, #262238 0%, #18171f 60%, #121615 100%);
+     
+     
       --shadow: 0 1px 2px rgba(0,0,0,.4); --shadow2: 0 10px 40px rgba(0,0,0,.5); color-scheme: dark; } }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { background: var(--bg); }
@@ -155,10 +155,6 @@
     .crisis a.call b { display: block; font: 650 17px var(--sans); letter-spacing: .01em; } .crisis a.call span.l { display: block; font-size: 13px; color: var(--muted); }
 
     /* His space */
-    .ringcard { display: flex; align-items: center; gap: 18px; }
-    .ring { width: 92px; height: 92px; flex: none; position: relative; } .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .ring .track { stroke: var(--line2); } .ring .val { stroke: var(--teal); transition: stroke-dashoffset .8s var(--spring); }
-    .ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 26px var(--display); font-variation-settings: "SOFT" 100; }
     .thing { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; border-radius: 20px; background: var(--card); border: 0; cursor: pointer; text-align: left; color: var(--ink);
              font: 600 16.5px var(--sans); box-shadow: var(--shadow); transition: transform .2s var(--spring); }
     .thing:active { transform: scale(.98); } .thing + .thing { margin-top: 10px; }
@@ -169,19 +165,9 @@
     .moods { display: flex; justify-content: space-between; gap: 8px; }
     .moods button { flex: 1; aspect-ratio: 1; max-width: 64px; border-radius: 50%; border: 0; background: none; padding: 0; cursor: pointer; transition: transform .25s var(--spring); opacity: .55; filter: saturate(.6); }
     .moods button svg { width: 100%; height: 100%; } .moods button.on { opacity: 1; filter: none; transform: scale(1.12); } .moods button:active { transform: scale(.92); }
-    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 96px; margin-top: 12px; }
-    .bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 6px; }
-    .bars i { width: 100%; max-width: 30px; border-radius: 10px; background: linear-gradient(180deg, var(--teal2), var(--teal)); min-height: 6px; transition: height .6s var(--ease); }
-    .bars i.zero { background: var(--line2); } .bars i.warm { background: linear-gradient(180deg, #f1a483, var(--coral)); }
-    .bars span { font: 650 11px var(--sans); color: var(--muted); } .bars div.today span { color: var(--teal); }
-    .timer-ring { width: 220px; height: 220px; margin: 6px auto 10px; position: relative; } .timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .timer-ring .track { stroke: var(--line); } .timer-ring .val { stroke: var(--coral); transition: stroke-dashoffset .3s linear; }
-    .timer { position: absolute; inset: 0; display: grid; place-items: center; font: 400 54px var(--display); font-variation-settings: "SOFT" 100; font-variant-numeric: tabular-nums; }
     .idea { font: italic 450 19px/1.5 var(--display); margin: 8px 0 0; }
-    .breath { width: 220px; height: 220px; margin: 18px auto; border-radius: 50%; display: grid; place-items: center; text-align: center; font: 600 17px var(--sans); color: var(--teal2);
               background: radial-gradient(circle at 35% 30%, #ffffffaa, transparent 45%), radial-gradient(circle, color-mix(in srgb, var(--teal) 32%, transparent), color-mix(in srgb, var(--teal) 12%, transparent) 70%);
               box-shadow: 0 0 0 14px color-mix(in srgb, var(--teal) 8%, transparent), 0 0 0 30px color-mix(in srgb, var(--teal) 4%, transparent); transform: scale(.72); transition: transform 4s ease-in-out; }
-    .breath.in { transform: scale(1); transition-duration: 4s; } .breath.out { transform: scale(.72); transition-duration: 6s; }
     .ground li { font-size: 17.5px; margin: 10px 0; } .ground b { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); margin-right: 8px; font-size: 14px; }
 
     nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 14px); z-index: 20; width: min(440px, calc(100% - 24px)); padding: 7px; border-radius: 30px;
@@ -258,7 +244,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "10", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "11", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -273,6 +259,7 @@
     (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
   /* What we know: the first consult happened in October; the second is on 17 November 2026. Both can be changed. */
+  if (db.space && db.space !== "family") db.space = null; /* the personal space was removed in v11 */
   if (db.steps.first === undefined) db.steps.first = true;
   if (db.appt === undefined) db.appt = "2026-11-17";
   db.apptPrep ||= {}; db.funds ||= { goal: "", gifts: [] }; db.connect ||= {}; db.moments ||= [];
@@ -305,8 +292,6 @@
   const face = n => { const c = MOODC[n - 1], m = [["M17 34c4-5 10-5 14 0", 1], ["M18 32.5c4-2.5 8-2.5 12 0", 1], ["M18 31h12", 0], ["M18 30c4 3 8 3 12 0", 1], ["M16.5 29c4 6 11 6 15 0", 1]][n - 1][0];
     return `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="${c}"/><circle cx="17.5" cy="20" r="2.4" fill="#2a2522"/><circle cx="30.5" cy="20" r="2.4" fill="#2a2522"/><path d="${m}" fill="none" stroke="#2a2522" stroke-width="2.6" stroke-linecap="round"/>${n >= 4 ? `<circle cx="13" cy="27" r="3" fill="#fff" opacity=".35"/><circle cx="35" cy="27" r="3" fill="#fff" opacity=".35"/>` : ""}</svg>`; };
   const MOOD_LABEL = ["Mabigat", "Medyo mabigat", "Okay lang", "Maayos", "Masaya"];
-  const ring = (v, max, size = 92, stroke = 9, cls = "") => { const r = (size - stroke) / 2, c = 2 * Math.PI * r, f = max ? Math.min(1, v / max) : 0;
-    return `<svg viewBox="0 0 ${size} ${size}"><circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke-width="${stroke}"/><circle class="val ${cls}" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - f)).toFixed(1)}"/></svg>`; };
 
   /* ---------- Illustrations (original, simple shapes) ---------- */
   const ART = {
@@ -324,15 +309,6 @@
     care: `<svg viewBox="0 0 170 150"><circle cx="112" cy="54" r="42" fill="#cfc4f0" opacity=".6"/><path d="M76 104h48l-6 34h-36z" fill="#8f7ed6"/><path d="M72 98h56v10H72z" fill="#7a68c7" rx="3"/>
       <path d="M100 98V62" stroke="#2a7a70" stroke-width="4" stroke-linecap="round"/><path d="M100 72c-4-16-16-24-30-22 2 15 14 23 30 22z" fill="#5fae96"/><path d="M100 64c4-18 18-28 34-26-2 18-16 28-34 26z" fill="#2a7a70"/>
       <circle cx="136" cy="96" r="4" fill="#f5b764"/><circle cx="62" cy="40" r="3" fill="#f5b764"/></svg>`,
-    today: `<svg viewBox="0 0 170 150"><g stroke="#f0a93b" stroke-width="5" stroke-linecap="round" opacity=".55"><path d="M108 18v14M146 50l-12 6M70 50l12 6M136 24l-9 10M80 24l9 10"/></g>
-      <circle cx="108" cy="82" r="34" fill="#f5b764"/><circle cx="108" cy="82" r="50" fill="#f5b764" opacity=".18"/><path d="M0 122c40-18 80-20 120-8s40 6 50 2v34H0z" fill="var(--card)" opacity=".7"/><path d="M0 136c40-12 90-14 170-4v18H0z" fill="var(--bg)" opacity=".9"/></svg>`,
-    sleep: `<svg viewBox="0 0 170 150"><circle cx="104" cy="64" r="40" fill="#f6e7b8"/><circle cx="122" cy="52" r="36" fill="#3b4a7a"/><g fill="#fff"><circle cx="40" cy="40" r="2.5"/><circle cx="64" cy="22" r="1.8"/><circle cx="150" cy="104" r="2.2"/><circle cx="56" cy="92" r="1.6"/><circle cx="148" cy="30" r="1.6"/></g>
-      <path d="M30 60l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#f6e7b8" opacity=".85"/></svg>`,
-    music: `<svg viewBox="0 0 170 150"><circle cx="116" cy="56" r="42" fill="#f6c4a8" opacity=".55"/><g transform="rotate(-28 100 90)"><rect x="96" y="14" width="10" height="70" rx="3" fill="#7a4a32"/><rect x="92" y="6" width="18" height="16" rx="4" fill="#5c3523"/>
-      <path d="M101 74c-22 0-32 12-32 26 0 10 7 16 7 22 0 14 12 22 25 22s25-8 25-22c0-6 7-12 7-22 0-14-10-26-32-26z" fill="#d7704f"/><circle cx="101" cy="104" r="9" fill="#5c3523"/><rect x="88" y="126" width="26" height="5" rx="2" fill="#5c3523"/></g>
-      <path d="M140 92v-22l14-3v19" stroke="#2a7a70" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="136" cy="93" r="5" fill="#2a7a70"/><circle cx="150" cy="88" r="5" fill="#2a7a70"/></svg>`,
-    calm: `<svg viewBox="0 0 170 150"><circle cx="108" cy="66" r="24" fill="#9fd5c6"/><circle cx="108" cy="66" r="40" fill="none" stroke="#9fd5c6" stroke-width="3" opacity=".6"/><circle cx="108" cy="66" r="56" fill="none" stroke="#9fd5c6" stroke-width="2" opacity=".35"/>
-      <path d="M10 124c18-12 34-12 52 0s34 12 52 0 34-12 52 0" stroke="#2a7a70" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/><path d="M30 140c18-10 34-10 52 0s34 10 52 0" stroke="#7fb9d6" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/></svg>`,
     welcome: `<svg viewBox="0 0 360 230"><circle cx="230" cy="92" r="54" fill="#f5b764" opacity=".9"/><circle cx="230" cy="92" r="80" fill="#f5b764" opacity=".14"/>
       <path d="M0 196c60-56 130-70 200-40s110 20 160-6v80H0z" fill="#2a7a70" opacity=".88"/><path d="M40 230c50-44 130-58 200-34s80 18 120 6v28z" fill="#9ccfb8"/>
       <circle cx="148" cy="134" r="12" fill="#1c2826"/><path d="M134 182c0-18 6-30 14-30s14 12 14 30z" fill="#1c2826"/><circle cx="178" cy="130" r="12" fill="#d7704f"/><path d="M164 182c0-19 6-32 14-32s14 13 14 32z" fill="#d7704f"/>
@@ -482,7 +458,7 @@
     { id: "music", t: "Paano banggitin ang musika", sit: "Gusto ninyong bumalik siya sa pagtugtog pero ayaw ninyong ma-pressure siya.",
       avoid: ["“Bakit hindi ka na tumutugtog? Sayang ang talent mo.”", "Pag-aayos ng gig para sa kanya nang hindi niya alam.", "Pagbanggit sa bar incident bilang dahilan para hindi na tumugtog."],
       say: ["“Narinig ko ulit ’yung kanta mo noon. Ang ganda pala talaga.”", "Iwanan lang ang gitara sa lugar na madaling abutin, nang walang sinasabi.", "“Gusto mo bang tumugtog tayo ng isang kanta? Kahit simple lang.”"],
-      why: "Ang musika ay dapat maging kanlungan, hindi obligasyon. Mag-imbita, huwag mag-utos. Sa “My days” space niya ay may maliit na Music section na walang pressure." },
+      why: "Ang musika ay dapat maging kanlungan, hindi obligasyon. Mag-imbita, huwag mag-utos. Kung tumugtog siya, makinig lang at magpasalamat; hindi kailangang magkomento sa galing o sa mali." },
   ];
   const PRACTICE = [
     { q: "Sabi niya: “Alam kong pinapakinggan ng kapitbahay ang lahat ng sinasabi ko.” Ano ang pinakamagandang sagot?", o: [
@@ -546,29 +522,6 @@
   ];
   const NOTE_TAGS = ["Epekto ng gamot", "Hindi nakatulog", "Galit", "Hinala/takot", "Boses", "Hindi kumakain", "Stress/pagod", "Nag-isa buong araw", "Magandang araw", "Tumugtog"];
 
-  /* =================================================================
-     HIS SPACE ("My days"): his goals, never labels. Behavioural activation, sleep, music, calm.
-     ================================================================= */
-  const DEFAULT_THINGS = ["Bumangon bago mag-9", "Kumain nang maayos", "Lumabas kahit 10 minuto", "10 minuto sa gitara"];
-  const MUSIC_IDEAS = [
-    "Tugtugin ang isang worship song o awit na gusto mo, kahit mag-isa.",
-    "Tugtugin ang isang kantang mahal mo noon. Isa lang, kahit hindi perpekto.",
-    "Isang chord lang. Tugtugin nang dahan-dahan sa loob ng dalawang minuto, at pakinggan ang tunog.",
-    "Mag-hum o kumanta kasabay ng paborito mong record.",
-    "Tune lang ang gitara. Minsan sapat na ’yon para sa araw na ito.",
-    "Matuto ng isang bagong kanta na gusto mo, isang linya lang ngayong araw.",
-    "Tugtugin ang isang kanta na parang para sa isang tao lang.",
-    "Mag-record ng isang take sa Woodshed, para lang sa ’yo. Hindi mo kailangang pakinggan agad.",
-    "Pumili ng tatlong chords at gumawa ng kahit anong tunog. Walang mali.",
-  ];
-  const CALM = [
-    ["Huminga nang dahan-dahan", "breath"],
-    ["5-4-3-2-1: bumalik sa ngayon", "ground"],
-    ["Kapag maingay ang isip o may mga boses", "voices"],
-    ["Kapag pakiramdam mo may banta", "threat"],
-    ["Kapag naiisip mong saktan ang sarili mo", "selfharm"],
-    ["Kung gusto kong kumausap ng doktor", "doctor"],
-  ];
 
   const crisisHTML = () => `<a class="bigcall" href="tel:911"><span class="bubble">${ic("phone")}</span><span class="grow"><b>911</b><span class="l">Emergency: may panganib sa buhay ngayon</span></span></a>
     <a class="bigcall teal" href="tel:1553"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH Crisis Hotline · libre, 24 oras · para rin sa pamilya</span></span></a>
@@ -596,31 +549,14 @@
       ["1 Peter 5:7", "1 Pedro 5:7", "Inyong ilagak sa kaniya ang lahat ng inyong kabalisahan, sapagka’t kayo’y ipinagmamalasakit niya.", "Casting all your worries on him, because he cares for you.", "Hindi ninyo kailangang buhatin ang lahat."],
       ["2 Corinthians 1:3–4", "2 Corinto 1:3–4", "Ang Ama ng mga kaawaan at Dios ng buong kaaliwan; Na siyang umaaliw sa atin sa lahat ng kapighatian, upang ating maaliw ang nangasa anomang kapighatian.", "The Father of mercies and God of all comfort; who comforts us in all our affliction, that we may be able to comfort those who are in any affliction.", "Ang inaaliw ay nakakapag-aliw din."],
       ["Psalm 147:3", "Awit 147:3", "Kaniyang pinagagaling ang mga may bagbag na puso, at tinatalian niya ang kanilang mga sugat.", "He heals the broken in heart, and binds up their wounds.", "Sa mga araw na parang wasak ang loob."],
-      ["Lamentations 3:22–23", "Panaghoy 3:22–23", "Ang kaniyang mga habag ay hindi nauubos. Ang mga yao’y bago tuwing umaga, dakila ang inyong pagtatapat.", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bawat umaga ay bagong simula, para sa kanya at para sa inyo."]],
-    him: [
-      ["Psalm 23:1–3", "Awit 23:1–3", "Ang Panginoon ay aking pastor; hindi ako mangangailangan. Kaniyang pinahihiga ako sa sariwang pastulan: pinapatnubayan niya ako sa siping ng mga tubig na pahingahan. Kaniyang pinapananauli ang aking kaluluwa.", "The Lord is my shepherd: I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.", "Pahinga at tahimik na tubig. Hindi kailangang magmadali."],
-      ["Psalm 4:8", "Awit 4:8", "Payapa akong hihiga at gayon din matutulog: sapagka’t ikaw, Panginoon, pinatatahan mo akong mag-isa sa katiwasayan.", "In peace I will both lay myself down and sleep, for you alone, Lord, make me live in safety.", "Para sa gabi, bago matulog."],
-      ["Psalm 127:2", "Awit 127:2", "Walang kabuluhan sa inyo na kayo’y magsibangong maaga, at magpahingang tanghali… sapagka’t binibigyan niyang gayon ng pagkakatulog ang kaniyang minamahal.", "It is vain for you to rise up early, to stay up late… for he gives sleep to his loved ones.", "Ang tulog ay regalo, hindi katamaran."],
-      ["Psalm 46:10", "Awit 46:10", "Kayo ay magsitigil at kilalanin ninyo na ako ang Dios.", "Be still, and know that I am God.", "Isang hinga. Isang sandali ng katahimikan."],
-      ["Isaiah 41:10", "Isaias 41:10", "Huwag kang matakot, sapagka’t ako’y sumasaiyo; huwag kang manglupaypay, sapagka’t ako’y iyong Dios; aking palalakasin ka; oo, aking tutulungan ka.", "Don’t you be afraid, for I am with you. Don’t be dismayed, for I am your God. I will strengthen you. Yes, I will help you.", "Para sa mga araw na may kaba."],
-      ["John 14:27", "Juan 14:27", "Ang kapayapaan ay iniiwan ko sa inyo; ang aking kapayapaan ay ibinibigay ko sa inyo… Huwag magulumihanan ang inyong puso, ni matakot man.", "Peace I leave with you. My peace I give to you… Don’t let your heart be troubled, neither let it be fearful.", "Kapayapaan na hindi galing sa mundo."],
-      ["2 Timothy 1:7", "2 Timoteo 1:7", "Sapagka’t hindi tayo binigyan ng Dios ng espiritu ng katakutan; kundi ng kapangyarihan at ng pagibig at ng kahusayan.", "For God didn’t give us a spirit of fear, but of power, love, and self-control.", "Lakas, pagmamahal, at kalmadong isip."],
-      ["Psalm 33:3", "Awit 33:3", "Magsiawit kayo sa kaniya ng bagong awit; magsitugtog kayong matalino na may malaking ingay.", "Sing to him a new song. Play skillfully with a shout of joy!", "Para sa gitara at sa boses mo."],
-      ["Psalm 98:4–5", "Awit 98:4–5", "Mangagpasimula at magsiawit dahil sa kagalakan, oo, magsiawit kayo ng mga pagpuri. Magsiawit kayo sa Panginoon ng mga pagpuri ng alpa; ng alpa at ng tinig na tugma.", "Burst out and sing for joy, yes, sing praises! Sing praises to the Lord with the harp, with the harp and the voice of melody.", "Ang pagtugtog ay puwede ring dasal."],
-      ["Zephaniah 3:17", "Sofonias 3:17", "Siya’y magagalak dahil sa iyo na may kagalakan; siya’y magpapahinga sa kaniyang pagibig; siya’y magagalak sa iyo na may pagawit.", "He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.", "May kumakanta rin para sa ’yo."],
-      ["Psalm 3:5", "Awit 3:5", "Ako’y nahiga, at natulog; ako’y nagising; sapagka’t inaalalayan ako ng Panginoon.", "I laid myself down and slept. I awakened; for the Lord sustains me.", "Matulog nang panatag. May umaalalay sa ’yo."],
-      ["Jeremiah 29:11", "Jeremias 29:11", "Sapagka’t nalalaman ko ang mga pagiisip na aking iniisip sa inyo, sabi ng Panginoon, mga pagiisip tungkol sa kapayapaan, at hindi tungkol sa kasamaan, upang bigyan kayo ng pagasa sa inyong huling wakas.", "“For I know the thoughts that I think toward you,” says the Lord, “thoughts of peace, and not of evil, to give you hope and a future.”", "May bukas pa. May mga kanta pang tutugtugin."],
-      ["Psalm 30:5", "Awit 30:5", "Pagiyak ay magtatagal ng magdamag, nguni’t kagalakan ay dumarating sa kinaumagahan.", "Weeping may stay for the night, but joy comes in the morning.", "Lilipas din ang gabi."],
-      ["Lamentations 3:22–23", "Panaghoy 3:22–23", "Ang kaniyang mga habag ay hindi nauubos. Ang mga yao’y bago tuwing umaga, dakila ang inyong pagtatapat.", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bagong umaga, bagong simula."],
-      ["Matthew 11:28", "Mateo 11:28", "Magsiparito sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo’y aking papagpapahingahin.", "Come to me, all you who labor and are heavily burdened, and I will give you rest.", "Puwede kang magpahinga."],
-      ["Philippians 4:6–7", "Filipos 4:6–7", "Huwag kayong mangabalisa sa anomang bagay; kundi sa lahat ng mga bagay sa pamamagitan ng panalangin at daing na may pagpapasalamat ay ipakilala ninyo ang inyong mga kahilingan sa Dios. At ang kapayapaan ng Dios, na di masayod ng pagiisip, ay magiingat ng inyong mga puso at ng inyong mga pagiisip kay Cristo Jesus.", "In nothing be anxious, but in everything, by prayer… let your requests be made known to God. And the peace of God… will guard your hearts and your thoughts.", "Sabihin ang laman ng isip mo, sa dasal o sa taong pinagkakatiwalaan mo."]] };
+      ["Lamentations 3:22–23", "Panaghoy 3:22–23", "Ang kaniyang mga habag ay hindi nauubos. Ang mga yao’y bago tuwing umaga, dakila ang inyong pagtatapat.", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bawat umaga ay bagong simula, para sa kanya at para sa inyo."]] };
   const verseToday = sp => { const L = VERSES[sp]; return L[Math.floor(Date.now() / DAY) % L.length]; };
   const verseBody = ([r, tr, tl, en, n]) => `<blockquote>${esc(tl)}</blockquote><div class="vref">${esc(tr)}</div>
       <details class="ven"><summary>English</summary><p>${esc(en)}</p><div class="vref">${esc(r)} · WEB</div></details><p class="small muted" style="margin:8px 0 0">${esc(n)}</p>`;
   const verseCard = (sp, link) => `<div class="card verse"><div class="eyebrow">Salita para sa araw na ito</div>${verseBody(verseToday(sp))}${link ? `<a class="small" href="#/verses">Lahat ng talata</a>` : ""}</div>`;
   function viewVerses() {
-    const sp = db.space === "family" ? "family" : "him";
-    return hero(sp === "family" ? "care" : "today", "Bibliya", sp === "family" ? "Mga talata para sa inyo" : "Mga talata para sa ’yo", sp === "family" ? "Para sa pagod, sa pag-asa, at sa pagmamahal na mahinahon." : "Para sa kapayapaan, pahinga, at musika.", { top: backBtn("#/" + (sp === "family" ? "care" : ""), "Bumalik") })
+    const sp = "family";
+    return hero("care", "Bibliya", "Mga talata para sa inyo", "Para sa pagod, sa pag-asa, at sa pagmamahal na mahinahon.", { top: backBtn("#/care", "Bumalik") })
       + `<div class="lift">${VERSES[sp].map(v => `<div class="card verse">${verseBody(v)}</div>`).join("")}</div>
       <p class="small muted center" style="margin-top:14px">Tagalog: Ang Biblia (1905). English: World English Bible (WEB). Parehong public domain.</p>`;
   }
@@ -688,7 +624,7 @@
      curtain, not encryption: it keeps what is written here from being seen at a glance. */
   const pinHash = pin => String([..."kasama:" + pin].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7));
   let unlocked = false, pinBuf = "", pinFirst = "", hiddenAt = 0;
-  const locked = () => db.space === "family" && !!db.pin && !unlocked;
+  const locked = () => !!db.space && !!db.pin && !unlocked;
   addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = Date.now(); else if (db.pin && unlocked && Date.now() - hiddenAt > 60000) { unlocked = false; pinBuf = ""; render(); } });
   const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Kasama</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
       <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
@@ -718,7 +654,7 @@
   function render() {
     const { v, id, n } = route(), h = location.hash || "#/", nav = h !== lastHash;
     let html;
-    if (!db.space) html = viewChoose(); else if (locked()) html = viewLock(); else if (v === "intro") html = viewIntro(+id || 0); else if (db.space === "family") html = familyView(v, id, n); else html = himView(v, id, n);
+    if (!db.space) html = viewChoose(); else if (locked()) html = viewLock(); else if (v === "intro") html = viewIntro(+id || 0); else html = familyView(v, id, n);
     if (html == null) return;
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     if (lastHash.startsWith("#/intro") && v !== "intro") setTimeout(() => showInstall(false), 1500); /* offer install once the intro is done */
@@ -727,9 +663,8 @@
   addEventListener("hashchange", render);
   function tabs(v) {
     const t = $("#tabs"); if (!db.space || locked()) { t.hidden = true; return; } t.hidden = false;
-    const items = db.space === "family" ? [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]]
-      : [["home", "sun", "Today"], ["sleep", "moon", "Tulog"], ["music", "music", "Music"], ["calm", "wave", "Kalma"]];
-    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", moments: "home", verses: db.space === "family" ? "care" : "home", local: "help", apply: "help", pin: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
+    const items = [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]];
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", moments: "home", verses: "care", local: "help", apply: "help", pin: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
     t.innerHTML = items.map(([k, i, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
   }
   /* One idea per screen, with big Back and Next buttons. Each step has its own address, so the phone's
@@ -746,21 +681,16 @@
     family: [["heart", "b-peach", "Para sa inyo ang app na ito", "Para sa girlfriend, pamilya at mga kaibigan niya. Sa Home, may isang maliit na paraan araw-araw para maging malapit sa kanya. Maiikli ang bawat pahina."],
       ["home", "b-sage", "Ang mga button sa ibaba", "Home, Unawain (mga aralin), Kausapin (ano ang sasabihin), Tulong (mga numero at plano), at Para sa ’yo. Pindutin para lumipat."],
       ["phone", "b-rose", "Kung kailangan ng tulong agad", "Pindutin ang Tulong, tapos ang unang button. Isang pindot lang ang tawag sa 911 o sa NCMH 1553."],
-      ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Kung may ibang gumagamit ng phone, lagyan ng PIN sa Settings."]],
-    him: [["sun", "b-sun", "Para sa mga araw mo", "Maliliit na plano, tulog, gitara, at mga paraan para kumalma. Walang pressure."],
-      ["check", "b-teal", "Pindutin ang bilog", "Para markahan ang nagawa mo ngayong araw. Kahit isa lang, sapat na."],
-      ["music", "b-peach", "Ang mga button sa ibaba", "Today, Tulog, Music at Kalma. Pindutin para lumipat."],
-      ["shield", "b-lav", "Para sa ’yo lang", "Lahat ng isusulat mo ay nasa phone mo lang. Ikaw ang bahala kung may ibabahagi ka."]] };
+      ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Kung may ibang gumagamit ng phone, lagyan ng PIN sa Settings."]] };
   function viewIntro(i) {
-    const cards = INTRO[db.space].map(([icn, b, t, d]) => `<span class="bubble ${b}" style="width:64px;height:64px;border-radius:20px">${ic(icn)}</span><h2 style="margin-top:18px">${t}</h2><p class="big">${d}</p>`);
-    return stepper({ k: db.space === "family" ? "home" : "today", kicker: "Paano gamitin", title: "Kasama", back: ["#/", "Laktawan"], cards, i, base: "#/intro", finish: `<a class="btn teal" href="#/">Simulan ${ic("chev")}</a>` });
+    const cards = INTRO.family.map(([icn, b, t, d]) => `<span class="bubble ${b}" style="width:64px;height:64px;border-radius:20px">${ic(icn)}</span><h2 style="margin-top:18px">${t}</h2><p class="big">${d}</p>`);
+    return stepper({ k: "home", kicker: "Paano gamitin", title: "Kasama", back: ["#/", "Laktawan"], cards, i, base: "#/intro", finish: `<a class="btn teal" href="#/">Simulan ${ic("chev")}</a>` });
   }
   function viewChoose() {
     return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
       <div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Magkasama tayo dito.</h1>
-      <p class="muted">Dalawang hiwalay na space. Lahat ng isusulat mo ay nananatili lang sa phone na ito.</p>
-      <button class="choice" data-act="space" data-v="family"><span class="bubble b-peach">${ic("heart")}</span><span class="grow"><b>Kasama niya ako</b><span class="t">Para sa girlfriend, pamilya at mga kaibigan: paano siya samahan, at paano rin alagaan ang sarili.</span></span></button>
-      <button class="choice" data-act="space" data-v="him"><span class="bubble b-sun">${ic("sun")}</span><span class="grow"><b>Para sa akin</b><span class="t">Ang mga araw ko: maliliit na plano, tulog, gitara, at mga paraan para kumalma.</span></span></button></div>`;
+      <p class="muted">Para sa girlfriend at pamilya niya: paano siya samahan, paano makipag-usap, at paano rin alagaan ang sarili. Lahat ng isusulat ninyo ay nananatili lang sa phone na ito.</p>
+      <button class="btn teal block" data-act="space" data-v="family" style="margin-top:18px">Simulan ${ic("chev")}</button></div>`;
   }
 
   /* ---------- Family views ---------- */
@@ -774,14 +704,14 @@
   const STEP_HOW = { first: "#/appt", learn: "#/learn", prep2: "#/appt", funds: "#/funds", notes: "#/notes", meds: "#/lesson/treatment/0", family: "#/scene/hisfamily/0", plan: "#/plan/0" };
   const PREP = [["notes", "Dalhin ang buod ng Talaan", "#/prep"], ["meds", "Listahan ng gamot at mga napansing epekto", ""], ["qs", "Ang mga tanong ninyo", "#/prep"], ["id", "ID at PhilHealth ID o MDR", ""],
     ["money", "Pera para sa konsulta at gamot", "#/funds"], ["who", "Sino ang sasama (puwede ring isang kapamilya niya)", "#/scene/hisfamily/0"], ["ask", "Itanong ang tungkol sa gastos", "#/funds/help/6"]];
-  function apptCard(forHim) {
-    const d = apptDate(); if (!d) return forHim ? "" : `<a class="rowcard" href="#/appt"><span class="bubble b-sky">${ic("cal")}</span><span class="grow">Itakda ang susunod na konsulta<small>Para may paalala at checklist</small></span><span class="chev">${ic("chev")}</span></a>`;
+  function apptCard() {
+    const d = apptDate(); if (!d) return `<a class="rowcard" href="#/appt"><span class="bubble b-sky">${ic("cal")}</span><span class="grow">Itakda ang susunod na konsulta<small>Para may paalala at checklist</small></span><span class="chev">${ic("chev")}</span></a>`;
     const n = daysTo(d), when = n === 0 ? "Ngayong araw" : n === 1 ? "Bukas na" : n > 1 ? `${n} araw na lang` : "Tapos na";
-    if (n < 0) return forHim ? "" : `<a class="rowcard" href="#/appt"><span class="bubble b-sky">${ic("cal")}</span><span class="grow">Kumusta ang konsulta noong ${tlDate(d)}?<small>Itakda ang susunod na petsa</small></span><span class="chev">${ic("chev")}</span></a>`;
+    if (n < 0) return `<a class="rowcard" href="#/appt"><span class="bubble b-sky">${ic("cal")}</span><span class="grow">Kumusta ang konsulta noong ${tlDate(d)}?<small>Itakda ang susunod na petsa</small></span><span class="chev">${ic("chev")}</span></a>`;
     const p = db.apptPrep[db.appt] || {}, done = PREP.filter(x => p[x[0]]).length;
-    return `<a class="card" href="${forHim ? "#/calm/doctor" : "#/appt"}" style="display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--ink);background:var(--sky)"><span class="bubble" style="background:var(--card);color:#4b6fa8;width:52px;height:52px;flex-direction:column;line-height:1"><b style="font:700 18px var(--sans)">${d.getDate()}</b><small style="font:700 9px var(--sans);letter-spacing:.06em">${MONTHS_TL[d.getMonth()].slice(0, 3).toUpperCase()}</small></span>
-      <span class="grow"><span class="eyebrow" style="color:#4b6fa8">${forHim ? "Konsulta" : "Susunod na konsulta"}</span><b style="display:block;font:600 18px var(--display);font-variation-settings:'SOFT' 100;margin-top:2px">${tlDate(d)}</b>
-      <small class="muted"><b style="color:#4b6fa8">${when}</b> · ${forHim ? "Isulat ang gusto mong sabihin" : `Handa: ${done} sa ${PREP.length}`}</small></span><span class="chev" style="color:var(--muted)">${ic("chev")}</span></a>`;
+    return `<a class="card" href="#/appt" style="display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--ink);background:var(--sky)"><span class="bubble" style="background:var(--card);color:#4b6fa8;width:52px;height:52px;flex-direction:column;line-height:1"><b style="font:700 18px var(--sans)">${d.getDate()}</b><small style="font:700 9px var(--sans);letter-spacing:.06em">${MONTHS_TL[d.getMonth()].slice(0, 3).toUpperCase()}</small></span>
+      <span class="grow"><span class="eyebrow" style="color:#4b6fa8">Susunod na konsulta</span><b style="display:block;font:600 18px var(--display);font-variation-settings:'SOFT' 100;margin-top:2px">${tlDate(d)}</b>
+      <small class="muted"><b style="color:#4b6fa8">${when}</b> · Handa: ${done} sa ${PREP.length}</small></span><span class="chev" style="color:var(--muted)">${ic("chev")}</span></a>`;
   }
   function viewAppt() {
     const d = apptDate(), p = db.apptPrep[db.appt] ||= {};
@@ -837,7 +767,7 @@
           <div class="row" style="gap:10px;margin-top:14px"><button class="btn" data-act="connectskip">Iba pa</button><button class="btn teal" data-act="connectdone">${ic("check")} Nagawa namin</button></div>`}
         <p class="small muted" style="margin:12px 0 0">Bakit? Ang init at pagtanggap sa bahay ay isa sa pinakamalakas na proteksyon sa paggaling niya.</p></div>
       ${db.moments.length ? rowcard("#/moments", "sun", "b-sun", "Magagandang sandali", `${db.moments.length} na naitala. Basahin kapag mabigat ang araw.`) : ""}
-      <div style="margin-top:12px">${apptCard(false)}</div>
+      <div style="margin-top:12px">${apptCard()}</div>
       <div class="card" style="margin-top:12px">${next ? `<div class="row between"><div class="eyebrow">Ang susunod na hakbang</div><span class="small muted">${ni + 1} sa ${STEPS.length}</span></div>
           <h3 style="margin-top:6px;font-size:19px">${next[1]}</h3><p style="font-size:16px;color:var(--ink2);margin:6px 0 0">${next[2]}</p>
           <div class="row" style="gap:10px;margin-top:14px"><a class="btn" href="${STEP_HOW[next[0]]}">Paano?</a><button class="btn teal" data-act="step" data-v="${next[0]}">${ic("check")} Tapos na</button></div>`
@@ -984,132 +914,22 @@
       <div class="sec">${rowcard("#/care/gf/0", "heart", "b-peach", "Para sa girlfriend", "5 maikling paalala")}${rowcard("#/lesson/friends/0", "hand", "b-sage", "Para sa mga kaibigan", "Paano tumulong")}
         ${rowcard("#/care/all/0", "leaf", "b-lav", "Lahat ng paalala", `${CARE_TIPS.length} maikling paalala`)}${rowcard("#/care/tired", "moon", "b-sky", "Kung pagod ka na", "Mga palatandaan, at saan hihingi ng tulong")}</div>`;
   }
-  /* ---------- His views ---------- */
-  function himView(v, id, n) {
-    if (v === "sleep") return viewSleep(); if (v === "verses") return viewVerses(); if (v === "music") return viewMusic(); if (v === "calm") return viewCalm(id); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
-    if (v === "goal") return hero("today", "Para sa akin", "Ang gusto ko", "Isang malaking gusto, at isang maliit na hakbang.", { top: backBtn("#/", "Today") })
-      + `<div class="card lift"><label class="f" style="margin-top:0"><span>Ang gusto ko</span><input type="text" data-goal="big" value="${esc(db.goal?.big || "")}" placeholder="Hal. makatugtog ulit sa bar"></label>
-        <label class="f"><span>Isang maliit na hakbang ngayong linggo</span><input type="text" data-goal="step" value="${esc(db.goal?.step || "")}" placeholder="Hal. isang kanta bawat araw"></label></div>
-      <p class="big" style="font-size:16.5px;color:var(--ink2);margin:16px 4px">Ang mga maliliit na bagay sa Today ay mga hakbang papunta rito. Walang deadline.</p>
-      <a class="btn teal block" href="#/">${ic("check")} I-save</a>`;
-    return viewToday();
-  }
-  const things = () => { const t = db.things || DEFAULT_THINGS; return db.medOn && !t.includes("Uminom ng gamot") ? [...t, "Uminom ng gamot"] : t; };
-  function viewToday() {
-    const k = dayKey(Date.now()), t = db.today[k] || {}, hr = new Date().getHours(), n = things().filter((_, i) => t[i]).length, tot = things().length;
-    const greet = hr < 12 ? "Magandang umaga" : hr < 18 ? "Magandang hapon" : "Magandang gabi", name = db.names.him ? `, ${esc(db.names.him)}` : "";
-    const days = [...Array(7)].map((_, i) => { const d = Date.now() - (6 - i) * DAY, x = db.today[dayKey(d)] || {}; return [Object.values(x).filter(Boolean).length, new Date(d).getDay()]; });
-    const msg = n === 0 ? "Kahit isa lang, sapat na." : n === tot ? "Lahat nagawa mo ngayon. Ang galing." : n === 1 ? "Isa na. Magandang simula." : `${n} na. Tuloy lang.`;
-    return hero("today", new Date().toLocaleDateString("en-PH", { weekday: "long", day: "numeric", month: "long" }), `${greet}${name}.`, "Ilang maliliit na bagay para sa araw na ito.", { top: gearBtn() })
-      + `<div class="card lift ringcard"><div class="ring">${ring(n, tot)}<b>${n}/${tot}</b></div><div class="grow"><h3>Ngayong araw</h3><p class="small muted" style="margin:4px 0 0">${msg}</p></div></div>
-      <div style="margin-top:12px">${apptCard(true)}</div>
-      <a class="rowcard" href="#/goal" style="margin-top:12px;background:var(--peach)"><span class="bubble" style="background:var(--card);color:var(--coral)">${ic("spark")}</span><span class="grow">${db.goal?.big ? esc(db.goal.big) : "Ano ang gusto mo?"}<small>${db.goal?.big ? (db.goal.step ? `Ngayong linggo: ${esc(db.goal.step)}` : "Magdagdag ng maliit na hakbang") : "Hal. makatugtog ulit sa bar. Pindutin para isulat."}</small></span><span class="chev">${ic("chev")}</span></a>
-      <div class="sec" style="margin-top:16px">${things().map((x, i) => `<button class="thing${t[i] ? " done" : ""}" data-act="thing" data-v="${i}"><span class="tick">${ic("check")}</span><span class="grow">${esc(x)}</span></button>`).join("")}</div>
-      <div class="sec"><div class="card"><h3>Kumusta ang pakiramdam mo?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(m => `<button data-act="mood" data-v="${m}" class="${db.moods[k] === m ? "on" : ""}" aria-label="${MOOD_LABEL[m - 1]}">${face(m)}</button>`).join("")}</div>
-        <p class="small muted center" style="margin:10px 0 0">${db.moods[k] ? MOOD_LABEL[db.moods[k] - 1] : "Pumili ng isa"}</p></div></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([c, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${c ? "" : "zero"}" style="height:${c ? Math.max(14, c / tot * 100) : 6}%"></i><span>${["L", "L", "M", "M", "H", "B", "S"][wd]}</span></div>`).join("")}</div>
-        <p class="small muted" style="margin:10px 0 0">Ilan sa maliliit na bagay ang nagawa mo bawat araw. Walang tama o mali.</p></div></div>
-      ${db.verseOff ? "" : `<div class="sec">${verseCard("him", true)}</div>`}
-      <div class="sec">${rowcard("#/calm", "wave", "b-sky", "Medyo mabigat ang araw?", "Mga paraan para kumalma")}${rowcard("#/calm/doctor", "chat", "b-teal", "Kung gusto kong kumausap ng doktor", "Para sa tulog, stress, o anumang mabigat")}${callsHTML()}</div>`;
-  }
-  const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a class="rowcard" href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="bubble b-teal">${ic("phone")}</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
-  const ncmhRow = () => `<a class="rowcard" href="tel:1553"><span class="bubble b-rose">${ic("phone")}</span><span class="grow">NCMH Crisis Hotline<small>1553 · 0917-899-8727 · 0919-057-1553 · libre, 24 oras</small></span></a>`;
-  let sleepTip = Math.floor(Date.now() / DAY);
-  function viewSleep() {
-    const k = dayKey(Date.now()), e = db.sleep[k] || {};
-    const days = [...Array(7)].map((_, i) => [sleepHours(db.sleep[dayKey(Date.now() - (6 - i) * DAY)]), new Date(Date.now() - (6 - i) * DAY).getDay()]);
-    const got = days.map(d => d[0]).filter(x => x != null), avg = got.length ? got.reduce((a, b) => a + b, 0) / got.length : null;
-    const wakes = [...Array(7)].map((_, i) => db.sleep[dayKey(Date.now() - (6 - i) * DAY)]?.wake).filter(Boolean).map(w => { const [h, m] = w.split(":").map(Number); return h * 60 + m; });
-    const spread = wakes.length >= 3 ? Math.max(...wakes) - Math.min(...wakes) : null, last = sleepHours(e);
-    return hero("sleep", "Tulog", "Kagabi", "Ang maayos na tulog ay isa sa pinakamalaking nakakatulong sa isip at pakiramdam.", { dark: true })
-      + `<div class="card lift"><div class="row" style="gap:12px"><label class="f grow" style="margin:0"><span>Natulog</span><input type="time" id="bed" value="${esc(e.bed || "")}"></label>
-        <label class="f grow" style="margin:0"><span>Gumising</span><input type="time" id="wake" value="${esc(e.wake || "")}"></label></div>
-        ${last != null ? `<p class="center" style="margin:12px 0 0;font:600 18px var(--display);font-variation-settings:'SOFT' 100">${last.toFixed(1)} oras</p>` : ""}
-        <div style="margin-top:14px"><div class="small muted" style="margin:0 4px 8px">Gaano kaayos ang tulog mo?</div><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([h, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${h == null ? "zero" : h < 5 || h > 11 ? "warm" : ""}" style="height:${h == null ? 6 : Math.max(10, Math.min(100, h / 10 * 100))}%"></i><span>${h == null ? ["L", "L", "M", "M", "H", "B", "S"][wd] : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
-        <p class="small" style="margin:10px 0 0;color:var(--ink2)">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
-      <div class="sec"><div class="eyebrow">Tip ngayon</div>${(() => { const T = [["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras pagkagising."],
-          ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "Pati energy drinks at softdrinks na may caffeine sa gabi."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
-          ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]];
-          const [i, b, t, d] = T[sleepTip % T.length];
-          return `<div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble ${b}">${ic(i)}</span><div class="grow"><h3>${t}</h3><p class="big" style="font-size:17px;margin:6px 0 0">${d}</p></div></div>
-            <button class="btn ghost sm" data-act="sleeptip" style="margin-top:8px;padding-left:0">Isa pang tip (${sleepTip % T.length + 1} sa ${T.length}) ${ic("chev")}</button></div>`; })()}</div>`;
-  }
-  function viewMusic() {
-    const wk = db.music.filter(m => m.at > Date.now() - 7 * DAY), mins = Math.round(wk.reduce((a, m) => a + m.min, 0)), idea = MUSIC_IDEAS[Math.floor(Date.now() / DAY) % MUSIC_IDEAS.length];
-    return hero("music", "Music", "Balik-gitara, dahan-dahan", "Walang pressure, walang audience. Para lang sa ’yo.")
-      + `<div class="card lift"><div class="eyebrow" style="color:var(--coral)">Ideya para ngayon</div><p class="idea">${esc(idea)}</p>
-        <button class="btn ghost sm" data-act="newidea" style="padding-left:0;margin-top:4px">Ibang ideya</button></div>
-      <div class="card"><div class="timer-ring" id="tring">${ring(mt.left, mt.len, 220, 12)}<div class="timer" id="mtime">${fmtT(mt.left)}</div></div>
-        <div class="chips" style="justify-content:center">${[5, 10, 15, 20].map(m => `<button class="chip${mt.len === m * 60 ? " on" : ""}" data-act="mlen" data-v="${m}">${m} min</button>`).join("")}</div>
-        <button class="btn teal block" data-act="mstart" id="mstart" style="margin-top:14px">${mt.run ? "Tapusin" : "Simulan"}</button>
-        <p class="small muted center" style="margin:10px 0 0">Kahit itigil mo bago matapos, binibilang pa rin.</p></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card ringcard"><div class="ring" style="width:72px;height:72px">${ring(Math.min(wk.length, 7), 7, 72, 8, "music")}<b style="font-size:20px">${wk.length}</b></div>
-        <div class="grow"><h3>${wk.length ? `${wk.length} beses · ${mins} minuto` : "Wala pa"}</h3><p class="small muted" style="margin:4px 0 0">${wk.length ? "Bawat session ay mahalaga." : "Isang kanta lang, kung kaya."}</p></div></div></div>
-      <div class="sec">${rowcard("../woodshed/", "music", "b-peach", "Mag-record sa Woodshed", "Para marinig mo ang sarili mo, kung gusto mo")}</div>
-      <p class="small muted" style="margin-top:18px">Sa pananaliksik, ang music therapy ay nakakatulong sa pakiramdam, motibasyon at pakikisalamuha. Hindi kailangang magaling ngayon. Ang mahalaga ay bumalik ang saya sa pagtugtog.</p>`;
-  }
-  function viewCalm(id) {
-    if (id === "breath") return hero("calm", "Kalma", "Huminga nang dahan-dahan", "4 na segundo papasok, 6 na segundo palabas.", { top: backBtn("#/calm", "Kalma") })
-      + `<div class="breath" id="breath">Simulan</div><button class="btn teal block" data-act="breath" id="bbtn">Simulan · 2 minuto</button>
-      <p class="small muted center" style="margin-top:12px">Mas mahaba ang palabas na hinga: ito ang nagpapakalma sa katawan.</p>`;
-    if (id === "ground") return hero("calm", "Kalma", "5-4-3-2-1", "Dahan-dahang pansinin ang paligid mo.", { top: backBtn("#/calm", "Kalma") })
-      + `<div class="card lift"><ul class="ground" style="list-style:none;padding:0;margin:4px 0"><li><b>5</b>na bagay na nakikita mo</li><li><b>4</b>na bagay na nahahawakan mo</li><li><b>3</b>na tunog na naririnig mo</li><li><b>2</b>na amoy</li><li><b>1</b>na nalalasahan mo, o isang magandang bagay tungkol sa sarili mo</li></ul></div>
-      <p class="small muted center" style="margin-top:14px">Ibinabalik ka nito sa ngayon, sa katawan mo at sa lugar kung nasaan ka.</p>`;
-    if (id === "voices") return hero("calm", "Kalma", "Kapag maingay ang isip", "Mga bagay na nakakatulong sa maraming tao.", { top: backBtn("#/calm", "Kalma") })
-      + `<div class="lift">${[["music", "b-peach", "Musika sa headphones", "O tumugtog ng gitara."], ["wave", "b-sky", "Mag-hum o kumanta nang mahina", "Para sa ilan, nababawasan nito ang mga boses."], ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", ""],
-        ["leaf", "b-sage", "Maglakad sa labas", "O gumawa ng isang bagay gamit ang kamay."], ["shield", "b-lav", "Hindi mo kailangang sundin", "ang anumang sinasabi ng mga boses."]].map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}${d ? `<small>${d}</small>` : ""}</span></div>`).join("")}</div>
-      <div class="warn">Kung may nag-uutos sa ’yo na saktan ang sarili mo o ang iba, tumawag agad sa taong pinagkakatiwalaan mo, o sa NCMH Crisis Hotline 1553 (libre, 24 oras).</div>${callsHTML()}${ncmhRow()}`;
-    if (id === "selfharm") return hero("calm", "Kalma", "Kapag naiisip mong saktan ang sarili mo", "Hindi ka nag-iisa, at lilipas ang pakiramdam na ito.", { top: backBtn("#/calm", "Kalma") })
-      + `<div class="card lift"><h3>Ngayon mismo</h3><ul class="tight" style="margin-top:8px"><li><b>Tumawag o mag-text sa isang taong pinagkakatiwalaan mo.</b> Sabihin lang: \u201cHindi ako okay. Puwede mo ba akong samahan?\u201d</li>
-        <li><b>Tumawag sa NCMH Crisis Hotline 1553.</b> Libre, 24 oras, at may kakausap sa \u2019yo.</li><li><b>Lumayo sa anumang puwedeng gamitin</b> sa pananakit sa sarili, o ibigay ito sa iba.</li>
-        <li><b>Pumunta sa lugar na may tao.</b> Huwag mag-isa ngayong gabi.</li><li><b>Kung nasa panganib ka na:</b> 911, o pumunta sa pinakamalapit na emergency room.</li></ul></div>
-      <div class="sec">${callsHTML()}${ncmhRow()}<a class="rowcard" href="tel:911"><span class="bubble b-rose">${ic("phone")}</span><span class="grow">Emergency<small>911</small></span></a></div>
-      <p class="small muted center" style="margin-top:14px">Ang mga ganitong isip ay madalas dala ng sobrang pagod, takot o sakit, at gumagaan sa tamang tulong.</p>`;
-    if (id === "doctor") return hero("calm", "Para sa akin", apptDate() && daysTo(apptDate()) >= 0 ? `Konsulta: ${tlDate(apptDate())}` : "Kung gusto kong kumausap ng doktor", "Ikaw ang may hawak ng gamutan mo.", { top: backBtn("#/", "Today") })
-      + `<div class="card lift"><h3>Gusto kong sabihin o itanong sa doktor</h3><textarea data-mynote="1" style="margin-top:10px;min-height:120px" placeholder="Hal. hirap pa rin akong matulog; inaantok ako sa gamot; gusto ko nang tumugtog ulit">${esc(db.myNote || "")}</textarea>
-        <button class="btn block" data-act="sharemynote" style="margin-top:10px">${ic("share")} Ipakita o ipadala</button><p class="small muted" style="margin:8px 4px 0">Para sa ’yo lang ito, maliban kung ibahagi mo.</p></div>
-      <div class="sec">${[["moon", "b-lav", "Puwede kang magsimula sa tulog at stress", "\u201cHirap akong matulog at sobrang stressed ako.\u201d Sapat na iyon bilang simula."],
-        ["chat", "b-teal", "Ikaw ang bahala kung gaano karami ang ikukuwento", "Kung may mga naririnig o naiisip na nakakatakot, makakatulong kung sasabihin, pero sa sarili mong panahon."],
-        ["spark", "b-sun", "Magtanong", "Para saan ang gamot? Ano ang side effects? Gaano katagal? Ano ang gagawin kung hindi ko gusto ang epekto?"],
-        ["hand", "b-peach", "Magsama ng pinagkakatiwalaan mo", "Puwedeng nasa loob siya o nasa labas lang ng kuwarto, depende sa gusto mo."],
-        ["shield", "b-sage", "Pribado ito", "Ang sinasabi mo sa doktor ay kumpidensyal, at may karapatan ka sa maayos at makataong pangangalaga (Mental Health Act, RA 11036)."],
-        ["music", "b-sky", "Isipin ang gusto mo", "Makatulog, gumaan ang pakiramdam, makatugtog ulit. Sabihin ito sa doktor; doon kayo magsisimula."]]
-        .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>`;
-    if (id === "threat") return hero("calm", "Kalma", "Kapag pakiramdam mo may banta", "Totoo at nakakapagod ang ganitong takot.", { top: backBtn("#/calm", "Kalma") })
-      + `<div class="lift">${[["home", "b-sage", "Pumunta sa lugar na ligtas ang pakiramdam", "At huminga nang dahan-dahan."], ["spark", "b-sky", "Tanungin ang sarili", "Ano pa ang posibleng paliwanag? Ano ang sasabihin ng kaibigang pinagkakatiwalaan ko?"],
-        ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", "Bago gumawa ng anumang hakbang."], ["moon", "b-lav", "Mas tumitindi ang takot kapag pagod", "Ang pahinga at tulog ay nakakatulong."], ["leaf", "b-peach", "Gawin ang isang simpleng bagay", "Maligo, kumain, o uminom ng tubig. Pinapakalma nito ang katawan."]]
-        .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>
-      <div class="sec">${callsHTML()}${ncmhRow()}</div>`;
-    const CI = { breath: ["wave", "b-sky"], ground: ["leaf", "b-sage"], voices: ["music", "b-peach"], threat: ["shield", "b-lav"], selfharm: ["heart", "b-rose"], doctor: ["chat", "b-teal"] };
-    return hero("calm", "Kalma", "Kapag mabigat", "Pumili ng isa. Okay lang kahit ilang beses.")
-      + `<div class="lift">${CALM.map(([t, k]) => rowcard(`#/calm/${k}`, CI[k][0], CI[k][1], esc(t))).join("")}</div>
-      <div class="sec"><div class="eyebrow">Mga taong puwedeng tawagan</div>${callsHTML() || rowcard("#/settings", "plus", "b-teal", "Idagdag ang mga taong pinagkakatiwalaan mo", "Para isang pindot lang ang tawag")}${ncmhRow()}</div>`;
-  }
-
-  /* ---------- Shared views ---------- */
   function viewSettings() {
-    const fam = db.space === "family";
-    return hero(fam ? "home" : "today", "Kasama", "Settings", "", { top: backBtn("#/", "Bumalik") })
+    const fam = true;
+    return hero("home", "Kasama", "Settings", "", { top: backBtn("#/", "Bumalik") })
       + `<div class="card lift"><label class="f" style="margin-top:0"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label></div>
-      ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div><div class="card">${[0, 1, 2].map(i => `<div class="row" style="gap:8px;${i ? "margin-top:10px" : ""}"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div></div>
-        <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div><div class="card">${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="${i ? "margin-top:10px" : ""}">`).join("")}</div></div>`}
-      ${fam ? "" : `<div class="sec"><div class="eyebrow">Talata sa Bibliya</div><button class="rowcard" data-act="verseoff"><span class="bubble b-sun">${ic("sun")}</span><span class="grow">${db.verseOff ? "Naka-off" : "Naka-on"}<small>${db.verseOff ? "Ipakita ang talata ng araw sa Today" : "May talata ng araw sa Today"}</small></span></button></div>`}
-      ${fam ? "" : `<div class="sec"><div class="eyebrow">Paalala sa gamot</div><button class="rowcard" data-act="medon"><span class="bubble b-teal">${ic("check")}</span><span class="grow">${db.medOn ? "Naka-on" : "Naka-off"}<small>${db.medOn ? "May “Uminom ng gamot” sa Today" : "Idagdag ang “Uminom ng gamot” sa Today"}</small></span></button></div>`}
       <div class="sec"><div class="eyebrow">Susunod na konsulta</div><div class="card"><input type="date" data-appt="1" value="${esc(db.appt || "")}" style="font:600 18px var(--sans)"></div></div>
       <div class="sec"><div class="eyebrow">Laki ng letra</div><div class="card"><div class="chips">${[[1, "Normal"], [1.12, "Malaki"], [1.25, "Pinakamalaki"]].map(([z, l]) => `<button class="chip${(db.zoom || 1) === z ? " on" : ""}" data-act="zoom" data-v="${z}" style="font-size:${13 * z}px">${l}</button>`).join("")}</div></div></div>
       <div class="sec"><div class="eyebrow">Phone na ito</div>${rowcard("#/intro/0", "info", "b-sun", "Paano gamitin", "Maikling gabay, 4 na pahina")}
-        ${fam ? "" : `<button class="rowcard" data-act="sharewk"><span class="bubble b-sage">${ic("share")}</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
         ${isStandalone() ? "" : `<button class="rowcard" data-act="installsheet"><span class="bubble b-teal">${ic("download")}</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
         ${fam ? `<a class="rowcard" href="#/pin${db.pin ? "" : "/new"}"><span class="bubble b-rose">${ic("shield")}</span><span class="grow">Private mode<small>${db.pin ? "Naka-on ang PIN" : "Lagyan ng PIN kung may ibang gumagamit ng phone"}</small></span><span class="chev">${ic("chev")}</span></a>` : ""}
-        <button class="rowcard" data-act="switch"><span class="bubble b-lav">${ic("swap")}</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
         ${rowcard("#/about", "info", "b-sky", "Tungkol sa Kasama", "Saan galing ang mga gabay")}</div>
       <p class="small muted center" style="margin-top:18px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
   }
   function viewAbout() {
     return hero("learn", "Kasama", "Tungkol sa app", "Ginawa para sa isang kaibigan at sa mga nagmamahal sa kanya.", { top: backBtn("#/", "Bumalik") })
       + `<p class="prose" style="margin-top:20px">Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
-      <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Sa space niya, walang label: tulog, musika, maliliit na plano.</div></div>
+      <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Para lang ito sa girlfriend at pamilya niya; walang bahagi ng app na para sa kanya mismo.</div></div>
       <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small" style="line-height:1.6"><ul class="tight">
         <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
         <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
@@ -1132,12 +952,9 @@
   /* Larger text for those who need it: the whole page scales, buttons included. */
   function applyZoom() { const z = db.zoom || 1; $("#main").style.zoom = z === 1 ? "" : z; }
   /* ---------- After render ---------- */
-  let ntags = [], ringRaf = 0;
+  let ntags = [];
   function afterRender(v) {
     if (v === "notes") ntags = [];
-    cancelAnimationFrame(ringRaf);
-    if (v === "music" && db.space === "him") { const tick = () => { const el = $("#mtime"), rg = $("#tring"); if (!el) return; el.textContent = fmtT(mt.left);
-      const c = rg.querySelector(".val"), circ = +c.getAttribute("stroke-dasharray"); c.setAttribute("stroke-dashoffset", (circ * (1 - mt.left / mt.len)).toFixed(1)); ringRaf = requestAnimationFrame(tick); }; tick(); }
   }
   async function shareText(title, text) {
     try { if (navigator.share) { await navigator.share({ title, text }); return; } } catch (e) { if (e.name === "AbortError") return; }
@@ -1149,14 +966,6 @@
     return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n- Accredited po ba kayo sa PhilHealth mental health package? Puwede po bang generic ang gamot, o nasa listahan ng libreng gamot ng DOH (MAP-MH)?\n- Puwede po ba kaming humingi ng medical abstract o certificate para sa tulong pinansyal?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gaano kadalas siyang umiinom ng alak o kape, at kung may gamot siyang iniinom.`;
   }
   function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Subukang kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
-  function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
-  const mt = { len: 600, left: 600, run: false, t0: 0, iv: 0 };
-  const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-  function musicStop(done) {
-    clearInterval(mt.iv); const played = mt.run ? (Date.now() - mt.t0) / 60000 : 0; mt.run = false; mt.left = mt.len;
-    if (played >= .5) { db.music.push({ at: Date.now(), min: Math.round(played * 10) / 10 }); save(); haptic([10, 40, 10]); toast(done ? "Tapos. Salamat sa pagtugtog ngayon." : `${Math.max(1, Math.round(played))} minuto. Binilang.`); }
-    if (route().v === "music") render();
-  }
   /* ---------- Install: one tap on Android Chrome; step-by-step for iPhone; open in a real browser first
      when the link was opened inside Messenger, Viber, Facebook or Instagram (they can't install apps). ---------- */
   let deferredInstall = null;
@@ -1204,7 +1013,6 @@
   addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Na-install na. Buksan mula sa home screen."); });
 
   /* ---------- Actions ---------- */
-  let breathT = 0;
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el) return;
     const a = el.dataset.act, v = el.dataset.v; if (el.tagName === "BUTTON") haptic(6);
@@ -1214,9 +1022,6 @@
     else if (a === "addgift") { const amt = +($("#gamt").value || "").replace(/[^\d.]/g, ""); if (!amt) { toast("Ilagay ang halaga"); return; } db.funds.gifts.push({ id: uid(), at: Date.now(), name: $("#gname").value.trim(), amt }); db.steps.funds = true; save(); toast("Naidagdag. Salamat sa kanila!"); render(); }
     else if (a === "delgift") { if (!confirm("Burahin ito?")) return; db.funds.gifts = db.funds.gifts.filter(g => g.id !== v); save(); render(); }
     else if (a === "sharefund") shareText("Humihingi ng tulong", $("#fundmsg").value);
-    else if (a === "sharemynote") shareText("Para sa doktor", $("[data-mynote]").value);
-    else if (a === "medon") { db.medOn = !db.medOn; save(); render(); }
-    else if (a === "sleeptip") { sleepTip++; render(); }
     else if (a === "zoom") { db.zoom = +v; save(); render(); }
     else if (a === "sharefam") shareText("Tungkol sa kanya", $("#fammsg").value);
     else if (a === "shareplan") shareText("Plano para sa mabibigat na araw", planText());
@@ -1224,13 +1029,11 @@
     else if (a === "installlater") closeInstall(true);
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
     else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Nakopya ang link. I-paste sa browser."), () => prompt("Kopyahin ang link:", u)); }
-    else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; unlocked = false; save(); location.hash = "#/"; render(); }
     else if (a === "connectskip") { connectSkip++; render(); }
     else if (a === "connectdone") { db.connect[dayKey(Date.now())] = { t: connectToday()[0] }; save(); haptic([8, 30, 12]); render(); }
     else if (a === "addmoment") { const text = $("#mtext").value.trim(); if (!text) { toast("Isulat kahit isang pangungusap"); return; } db.moments.push({ id: uid(), at: Date.now(), text, idea: db.connect[dayKey(Date.now())]?.t || "" }); save(); toast("Naitala. Salamat."); $("#mtext").value = ""; render(); }
     else if (a === "delmoment") { if (!confirm("Burahin ito?")) return; db.moments = db.moments.filter(m => m.id !== v); save(); render(); }
     else if (a === "pinkey") pinKey(v);
-    else if (a === "verseoff") { db.verseOff = !db.verseOff; save(); render(); }
     else if (a === "pinoff") { if (!confirm("Alisin ang PIN?")) return; delete db.pin; save(); toast("Inalis ang PIN"); location.hash = "#/settings"; }
     else if (a === "pinforgot") { if (!confirm("Walang paraan para makuha ulit ang PIN. Para makapasok ulit, kailangang burahin ang LAHAT ng nasa app na ito sa phone na ito. Burahin?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
@@ -1244,44 +1047,17 @@
     else if (a === "shareprep") shareText("Para sa doktor", $("#prep").value);
     else if (a === "sharecrisis") shareText("Crisis numbers", `Kung may panganib sa buhay: 911.\nNCMH Crisis Hotline (libre, 24/7): 1553 (landline) · 1800-1888-1553 · Smart/TNT 0919-057-1553 · Globe/TM 0917-899-8727 / 0966-351-4518.\nPara rin sa pamilya ang NCMH line.`);
     else if (a === "care") { db.care.push({ at: Date.now(), v: +v }); save(); render(); }
-    else if (a === "thing") { const k = dayKey(Date.now()); db.today[k] ||= {}; db.today[k][v] = !db.today[k][v]; save(); if (db.today[k][v]) haptic([8, 30, 12]); render(); }
-    else if (a === "mood") { db.moods[dayKey(Date.now())] = +v; save(); render(); }
-    else if (a === "sq") { const k = dayKey(Date.now()); db.sleep[k] = { ...(db.sleep[k] || {}), q: +v }; save(); render(); }
-    else if (a === "newidea") { const p = el.previousElementSibling; p.textContent = MUSIC_IDEAS[Math.floor(Math.random() * MUSIC_IDEAS.length)]; }
-    else if (a === "mlen") { if (mt.run) return; mt.len = mt.left = +v * 60; render(); }
-    else if (a === "mstart") {
-      if (mt.run) { musicStop(false); return; }
-      mt.run = true; mt.t0 = Date.now(); mt.left = mt.len; el.textContent = "Tapusin";
-      mt.iv = setInterval(() => { mt.left = Math.max(0, mt.len - (Date.now() - mt.t0) / 1000); const t = $("#mtime"); if (t) t.textContent = fmtT(mt.left); if (mt.left <= 0) musicStop(true); }, 250);
-    }
-    else if (a === "breath") {
-      const b = $("#breath"), btn = $("#bbtn"); if (breathT) { clearTimeout(breathT); breathT = 0; b.className = "breath"; b.textContent = "Simulan"; btn.textContent = "Simulan · 2 minuto"; return; }
-      btn.textContent = "Itigil"; const end = Date.now() + 120000;
-      const cycle = () => { if (Date.now() > end) { b.className = "breath"; b.textContent = "Tapos"; btn.textContent = "Ulitin"; breathT = 0; return; }
-        b.className = "breath in"; b.textContent = "Hinga papasok"; breathT = setTimeout(() => { b.className = "breath out"; b.textContent = "Dahan-dahang palabas"; breathT = setTimeout(cycle, 6000); }, 4000); };
-      cycle();
-    }
-    else if (a === "sharewk") {
-      const days = [...Array(7)].map((_, i) => dayKey(Date.now() - (6 - i) * DAY)), sl = days.map(k => sleepHours(db.sleep[k])).filter(x => x != null);
-      const done = days.reduce((s, k) => s + Object.values(db.today[k] || {}).filter(Boolean).length, 0), mus = db.music.filter(m => m.at > Date.now() - 7 * DAY);
-      shareText("Ang linggo ko", `Ang linggo ko:\n- Tulog: ${sl.length ? `average ${(sl.reduce((a, b) => a + b, 0) / sl.length).toFixed(1)} oras` : "hindi naitala"}\n- Maliliit na nagawa: ${done}\n- Pagtugtog: ${mus.length} beses, ${Math.round(mus.reduce((a, m) => a + m.min, 0))} minuto`);
-    }
   });
   document.addEventListener("input", e => {
     const el = e.target;
     if (el.id === "nm") { db.names.him = el.value.trim(); save(); }
     if (el.dataset.appt) { db.appt = el.value || null; save(); }
     if (el.dataset.fund) { db.funds[el.dataset.fund] = el.value.replace(/[^\d.]/g, ""); save(); }
-    if (el.dataset.mynote) { db.myNote = el.value; save(); }
     if (el.dataset.plan) { plan()[el.dataset.plan] = el.value; db.steps.plan = true; save(); }
     if (el.dataset.doc) { db.doc ||= {}; db.doc[el.dataset.doc] = el.value; save(); }
-    if (el.dataset.goal) { db.goal ||= {}; db.goal[el.dataset.goal] = el.value; save(); }
-    if (el.dataset.c) { const i = +el.dataset.i; db.contacts[i] ||= { name: "", tel: "" }; db.contacts[i][el.dataset.c] = el.value.trim(); save(); }
-    if (el.dataset.t != null) { const t = [...things()]; t[+el.dataset.t] = el.value; db.things = t.map(x => x.trim()).filter(Boolean).length ? t : null; save(); }
-    if (el.id === "bed" || el.id === "wake") { const k = dayKey(Date.now()); db.sleep[k] = { ...(db.sleep[k] || {}), [el.id]: el.value }; save(); }
   });
   /* Re-draw after a field is left, but outside the blur itself (a button tap may be re-drawing at the same moment). */
-  document.addEventListener("change", e => { if (e.target.id === "bed" || e.target.id === "wake" || e.target.dataset.appt || e.target.dataset.fund || e.target.dataset.doc === "tel") setTimeout(render, 0); });
+  document.addEventListener("change", e => { if (e.target.dataset.appt || e.target.dataset.fund || e.target.dataset.doc === "tel") setTimeout(render, 0); });
 
   render();
   if (db.space) setTimeout(() => showInstall(false), 4000);
