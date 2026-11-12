@@ -243,6 +243,8 @@
     .verse blockquote { margin: 10px 0 0; font: 400 19px/1.5 var(--display); font-variation-settings: 'SOFT' 100; font-style: italic; color: var(--ink); }
     .verse .vref { margin-top: 8px; font: 600 13px var(--sans); letter-spacing: .04em; color: var(--teal); }
     .verse + .verse { margin-top: 12px; }
+    .ven { margin-top: 10px; } .ven summary { cursor: pointer; font: 600 13px var(--sans); color: var(--muted); }
+    .ven p { margin: 6px 0 0; font-style: italic; color: var(--ink2); }
     .place + .place { margin-top: 10px; }
     .telrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .telrow .btn { min-height: 40px; font-size: 14px; }
@@ -256,7 +258,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "9", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "10", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -571,53 +573,56 @@
   const crisisHTML = () => `<a class="bigcall" href="tel:911"><span class="bubble">${ic("phone")}</span><span class="grow"><b>911</b><span class="l">Emergency: may panganib sa buhay ngayon</span></span></a>
     <a class="bigcall teal" href="tel:1553"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH Crisis Hotline · libre, 24 oras · para rin sa pamilya</span></span></a>
     <details class="more"><summary>Ibang numero ng NCMH (cellphone)</summary><div class="crisis" style="margin-top:6px">${CRISIS.slice(2).map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div></details>`;
-  /* Bible verses: World English Bible (public domain), with "Yahweh" rendered "the Lord". Chosen for peace,
+  /* Bible verses: Tagalog from Ang Biblia (1905), English from the World English Bible with "Yahweh" rendered
+     "the Lord"; both public domain. Each entry: [English ref, Tagalog ref, Tagalog, English, note]. Chosen for peace,
      rest, love and hope; nothing about punishment, enemies or spirits, which can frighten someone under stress.
      The short Taglish notes are original. */
   const VERSES = {
     family: [
-      ["Ecclesiastes 4:9–10", "Two are better than one… For if they fall, the one will lift up his fellow; but woe to him who is alone when he falls, and doesn’t have another to lift him up.", "Ito ang ibig sabihin ng kasama. Hindi kayo nag-iisa, at hindi rin siya."],
-      ["Galatians 6:2", "Bear one another’s burdens, and so fulfill the law of Christ.", "Hatiin ang pasanin: sa pamilya, sa mga kaibigan, sa simbahan."],
-      ["1 Corinthians 13:4–7", "Love is patient and is kind… is not provoked, takes no account of evil… bears all things, believes all things, hopes all things, and endures all things.", "Mahinahon at mainit: iyan din ang sinasabi ng pananaliksik na pinakamakakatulong sa kanya."],
-      ["James 1:19", "Let every man be swift to hear, slow to speak, and slow to anger.", "Makinig muna bago magpayo. Ito ang puso ng LEAP."],
-      ["Proverbs 15:1", "A gentle answer turns away wrath, but a harsh word stirs up anger.", "Kapag mainit ang ulo niya, ang mahinahong boses ang nagpapakalma."],
-      ["Colossians 3:12–13", "Put on… a heart of compassion, kindness, lowliness, humility, and perseverance; bearing with one another, and forgiving each other.", "Pagpapatawad, sa kanya at sa sarili ninyo, sa mga araw na hindi naging maayos."],
-      ["Ruth 1:16", "Where you go, I will go; and where you stay, I will stay.", "Para sa nananatili sa tabi niya."],
-      ["Proverbs 17:17", "A friend loves at all times; and a brother is born for adversity.", "Para sa mga kaibigang hindi lumalayo."],
-      ["Matthew 11:28–29", "Come to me, all you who labor and are heavily burdened, and I will give you rest… for I am gentle and humble in heart; and you will find rest for your souls.", "Para sa mga pagod na. Puwede kayong magpahinga."],
-      ["Mark 6:31", "You come apart into a deserted place, and rest awhile.", "Kahit si Hesus ay pinagpahinga ang mga kasama niya. Hindi kasalanan ang magpahinga."],
-      ["Isaiah 40:29, 31", "He gives power to the weak… those who wait for the Lord will renew their strength. They will run, and not be weary. They will walk, and not faint.", "Kapag ubos na ang lakas ninyo."],
-      ["Galatians 6:9", "Let’s not be weary in doing good, for we will reap in due season, if we don’t give up.", "Mabagal ang paggaling, pero may direksyon."],
-      ["Romans 12:12", "Rejoicing in hope; enduring in troubles; continuing steadfastly in prayer.", "Pag-asa, tiyaga, dasal: sabay-sabay."],
-      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts.", "Para sa gabi bago ang konsulta, o anumang gabing puno ng pag-aalala."],
-      ["1 Peter 5:7", "Casting all your worries on him, because he cares for you.", "Hindi ninyo kailangang buhatin ang lahat."],
-      ["2 Corinthians 1:3–4", "The Father of mercies and God of all comfort; who comforts us in all our affliction, that we may be able to comfort those who are in any affliction.", "Ang inaaliw ay nakakapag-aliw din."],
-      ["Psalm 34:18", "The Lord is near to those who have a broken heart, and saves those who have a crushed spirit.", "Sa mga araw na parang wasak ang loob."],
-      ["Lamentations 3:22–23", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bawat umaga ay bagong simula, para sa kanya at para sa inyo."]],
+      ["Ecclesiastes 4:9–10", "Eclesiastes 4:9–10", "Dalawa ay maigi kay sa isa… Sapagka’t kung sila’y mabuwal, ibabangon ng isa ang kaniyang kasama; nguni’t sa aba niya, na nagiisa pagka siya’y nabuwal, at walang iba na magbangon sa kaniya.", "Two are better than one… For if they fall, the one will lift up his fellow; but woe to him who is alone when he falls, and doesn’t have another to lift him up.", "Ito ang ibig sabihin ng kasama. Hindi kayo nag-iisa, at hindi rin siya."],
+      ["Galatians 6:2", "Galacia 6:2", "Mangagdalahan kayo ng mga pasanin ng isa’t isa, at tuparin ninyong gayon ang kautusan ni Cristo.", "Bear one another’s burdens, and so fulfill the law of Christ.", "Hatiin ang pasanin: sa pamilya, sa mga kaibigan, sa simbahan."],
+      ["1 Corinthians 13:4–7", "1 Corinto 13:4–7", "Ang pagibig ay mapagpahinuhod, at magandang-loob… hindi nayayamot, hindi inaalumana ang masama… Lahat ay binabata, lahat ay pinaniniwalaan, lahat ay inaasahan, lahat ay tinitiis.", "Love is patient and is kind… is not provoked, takes no account of evil… bears all things, believes all things, hopes all things, and endures all things.", "Mahinahon at mainit: iyan din ang sinasabi ng pananaliksik na pinakamakakatulong sa kanya."],
+      ["James 1:19", "Santiago 1:19", "Magmaliksi ang bawa’t tao sa pakikinig, magmakupad sa pananalita, magmakupad sa pagkagalit.", "Let every man be swift to hear, slow to speak, and slow to anger.", "Makinig muna bago magpayo. Ito ang puso ng LEAP."],
+      ["Proverbs 15:1", "Kawikaan 15:1", "Ang malubay na sagot ay nakapapawi ng poot: nguni’t ang mabigat na salita ay humihila ng galit.", "A gentle answer turns away wrath, but a harsh word stirs up anger.", "Kapag mainit ang ulo niya, ang mahinahong boses ang nagpapakalma."],
+      ["Colossians 3:12–13", "Colosas 3:12–13", "Mangagbihis nga kayo… ng isang pusong mahabagin, ng kagandahangloob, ng kababaan, ng kaamuan, ng pagpapahinuhod: Mangagtiisan kayo sa isa’t isa, at mangagpatawaran kayo sa isa’t isa.", "Put on… a heart of compassion, kindness, lowliness, humility, and perseverance; bearing with one another, and forgiving each other.", "Pagpapatawad, sa kanya at sa sarili ninyo, sa mga araw na hindi naging maayos."],
+      ["Ruth 1:16", "Ruth 1:16", "Kung saan ka pumaroon, ay paroroon ako: at kung saan ka tumigil, ay titigil ako.", "Where you go, I will go; and where you stay, I will stay.", "Para sa nananatili sa tabi niya."],
+      ["Proverbs 17:17", "Kawikaan 17:17", "Ang kaibigan ay umiibig sa lahat ng panahon, at ang kapatid ay ipinanganak na ukol sa kasakunaan.", "A friend loves at all times; and a brother is born for adversity.", "Para sa mga kaibigang hindi lumalayo."],
+      ["Matthew 11:28–29", "Mateo 11:28–29", "Magsiparito sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo’y aking papagpapahingahin… sapagka’t ako’y maamo at mapagpakumbabang puso: at masusumpungan ninyo ang kapahingahan ng inyong mga kaluluwa.", "Come to me, all you who labor and are heavily burdened, and I will give you rest… for I am gentle and humble in heart; and you will find rest for your souls.", "Para sa mga pagod na. Puwede kayong magpahinga."],
+      ["Mark 6:31", "Marcos 6:31", "Magsiparito kayo ng bukod sa isang dakong ilang, at mangagpahinga kayo ng kaunti.", "You come apart into a deserted place, and rest awhile.", "Kahit si Hesus ay pinagpahinga ang mga kasama niya. Hindi kasalanan ang magpahinga."],
+      ["Isaiah 40:29, 31", "Isaias 40:29, 31", "Siya’y nagbibigay ng lakas sa mahina… Nguni’t silang nangaghihintay sa Panginoon ay mangagbabagong lakas… sila’y magsisitakbo, at hindi mangapapagod; sila’y magsisilakad, at hindi manganghihina.", "He gives power to the weak… those who wait for the Lord will renew their strength. They will run, and not be weary. They will walk, and not faint.", "Kapag ubos na ang lakas ninyo."],
+      ["Galatians 6:9", "Galacia 6:9", "At huwag tayong mangapagod sa paggawa ng mabuti: sapagka’t sa kapanahunan ay magsisipagani tayo, kung hindi tayo manganghihimagod.", "Let’s not be weary in doing good, for we will reap in due season, if we don’t give up.", "Mabagal ang paggaling, pero may direksyon."],
+      ["Romans 12:12", "Roma 12:12", "Mangagalak sa pagasa; magmatiisin sa kapighatian; magmatiyagain sa pananalangin.", "Rejoicing in hope; enduring in troubles; continuing steadfastly in prayer.", "Pag-asa, tiyaga, dasal: sabay-sabay."],
+      ["Philippians 4:6–7", "Filipos 4:6–7", "Huwag kayong mangabalisa sa anomang bagay; kundi sa lahat ng mga bagay sa pamamagitan ng panalangin at daing na may pagpapasalamat ay ipakilala ninyo ang inyong mga kahilingan sa Dios. At ang kapayapaan ng Dios, na di masayod ng pagiisip, ay magiingat ng inyong mga puso at ng inyong mga pagiisip kay Cristo Jesus.", "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts.", "Para sa gabi bago ang konsulta, o anumang gabing puno ng pag-aalala."],
+      ["1 Peter 5:7", "1 Pedro 5:7", "Inyong ilagak sa kaniya ang lahat ng inyong kabalisahan, sapagka’t kayo’y ipinagmamalasakit niya.", "Casting all your worries on him, because he cares for you.", "Hindi ninyo kailangang buhatin ang lahat."],
+      ["2 Corinthians 1:3–4", "2 Corinto 1:3–4", "Ang Ama ng mga kaawaan at Dios ng buong kaaliwan; Na siyang umaaliw sa atin sa lahat ng kapighatian, upang ating maaliw ang nangasa anomang kapighatian.", "The Father of mercies and God of all comfort; who comforts us in all our affliction, that we may be able to comfort those who are in any affliction.", "Ang inaaliw ay nakakapag-aliw din."],
+      ["Psalm 147:3", "Awit 147:3", "Kaniyang pinagagaling ang mga may bagbag na puso, at tinatalian niya ang kanilang mga sugat.", "He heals the broken in heart, and binds up their wounds.", "Sa mga araw na parang wasak ang loob."],
+      ["Lamentations 3:22–23", "Panaghoy 3:22–23", "Ang kaniyang mga habag ay hindi nauubos. Ang mga yao’y bago tuwing umaga, dakila ang inyong pagtatapat.", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bawat umaga ay bagong simula, para sa kanya at para sa inyo."]],
     him: [
-      ["Psalm 23:1–3", "The Lord is my shepherd: I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.", "Pahinga at tahimik na tubig. Hindi kailangang magmadali."],
-      ["Psalm 4:8", "In peace I will both lay myself down and sleep, for you alone, Lord, make me live in safety.", "Para sa gabi, bago matulog."],
-      ["Psalm 127:2", "It is vain for you to rise up early, to stay up late… for he gives sleep to his loved ones.", "Ang tulog ay regalo, hindi katamaran."],
-      ["Psalm 46:10", "Be still, and know that I am God.", "Isang hinga. Isang sandali ng katahimikan."],
-      ["Isaiah 41:10", "Don’t you be afraid, for I am with you. Don’t be dismayed, for I am your God. I will strengthen you. Yes, I will help you.", "Para sa mga araw na may kaba."],
-      ["John 14:27", "Peace I leave with you. My peace I give to you… Don’t let your heart be troubled, neither let it be fearful.", "Kapayapaan na hindi galing sa mundo."],
-      ["2 Timothy 1:7", "For God didn’t give us a spirit of fear, but of power, love, and self-control.", "Lakas, pagmamahal, at kalmadong isip."],
-      ["Psalm 33:3", "Sing to him a new song. Play skillfully with a shout of joy!", "Para sa gitara at sa boses mo."],
-      ["Psalm 98:4–5", "Burst out and sing for joy, yes, sing praises! Sing praises to the Lord with the harp, with the harp and the voice of melody.", "Ang pagtugtog ay puwede ring dasal."],
-      ["Zephaniah 3:17", "He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.", "May kumakanta rin para sa ’yo."],
-      ["Psalm 139:14", "I will give thanks to you, for I am fearfully and wonderfully made.", "Mahalaga ka, kahit sa mabibigat na araw."],
-      ["Jeremiah 29:11", "“For I know the thoughts that I think toward you,” says the Lord, “thoughts of peace, and not of evil, to give you hope and a future.”", "May bukas pa. May mga kanta pang tutugtugin."],
-      ["Psalm 30:5", "Weeping may stay for the night, but joy comes in the morning.", "Lilipas din ang gabi."],
-      ["Lamentations 3:22–23", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bagong umaga, bagong simula."],
-      ["Matthew 11:28", "Come to me, all you who labor and are heavily burdened, and I will give you rest.", "Puwede kang magpahinga."],
-      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer… let your requests be made known to God. And the peace of God… will guard your hearts and your thoughts.", "Sabihin ang laman ng isip mo, sa dasal o sa taong pinagkakatiwalaan mo."]] };
+      ["Psalm 23:1–3", "Awit 23:1–3", "Ang Panginoon ay aking pastor; hindi ako mangangailangan. Kaniyang pinahihiga ako sa sariwang pastulan: pinapatnubayan niya ako sa siping ng mga tubig na pahingahan. Kaniyang pinapananauli ang aking kaluluwa.", "The Lord is my shepherd: I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.", "Pahinga at tahimik na tubig. Hindi kailangang magmadali."],
+      ["Psalm 4:8", "Awit 4:8", "Payapa akong hihiga at gayon din matutulog: sapagka’t ikaw, Panginoon, pinatatahan mo akong mag-isa sa katiwasayan.", "In peace I will both lay myself down and sleep, for you alone, Lord, make me live in safety.", "Para sa gabi, bago matulog."],
+      ["Psalm 127:2", "Awit 127:2", "Walang kabuluhan sa inyo na kayo’y magsibangong maaga, at magpahingang tanghali… sapagka’t binibigyan niyang gayon ng pagkakatulog ang kaniyang minamahal.", "It is vain for you to rise up early, to stay up late… for he gives sleep to his loved ones.", "Ang tulog ay regalo, hindi katamaran."],
+      ["Psalm 46:10", "Awit 46:10", "Kayo ay magsitigil at kilalanin ninyo na ako ang Dios.", "Be still, and know that I am God.", "Isang hinga. Isang sandali ng katahimikan."],
+      ["Isaiah 41:10", "Isaias 41:10", "Huwag kang matakot, sapagka’t ako’y sumasaiyo; huwag kang manglupaypay, sapagka’t ako’y iyong Dios; aking palalakasin ka; oo, aking tutulungan ka.", "Don’t you be afraid, for I am with you. Don’t be dismayed, for I am your God. I will strengthen you. Yes, I will help you.", "Para sa mga araw na may kaba."],
+      ["John 14:27", "Juan 14:27", "Ang kapayapaan ay iniiwan ko sa inyo; ang aking kapayapaan ay ibinibigay ko sa inyo… Huwag magulumihanan ang inyong puso, ni matakot man.", "Peace I leave with you. My peace I give to you… Don’t let your heart be troubled, neither let it be fearful.", "Kapayapaan na hindi galing sa mundo."],
+      ["2 Timothy 1:7", "2 Timoteo 1:7", "Sapagka’t hindi tayo binigyan ng Dios ng espiritu ng katakutan; kundi ng kapangyarihan at ng pagibig at ng kahusayan.", "For God didn’t give us a spirit of fear, but of power, love, and self-control.", "Lakas, pagmamahal, at kalmadong isip."],
+      ["Psalm 33:3", "Awit 33:3", "Magsiawit kayo sa kaniya ng bagong awit; magsitugtog kayong matalino na may malaking ingay.", "Sing to him a new song. Play skillfully with a shout of joy!", "Para sa gitara at sa boses mo."],
+      ["Psalm 98:4–5", "Awit 98:4–5", "Mangagpasimula at magsiawit dahil sa kagalakan, oo, magsiawit kayo ng mga pagpuri. Magsiawit kayo sa Panginoon ng mga pagpuri ng alpa; ng alpa at ng tinig na tugma.", "Burst out and sing for joy, yes, sing praises! Sing praises to the Lord with the harp, with the harp and the voice of melody.", "Ang pagtugtog ay puwede ring dasal."],
+      ["Zephaniah 3:17", "Sofonias 3:17", "Siya’y magagalak dahil sa iyo na may kagalakan; siya’y magpapahinga sa kaniyang pagibig; siya’y magagalak sa iyo na may pagawit.", "He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.", "May kumakanta rin para sa ’yo."],
+      ["Psalm 3:5", "Awit 3:5", "Ako’y nahiga, at natulog; ako’y nagising; sapagka’t inaalalayan ako ng Panginoon.", "I laid myself down and slept. I awakened; for the Lord sustains me.", "Matulog nang panatag. May umaalalay sa ’yo."],
+      ["Jeremiah 29:11", "Jeremias 29:11", "Sapagka’t nalalaman ko ang mga pagiisip na aking iniisip sa inyo, sabi ng Panginoon, mga pagiisip tungkol sa kapayapaan, at hindi tungkol sa kasamaan, upang bigyan kayo ng pagasa sa inyong huling wakas.", "“For I know the thoughts that I think toward you,” says the Lord, “thoughts of peace, and not of evil, to give you hope and a future.”", "May bukas pa. May mga kanta pang tutugtugin."],
+      ["Psalm 30:5", "Awit 30:5", "Pagiyak ay magtatagal ng magdamag, nguni’t kagalakan ay dumarating sa kinaumagahan.", "Weeping may stay for the night, but joy comes in the morning.", "Lilipas din ang gabi."],
+      ["Lamentations 3:22–23", "Panaghoy 3:22–23", "Ang kaniyang mga habag ay hindi nauubos. Ang mga yao’y bago tuwing umaga, dakila ang inyong pagtatapat.", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bagong umaga, bagong simula."],
+      ["Matthew 11:28", "Mateo 11:28", "Magsiparito sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo’y aking papagpapahingahin.", "Come to me, all you who labor and are heavily burdened, and I will give you rest.", "Puwede kang magpahinga."],
+      ["Philippians 4:6–7", "Filipos 4:6–7", "Huwag kayong mangabalisa sa anomang bagay; kundi sa lahat ng mga bagay sa pamamagitan ng panalangin at daing na may pagpapasalamat ay ipakilala ninyo ang inyong mga kahilingan sa Dios. At ang kapayapaan ng Dios, na di masayod ng pagiisip, ay magiingat ng inyong mga puso at ng inyong mga pagiisip kay Cristo Jesus.", "In nothing be anxious, but in everything, by prayer… let your requests be made known to God. And the peace of God… will guard your hearts and your thoughts.", "Sabihin ang laman ng isip mo, sa dasal o sa taong pinagkakatiwalaan mo."]] };
   const verseToday = sp => { const L = VERSES[sp]; return L[Math.floor(Date.now() / DAY) % L.length]; };
-  const verseCard = (sp, link) => { const [r, t, n] = verseToday(sp); return `<div class="card verse"><div class="eyebrow">Salita para sa araw na ito</div><blockquote>${esc(t)}</blockquote><div class="vref">${esc(r)}</div><p class="small muted" style="margin:8px 0 0">${esc(n)}</p>${link ? `<a class="small" href="#/verses">Lahat ng talata</a>` : ""}</div>`; };
+  const verseBody = ([r, tr, tl, en, n]) => `<blockquote>${esc(tl)}</blockquote><div class="vref">${esc(tr)}</div>
+      <details class="ven"><summary>English</summary><p>${esc(en)}</p><div class="vref">${esc(r)} · WEB</div></details><p class="small muted" style="margin:8px 0 0">${esc(n)}</p>`;
+  const verseCard = (sp, link) => `<div class="card verse"><div class="eyebrow">Salita para sa araw na ito</div>${verseBody(verseToday(sp))}${link ? `<a class="small" href="#/verses">Lahat ng talata</a>` : ""}</div>`;
   function viewVerses() {
     const sp = db.space === "family" ? "family" : "him";
     return hero(sp === "family" ? "care" : "today", "Bibliya", sp === "family" ? "Mga talata para sa inyo" : "Mga talata para sa ’yo", sp === "family" ? "Para sa pagod, sa pag-asa, at sa pagmamahal na mahinahon." : "Para sa kapayapaan, pahinga, at musika.", { top: backBtn("#/" + (sp === "family" ? "care" : ""), "Bumalik") })
-      + `<div class="lift">${VERSES[sp].map(([r, t, n]) => `<div class="card verse"><blockquote>${esc(t)}</blockquote><div class="vref">${esc(r)}</div><p class="small muted" style="margin:8px 0 0">${esc(n)}</p></div>`).join("")}</div>
-      <p class="small muted center" style="margin-top:14px">World English Bible (public domain)</p>`;
+      + `<div class="lift">${VERSES[sp].map(v => `<div class="card verse">${verseBody(v)}</div>`).join("")}</div>
+      <p class="small muted center" style="margin-top:14px">Tagalog: Ang Biblia (1905). English: World English Bible (WEB). Parehong public domain.</p>`;
   }
   /* Where they live now: El Nido, Palawan. Numbers come from official pages and directories, checked
      November 2026; several are from older listings, so the app always says to call first. */
@@ -1109,7 +1114,7 @@
         <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
         <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
         <li><b>Label at self-stigma:</b> ang paraan ng pagbanggit ng diagnosis ay nakakaapekto sa tingin ng tao sa sarili; ang self-stigma ay humaharang sa paggaling (pag-aaral sa first-episode psychosis, 2023; review sa self-stigma).</li>
-        <li><b>Pananampalataya:</b> ang suporta ng faith community ay kaugnay ng mas magandang paggaling; ang mga talata ay mula sa World English Bible (public domain), pinili para sa kapayapaan at pahinga.</li>
+        <li><b>Pananampalataya:</b> ang suporta ng faith community ay kaugnay ng mas magandang paggaling; ang mga talata ay mula sa Ang Biblia (1905) at sa World English Bible, parehong public domain, pinili para sa kapayapaan at pahinga.</li>
         <li><b>Mga pamilyang Pilipino:</b> ang hiya at stigma ay malalaking hadlang sa pagpapatingin; ang suporta ng pamilya ang pinakamalaking tulong (systematic review ng Filipino help-seeking, 2020). Kaya may Private mode at mga mensaheng hindi binabanggit ang diagnosis.</li>
         <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
         <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
