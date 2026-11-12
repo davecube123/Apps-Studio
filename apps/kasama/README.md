@@ -20,4 +20,6 @@ Two separate spaces, chosen on first open, meant for separate phones. Everything
 - *Kalma:* paced breathing, 5-4-3-2-1 grounding, coping with voices or a sense of threat, one-tap calls to trusted
   people and the NCMH line.
 
+Design: Fraunces (soft) headings and Inter text (SIL OFL, bundled in `fonts/`), an original illustration and colour world per section, line icons, drawn mood faces, progress rings, light and dark themes.
+
 Evidence base and sources are listed in the app (About). It is guidance, not a substitute for professional care.
