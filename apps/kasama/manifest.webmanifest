@@ -1,0 +1,18 @@
+{
+  "name": "Kasama",
+  "short_name": "Kasama",
+  "description": "Para sa pamilya at sa kanya: understanding psychosis, how to talk, getting help in the Philippines, and gentle daily routines, sleep and music.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f1e9",
+  "theme_color": "#f6f1e9",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["health", "lifestyle"],
+  "orientation": "portrait"
+}

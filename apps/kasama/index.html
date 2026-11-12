@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="tl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#f6f1e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16191a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kasama">
+  <meta name="description" content="Para sa pamilya at sa kanya: understanding psychosis, how to talk, getting help in the Philippines, and gentle daily routines, sleep and music.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>Kasama</title>
+  <style>
+    :root {
+      --bg: #f6f1e9; --card: #fffdf9; --ink: #1f2a2c; --ink2: #4d5b5d; --muted: #8a9597; --line: rgba(31,42,44,.09); --line2: rgba(31,42,44,.16);
+      --teal: #2f7f78; --teal-soft: rgba(47,127,120,.1); --coral: #d9714f; --coral-soft: rgba(217,113,79,.12); --sun: #e3a93b; --red: #c2453b; --red-soft: rgba(194,69,59,.1);
+      --r: 20px; --ease: cubic-bezier(.2,.7,.2,1); --spring: cubic-bezier(.2,.9,.25,1.15);
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --e1: 0 1px 2px rgba(31,42,44,.05), 0 4px 14px rgba(31,42,44,.05); color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) { :root {
+      --bg: #16191a; --card: #1f2425; --ink: #e9eeec; --ink2: #b6c1bf; --muted: #7f8a89; --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.15);
+      --teal: #6cc3b9; --teal-soft: rgba(108,195,185,.13); --coral: #ef9271; --coral-soft: rgba(239,146,113,.14); --sun: #f0c062; --red: #ef7b70; --red-soft: rgba(239,123,112,.13); --e1: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; } }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { background: var(--bg); }
+    body { margin: 0; color: var(--ink); font: 16.5px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+    main { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 20px) 18px calc(env(safe-area-inset-bottom) + 110px); }
+    a { color: var(--teal); }
+    h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -.015em; line-height: 1.2; text-wrap: balance; }
+    h1 { font-size: 30px; } h2 { font-size: 22px; } h3 { font-size: 17.5px; }
+    p { margin: .5em 0; text-wrap: pretty; }
+    .muted { color: var(--muted); } .small { font-size: 14px; } .center { text-align: center; }
+    .eyebrow { font: 700 11.5px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; box-shadow: var(--e1); }
+    .card + .card, .card + .list, .list + .card { margin-top: 12px; }
+    .sec { margin-top: 26px; } .sec > .eyebrow { margin: 0 2px 10px; }
+    .btn { appearance: none; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 999px; min-height: 44px; padding: 10px 18px;
+           font: 600 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: transform .25s var(--spring); }
+    .btn:active { transform: scale(.96); }
+    .btn.teal { background: var(--teal); color: #fff; border-color: transparent; } .btn.red { background: var(--red); color: #fff; border-color: transparent; }
+    .btn.sm { min-height: 36px; padding: 6px 14px; font-size: 14px; } .btn.block { display: flex; width: 100%; }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .view.enter > * { animation: rise .4s var(--ease) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .hello { font: 600 28px/1.2 var(--serif); letter-spacing: -.01em; }
+    .list a, .list button.li { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
+           color: var(--ink); text-decoration: none; font: 600 16px/1.35 var(--sans); cursor: pointer; }
+    .list a + a, .list button + button, .list a + button, .list button + a { margin-top: 8px; }
+    .list small { display: block; font-weight: 500; color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+    .list .ic { width: 38px; height: 38px; border-radius: 12px; background: var(--teal-soft); color: var(--teal); display: grid; place-items: center; flex: none; font-size: 18px; }
+    .list .done .ic, .ic.done { background: var(--teal); color: #fff; }
+    .chev { margin-left: auto; color: var(--muted); }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); font: 500 15px var(--sans); margin: -4px 0 14px -4px; padding: 6px 12px 6px 8px; border-radius: 999px;
+            background: var(--card); border: 1px solid var(--line); cursor: pointer; text-decoration: none; }
+    .prose p { font-size: 17px; line-height: 1.62; }
+    .key { background: var(--teal-soft); border-radius: 16px; padding: 12px 16px; margin: 14px 0; font-weight: 600; color: var(--ink); }
+    .warn { background: var(--red-soft); border-radius: 16px; padding: 12px 16px; margin: 14px 0; }
+    .say { border-left: 3px solid var(--teal); padding: 4px 0 4px 14px; margin: 8px 0; font: italic 17px/1.5 var(--serif); }
+    .avoid { border-left: 3px solid var(--coral); padding: 4px 0 4px 14px; margin: 8px 0; font: 16px/1.5 var(--sans); color: var(--ink2); }
+    ul.tight { margin: 6px 0; padding-left: 20px; } ul.tight li { margin: 4px 0; }
+    .opt { display: block; width: 100%; text-align: left; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 14px; padding: 12px 14px; margin-top: 8px; font: 16px/1.45 var(--sans); cursor: pointer; }
+    .opt.good { border-color: var(--teal); background: var(--teal-soft); } .opt.bad { border-color: var(--coral); background: var(--coral-soft); }
+    .fb { margin-top: 10px; font-size: 15.5px; color: var(--ink2); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { border: 1px solid var(--line2); background: var(--card); color: var(--ink2); border-radius: 999px; padding: 6px 12px; font: 600 13.5px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--teal); color: #fff; border-color: transparent; }
+    textarea, input[type=text], input[type=tel], input[type=time] { width: 100%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 14px; padding: 11px 13px; font: 16px var(--sans); outline: 0; }
+    textarea { resize: vertical; min-height: 90px; } textarea:focus, input:focus { border-color: var(--teal); }
+    label.f { display: block; margin-top: 12px; } label.f > span { display: block; font: 600 13px var(--sans); color: var(--muted); margin: 0 2px 5px; }
+    .note { padding: 12px 0; border-bottom: 1px solid var(--line); } .note .d { font: 600 12.5px var(--sans); color: var(--muted); }
+    .crisis { background: var(--red-soft); border: 1px solid rgba(194,69,59,.25); border-radius: var(--r); padding: 16px 18px; }
+    .crisis a.call { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid rgba(194,69,59,.18); text-decoration: none; color: var(--ink); font-weight: 600; }
+    .crisis a.call:first-of-type { border-top: 0; } .crisis a.call b { color: var(--red); white-space: nowrap; }
+    /* His space */
+    .things .thing { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); cursor: pointer; text-align: left; color: var(--ink); font: 600 16.5px var(--sans); }
+    .things .thing + .thing { margin-top: 8px; }
+    .tick { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #fff; transition: all .25s var(--spring); }
+    .thing.done .tick { background: var(--teal); border-color: var(--teal); } .thing.done { color: var(--ink2); }
+    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 90px; margin-top: 10px; }
+    .bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
+    .bars i { width: 100%; max-width: 30px; border-radius: 6px; background: var(--teal); opacity: .85; min-height: 4px; } .bars i.zero { background: var(--line2); }
+    .bars span { font: 700 10.5px var(--sans); color: var(--muted); }
+    .timer { font: 300 64px/1 var(--sans); text-align: center; font-variant-numeric: tabular-nums; margin: 10px 0; }
+    .breath { width: 180px; height: 180px; margin: 20px auto; border-radius: 50%; background: radial-gradient(circle, var(--teal-soft), transparent 70%); border: 2px solid var(--teal); display: grid; place-items: center;
+              font: 600 18px var(--sans); color: var(--teal); transform: scale(.7); transition: transform 4s ease-in-out; }
+    .breath.in { transform: scale(1); transition-duration: 4s; } .breath.out { transform: scale(.7); transition-duration: 6s; }
+    .moods { display: flex; justify-content: space-between; gap: 6px; } .moods button { flex: 1; font-size: 26px; padding: 8px 0; border-radius: 14px; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
+    .moods button.on { background: var(--teal-soft); border-color: var(--teal); }
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(460px, calc(100% - 20px)); padding: 6px; border-radius: 28px;
+               background: color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6); border: 1px solid var(--line2);
+               box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 22px; color: var(--muted); font: 600 10.5px var(--sans); padding: 7px 0 6px; }
+    nav.tabs a svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    nav.tabs a.on { color: var(--teal); background: var(--teal-soft); }
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 96px); background: var(--ink); color: var(--bg);
+             padding: 11px 18px; border-radius: 18px; font: 600 14px var(--sans); z-index: 60; animation: rise .3s var(--spring) both; }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 55; border: 0; background: var(--teal); color: #fff; padding: 11px 20px; border-radius: 999px; font: 700 14px var(--sans); cursor: pointer; }
+    .choose { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; }
+    .choose button { text-align: left; width: 100%; border: 1px solid var(--line2); background: var(--card); border-radius: 22px; padding: 18px 20px; margin-top: 12px; cursor: pointer; color: var(--ink); box-shadow: var(--e1); }
+    .choose button b { display: block; font-size: 19px; } .choose button span { color: var(--ink2); font-size: 15px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs" hidden></nav>
+  <script>
+  "use strict";
+  const APP_VERSION = "1", APP_DATE = "12 Nov 2026";
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const dstr = t => new Date(t).toLocaleDateString("en-PH", { weekday: "short", day: "numeric", month: "short" });
+  function toast(m, ms = 2600) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+  const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
+
+  /* Everything stays on this phone (localStorage). Nothing is sent anywhere. */
+  const KEY = "kasama";
+  const db = Object.assign({ space: null, names: { him: "", me: "" }, steps: {}, notes: [], lessons: {}, practice: {}, care: [], contacts: [], today: {}, things: null, sleep: {}, music: [], moods: {} },
+    (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+  const him = () => db.names.him || "siya";
+
+  /* ---------- Verified Philippine numbers (November 2026). NCMH Crisis Hotline: free, 24/7. ---------- */
+  const CRISIS = [
+    ["Emergency (pulis, ambulansya, bumbero)", "911", "911"],
+    ["NCMH Crisis Hotline · landline, toll-free", "1553", "1553"],
+    ["NCMH Crisis Hotline · toll-free", "1800-1888-1553", "180018881553"],
+    ["NCMH Crisis Hotline · Smart/TNT", "0919-057-1553", "09190571553"],
+    ["NCMH Crisis Hotline · Globe/TM", "0917-899-8727", "09178998727"],
+    ["NCMH Crisis Hotline · Globe/TM", "0966-351-4518", "09663514518"],
+  ];
+  const crisisHTML = (title = "Kung may panganib ngayon") => `<div class="crisis"><h3 style="color:var(--red)">${title}</h3>
+    <p class="small" style="margin:6px 0 4px;color:var(--ink2)">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Ang NCMH line ay para rin sa pamilya: puwede kayong tumawag para humingi ng payo.</p>
+    ${CRISIS.map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="small">${l}</span><b>${n}</b></a>`).join("")}</div>`;
+
+  /* =================================================================
+     FAMILY SPACE: understanding, talking (LEAP, low expressed emotion), getting help, caring for yourselves
+     ================================================================= */
+  const LESSONS = [
+    { id: "what", t: "Ano ba talaga ang psychosis?", m: 3, body: [
+      "Ang psychosis ay kondisyon kung saan nahihirapan ang utak na paghiwalayin kung ano ang totoo at kung ano ang galing sa sariling isip. Hindi ito kahinaan ng loob, hindi ito katamaran, at hindi niya ito pinili.",
+      "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations), o matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagbabantay sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
+      "Kaya maaaring tumigil siya sa pagtugtog. Hindi dahil ayaw na niya sa musika; ang “bawas” na sintomas mismo ang kumukuha ng gana at lakas. Hindi ito masosolusyonan ng pagpilit, pero bumabalik ito sa tamang gamutan at panahon.",
+      "Ang mga pagsabog ng galit, gaya ng pagtumba ng upuan o pagbasag ng cellphone, ay kadalasang galing sa takot at sobrang stress ng nararanasan niya, lalo na kung pakiramdam niya ay may banta sa kanya. Seryoso pa rin ito, pero tanda ito na kailangan na niya ng tulong, hindi ng sermon." ],
+      key: "Hindi siya ang problema. Ang kondisyon ang problema, at kasama ninyo siya sa paglaban dito." },
+    { id: "insight", t: "Bakit sinasabi niyang wala siyang sakit", m: 3, body: [
+      "Isa sa pinakamahirap: maraming taong may psychosis ang tunay na hindi nakikitang may sakit sila. Ito ay tinatawag na anosognosia o lack of insight, at bahagi ito ng kondisyon mismo, galing sa paraan ng pagtrabaho ng utak. Sa pananaliksik, mga kalahati ng may schizophrenia ang nakakaranas nito.",
+      "Ibig sabihin, hindi siya nagmamatigas. Para sa kanya, totoo ang nararanasan niya. Kaya kapag pinagtatalunan natin kung totoo o hindi, lalo lang siyang lumalayo at hindi na nagtitiwala.",
+      "Ang mas gumagana: huwag pilitin siyang tanggapin na “may sakit” siya. Sa halip, hanapin ang mga bagay na gusto niyang mabago: makatulog nang maayos, mabawasan ang stress o takot, makabalik sa pagtugtog. Doon kayo magtulungan. Ito ang puso ng LEAP, na nasa “Kausapin” tab." ],
+      key: "Ang layunin ay hindi manalo sa argumento. Ang layunin ay manatili siyang nagtitiwala sa inyo." },
+    { id: "early", t: "Bakit ngayon na dapat magpatingin", m: 2, body: [
+      "Malinaw sa pananaliksik: mas maaga ang gamutan, mas maganda ang paggaling. Ang tagal ng hindi nagagamot na psychosis (duration of untreated psychosis) ay isa sa pinakamalakas na palatandaan ng magiging takbo ng kanyang paggaling.",
+      "Ang psychiatrist ang makakapagbigay ng tamang diagnosis at gamot. Ang mga antipsychotic na gamot ay napatunayang nakakatulong lalo sa mga “dagdag” na sintomas at sa pag-iwas sa pagbabalik nito. May side effects ang ilan, pero napag-uusapan at naaayos ito kasama ang doktor.",
+      "Hindi kailangang hintayin na pumayag siya bago kayo kumilos. Puwedeng kayo muna, ang girlfriend o pamilya, ang kumonsulta sa psychiatrist para humingi ng gabay kung paano siya madadala. Tingnan ang “Tulong” tab." ],
+      key: "Ang pinakamahalagang magagawa ninyo ngayon: tulungan siyang makarating sa psychiatrist." },
+    { id: "worse", t: "Ano ang nagpapalala", m: 2, body: [
+      "Kulang sa tulog: madalas ito ang unang senyales at nagpapalala rin ng hinala at boses. Ang tulog ay mahalagang bantayan.",
+      "Droga at alak: ang marijuana at lalo na ang shabu (methamphetamine) ay kilalang nagti-trigger at nagpapalala ng psychosis. Pati ang sobrang alak. Kung gumagamit siya, mahalagang sabihin ito sa doktor, nang walang paninisi.",
+      "Stress at gulo sa bahay: away, sigawan, sobrang daming tao o ingay, pressure na “bumalik ka na sa trabaho.” Ang kalmado at mainit na kapaligiran ay nakakatulong talaga, hindi lang “magandang pakiramdam.”",
+      "Biglaang paghinto ng gamot (kapag nagsimula na siya): isa ito sa pinakamadalas na dahilan ng pagbabalik ng sintomas." ],
+      key: "Tulog, walang droga, at kalmadong bahay: tatlong bagay na kayang tulungan ng pamilya araw-araw." },
+    { id: "home", t: "Ang kalmadong bahay: ano ang sinasabi ng research", m: 3, body: [
+      "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
+      "Ang nakakatulong: mahinahong boses, maikli at malinaw na pananalita, papuri sa maliliit na hakbang, at pagbibigay ng espasyo kapag kailangan niya. Ang mga pamilyang natuto tungkol sa kondisyon at sa ganitong paraan ng pakikitungo ay may mas kaunting pagbabalik ng sintomas at pagkaka-ospital; ito ay family psychoeducation, isa sa pinakamatibay na ebidensya sa larangang ito.",
+      "Hindi ibig sabihin na wala nang hangganan. Puwede kayong magsabi ng malinaw na limitasyon (“Hindi okay ang magbasag ng gamit”), nang mahinahon at walang pang-iinsulto." ],
+      key: "Mahinahon, maikli, mainit, at may malinaw na limitasyon." },
+    { id: "safety", t: "Tungkol sa galit at kaligtasan", m: 3, body: [
+      "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag may droga o alak, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
+      "Kapag galit o takot siya: bigyan siya ng espasyo, huwag harangan ang daan niya palabas, huwag hawakan o pigilan nang pisikal, magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
+      "Itago ang mga bagay na maaaring makasakit (kutsilyo, gamot na marami, matutulis). Kung may banta sa buhay niya o ng iba, tumawag sa 911 o dalhin siya sa emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal." ],
+      key: "Kaligtasan muna, ng lahat, kasama siya." },
+    { id: "faith", t: "Pananampalataya, hiya, at ang sasabihin ng iba", m: 2, body: [
+      "Sa ating kultura, minsan iniisip na ito ay sinapian, kulam, o kahinaan ng pananampalataya. Igalang ang paniniwala ng pamilya; ang dasal at komunidad ay malaking suporta. Pero hindi ito kapalit ng gamutan; magkasama dapat.",
+      "Ang hiya (“ano ang sasabihin ng kapitbahay”) ay madalas na dahilan kung bakit naaantala ang pagpapatingin. Ang psychosis ay medikal na kondisyon tulad ng diabetes o hika. Walang dapat ikahiya sa pagpapagamot.",
+      "May batas tayo, ang Mental Health Act (RA 11036), na nagbibigay ng karapatan sa maayos at makataong pangangalaga." ],
+      key: "Pananampalataya at gamutan: magkasama, hindi magkalaban." },
+    { id: "recovery", t: "May pag-asa: ang paggaling", m: 2, body: [
+      "Maraming taong nagkaroon ng unang episode ng psychosis ang gumagaling nang malaki, lalo na kung maaga ang gamutan at may suportadong pamilya. Marami ang nakakabalik sa trabaho, pag-aaral, at sa mga gusto nila, kasama ang musika.",
+      "Hindi diretso ang daan; may magagandang linggo at mahihirap na linggo. Ang mahalaga ay ang direksyon, hindi ang bilis.",
+      "Ang musika ay maaaring maging malaking bahagi ng paggaling niya. May pananaliksik (Cochrane review) na ang music therapy, kasabay ng karaniwang gamutan, ay nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas, at sa pakikisalamuha. Pero sa tamang panahon at walang pressure." ],
+      key: "Hindi ito ang katapusan ng kuwento niya. Isa itong kabanata." },
+  ];
+  const SCENES = [
+    { id: "leap", t: "Ang LEAP: paraan ng pakikipag-usap", intro: "Binuo ito ni Dr. Xavier Amador, psychologist na ang kapatid ay may schizophrenia, para sa mga taong hindi naniniwalang may sakit sila. Apat na hakbang:", steps: [
+      ["Listen · Makinig", "Makinig para maintindihan, hindi para kumontra. Ulitin sa sariling salita ang narinig mo: “Kung tama ang pagkaintindi ko, pakiramdam mo may nagbabantay sa ’yo.”"],
+      ["Empathize · Damayan", "Damayan ang nararamdaman, kahit hindi ka sang-ayon sa paniniwala: “Nakakatakot siguro ’yon. Kung ako ’yan, matatakot din ako.”"],
+      ["Agree · Sumang-ayon kung saan puwede", "Hanapin ang puwedeng pagkasunduan: “Sang-ayon ako na hindi ka nakakatulog nang maayos, at mahirap ’yon.” Kung tanungin ka kung naniniwala ka sa kanya, puwedeng: “Hindi ko alam, pero alam kong totoo ang takot mo, at nandito ako.”"],
+      ["Partner · Magtulungan", "Magtulungan sa layuning gusto rin niya: “Subukan nating humingi ng tulong para makatulog ka. Sasamahan kita.”"] ],
+      key: "Hindi mo kailangang sumang-ayon sa paniniwala para damayan ang nararamdaman." },
+    { id: "paranoid", t: "“May sumusunod sa akin / may nagbabantay”", sit: "Kumbinsido siyang may nagmamanman, may sumusunod, o may gustong manakit sa kanya.",
+      avoid: ["“Wala namang ganyan, guni-guni mo lang ’yan.” (Pinapawalang-bisa ang takot niya.)", "“Oo, baka nga may sumusunod.” (Pinapalakas ang paniniwala.)", "Pagtawa, pagbubulungan sa harap niya, o pagtingin-tingin sa isa’t isa."],
+      say: ["“Mukhang takot na takot ka. Ano ang makakatulong para maging mas ligtas ang pakiramdam mo ngayon?”", "“Hindi ko nakikita ang nakikita mo, pero naniniwala akong nararamdaman mo talaga ’yan. Nandito lang ako.”", "“Gusto mo bang umupo muna tayo dito, malayo sa ingay?”"],
+      why: "Ang pakikipagtalo tungkol sa totoo o hindi ay halos hindi gumagana at sumisira ng tiwala. Ang pagdamay sa takot at pagtulong na maging ligtas ang pakiramdam ay nagpapanatili ng koneksyon." },
+    { id: "angry", t: "Galit siya o nagwawala", sit: "Sumisigaw, nagbabato ng gamit, o mukhang malapit nang sumabog.",
+      avoid: ["Sumigaw pabalik o makipagtalo.", "Lumapit nang sobra, hawakan, o harangan ang pinto.", "Magbanta (“Ipapakulong kita”) o mag-sermon habang galit pa siya."],
+      say: ["(Mahina at mabagal) “Nakikita kong galit na galit ka. Nandito lang ako. Hindi kita sasaktan.”", "“Lalayo muna ako nang kaunti para may espasyo ka.”", "Pagkatapos, kapag kalmado na: “Kanina, mukhang sobrang bigat ng nararamdaman mo. Gusto mo bang pag-usapan?”"],
+      why: "Sa gitna ng galit, hindi naririnig ang paliwanag. Ang layunin ay pababain ang tensyon at manatiling ligtas ang lahat. Kung may panganib, tumawag sa 911.", danger: true },
+    { id: "notsick", t: "“Wala akong sakit!”", sit: "Ayaw niyang tanggapin na may problema, at nagagalit kapag binabanggit.",
+      avoid: ["“May sakit ka, tanggapin mo na.”", "Pagbabasa ng listahan ng sintomas niya.", "Paulit-ulit na pagbanggit ng diagnosis."],
+      say: ["“Okay, hindi natin kailangang pag-usapan ang tawag diyan. Pero napansin kong hirap kang matulog. Totoo ba?”", "“Ano ang gusto mong mabago sa buhay mo ngayon?”", "“Nami-miss mo ba ang pagtugtog? Ano sa tingin mo ang pumipigil?”"],
+      why: "Ayon sa LEAP, ang pagtutok sa mga layunin niya (tulog, stress, musika) ay mas nagbubukas ng daan sa tulong kaysa sa pagpilit na tanggapin ang diagnosis." },
+    { id: "refuse", t: "Ayaw magpatingin sa doktor", sit: "Tumatanggi siya sa psychiatrist o sa anumang “doktor sa utak.”",
+      avoid: ["“Baliw ka kaya kailangan mo ng psychiatrist.”", "Panlilinlang (“pupunta lang tayo sa mall” tapos ospital). Sinisira nito ang tiwala sa susunod.", "Ultimatum habang nasa krisis."],
+      say: ["“Mukhang pagod na pagod ka at hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", "“Hindi mo kailangang magdesisyon ngayon. Pag-isipan mo lang, at sabihin mo kung handa ka na.”", "“Para sa akin na lang, puwede mo bang subukan ang isang beses? Kung ayaw mo pagkatapos, pag-uusapan natin ulit.”"],
+      why: "I-frame ang pagpapatingin sa paraang may saysay para sa kanya (tulog, stress, pagod) at ialok ang inyong presensya. Kung hindi pa rin, kayo muna ang kumonsulta para sa gabay. Kung may panganib, emergency na ito." },
+    { id: "voices", t: "Nakakarinig siya ng boses", sit: "Kumikilos na parang may kausap, o sinasabi niyang may naririnig.",
+      avoid: ["“Walang boses diyan!”", "Matakot o tumakbo palayo.", "Magtanong nang paulit-ulit kung ano ang sinasabi ng boses."],
+      say: ["“May naririnig ka ba ngayon? Ano ang pakiramdam mo?”", "“Hindi ko naririnig, pero naniniwala akong naririnig mo. Paano kita matutulungan?”", "“Minsan nakakatulong ang musika o ang pag-hum. Gusto mo bang subukan?”"],
+      why: "Mahalaga ring itanong kung inuutusan siya ng boses na saktan ang sarili o iba. Kung oo, emergency ito: tumawag sa 911 o NCMH 1553." },
+    { id: "withdrawn", t: "Ayaw kumilos, nasa kwarto lang", sit: "Natutulog nang matagal, hindi naliligo, ayaw lumabas o makipag-usap.",
+      avoid: ["“Tamad ka lang.”", "Pagkumpara sa iba (“Tingnan mo si ganito, may trabaho na”).", "Pagpilit sa malalaking gawain."],
+      say: ["“Gusto mo bang samahan kitang maglakad nang sampung minuto?”", "“Kumain ka muna kahit konti. Ginawa ko ’yung gusto mo.”", "Papuri sa maliit: “Ang sarap makita kang nakalabas ngayon.”"],
+      why: "Ang kawalan ng gana ay sintomas, hindi katamaran. Maliliit na imbitasyon at papuri sa maliliit na hakbang ang mas gumagana kaysa pressure." },
+    { id: "music", t: "Paano banggitin ang musika", sit: "Gusto ninyong bumalik siya sa pagtugtog pero ayaw ninyong ma-pressure siya.",
+      avoid: ["“Bakit hindi ka na tumutugtog? Sayang ang talent mo.”", "Pag-aayos ng gig para sa kanya nang hindi niya alam.", "Pagbanggit sa bar incident bilang dahilan para hindi na tumugtog."],
+      say: ["“Narinig ko ulit ’yung kanta mo noon. Ang ganda pala talaga.”", "Iwanan lang ang gitara sa lugar na madaling abutin, walang sinasabi.", "“Gusto mo bang tumugtog tayo ng isang kanta? Kahit simple lang.”"],
+      why: "Ang musika ay dapat maging kanlungan, hindi obligasyon. Mag-imbita, huwag mag-utos. Sa “My days” space niya ay may maliit na Music section na walang pressure." },
+  ];
+  const PRACTICE = [
+    { q: "Sabi niya: “Alam kong pinapakinggan ng kapitbahay ang lahat ng sinasabi ko.” Ano ang pinakamagandang sagot?", o: [
+      ["“Imposible ’yan, wala silang pakialam sa ’yo.”", 0, "Kahit totoo ito sa atin, pinaparamdam nito na hindi siya pinapaniwalaan, kaya lalo siyang lalayo."],
+      ["“Nakakatakot siguro ’yan. Ano ang makakatulong para maging mas ligtas ang pakiramdam mo?”", 1, "Tama. Dinadamayan ang takot nang hindi sumasang-ayon o kumokontra sa paniniwala (Listen at Empathize sa LEAP)."],
+      ["“Baka nga. Isara na natin lahat ng bintana.”", 0, "Pinapalakas nito ang paniniwala. Puwedeng tumulong na maging komportable siya, pero huwag kumpirmahin ang hinala."] ] },
+    { q: "Ayaw niyang magpatingin. Alin ang mas malamang na gumana?", o: [
+      ["“Kung hindi ka pupunta, aalis na ako.”", 0, "Ang ultimatum habang may krisis ay madalas nauuwi sa away at mas mababang tiwala."],
+      ["“Napansin kong hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", 1, "Tama. Nakatuon ito sa problemang kinikilala niya (tulog) at inaalok ang inyong presensya: ang Partner sa LEAP."],
+      ["Sabihin na pupunta kayo sa mall, tapos sa ospital pala.", 0, "Sinisira ng panlilinlang ang tiwala, kaya mas mahirap na siyang madala sa susunod."] ] },
+    { q: "Nagbasag siya ng baso at sumisigaw. Ano ang uunahin?", o: [
+      ["Hawakan siya nang mahigpit para pigilan.", 0, "Ang pisikal na pagpigil ay mapanganib para sa lahat at maaaring magpalala ng takot niya."],
+      ["Lumayo nang kaunti, magsalita nang mahina, at siguraduhing ligtas ang lahat. Tumawag sa 911 kung may panganib.", 1, "Tama. Kaligtasan at pagpapababa ng tensyon muna. Ang usapan ay mamaya na, kapag kalmado na."],
+      ["Pagsabihan siya nang malakas para matauhan.", 0, "Sa gitna ng galit, hindi naririnig ang sermon; lalo lang tataas ang tensyon."] ] },
+    { q: "Buong araw siyang nasa kwarto. Ano ang pinakamainam?", o: [
+      ["“Bumangon ka na, ang tamad mo.”", 0, "Ang kawalan ng gana ay sintomas. Ang batikos ay nagpapataas ng stress at ng tsansang lumala."],
+      ["“Gusto mo bang samahan kitang lumabas kahit sampung minuto?”", 1, "Tama. Maliit, malinaw, at may kasama. Ganito ang behavioral activation: maliit na hakbang na may tagumpay."],
+      ["Hayaan siya nang ilang linggo nang walang kumakausap.", 0, "Mahalaga ang espasyo, pero ang tuluyang pag-iwan ay nagpapalalim ng pag-iisa. Mag-imbita pa rin nang mahinahon."] ] },
+    { q: "Tinanong ka niya: “Naniniwala ka ba sa akin o hindi?”", o: [
+      ["“Hindi, hindi totoo ang sinasabi mo.”", 0, "Tapat, pero kadalasan ito ang katapusan ng usapan."],
+      ["“Oo, naniniwala ako.” (kahit hindi totoo)", 0, "Ang pagsisinungaling ay nagpapalakas ng paniniwala at nasisira ang tiwala kapag nalaman niya."],
+      ["“Hindi ko nararanasan ang nararanasan mo, pero naniniwala akong totoo ang takot mo, at nandito ako.”", 1, "Tama. Tapat at may pagdamay. Iginagalang ang karanasan niya nang hindi nagsisinungaling."] ] },
+  ];
+  const STEPS = [
+    ["learn", "Unawain ang kondisyon", "Basahin ang ilang aralin sa Unawain. Mga 20 minuto lahat."],
+    ["consult", "Kayo muna ang kumonsulta", "Puwedeng ang girlfriend o pamilya ang unang pumunta sa psychiatrist para humingi ng gabay, kahit ayaw pa niya."],
+    ["notes", "Isulat ang mga napapansin", "Tulog, galit, hinala, boses, droga o alak, at magagandang araw. Malaking tulong ito sa doktor."],
+    ["talk", "Kausapin siya gamit ang LEAP", "Tungkol sa mga gusto niyang mabago: tulog, stress, musika. Hindi tungkol sa “sakit.”"],
+    ["book", "Mag-set ng appointment", "Psychiatrist sa ospital (gaya ng NCMH) o private clinic."],
+    ["go", "Samahan siya sa unang konsulta", "Dalhin ang inyong notes. Pagkatapos, alamin kung paano kayo makakatulong sa gamutan."],
+  ];
+  const NOTE_TAGS = ["Hindi nakatulog", "Galit", "Hinala/takot", "Boses", "Hindi kumakain", "Droga/alak", "Nag-isa buong araw", "Magandang araw", "Tumugtog"];
+
+  /* =================================================================
+     HIS SPACE ("My days"): his goals, never labels. Behavioural activation, sleep, music, calm.
+     ================================================================= */
+  const DEFAULT_THINGS = ["Bumangon bago mag-9", "Kumain nang maayos", "Lumabas kahit 10 minuto", "10 minuto sa gitara"];
+  const MUSIC_IDEAS = [
+    "Tugtugin ang isang kantang mahal mo noon. Isa lang, kahit hindi perpekto.",
+    "Isang chord lang. Tugtugin nang dahan-dahan sa loob ng dalawang minuto, at pakinggan ang tunog.",
+    "Mag-hum o kumanta kasabay ng paborito mong record.",
+    "Tune lang ang gitara. Minsan sapat na ’yon para sa araw na ito.",
+    "Matuto ng isang bagong kanta na gusto mo, isang linya lang ngayong araw.",
+    "Tugtugin ang kanta na parang ginagawa mo para sa isang tao lang.",
+    "Mag-record ng isang take sa Woodshed, para lang sa ’yo. Hindi mo kailangang pakinggan agad.",
+    "Pumili ng tatlong chords at gumawa ng kahit anong tunog. Walang mali.",
+  ];
+  const CALM = [
+    ["Huminga nang dahan-dahan", "breath"],
+    ["5-4-3-2-1: bumalik sa ngayon", "ground"],
+    ["Kapag maingay ang isip o may mga boses", "voices"],
+    ["Kapag pakiramdam mo may banta", "threat"],
+  ];
+
+  /* ---------- Routing ---------- */
+  let lastHash = "";
+  function route() { const h = (location.hash || "#/").slice(2).split("/"); return { v: h[0] || "home", id: h[1] }; }
+  function render() {
+    const { v, id } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    let html;
+    if (!db.space) html = viewChoose(); else if (db.space === "family") html = familyView(v, id); else html = himView(v, id);
+    if (html == null) return;
+    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    tabs(v); if (nav) scrollTo(0, 0); lastHash = h; afterRender(v, id);
+  }
+  addEventListener("hashchange", render);
+  function tabs(v) {
+    const t = $("#tabs"); if (!db.space) { t.hidden = true; return; } t.hidden = false;
+    const I = { home: `<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>`, learn: `<path d="M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-7"/><path d="M20 5v12h-7"/>`, talk: `<path d="M4 5h16v11H9l-5 4z"/>`,
+      help: `<path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/>`, care: `<circle cx="12" cy="12" r="8"/><path d="M8.5 13.5c1 1.5 2.1 2 3.5 2s2.5-.5 3.5-2M9 9.5h.01M15 9.5h.01"/>`,
+      today: `<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>`,
+      sleep: `<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>`, music: `<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>`, calm: `<path d="M3 12c3-4 6-4 9 0s6 4 9 0"/><path d="M3 17c3-4 6-4 9 0s6 4 9 0" opacity=".5"/>` };
+    const items = db.space === "family" ? [["home", "Home"], ["learn", "Unawain"], ["talk", "Kausapin"], ["help", "Tulong"], ["care", "Para sa ’yo"]]
+      : [["home", "Today"], ["sleep", "Tulog"], ["music", "Music"], ["calm", "Kalma"]];
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", settings: "home" }[v] || v;
+    t.innerHTML = items.map(([k, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}"><svg viewBox="0 0 24 24">${I[k === "home" && db.space === "him" ? "today" : k]}</svg>${l}</a>`).join("");
+  }
+  function viewChoose() {
+    return `<div class="choose"><div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Para kanino ang phone na ito?</h1>
+      <p class="muted">Dalawang hiwalay na space. Lahat ng nakasulat ay nananatili lang sa phone na ito.</p>
+      <button data-act="space" data-v="family"><b>Sumusuporta ako sa kanya</b><span>Para sa girlfriend, pamilya at mga kaibigan: pag-unawa, paano makipag-usap, paano siya madadala sa tulong, at pag-aalaga sa sarili.</span></button>
+      <button data-act="space" data-v="him"><b>Para sa akin</b><span>Ang mga araw ko: maliliit na plano, tulog, pagtugtog ng gitara, at mga paraan para kumalma.</span></button></div>`;
+  }
+
+  /* ---------- Family views ---------- */
+  function familyView(v, id) {
+    if (v === "learn") return viewLearn(); if (v === "lesson") return viewLesson(id); if (v === "talk") return viewTalk(); if (v === "scene") return viewScene(id);
+    if (v === "practice") return viewPractice(); if (v === "help") return viewHelp(); if (v === "prep") return viewPrep(); if (v === "care") return viewCare();
+    if (v === "notes") return viewNotes(); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+    return viewFamilyHome();
+  }
+  function viewFamilyHome() {
+    const done = STEPS.filter(s => db.steps[s[0]]).length, next = STEPS.find(s => !db.steps[s[0]]), notes = db.notes.length;
+    const tip = SCENES[1 + Math.floor(Date.now() / DAY) % (SCENES.length - 1)];
+    return `<div class="row between"><div><div class="eyebrow">Kasama · para sa pamilya</div><div class="hello" style="margin-top:4px">Hindi kayo nag-iisa dito.</div></div>
+        <a class="btn ghost sm" href="#/settings" aria-label="Settings">⚙︎</a></div>
+      <div class="card" style="margin-top:16px;border-color:var(--teal)"><div class="eyebrow" style="color:var(--teal)">Pinakamahalaga ngayon</div>
+        <h2 style="margin-top:4px">Tulungan siyang makarating sa psychiatrist</h2>
+        <p class="small muted">Mas maaga ang gamutan, mas maganda ang paggaling. ${done}/${STEPS.length} na hakbang ang tapos.</p>
+        <div class="list" style="margin-top:10px">${STEPS.map(([k, t, d]) => `<button class="li${db.steps[k] ? " done" : ""}" data-act="step" data-v="${k}"><span class="ic">${db.steps[k] ? "✓" : "○"}</span><span class="grow">${t}<small>${d}</small></span></button>`).join("")}</div>
+        ${next ? "" : `<p class="key">Napakagaling. Ang susunod: alamin mula sa doktor kung paano kayo makakatulong sa gamutan, at bantayan ang tulog niya.</p>`}</div>
+      <div class="sec"><div class="eyebrow">Mabilis</div><div class="list">
+        <a href="#/scene/${tip.id}"><span class="ic">💬</span><span class="grow">${esc(tip.t)}<small>Script para sa araw na ito</small></span><span class="chev">›</span></a>
+        <a href="#/notes"><span class="ic">📝</span><span class="grow">Talaan ng napapansin<small>${notes ? `${notes} na tala · para sa doktor` : "Isulat ang tulog, galit, hinala, at magagandang araw"}</small></span><span class="chev">›</span></a>
+        <a href="#/help"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">Kung may krisis<small>911 · NCMH Crisis Hotline 1553</small></span><span class="chev">›</span></a></div></div>
+      <p class="small muted center" style="margin-top:24px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
+  }
+  function viewLearn() {
+    const n = LESSONS.filter(l => db.lessons[l.id]).length;
+    return `<div class="eyebrow">Unawain</div><h1 style="margin-top:4px">Ano ang nararanasan niya</h1>
+      <p class="muted">${n ? `${n} sa ${LESSONS.length} na aralin ang nabasa.` : "Maiikling aralin, 2 hanggang 3 minuto bawat isa."} Pinakamaganda kung basahin ng buong pamilya.</p>
+      <div class="list" style="margin-top:14px">${LESSONS.map((l, i) => `<a href="#/lesson/${l.id}" class="${db.lessons[l.id] ? "done" : ""}"><span class="ic">${db.lessons[l.id] ? "✓" : i + 1}</span><span class="grow">${esc(l.t)}<small>${l.m} minuto</small></span><span class="chev">›</span></a>`).join("")}</div>`;
+  }
+  function viewLesson(id) {
+    const i = LESSONS.findIndex(l => l.id === id), l = LESSONS[i]; if (!l) { location.hash = "#/learn"; return null; }
+    const next = LESSONS[i + 1];
+    return `<a class="back" href="#/learn">‹ Unawain</a><div class="eyebrow">Aralin ${i + 1} · ${l.m} minuto</div><h1 style="margin-top:4px">${esc(l.t)}</h1>
+      <div class="prose" style="margin-top:12px">${l.body.map(p => `<p>${esc(p)}</p>`).join("")}</div><div class="key">${esc(l.key)}</div>
+      <button class="btn teal block" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${db.lessons[l.id] ? "Nabasa na ✓" : "Naintindihan ko"}${next ? " · Susunod ›" : ""}</button>`;
+  }
+  function viewTalk() {
+    const p = Object.keys(db.practice).length;
+    return `<div class="eyebrow">Kausapin</div><h1 style="margin-top:4px">Paano makipag-usap sa kanya</h1>
+      <p class="muted">Mga script para sa totoong sitwasyon. Hindi kailangang perpekto; ang mahalaga ay mahinahon at may pagdamay.</p>
+      <div class="list" style="margin-top:14px">${SCENES.map(s => `<a href="#/scene/${s.id}"><span class="ic">${s.id === "leap" ? "★" : s.danger ? "!" : "💬"}</span><span class="grow">${esc(s.t)}${s.sit ? `<small>${esc(s.sit)}</small>` : "<small>Basahin muna ito</small>"}</span><span class="chev">›</span></a>`).join("")}</div>
+      <div class="sec"><div class="eyebrow">Mag-ensayo</div><a class="card" href="#/practice" style="display:block;text-decoration:none;color:var(--ink)"><h3>Subukan ang sarili: ${PRACTICE.length} sitwasyon</h3>
+        <p class="small muted" style="margin:4px 0 0">Mas madaling maalala ang tamang sasabihin kapag na-ensayo na. ${p ? `${p} na ang nasagot mo.` : ""}</p></a></div>`;
+  }
+  function viewScene(id) {
+    const s = SCENES.find(x => x.id === id); if (!s) { location.hash = "#/talk"; return null; }
+    if (s.steps) return `<a class="back" href="#/talk">‹ Kausapin</a><h1>${esc(s.t)}</h1><p class="prose" style="margin-top:10px">${esc(s.intro)}</p>
+      ${s.steps.map(([h, d], i) => `<div class="card"><div class="eyebrow" style="color:var(--teal)">${i + 1}</div><h3>${esc(h)}</h3><p style="margin:6px 0 0">${esc(d)}</p></div>`).join("")}
+      <div class="key">${esc(s.key)}</div><p class="small muted">Mula sa aklat na “I Am Not Sick, I Don’t Need Help!” ni Xavier Amador.</p>`;
+    return `<a class="back" href="#/talk">‹ Kausapin</a><h1>${esc(s.t)}</h1><p class="muted" style="margin-top:8px">${esc(s.sit)}</p>
+      ${s.danger ? `<div class="warn small"><b>Kung may panganib</b> sa kanya o sa iba: tumawag sa 911 o NCMH 1553. <a href="#/help">Mga numero</a></div>` : ""}
+      <div class="sec"><div class="eyebrow">Iwasan</div>${s.avoid.map(a => `<div class="avoid">${esc(a)}</div>`).join("")}</div>
+      <div class="sec"><div class="eyebrow">Subukan sabihin</div>${s.say.map(a => `<div class="say">${esc(a)}</div>`).join("")}</div>
+      <div class="key" style="font-weight:500">${esc(s.why)}</div>`;
+  }
+  let pq = 0;
+  function viewPractice() {
+    const q = PRACTICE[pq % PRACTICE.length], ans = db.practice[pq % PRACTICE.length];
+    return `<a class="back" href="#/talk">‹ Kausapin</a><div class="eyebrow">Sitwasyon ${pq % PRACTICE.length + 1} sa ${PRACTICE.length}</div><h2 style="margin-top:6px">${esc(q.q)}</h2>
+      <div id="opts">${q.o.map(([t, g], i) => `<button class="opt${ans != null ? (g ? " good" : i === ans ? " bad" : "") : ""}" data-act="pick" data-v="${i}" ${ans != null ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+      <div class="fb" id="fb">${ans != null ? esc(q.o[ans][2]) + (q.o[ans][1] ? "" : " " + esc(q.o.find(o => o[1])[2])) : ""}</div>
+      <div class="row between" style="margin-top:18px"><button class="btn ghost sm" data-act="pqreset">Ulitin lahat</button><button class="btn teal sm" data-act="pqnext">Susunod ›</button></div>`;
+  }
+  function viewHelp() {
+    return `<div class="eyebrow">Tulong</div><h1 style="margin-top:4px">Paano siya madadala sa tulong</h1>
+      ${crisisHTML()}
+      <div class="sec"><div class="eyebrow">Para sa konsulta (hindi emergency)</div>
+        <div class="card"><h3>National Center for Mental Health (NCMH)</h3><p class="small" style="margin:4px 0">9 De Pebrero St., Mauway, Mandaluyong City. Adult outpatient: <a href="tel:0285319001">(02) 8531-9001</a> local 302, Lunes–Biyernes, 8am–5pm.</p>
+          <p class="small muted" style="margin:0">Tumawag muna para kumpirmahin ang schedule, bayad at kung tumatanggap ng walk-in. Maghanda ng kalahating araw.</p></div>
+        <div class="card"><h3>Malapit na ospital</h3><p class="small" style="margin:4px 0">Maraming government at private hospital ang may Department of Psychiatry o psychiatrist sa OPD. Itanong sa pinakamalapit na ospital o sa barangay health center kung saan ang pinakamalapit na psychiatrist. Tanungin din kung may PhilHealth coverage.</p></div>
+        <div class="card"><h3>Kung ayaw pa niya</h3><ul class="tight small"><li>Kayo muna ang kumonsulta sa psychiatrist. Humingi ng gabay para sa sitwasyon ninyo.</li><li>Gamitin ang LEAP: i-frame tungkol sa tulog, stress, o pagod, hindi sa “sakit.” <a href="#/scene/refuse">Mga script</a></li><li>Isama ang taong pinakapinagkakatiwalaan niya.</li><li>Huwag gumamit ng panlilinlang; kailangan ninyo ang tiwala niya sa susunod.</li><li>Kung may panganib sa buhay niya o ng iba: emergency na ito. 911 o emergency room.</li></ul></div></div>
+      <div class="sec"><div class="eyebrow">Paghahanda</div><div class="list">
+        <a href="#/prep"><span class="ic">📋</span><span class="grow">Ihanda para sa doktor<small>Buod ng inyong tala at mga tanong</small></span><span class="chev">›</span></a>
+        <button class="li" data-act="sharecrisis"><span class="ic">↗</span><span class="grow">Ibahagi ang crisis numbers<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button></div></div>`;
+  }
+  function viewNotes() {
+    const list = [...db.notes].sort((a, b) => b.at - a.at);
+    return `<a class="back" href="#/">‹ Home</a><div class="eyebrow">Talaan</div><h1 style="margin-top:4px">Mga napapansin</h1>
+      <p class="muted small">Maikli lang: ano ang nangyari, kailan. Malaking tulong ito sa doktor, lalo sa unang konsulta.</p>
+      <div class="card" style="margin-top:12px"><div class="chips" id="ntags">${NOTE_TAGS.map(t => `<button class="chip" data-act="ntag" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+        <textarea id="ntext" placeholder="Hal. Hindi natulog hanggang 4am. Sabi niya may nakikinig sa usapan namin." style="margin-top:10px"></textarea>
+        <button class="btn teal block" data-act="addnote" style="margin-top:10px">I-save</button></div>
+      <div class="sec">${list.length ? list.map(n => `<div class="note"><div class="row between"><span class="d">${dstr(n.at)} · ${new Date(n.at).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" })}</span><button class="btn ghost sm" data-act="delnote" data-v="${n.id}" aria-label="Burahin">×</button></div>
+        ${n.tags.length ? `<div class="chips" style="margin:4px 0">${n.tags.map(t => `<span class="chip on" style="cursor:default">${esc(t)}</span>`).join("")}</div>` : ""}${n.text ? `<div>${esc(n.text)}</div>` : ""}</div>`).join("") : `<p class="muted center">Wala pang tala.</p>`}</div>`;
+  }
+  function prepText() {
+    const since = Date.now() - 60 * DAY, ns = db.notes.filter(n => n.at >= since).sort((a, b) => a.at - b.at), counts = {};
+    ns.forEach(n => n.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
+    return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gumagamit siya ng droga o alak, at kung may gamot siyang iniinom.`;
+  }
+  function viewPrep() {
+    return `<a class="back" href="#/help">‹ Tulong</a><div class="eyebrow">Para sa doktor</div><h1 style="margin-top:4px">Ihanda ang konsulta</h1>
+      <p class="muted small">Ginawa mula sa inyong Talaan. Puwedeng i-edit bago ibahagi o ipakita.</p>
+      <textarea id="prep" style="min-height:360px;margin-top:10px;font-size:15px">${esc(prepText())}</textarea>
+      <div class="row" style="margin-top:10px;gap:8px"><button class="btn teal" data-act="shareprep">Ibahagi o kopyahin</button><a class="btn ghost" href="#/notes">Magdagdag ng tala</a></div>`;
+  }
+  function viewCare() {
+    const last = db.care[db.care.length - 1];
+    return `<div class="eyebrow">Para sa ’yo</div><h1 style="margin-top:4px">Alagaan din ang sarili mo</h1>
+      <p class="prose">Ang pag-aalaga sa taong may psychosis ay mabigat. Ang pagod at stress ng pamilya ay nakakaapekto rin sa kanya, kaya ang pag-aalaga sa sarili mo ay bahagi ng pag-aalaga sa kanya.</p>
+      <div class="card"><h3>Kumusta ka ngayon?</h3><div class="moods" style="margin-top:10px">${["😣", "😟", "😐", "🙂", "😊"].map((m, i) => `<button data-act="care" data-v="${i + 1}" class="${last && dayKey(last.at) === dayKey(Date.now()) && last.v === i + 1 ? "on" : ""}">${m}</button>`).join("")}</div>
+        ${db.care.length >= 3 ? `<p class="small muted" style="margin:10px 0 0">Nitong huling linggo: ${careTrend()}</p>` : ""}</div>
+      <div class="sec"><div class="eyebrow">Mga paalala</div><div class="card"><ul class="tight">
+        <li><b>Hindi mo kasalanan.</b> Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis.</li>
+        <li><b>Hatiin ang pasanin.</b> Huwag iisa ang taong laging nagbabantay. Magpalitan.</li>
+        <li><b>Matulog, kumain, lumabas.</b> Hindi ka makakatulong kung ubos ka na.</li>
+        <li><b>May sariling buhay ka pa rin.</b> Okay lang magpahinga at mag-enjoy nang walang guilt.</li>
+        <li><b>Humingi ng tulong para sa sarili mo.</b> Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist para sa sarili mo.</li>
+        <li><b>Hindi ka nag-iisa.</b> May mga kaibigan na handang tumulong. Hayaan ninyong tumulong sila.</li></ul></div></div>
+      <div class="sec"><div class="eyebrow">Mga palatandaan na pagod ka na</div><div class="card small">Laging iritable, hirap matulog, umiiyak nang madalas, wala nang gana sa ibang bagay, o pakiramdam na walang pag-asa. Kung ganito ka na nang ilang linggo, kausapin ang isang mapagkakatiwalaang tao o propesyonal.</div></div>`;
+  }
+  function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Mangyaring kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
+
+  /* ---------- His views ---------- */
+  function himView(v, id) {
+    if (v === "sleep") return viewSleep(); if (v === "music") return viewMusic(); if (v === "calm") return viewCalm(id); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+    return viewToday();
+  }
+  const things = () => db.things || DEFAULT_THINGS;
+  function viewToday() {
+    const k = dayKey(Date.now()), t = db.today[k] || {}, hr = new Date().getHours(), n = things().filter((_, i) => t[i]).length;
+    const greet = hr < 12 ? "Magandang umaga" : hr < 18 ? "Magandang hapon" : "Magandang gabi", name = db.names.him ? `, ${esc(db.names.him)}` : "";
+    const days = [...Array(7)].map((_, i) => { const d = Date.now() - (6 - i) * DAY, x = db.today[dayKey(d)] || {}; return Object.values(x).filter(Boolean).length; });
+    return `<div class="row between"><div><div class="eyebrow">${new Date().toLocaleDateString("en-PH", { weekday: "long", day: "numeric", month: "long" })}</div><div class="hello" style="margin-top:4px">${greet}${name}.</div></div>
+        <a class="btn ghost sm" href="#/settings" aria-label="Settings">⚙︎</a></div>
+      <p class="muted">Ilang maliliit na bagay para sa araw na ito. Kahit isa lang, sapat na.</p>
+      <div class="things" style="margin-top:12px">${things().map((x, i) => `<button class="thing${t[i] ? " done" : ""}" data-act="thing" data-v="${i}"><span class="tick">${t[i] ? "✓" : ""}</span><span class="grow">${esc(x)}</span></button>`).join("")}</div>
+      ${n ? `<p class="center" style="margin-top:12px;color:var(--teal);font-weight:600">${n === things().length ? "Lahat nagawa mo ngayon. Ang galing." : n === 1 ? "Isa na. Magandang simula." : `${n} na. Tuloy lang.`}</p>` : ""}
+      <div class="card" style="margin-top:16px"><h3>Kumusta ang pakiramdam mo?</h3><div class="moods" style="margin-top:10px">${["😣", "😟", "😐", "🙂", "😊"].map((m, i) => `<button data-act="mood" data-v="${i + 1}" class="${db.moods[k] === i + 1 ? "on" : ""}">${m}</button>`).join("")}</div></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map((c, i) => `<div><i class="${c ? "" : "zero"}" style="height:${c ? Math.max(12, c / things().length * 100) : 5}%"></i><span>${["L", "L", "M", "M", "H", "B", "S"][new Date(Date.now() - (6 - i) * DAY).getDay()]}</span></div>`).join("")}</div>
+        <p class="small muted" style="margin:8px 0 0">Bawat bar: ilan sa maliliit na bagay ang nagawa mo. Walang tama o mali.</p></div></div>
+      <div class="sec"><div class="list"><a href="#/calm"><span class="ic">〰</span><span class="grow">Medyo mabigat ang araw?<small>Mga paraan para kumalma</small></span><span class="chev">›</span></a>
+        ${callsHTML()}</div></div>`;
+  }
+  const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="ic">☎</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
+  function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
+  function viewSleep() {
+    const k = dayKey(Date.now()), e = db.sleep[k] || {};
+    const days = [...Array(7)].map((_, i) => sleepHours(db.sleep[dayKey(Date.now() - (6 - i) * DAY)]));
+    const got = days.filter(x => x != null), avg = got.length ? got.reduce((a, b) => a + b, 0) / got.length : null;
+    const wakes = [...Array(7)].map((_, i) => db.sleep[dayKey(Date.now() - (6 - i) * DAY)]?.wake).filter(Boolean).map(w => { const [h, m] = w.split(":").map(Number); return h * 60 + m; });
+    const spread = wakes.length >= 3 ? Math.max(...wakes) - Math.min(...wakes) : null;
+    return `<div class="eyebrow">Tulog</div><h1 style="margin-top:4px">Kagabi</h1><p class="muted small">Ang maayos na tulog ay isa sa pinakamalaking nakakatulong sa isip at pakiramdam.</p>
+      <div class="card" style="margin-top:12px"><div class="row" style="gap:12px"><label class="f grow" style="margin:0"><span>Natulog</span><input type="time" id="bed" value="${esc(e.bed || "")}"></label>
+        <label class="f grow" style="margin:0"><span>Gumising</span><input type="time" id="wake" value="${esc(e.wake || "")}"></label></div>
+        <div class="row between" style="margin-top:12px"><span class="small muted">Gaano kaayos?</span><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map((h, i) => `<div><i class="${h == null ? "zero" : ""}" style="height:${h == null ? 5 : Math.min(100, h / 10 * 100)}%;${h != null && (h < 5 || h > 11) ? "background:var(--coral)" : ""}"></i><span>${h == null ? "" : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
+        <p class="small" style="margin:8px 0 0">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
+      <div class="sec"><div class="eyebrow">Mga nakakatulong (mula sa sleep research)</div><div class="card"><ul class="tight">
+        <li><b>Parehong oras ng paggising</b> araw-araw, kahit weekend. Ito ang pinakamalakas na tip.</li><li><b>Liwanag sa umaga:</b> lumabas o buksan ang bintana sa unang oras paggising.</li>
+        <li><b>Walang kape</b> pagkatapos ng tanghali, at iwasan ang alak at marijuana: pinapasama nila ang tulog.</li><li><b>Kama ay para sa tulog.</b> Kung hindi makatulog pagkalipas ng mga 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na.</li>
+        <li><b>Pampakalma bago matulog:</b> mahinang musika, ilang minutong paghinga, walang cellphone sa kama.</li><li><b>Iwasan ang mahabang idlip</b> sa hapon; kung kailangan, 20–30 minuto lang bago mag-3pm.</li></ul></div></div>`;
+  }
+  function viewMusic() {
+    const wk = db.music.filter(m => m.at > Date.now() - 7 * DAY), mins = Math.round(wk.reduce((a, m) => a + m.min, 0)), idea = MUSIC_IDEAS[Math.floor(Date.now() / DAY) % MUSIC_IDEAS.length];
+    return `<div class="eyebrow">Music</div><h1 style="margin-top:4px">Balik-gitara, dahan-dahan</h1>
+      <p class="muted">Walang pressure, walang audience. Para lang sa ’yo.</p>
+      <div class="card" style="margin-top:12px"><div class="eyebrow" style="color:var(--teal)">Ideya para ngayon</div><p style="font:17px/1.5 var(--serif);margin:6px 0 0">${esc(idea)}</p>
+        <button class="btn ghost sm" data-act="newidea" style="margin-top:6px;padding-left:0">Ibang ideya ›</button></div>
+      <div class="card"><div class="timer" id="mtime">${fmtT(mt.left)}</div><div class="chips" style="justify-content:center">${[5, 10, 15, 20].map(m => `<button class="chip${mt.len === m * 60 ? " on" : ""}" data-act="mlen" data-v="${m}">${m} min</button>`).join("")}</div>
+        <button class="btn teal block" data-act="mstart" id="mstart" style="margin-top:12px">${mt.run ? "Tapusin" : "Simulan"}</button>
+        <p class="small muted center" style="margin:8px 0 0">Kahit itigil mo bago matapos ang oras, binibilang pa rin.</p></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="row between"><span>${wk.length ? `${wk.length} beses · ${mins} minuto` : "Wala pa. Isang kanta lang, kung kaya."}</span><span style="font-size:22px">🎸</span></div></div></div>
+      <div class="sec"><div class="list"><a href="../woodshed/"><span class="ic">●</span><span class="grow">Mag-record sa Woodshed<small>Para marinig mo ang sarili mo, kung gusto mo</small></span><span class="chev">›</span></a></div></div>
+      <p class="small muted" style="margin-top:16px">Bakit musika: sa pananaliksik, ang music therapy ay nakakatulong sa pakiramdam, motibasyon at pakikisalamuha. Hindi kailangang magaling ngayon. Ang mahalaga ay bumalik ang saya sa pagtugtog.</p>`;
+  }
+  const mt = { len: 600, left: 600, run: false, t0: 0, iv: 0 };
+  const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  function musicStop(done) {
+    clearInterval(mt.iv); const played = mt.run ? (Date.now() - mt.t0) / 60000 : 0; mt.run = false; mt.left = mt.len;
+    if (played >= .5) { db.music.push({ at: Date.now(), min: Math.round(played * 10) / 10 }); save(); haptic([10, 40, 10]); toast(done ? "Tapos. Salamat sa pagtugtog ngayon." : `${Math.max(1, Math.round(played))} minuto. Binilang.`); }
+    if (route().v === "music") render();
+  }
+  function viewCalm(id) {
+    if (id === "breath") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Huminga nang dahan-dahan</h1><p class="muted">Sumabay sa bilog: 4 na segundo papasok, 6 na segundo palabas. Mas mahaba ang palabas; ito ang nagpapakalma sa katawan.</p>
+      <div class="breath" id="breath">Simulan</div><button class="btn teal block" data-act="breath" id="bbtn">Simulan · 2 minuto</button>`;
+    if (id === "ground") return `<a class="back" href="#/calm">‹ Kalma</a><h1>5-4-3-2-1</h1><p class="muted">Dahan-dahang pansinin ang paligid mo. Sabihin sa isip, o nang mahina.</p>
+      <div class="card"><ul class="tight" style="font-size:17.5px;line-height:1.7"><li><b>5</b> na bagay na nakikita mo</li><li><b>4</b> na bagay na nahahawakan mo (ang upuan, ang damit mo…)</li><li><b>3</b> na tunog na naririnig mo</li><li><b>2</b> na amoy</li><li><b>1</b> na nalalasahan mo, o isang magandang bagay tungkol sa sarili mo</li></ul></div>
+      <p class="small muted">Ibinabalik ka nito sa ngayon, sa katawan mo at sa lugar kung nasaan ka.</p>`;
+    if (id === "voices") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Kapag maingay ang isip</h1><p class="muted">Mga bagay na nakakatulong sa maraming tao kapag maraming iniisip, o may naririnig na mga boses:</p>
+      <div class="card"><ul class="tight"><li><b>Musika sa headphones</b>, o tumugtog ng gitara.</li><li><b>Mag-hum o kumanta nang mahina.</b> Para sa ilan, nababawasan nito ang mga boses.</li><li><b>Kausapin ang taong pinagkakatiwalaan mo.</b></li><li><b>Maglakad sa labas</b>, o gumawa ng isang bagay gamit ang kamay.</li><li><b>Hindi mo kailangang sundin</b> ang anumang sinasabi ng mga boses.</li></ul></div>
+      <div class="warn small">Kung may nag-uutos sa ’yo na saktan ang sarili mo o ang iba, tumawag agad sa taong pinagkakatiwalaan mo, o sa NCMH Crisis Hotline 1553 (libre, 24 oras).</div>
+      <div class="list">${callsHTML()}<a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · 0917-899-8727 · 0919-057-1553</small></span></a></div>`;
+    if (id === "threat") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Kapag pakiramdam mo may banta</h1><p class="muted">Totoo at nakakapagod ang ganitong takot. Ilang bagay na puwedeng subukan:</p>
+      <div class="card"><ul class="tight"><li><b>Pumunta sa lugar na pakiramdam mo ay ligtas</b>, at huminga nang dahan-dahan.</li><li><b>Tanungin ang sarili:</b> ano pa ang posibleng paliwanag? Ano ang sasabihin ng kaibigang pinagkakatiwalaan ko?</li><li><b>Kausapin ang taong pinagkakatiwalaan mo</b> bago gumawa ng anumang hakbang.</li><li><b>Mas tumitindi ang takot kapag pagod o puyat.</b> Ang pahinga at tulog ay nakakatulong.</li><li><b>Iwasan ang alak at droga</b>; pinapalakas nila ang takot.</li></ul></div>
+      <div class="list">${callsHTML()}<a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · libre, 24 oras</small></span></a></div>`;
+    return `<div class="eyebrow">Kalma</div><h1 style="margin-top:4px">Kapag mabigat</h1><p class="muted">Pumili ng isa. Okay lang kahit ilang beses.</p>
+      <div class="list" style="margin-top:12px">${CALM.map(([t, k]) => `<a href="#/calm/${k}"><span class="ic">〰</span><span class="grow">${esc(t)}</span><span class="chev">›</span></a>`).join("")}</div>
+      <div class="sec"><div class="eyebrow">Mga taong puwedeng tawagan</div><div class="list">${callsHTML() || `<a href="#/settings"><span class="ic">+</span><span class="grow">Idagdag ang mga taong pinagkakatiwalaan mo<small>Para isang pindot lang ang tawag</small></span></a>`}
+        <a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · libre, 24 oras</small></span></a></div></div>`;
+  }
+
+  /* ---------- Shared views ---------- */
+  function viewSettings() {
+    const fam = db.space === "family";
+    return `<a class="back" href="#/">‹ Bumalik</a><h1>Settings</h1>
+      <label class="f"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label>
+      ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div>
+        ${[0, 1, 2].map(i => `<div class="row" style="gap:8px;margin-top:8px"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div>
+        <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div>${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="margin-top:8px">`).join("")}</div>`}
+      <div class="sec"><div class="eyebrow">Phone na ito</div><div class="list">
+        ${fam ? "" : `<button class="li" data-act="sharewk"><span class="ic">↗</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
+        <button class="li" data-act="switch"><span class="ic">⇄</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
+        <a href="#/about"><span class="ic">i</span><span class="grow">Tungkol sa Kasama<small>Saan galing ang mga gabay</small></span><span class="chev">›</span></a></div></div>
+      <p class="small muted" style="margin-top:14px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
+  }
+  function viewAbout() {
+    return `<a class="back" href="#/">‹ Bumalik</a><h1>Tungkol sa Kasama</h1>
+      <p class="prose">Ginawa ang Kasama para sa isang kaibigan at sa mga nagmamahal sa kanya. Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
+      <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small"><ul class="tight">
+        <li><b>Family psychoeducation:</b> ang pag-aaral ng pamilya tungkol sa kondisyon ay nagpapababa ng pagbabalik ng sintomas at pagkaka-ospital (Cochrane review: Pharoah et al.).</li>
+        <li><b>Expressed emotion:</b> ang batikos, galit at sobrang pakikialam sa bahay ay kaugnay ng mas madalas na pagbabalik (meta-analysis: Butzlaff &amp; Hooley, 1998).</li>
+        <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
+        <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
+        <li><b>Behavioural activation:</b> maliliit at regular na gawain para sa mababang motibasyon at pag-iisa.</li>
+        <li><b>Tulog:</b> ang pag-ayos ng tulog ay nagpapabawas ng paranoia (Freeman et al., 2015, 2017); mga tip mula sa CBT for insomnia.</li>
+        <li><b>Music therapy:</b> nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas at sa pakikisalamuha (Cochrane: Geretsegger et al., 2017). Ang Music section ay hango rito pero hindi kapalit ng music therapist.</li>
+        <li><b>Self-management apps</b> gaya ng FOCUS, Actissist at Horyzons ang nagpakita na nakakatulong ang ganitong mga tool kasama ng gamutan.</li></ul></div></div>
+      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
+      <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}</p>`;
+  }
+
+  /* ---------- After render ---------- */
+  let ntags = [];
+  function afterRender(v) {
+    if (v === "notes") ntags = [];
+    if (v === "music") { const el = $("#mtime"); if (el) el.textContent = fmtT(mt.left); }
+  }
+  async function shareText(title, text) {
+    try { if (navigator.share) { await navigator.share({ title, text }); return; } } catch (e) { if (e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(text); toast("Nakopya. I-paste sa Messenger o Viber."); } catch (e) { toast("Hindi makopya"); }
+  }
+
+  /* ---------- Actions ---------- */
+  let breathT = 0;
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, v = el.dataset.v; if (el.tagName === "BUTTON") haptic(6);
+    if (a === "space") { db.space = v; save(); location.hash = "#/"; render(); }
+    else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; save(); location.hash = "#/"; render(); }
+    else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
+    else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next : "#/learn"; }
+    else if (a === "pick") { const i = pq % PRACTICE.length; db.practice[i] = +v; save(); render(); }
+    else if (a === "pqnext") { pq++; render(); scrollTo(0, 0); }
+    else if (a === "pqreset") { db.practice = {}; pq = 0; save(); render(); }
+    else if (a === "ntag") { const t = v; ntags.includes(t) ? ntags.splice(ntags.indexOf(t), 1) : ntags.push(t); el.classList.toggle("on"); }
+    else if (a === "addnote") { const text = $("#ntext").value.trim(); if (!text && !ntags.length) { toast("Pumili ng tag o magsulat ng kaunti"); return; } db.notes.push({ id: uid(), at: Date.now(), tags: [...ntags], text }); db.steps.notes = true; save(); toast("Nai-save"); render(); }
+    else if (a === "delnote") { if (!confirm("Burahin ang talang ito?")) return; db.notes = db.notes.filter(n => n.id !== v); save(); render(); }
+    else if (a === "shareprep") shareText("Para sa doktor", $("#prep").value);
+    else if (a === "sharecrisis") shareText("Crisis numbers", `Kung may panganib sa buhay: 911.\nNCMH Crisis Hotline (libre, 24/7): 1553 (landline) · 1800-1888-1553 · Smart/TNT 0919-057-1553 · Globe/TM 0917-899-8727 / 0966-351-4518.\nPara rin sa pamilya ang NCMH line.`);
+    else if (a === "care") { db.care.push({ at: Date.now(), v: +v }); save(); render(); }
+    else if (a === "thing") { const k = dayKey(Date.now()); db.today[k] ||= {}; db.today[k][v] = !db.today[k][v]; save(); if (db.today[k][v]) haptic([8, 30, 12]); render(); }
+    else if (a === "mood") { db.moods[dayKey(Date.now())] = +v; save(); render(); }
+    else if (a === "sq") { const k = dayKey(Date.now()); db.sleep[k] = { ...(db.sleep[k] || {}), q: +v }; save(); render(); }
+    else if (a === "newidea") { const p = el.previousElementSibling; p.textContent = MUSIC_IDEAS[Math.floor(Math.random() * MUSIC_IDEAS.length)]; }
+    else if (a === "mlen") { if (mt.run) return; mt.len = mt.left = +v * 60; render(); }
+    else if (a === "mstart") {
+      if (mt.run) { musicStop(false); return; }
+      mt.run = true; mt.t0 = Date.now(); mt.left = mt.len; el.textContent = "Tapusin";
+      mt.iv = setInterval(() => { mt.left = Math.max(0, mt.len - (Date.now() - mt.t0) / 1000); const t = $("#mtime"); if (t) t.textContent = fmtT(mt.left); if (mt.left <= 0) musicStop(true); }, 250);
+    }
+    else if (a === "breath") {
+      const b = $("#breath"), btn = $("#bbtn"); if (breathT) { clearTimeout(breathT); breathT = 0; b.className = "breath"; b.textContent = "Simulan"; btn.textContent = "Simulan · 2 minuto"; return; }
+      btn.textContent = "Itigil"; const end = Date.now() + 120000;
+      const cycle = () => { if (Date.now() > end) { b.className = "breath"; b.textContent = "Tapos"; btn.textContent = "Ulitin"; breathT = 0; return; }
+        b.className = "breath in"; b.textContent = "Hinga papasok"; breathT = setTimeout(() => { b.className = "breath out"; b.textContent = "Dahan-dahang palabas"; breathT = setTimeout(cycle, 6000); }, 4000); };
+      cycle();
+    }
+    else if (a === "sharewk") {
+      const days = [...Array(7)].map((_, i) => dayKey(Date.now() - (6 - i) * DAY)), sl = days.map(k => sleepHours(db.sleep[k])).filter(x => x != null);
+      const done = days.reduce((s, k) => s + Object.values(db.today[k] || {}).filter(Boolean).length, 0), mus = db.music.filter(m => m.at > Date.now() - 7 * DAY);
+      shareText("Ang linggo ko", `Ang linggo ko:\n- Tulog: ${sl.length ? `average ${(sl.reduce((a, b) => a + b, 0) / sl.length).toFixed(1)} oras` : "hindi naitala"}\n- Maliliit na nagawa: ${done}\n- Pagtugtog: ${mus.length} beses, ${Math.round(mus.reduce((a, m) => a + m.min, 0))} minuto`);
+    }
+  });
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el.id === "nm") { db.names.him = el.value.trim(); save(); }
+    if (el.dataset.c) { const i = +el.dataset.i; db.contacts[i] ||= { name: "", tel: "" }; db.contacts[i][el.dataset.c] = el.value.trim(); save(); }
+    if (el.dataset.t != null) { const t = [...things()]; t[+el.dataset.t] = el.value; db.things = t.map(x => x.trim()).filter(Boolean).length ? t : null; save(); }
+    if (el.id === "bed" || el.id === "wake") { const k = dayKey(Date.now()); db.sleep[k] = { ...(db.sleep[k] || {}), [el.id]: el.value }; save(); }
+  });
+  document.addEventListener("change", e => { if (e.target.id === "bed" || e.target.id === "wake") render(); });
+
+  render();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had || $(".update")) return; const u = document.createElement("button"); u.className = "update"; u.textContent = "May bagong version · I-reload"; u.onclick = () => location.reload(); document.body.appendChild(u); });
+  }
+  </script>
+</body>
+</html>
