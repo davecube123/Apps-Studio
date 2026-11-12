@@ -8,7 +8,12 @@ three text sizes.
 Two separate spaces, chosen on first open, meant for separate phones. Everything stays on the phone.
 
 **Family space (Para sa pamilya)**
-- *Home:* the path to a psychiatrist in six steps, a daily conversation script, notes, crisis numbers.
+- *Konsulta:* the next appointment (17 Nov 2026 by default, editable) with a countdown and a 7-item prep checklist.
+- *Pondo:* a fundraising tracker (target, contributions, remaining), a privacy-respecting appeal message, and cards on
+  ways to cut costs: PhilHealth's outpatient mental health package, DOH's free medicines (MAP-MH), Malasakit Centers,
+  DSWD AICS, PCSO MAP, common documents, and questions to ask the doctor about cost (checked November 2026).
+- *Home:* the next step of an 8-step path (first consult done, prepare the second, funds, notes, treatment, his
+  family, a plan), with the old wording: the path to a psychiatrist, a daily conversation script, notes, crisis numbers.
 - *Unawain:* twelve short lessons (what psychosis is, lack of insight, early treatment, once treatment starts,
   what makes it worse, a calm home / expressed emotion, anger and safety, suicide risk and asking directly, faith and
   stigma, recovery and music, a ready-to-send explanation for his family, and how friends can help).
