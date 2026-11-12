@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Kasama">
-  <meta name="description" content="Para sa pamilya at sa kanya: understanding psychosis, how to talk, getting help in the Philippines, and gentle daily routines, sleep and music.">
+  <meta name="description" content="Para sa pamilya at sa kanya: being there for someone you love, how to talk, getting help in the Philippines, and gentle daily routines, sleep and music.">
   <link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/fraunces-latin-soft-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="manifest" href="manifest.webmanifest">
@@ -227,7 +227,20 @@
     @media (prefers-color-scheme: dark) { .bigcall { color: #1a0f0e; } .bigcall .bubble { color: #1a0f0e; background: rgba(0,0,0,.12); } }
     details.more { margin-top: 14px; } details.more > summary { list-style: none; cursor: pointer; font: 650 15px var(--sans); color: var(--teal); padding: 10px 4px; }
     details.more > summary::-webkit-details-marker { display: none; } details.more > summary::before { content: "+ "; } details.more[open] > summary::before { content: "\2212  "; }
-    .nextstep { border: 2px solid var(--teal); } .nextstep .row .btn { flex: 1; }
+    .nextstep, .connect { border: 2px solid var(--teal); }
+    .connect .row .btn { flex: 1; min-height: 56px; font-size: 16.5px; }
+    .connect .eyebrow .i { width: 15px; height: 15px; vertical-align: -2px; }
+    .quiethelp { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 22px; padding: 12px; border-radius: 16px; color: var(--ink2); text-decoration: none; font-size: 14.5px; border: 1px solid var(--line); }
+    .quiethelp .i { width: 18px; height: 18px; color: var(--red); }
+    .lock { text-align: center; padding: 48px 8px 0; }
+    .pindots { display: flex; gap: 18px; justify-content: center; margin: 30px 0; }
+    .pindots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--teal); }
+    .pindots i.on { background: var(--teal); }
+    .keypad { display: grid; grid-template-columns: repeat(3, 76px); gap: 16px 26px; justify-content: center; }
+    .keypad button { width: 76px; height: 76px; border-radius: 50%; border: 0; background: var(--card); color: var(--ink); font: 500 28px var(--sans); box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; display: grid; place-items: center; }
+    .keypad button:active { background: var(--sage); }
+    .keypad .i { width: 26px; height: 26px; }
+    .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; } .nextstep .row .btn { flex: 1; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
@@ -236,7 +249,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "6", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "7", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -253,7 +266,7 @@
   /* What we know: the first consult happened in October; the second is on 17 November 2026. Both can be changed. */
   if (db.steps.first === undefined) db.steps.first = true;
   if (db.appt === undefined) db.appt = "2026-11-17";
-  db.apptPrep ||= {}; db.funds ||= { goal: "", gifts: [] };
+  db.apptPrep ||= {}; db.funds ||= { goal: "", gifts: [] }; db.connect ||= {}; db.moments ||= [];
   const DAYS_TL = ["Linggo", "Lunes", "Martes", "Miyerkules", "Huwebes", "Biyernes", "Sabado"], MONTHS_TL = ["Enero", "Pebrero", "Marso", "Abril", "Mayo", "Hunyo", "Hulyo", "Agosto", "Setyembre", "Oktubre", "Nobyembre", "Disyembre"];
   const apptDate = () => { if (!db.appt) return null; const [y, m, d] = db.appt.split("-").map(Number); return new Date(y, m - 1, d); };
   const tlDate = d => `${DAYS_TL[d.getDay()]}, ${MONTHS_TL[d.getMonth()]} ${d.getDate()}`;
@@ -330,13 +343,13 @@
     ["NCMH Crisis Hotline · Globe/TM", "0966-351-4518", "09663514518"],
   ];
   const LESSONS = [
-    { id: "what", t: "Ano ba talaga ang psychosis?", m: 3, body: [
+    { id: "what", t: "Ano ang pinagdadaanan niya?", m: 3, body: [
       "Ang psychosis ay kondisyon kung saan nahihirapan ang utak na paghiwalayin kung ano ang totoo at kung ano ang galing sa sariling isip. Hindi ito kahinaan ng loob, hindi ito katamaran, at hindi niya ito pinili.",
       "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations), o matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagbabantay sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
       "Kaya maaaring tumigil siya sa pagtugtog. Hindi dahil ayaw na niya sa musika; ang “bawas” na sintomas mismo ang kumukuha ng gana at lakas. Hindi ito masosolusyonan ng pagpilit, pero bumabalik ito sa tamang gamutan at panahon.",
       "Ang mga pagsabog ng galit, gaya ng pagtumba ng upuan o pagbasag ng cellphone, ay kadalasang galing sa takot at sobrang stress ng nararanasan niya, lalo na kung pakiramdam niya ay may banta sa kanya. Seryoso pa rin ito, pero tanda ito na kailangan na niya ng tulong, hindi ng sermon." ],
       key: "Hindi siya ang problema. Ang kondisyon ang problema, at kasama ninyo siya sa paglaban dito." },
-    { id: "insight", t: "Bakit sinasabi niyang wala siyang sakit", m: 3, body: [
+    { id: "insight", t: "Bakit sinasabi niyang okay lang siya", m: 3, body: [
       "Isa sa pinakamahirap: maraming taong may psychosis ang tunay na hindi nakikitang may sakit sila. Ito ay tinatawag na anosognosia o lack of insight, at bahagi ito ng kondisyon mismo, galing sa paraan ng pagtrabaho ng utak. Sa pananaliksik, mga kalahati ng may schizophrenia ang nakakaranas nito.",
       "Ibig sabihin, hindi siya nagmamatigas. Para sa kanya, totoo ang nararanasan niya. Kaya kapag pinagtatalunan natin kung totoo o hindi, lalo lang siyang lumalayo at hindi na nagtitiwala.",
       "Ang mas gumagana: huwag pilitin siyang tanggapin na “may sakit” siya. Sa halip, hanapin ang mga bagay na gusto niyang mabago: makatulog nang maayos, mabawasan ang stress o takot, makabalik sa pagtugtog. Doon kayo magtulungan. Ito ang puso ng LEAP, na nasa “Kausapin” tab." ],
@@ -360,10 +373,16 @@
       "Biglaang paghinto ng gamot (kapag nagsimula na siya): isa ito sa pinakamadalas na dahilan ng pagbabalik ng sintomas." ],
       key: "Tulog, walang droga, at kalmadong bahay: tatlong bagay na kayang tulungan ng pamilya araw-araw." },
     { id: "home", t: "Ang kalmadong bahay: ano ang sinasabi ng research", m: 3, body: [
-      "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
+      "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Sa pagsusuri ng 30 pag-aaral (2021), halos dinodoble ng madalas na batikos ang tsansang bumalik ito, at ang init at pagtanggap (warmth) ay nagpapababa nito nang malaki. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
       "Ang nakakatulong: mahinahong boses, maikli at malinaw na pananalita, papuri sa maliliit na hakbang, at pagbibigay ng espasyo kapag kailangan niya. Ang mga pamilyang natuto tungkol sa kondisyon at sa ganitong paraan ng pakikitungo ay may mas kaunting pagbabalik ng sintomas at pagkaka-ospital; ito ay family psychoeducation, isa sa pinakamatibay na ebidensya sa larangang ito.",
       "Hindi ibig sabihin na wala nang hangganan. Puwede kayong magsabi ng malinaw na limitasyon (“Hindi okay ang magbasag ng gamit”), nang mahinahon at walang pang-iinsulto." ],
       key: "Mahinahon, maikli, mainit, at may malinaw na limitasyon." },
+    { id: "words", t: "Ang mga salitang ginagamit natin", m: 2, body: [
+      "Hindi siya ang diagnosis niya. Siya pa rin ang kaibigang musikero, ang anak, ang kasintahan. Ang pananaliksik sa mga taong bagong nadiagnose ay nagpapakita na ang paraan ng pagbanggit ng label ay nakakaapekto sa tingin nila sa sarili, at ang kahihiyan sa sarili (self-stigma) ay humaharang sa paggaling.",
+      "Kaya sa bahay, pag-usapan ang mga bagay na mahalaga sa kanya: tulog, pagod, stress, ang musika, ang mga plano niya. Hindi kailangang laging banggitin ang “sakit” o ang pangalan ng kondisyon. Sa doktor at sa kanya ang usapang iyon, kapag handa siya.",
+      "Sa ibang tao, sapat na ang “nagpapagamot siya” o “nagpapahinga muna siya.” Kanya ang kuwento; siya ang magpapasya kung kanino ito ibabahagi. Sa mga pamilyang Pilipino, ang hiya ay isa sa pinakamalaking dahilan kung bakit naaantala ang pagpapatingin. Ang pag-iingat sa privacy niya ay paraan para hindi siya mahiyang magpagamot.",
+      "Iwasan ang mga salitang tulad ng “baliw,” “sira,” o “may topak,” kahit pabiro, at pakiusapan ang iba na iwasan din ang mga ito." ],
+      key: "Pag-usapan ang tao, hindi ang label. Kanya ang kuwento." },
     { id: "safety", t: "Tungkol sa galit at kaligtasan", m: 3, body: [
       "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag may droga o alak, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
       "Kapag galit o takot siya: bigyan siya ng espasyo, huwag harangan ang daan niya palabas, huwag hawakan o pigilan nang pisikal, magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
@@ -390,7 +409,7 @@
       "Ibahagi ang mensahe sa ibaba sa Messenger o Viber. Maikli ito, mahinahon, at nakatuon sa kung paano sila makakatulong. Puwede itong i-edit bago ipadala.",
       "Kung may pinagkakatiwalaan silang tao, gaya ng doktor, nurse na kamag-anak, pari o pastor, hilingin na sila ang tumulong magpaliwanag.",
       "Bigyan sila ng panahon. Ang pag-unawa ay proseso; kahit isang tao lang sa pamilya ang maging kakampi, malaking tulong na." ],
-      key: "Kailangan niya ang buong pamilya sa iisang panig: laban sa sakit, hindi laban sa kanya." },
+      key: "Kailangan niya ang buong pamilya sa iisang panig: kasama niya, hindi laban sa kanya." },
     { id: "friends", t: "Para sa mga kaibigan", m: 2, body: [
       "Malaking bagay ang mga kaibigang nananatili. Maraming taong may psychosis ang nawawalan ng kaibigan dahil sa takot o hiya ng iba. Ang simpleng pagpapakita ay nakakatulong sa paggaling.",
       "Gawin: mag-text kahit maikli, mag-imbita sa simpleng bagay (kape, lakad, tugtugan nang walang pressure), makinig, at ituring siyang siya pa rin.",
@@ -480,15 +499,35 @@
       ["\u201cMukhang sobrang bigat ng nararamdaman mo kahapon. Ano ang nangyari para sa \u2019yo?\u201d", 1, "Tama. Mahinahon, walang paninisi, at nagbubukas ng usapan tungkol sa nararamdaman niya at sa tulong."],
       ["Huwag na lang itong banggitin kahit kailan.", 0, "Ang pag-iwas ay nag-iiwan ng tensyon at nawawalan ng pagkakataong pag-usapan ang tulong."] ] },
   ];
+  /* One small way a day to be close to him. Warmth at home is one of the strongest protective factors
+     known (expressed-emotion meta-analysis, Ma et al. 2021); behavioural family therapy builds it through
+     shared pleasant activities and praise for small steps. */
+  const CONNECT = [
+    ["Kumain nang sabay ngayong araw.", "Walang usapang problema sa mesa. Kuwentuhan lang, o kahit tahimik."],
+    ["Maglakad nang 10 minuto nang magkasama.", "Hindi kailangang mag-usap. Ang paglalakad nang magkatabi ay sapat na."],
+    ["Magpatugtog ng kantang gusto niya.", "Pakinggan nang buo. Kung gusto niyang magkuwento tungkol dito, makinig."],
+    ["Sabihin ang isang bagay na pinasasalamatan mo sa kanya.", "Isang pangungusap lang: “Salamat sa pagsama mo sa akin kanina.”"],
+    ["Pansinin ang isang maliit na nagawa niya.", "“Nakita kong bumangon ka nang maaga. Ang galing.” Ang papuri sa maliliit na hakbang ay malaking tulong."],
+    ["Magtimpla ng kape o tsaa para sa kanya.", "Tapos umupo sandali sa tabi niya. Hindi kailangang may sabihin."],
+    ["Manood ng nakakatawa nang magkasama.", "Isang video o pelikula. Ang tawa ay nagpapagaan sa bahay."],
+    ["Tanungin siya tungkol sa bagay na alam niya.", "Isang kanta, isang gitarista, isang alaala sa tugtugan. Hayaan siyang magturo."],
+    ["Ngayong araw: walang payo, walang sermon.", "Makinig lang. Kung may gusto kang itama, hintayin ang ibang araw."],
+    ["Lutuin o bilhin ang paborito niyang pagkain.", "Hindi kailangang espesyal ang okasyon."],
+    ["Magpadala ng maikling mensahe.", "“Iniisip kita. Walang kailangang sagot.”"],
+    ["Umupo sa labas nang magkasama sa umaga.", "Kahit 5 minuto sa araw. Nakakatulong din ito sa tulog niya."],
+    ["Imbitahin siyang tumugtog ng isang kanta, kung gusto lang niya.", "Kung ayaw niya, ayos lang. Sabihing “Sige, sa ibang araw,” at ngumiti."],
+    ["Mag-alok ng tulong sa isang maliit na bagay.", "At tanggapin kung tumanggi siya. Ang paggalang sa “hindi” niya ay nagpapatibay ng tiwala."]];
+  let connectSkip = 0;
+  const connectToday = () => CONNECT[(Math.floor(Date.now() / DAY) + connectSkip) % CONNECT.length];
   const STEPS = [
     ["first", "Unang konsulta sa psychiatrist", "Tapos na noong nakaraang buwan. Malaking hakbang ito."],
-    ["learn", "Unawain ang kondisyon", "Basahin ang ilang aralin sa Unawain. Mga 20 minuto lahat."],
+    ["learn", "Unawain ang pinagdadaanan niya", "Basahin ang ilang aralin sa Unawain. Mga 20 minuto lahat."],
     ["prep2", "Ihanda ang ikalawang konsulta", "Ang Talaan, mga tanong, ID at PhilHealth, at kung sino ang sasama."],
     ["funds", "Ayusin ang pondo", "Mga programang makakabawas sa gastos, at ang inyong fundraising."],
     ["notes", "Isulat ang mga napapansin", "Tulog, galit, hinala, epekto ng gamot, at magagandang araw. Para sa doktor."],
     ["meds", "Tulungan siya sa gamutan", "Kung may reseta: paano tumulong nang hindi nagbabantay."],
     ["family", "Ipaliwanag sa pamilya niya", "May handang mensahe, at paano sila kausapin."],
-    ["plan", "Gawin ang plano kung lumala", "Mga maagang senyales, ang gagawin, at sino ang tatawagan."],
+    ["plan", "Gawin ang plano para sa mabibigat na araw", "Mga maagang senyales, ang gagawin, at sino ang tatawagan."],
   ];
   const NOTE_TAGS = ["Epekto ng gamot", "Hindi nakatulog", "Galit", "Hinala/takot", "Boses", "Hindi kumakain", "Droga/alak", "Nag-isa buong araw", "Magandang araw", "Tumugtog"];
 
@@ -518,13 +557,42 @@
   const crisisHTML = () => `<a class="bigcall" href="tel:911"><span class="bubble">${ic("phone")}</span><span class="grow"><b>911</b><span class="l">Emergency: may panganib sa buhay ngayon</span></span></a>
     <a class="bigcall teal" href="tel:1553"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH Crisis Hotline · libre, 24 oras · para rin sa pamilya</span></span></a>
     <details class="more"><summary>Ibang numero ng NCMH (cellphone)</summary><div class="crisis" style="margin-top:6px">${CRISIS.slice(2).map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div></details>`;
+  /* ---------- Private mode ----------
+     An optional 4-digit PIN for the family space, for a phone others may pick up. It is a privacy
+     curtain, not encryption: it keeps what is written here from being seen at a glance. */
+  const pinHash = pin => String([..."kasama:" + pin].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7));
+  let unlocked = false, pinBuf = "", pinFirst = "", hiddenAt = 0;
+  const locked = () => db.space === "family" && !!db.pin && !unlocked;
+  addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = Date.now(); else if (db.pin && unlocked && Date.now() - hiddenAt > 60000) { unlocked = false; pinBuf = ""; render(); } });
+  const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Kasama</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
+      <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
+      <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"].map(k => k === "" ? "<span></span>" : `<button data-act="pinkey" data-v="${k}" aria-label="${k === "del" ? "Burahin" : k}">${k === "del" ? ic("back") : k}</button>`).join("")}</div></div>`;
+  function viewLock() {
+    return keypad("Ilagay ang PIN", "Para sa family space ng phone na ito.")
+      + `<div class="center" style="margin-top:18px"><a class="small" href="tel:911" style="color:var(--muted)">Emergency: 911</a> · <button class="linkbtn small" data-act="pinforgot">Nakalimutan ang PIN?</button></div>`;
+  }
+  function viewPin() {
+    if (db.pin && !pinFirst && route().id !== "new") return hero("home", "Settings", "Private mode", "May PIN na ang family space.", { top: backBtn("#/settings", "Settings") })
+      + `<div class="card lift"><p style="margin-top:0">Hinihingi ang PIN tuwing bubuksan ang app, at kapag naiwan ito nang higit sa isang minuto.</p>
+        <a class="btn block" href="#/pin/new">Palitan ang PIN</a><button class="btn ghost block" data-act="pinoff" style="margin-top:10px">Alisin ang PIN</button></div>`;
+    return `<div style="padding-top:8px">${backBtn("#/settings", "Settings")}</div>` + keypad(pinFirst ? "Ulitin ang PIN" : "Pumili ng 4-digit na PIN", pinFirst ? "Para makasigurong tama." : "Huwag gamitin ang birthday. Tandaan ito: hindi ito mababawi nang hindi binubura ang data.");
+  }
+  function pinKey(k) {
+    if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) { pinBuf += k; haptic(6); }
+    if (pinBuf.length < 4) { render(); return; }
+    const entered = pinBuf; pinBuf = "";
+    if (locked()) { if (pinHash(entered) === db.pin) { unlocked = true; render(); } else { haptic([30, 40, 30]); toast("Mali ang PIN"); render(); } return; }
+    if (!pinFirst) { pinFirst = entered; render(); return; }
+    if (entered !== pinFirst) { pinFirst = ""; toast("Hindi magkapareho. Subukan ulit."); render(); return; }
+    db.pin = pinHash(entered); pinFirst = ""; unlocked = true; save(); toast("Naka-on ang PIN"); location.hash = "#/settings";
+  }
   /* ---------- Routing ---------- */
   let lastHash = "";
   function route() { const h = (location.hash || "#/").slice(2).split("/"); return { v: h[0] || "home", id: h[1], n: +(h[2] || 0) }; }
   function render() {
     const { v, id, n } = route(), h = location.hash || "#/", nav = h !== lastHash;
     let html;
-    if (!db.space) html = viewChoose(); else if (v === "intro") html = viewIntro(+id || 0); else if (db.space === "family") html = familyView(v, id, n); else html = himView(v, id, n);
+    if (!db.space) html = viewChoose(); else if (locked()) html = viewLock(); else if (v === "intro") html = viewIntro(+id || 0); else if (db.space === "family") html = familyView(v, id, n); else html = himView(v, id, n);
     if (html == null) return;
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     if (lastHash.startsWith("#/intro") && v !== "intro") setTimeout(() => showInstall(false), 1500); /* offer install once the intro is done */
@@ -532,10 +600,10 @@
   }
   addEventListener("hashchange", render);
   function tabs(v) {
-    const t = $("#tabs"); if (!db.space) { t.hidden = true; return; } t.hidden = false;
+    const t = $("#tabs"); if (!db.space || locked()) { t.hidden = true; return; } t.hidden = false;
     const items = db.space === "family" ? [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]]
       : [["home", "sun", "Today"], ["sleep", "moon", "Tulog"], ["music", "music", "Music"], ["calm", "wave", "Kalma"]];
-    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", moments: "home", pin: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
     t.innerHTML = items.map(([k, i, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
   }
   /* One idea per screen, with big Back and Next buttons. Each step has its own address, so the phone's
@@ -549,10 +617,10 @@
       <div class="stepnav">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")} Bumalik</a>` : ""}${last ? finish : `<a class="btn teal" href="${base}/${i + 1}">Susunod ${ic("chev")}</a>`}</div>`;
   }
   const INTRO = {
-    family: [["heart", "b-peach", "Para sa inyo ang app na ito", "Para sa girlfriend, pamilya at mga kaibigan niya. Maiikli ang bawat pahina; basahin kapag may oras."],
+    family: [["heart", "b-peach", "Para sa inyo ang app na ito", "Para sa girlfriend, pamilya at mga kaibigan niya. Sa Home, may isang maliit na paraan araw-araw para maging malapit sa kanya. Maiikli ang bawat pahina."],
       ["home", "b-sage", "Ang mga button sa ibaba", "Home, Unawain (mga aralin), Kausapin (ano ang sasabihin), Tulong (mga numero at plano), at Para sa ’yo. Pindutin para lumipat."],
-      ["phone", "b-rose", "Kung may emergency", "Pindutin ang Tulong, tapos ang pulang button. Isang pindot lang ang tawag sa 911 o sa NCMH 1553."],
-      ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Walang ipinapadala kahit saan."]],
+      ["phone", "b-rose", "Kung kailangan ng tulong agad", "Pindutin ang Tulong, tapos ang unang button. Isang pindot lang ang tawag sa 911 o sa NCMH 1553."],
+      ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Kung may ibang gumagamit ng phone, lagyan ng PIN sa Settings."]],
     him: [["sun", "b-sun", "Para sa mga araw mo", "Maliliit na plano, tulog, gitara, at mga paraan para kumalma. Walang pressure."],
       ["check", "b-teal", "Pindutin ang bilog", "Para markahan ang nagawa mo ngayong araw. Kahit isa lang, sapat na."],
       ["music", "b-peach", "Ang mga button sa ibaba", "Today, Tulog, Music at Kalma. Pindutin para lumipat."],
@@ -565,7 +633,7 @@
     return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
       <div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Magkasama tayo dito.</h1>
       <p class="muted">Dalawang hiwalay na space. Lahat ng isusulat mo ay nananatili lang sa phone na ito.</p>
-      <button class="choice" data-act="space" data-v="family"><span class="bubble b-peach">${ic("heart")}</span><span class="grow"><b>Sumusuporta ako sa kanya</b><span class="t">Para sa girlfriend, pamilya at mga kaibigan: pag-unawa, paano makipag-usap, at paano siya madadala sa tulong.</span></span></button>
+      <button class="choice" data-act="space" data-v="family"><span class="bubble b-peach">${ic("heart")}</span><span class="grow"><b>Kasama niya ako</b><span class="t">Para sa girlfriend, pamilya at mga kaibigan: paano siya samahan, at paano rin alagaan ang sarili.</span></span></button>
       <button class="choice" data-act="space" data-v="him"><span class="bubble b-sun">${ic("sun")}</span><span class="grow"><b>Para sa akin</b><span class="t">Ang mga araw ko: maliliit na plano, tulog, gitara, at mga paraan para kumalma.</span></span></button></div>`;
   }
 
@@ -574,6 +642,7 @@
     if (v === "learn") return viewLearn(); if (v === "lesson") return viewLesson(id, n); if (v === "talk") return viewTalk(); if (v === "scene") return viewScene(id, n);
     if (v === "practice") return viewPractice(); if (v === "help") return viewHelp(id); if (v === "prep") return viewPrep(); if (v === "care") return viewCare(id);
     if (v === "notes") return viewNotes(); if (v === "plan") return viewPlan(+id || 0); if (v === "appt") return viewAppt(); if (v === "funds") return viewFunds(id, n); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+    if (v === "moments") return viewMoments(); if (v === "pin") return viewPin();
     return viewFamilyHome();
   }
   const STEP_HOW = { first: "#/appt", learn: "#/learn", prep2: "#/appt", funds: "#/funds", notes: "#/notes", meds: "#/lesson/treatment/0", family: "#/scene/hisfamily/0", plan: "#/plan/0" };
@@ -626,21 +695,37 @@
         <p class="small muted" style="margin:8px 4px">Para sa inyong sariling talaan lang. Magandang magpasalamat sa bawat nagbigay.</p></div>` : ""}`;
   }
   function viewFamilyHome() {
-    const done = STEPS.filter(s => db.steps[s[0]]).length, next = STEPS.find(s => !db.steps[s[0]]), ni = next ? STEPS.indexOf(next) : -1, notes = db.notes.length, read = Object.keys(db.lessons).length;
-    const tip = SCENES[1 + Math.floor(Date.now() / DAY) % (SCENES.length - 1)];
-    return hero("home", "Kasama · para sa pamilya", "Hindi kayo nag-iisa dito.", db.names.him ? `Para kay ${esc(db.names.him)}, at para sa inyo.` : "Isang hakbang sa isang araw.", { top: gearBtn() })
-      + `<div class="lift">${apptCard(false)}</div><div class="card nextstep" style="margin-top:12px">${next ? `<div class="row between"><div class="eyebrow" style="color:var(--teal)">Ang susunod na hakbang</div><span class="small muted">${ni + 1} sa ${STEPS.length}</span></div>
-          <h2 style="margin-top:6px">${next[1]}</h2><p class="big" style="font-size:17px;color:var(--ink2)">${next[2]}</p>
+    const done = STEPS.filter(s => db.steps[s[0]]).length, next = STEPS.find(s => !db.steps[s[0]]), ni = next ? STEPS.indexOf(next) : -1, notes = db.notes.length;
+    const tip = SCENES[1 + Math.floor(Date.now() / DAY) % (SCENES.length - 1)], [ct, cd] = connectToday(), tk = dayKey(Date.now()), did = db.connect[tk];
+    const nextLesson = LESSONS.find(l => !db.lessons[l.id]);
+    return hero("home", "Kasama", "Kumusta kayo ngayon?", db.names.him ? `Para kay ${esc(db.names.him)}, at para sa inyo.` : "Isang maliit na bagay sa isang araw.", { top: gearBtn() })
+      + `<div class="card lift connect">${did ? `<div class="eyebrow" style="color:var(--teal)">Nagawa ninyo ngayong araw ${ic("heart")}</div><h2 style="margin-top:6px">${esc(did.t)}</h2>
+          <p class="small muted" style="margin:6px 0 0">Ano ang magandang nangyari, kahit maliit?</p>
+          <textarea id="mtext" placeholder="Hal. Natawa siya sa kuwento ko. Tumugtog siya nang kaunti." style="margin-top:10px;min-height:80px"></textarea>
+          <button class="btn teal block" data-act="addmoment" style="margin-top:10px">I-save ang sandali</button>`
+        : `<div class="eyebrow" style="color:var(--teal)">Isang paraan para maging malapit ngayong araw</div><h2 style="margin-top:6px">${esc(ct)}</h2><p class="big" style="font-size:17px;color:var(--ink2)">${esc(cd)}</p>
+          <div class="row" style="gap:10px;margin-top:14px"><button class="btn" data-act="connectskip">Iba pa</button><button class="btn teal" data-act="connectdone">${ic("check")} Nagawa namin</button></div>`}
+        <p class="small muted" style="margin:12px 0 0">Bakit? Ang init at pagtanggap sa bahay ay isa sa pinakamalakas na proteksyon sa paggaling niya.</p></div>
+      ${db.moments.length ? rowcard("#/moments", "sun", "b-sun", "Magagandang sandali", `${db.moments.length} na naitala. Basahin kapag mabigat ang araw.`) : ""}
+      <div style="margin-top:12px">${apptCard(false)}</div>
+      <div class="card" style="margin-top:12px">${next ? `<div class="row between"><div class="eyebrow">Ang susunod na hakbang</div><span class="small muted">${ni + 1} sa ${STEPS.length}</span></div>
+          <h3 style="margin-top:6px;font-size:19px">${next[1]}</h3><p style="font-size:16px;color:var(--ink2);margin:6px 0 0">${next[2]}</p>
           <div class="row" style="gap:10px;margin-top:14px"><a class="btn" href="${STEP_HOW[next[0]]}">Paano?</a><button class="btn teal" data-act="step" data-v="${next[0]}">${ic("check")} Tapos na</button></div>`
-        : `<div class="eyebrow" style="color:var(--teal)">Lahat ng hakbang ay tapos na</div><h2 style="margin-top:6px">Napakagaling.</h2><p class="big" style="font-size:17px;color:var(--ink2)">Ang susunod: alamin mula sa doktor kung paano kayo makakatulong, at bantayan ang tulog niya.</p>`}
+        : `<div class="eyebrow" style="color:var(--teal)">Lahat ng hakbang ay tapos na</div><p style="font-size:16px;color:var(--ink2)">Ang susunod: alamin mula sa doktor kung paano kayo makakatulong, at bantayan ang tulog niya.</p>`}
         <div class="meter" style="margin-top:16px"><i style="width:${done / STEPS.length * 100}%"></i></div>
         <details class="more"><summary>Tingnan lahat ng ${STEPS.length} hakbang</summary><div class="path">${STEPS.map(([k, t, d]) => `<button class="${db.steps[k] ? "done" : ""}" data-act="step" data-v="${k}"><span class="dot">${db.steps[k] ? ic("check") : ""}</span><span class="grow"><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div></details></div>
       <div class="sec"><div class="eyebrow">Para sa araw na ito</div><div class="tiles">
         <a class="tile" href="#/scene/${tip.id}/0" style="background:var(--peach)"><span class="bubble" style="color:var(--coral)">${ic("chat")}</span><span><b>${esc(tip.t)}</b><small>Ano ang sasabihin</small></span></a>
-        <a class="tile" href="#/funds" style="background:var(--sage)"><span class="bubble" style="color:var(--teal)">${ic("coin")}</span><span><b>Pondo</b><small>${db.funds.gifts.length ? `${peso(fundsRaised())} na ang nalikom` : "Gastos at tulong"}</small></span></a>
+        <a class="tile" href="${nextLesson ? `#/lesson/${nextLesson.id}/0` : "#/learn"}" style="background:var(--lav)"><span class="bubble" style="color:#7a68b0">${ic("book")}</span><span><b>${nextLesson ? esc(nextLesson.t) : "Mga aralin"}</b><small>${nextLesson ? `${nextLesson.m} minutong basa` : "Lahat ay nabasa na"}</small></span></a>
         <a class="tile" href="#/notes" style="background:var(--sun)"><span class="bubble" style="color:#b9862a">${ic("note")}</span><span><b>Talaan</b><small>${notes ? `${notes} na tala para sa doktor` : "Isulat ang napapansin"}</small></span></a>
-        <a class="tile" href="#/help/emergency" style="background:var(--rose)"><span class="bubble" style="color:var(--red)">${ic("phone")}</span><span><b>Emergency</b><small>911 · NCMH 1553</small></span></a></div></div>
-      <p class="small muted center" style="margin-top:26px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
+        <a class="tile" href="#/funds" style="background:var(--sage)"><span class="bubble" style="color:var(--teal)">${ic("coin")}</span><span><b>Pondo</b><small>${db.funds.gifts.length ? `${peso(fundsRaised())} na ang nalikom` : "Gastos at tulong"}</small></span></a></div></div>
+      <a class="quiethelp" href="#/help/emergency">${ic("phone")} Kailangan ng tulong agad? 911 · NCMH 1553</a>
+      <p class="small muted center" style="margin-top:18px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
+  }
+  function viewMoments() {
+    const list = [...db.moments].sort((a, b) => b.at - a.at);
+    return hero("home", "Kasama", "Magagandang sandali", "Ang maliliit na magandang nangyari. Basahin ito kapag pagod ka o mabigat ang araw.", { top: backBtn("#/", "Home") })
+      + `<div class="card lift" style="padding:4px 18px">${list.map(m => `<div class="note"><div class="row between"><span class="d">${dstr(m.at)}${m.idea ? ` · ${esc(m.idea)}` : ""}</span><button class="btn ghost sm" style="min-height:30px;padding:2px 8px" data-act="delmoment" data-v="${m.id}" aria-label="Burahin">${ic("x")}</button></div>${m.text ? `<div>${esc(m.text)}</div>` : ""}</div>`).join("")}</div>`;
   }
   function viewLearn() {
     const n = LESSONS.filter(l => db.lessons[l.id]).length;
@@ -704,7 +789,7 @@
       + `<div class="lift"><a class="bigcall" href="#/help/emergency"><span class="bubble">${ic("phone")}</span><span class="grow"><b style="font-size:21px">Emergency ngayon</b><span class="l">911 · NCMH 1553</span></span></a>
         <div style="margin-top:14px">${rowcard("#/appt", "cal", "b-sky", "Ang susunod na konsulta", apptDate() ? tlDate(apptDate()) : "Itakda ang petsa")}${rowcard("#/funds", "coin", "b-sage", "Pondo para sa gamutan", "Fundraising at mga programang makakatulong")}
         ${rowcard("#/help/where", "map", "b-sky", "Saan magpapatingin", "NCMH at malapit na ospital")}${rowcard("#/help/refuse/0", "hand", "b-peach", "Kung ayaw pa niya", "5 maikling hakbang")}
-        ${rowcard("#/plan/0", "shield", "b-sage", "Plano kung lumala", "Berde, dilaw, pula")}${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
+        ${rowcard("#/plan/0", "shield", "b-sage", "Plano para sa mabibigat na araw", "Berde, dilaw, pula")}${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
         ${rowcard("#/lesson/family/0", "chat", "b-lav", "Ipaliwanag sa pamilya niya", "May handang mensahe")}</div></div>`;
   }
   const SIGNS = ["Hindi natutulog nang ilang gabi", "Lumalayo sa lahat", "Mas maraming hinala o takot", "Nagsasalita o tumatawa nang mag-isa", "Hindi kumakain o naliligo", "Biglang galit o pagbabasag", "Gumagamit ng alak o droga", "Nagsasalita tungkol sa kamatayan"];
@@ -717,7 +802,7 @@
         <div class="chips" style="margin-top:10px">${SIGNS.map(x => `<button class="chip${p.signs.includes(x) ? " on" : ""}" data-act="psign" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
         <label class="f"><span>Iba pang senyales niya</span><input type="text" data-plan="other" value="${esc(p.other)}" placeholder="Hal. paulit-ulit na iisang kanta"></label>`,
       `<div class="row" style="gap:10px"><span class="bubble b-sun">${ic("spark")}</span><h2>Dilaw · ang gagawin</h2></div><p class="big" style="font-size:17px">Kapag nakita ang mga senyales, ano ang gagawin ninyo?</p>${fld("yellow", "Ang gagawin namin", "Hal. bawasan ang stress at bisita, tulungan siyang matulog, kausapin gamit ang LEAP, tumawag sa doktor")}`,
-      `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · krisis</h2></div><p class="big" style="font-size:17px">Kung may panganib sa buhay: 911, NCMH 1553, o emergency room.</p>${fld("hospital", "Pinakamalapit na ospital na may emergency room", "Pangalan at address", 2)}${fld("call", "Sino ang tatawagan, sa ganitong pagkakasunod", "Hal. Ana 0917…, Kuya 0918…", 2)}`,
+      `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · tulong agad</h2></div><p class="big" style="font-size:17px">Kung may panganib sa buhay: 911, NCMH 1553, o emergency room.</p>${fld("hospital", "Pinakamalapit na ospital na may emergency room", "Pangalan at address", 2)}${fld("call", "Sino ang tatawagan, sa ganitong pagkakasunod", "Hal. Ana 0917…, Kuya 0918…", 2)}`,
       `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · ang paghahanda</h2></div>${fld("stay", "Sino ang mananatili sa kanya", "", 2)}${fld("bring", "Dadalhin sa ospital", "Listahan ng gamot, ang Talaan, ID, PhilHealth, charger", 2)}`,
       `<span class="bubble b-teal" style="width:64px;height:64px;border-radius:20px">${ic("share")}</span><h2 style="margin-top:16px">Ibahagi sa pamilya</h2><p class="big">Ipadala ang plano para alam ng lahat ang gagawin. Kapag nagsimula na ang gamutan, ipakita rin ito sa doktor.</p>
         <button class="btn teal block" data-act="shareplan" style="margin-top:12px">${ic("share")} Ibahagi ang plano</button>`];
@@ -725,7 +810,7 @@
   }
   function planText() {
     const p = plan();
-    return `PLANO KUNG LUMALA · ${db.names.him || "(pangalan)"}\n\nBERDE (maayos siya). Ang nakakatulong:\n${p.green || "-"}\n\nDILAW (maagang senyales):\n${[...p.signs, p.other].filter(Boolean).map(x => "- " + x).join("\n") || "-"}\nAng gagawin namin:\n${p.yellow || "-"}\n\nPULA (krisis): 911 · NCMH Crisis Hotline 1553 (libre, 24 oras) · 0917-899-8727 · 0919-057-1553\nOspital: ${p.hospital || "-"}\nTatawagan: ${p.call || "-"}\nMananatili sa kanya: ${p.stay || "-"}\nDadalhin: ${p.bring || "-"}`;
+    return `PLANO KUNG LUMALA · ${db.names.him || "(pangalan)"}\n\nBERDE (maayos siya). Ang nakakatulong:\n${p.green || "-"}\n\nDILAW (maagang senyales):\n${[...p.signs, p.other].filter(Boolean).map(x => "- " + x).join("\n") || "-"}\nAng gagawin namin:\n${p.yellow || "-"}\n\nPULA (tulong agad): 911 · NCMH Crisis Hotline 1553 (libre, 24 oras) · 0917-899-8727 · 0919-057-1553\nOspital: ${p.hospital || "-"}\nTatawagan: ${p.call || "-"}\nMananatili sa kanya: ${p.stay || "-"}\nDadalhin: ${p.bring || "-"}`;
   }
   function viewNotes() {
     const list = [...db.notes].sort((a, b) => b.at - a.at);
@@ -742,7 +827,7 @@
       + `<div class="card lift"><textarea id="prep" style="min-height:380px;font-size:15px;box-shadow:none;background:transparent;padding:4px">${esc(prepText())}</textarea></div>
       <div class="row" style="margin-top:14px;gap:10px"><button class="btn teal" data-act="shareprep">${ic("share")} Ibahagi o kopyahin</button><a class="btn ghost" href="#/notes">Magdagdag ng tala</a></div>`;
   }
-  const CARE_TIPS = [["shield", "b-lav", "Hindi mo kasalanan.", "Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis."], ["hand", "b-peach", "Hatiin ang pasanin.", "Huwag iisa ang taong laging nagbabantay. Magpalitan."],
+  const CARE_TIPS = [["shield", "b-lav", "Hindi mo kasalanan.", "Hindi ang pamilya o ang girlfriend ang dahilan ng pinagdadaanan niya."], ["hand", "b-peach", "Hatiin ang pasanin.", "Huwag iisa ang taong laging nagbabantay. Magpalitan."],
     ["sun", "b-sun", "Matulog, kumain, lumabas.", "Hindi ka makakatulong kung ubos ka na."], ["leaf", "b-sage", "May sariling buhay ka pa rin.", "Okay lang magpahinga at mag-enjoy nang walang guilt."],
     ["phone", "b-rose", "Humingi ng tulong para sa sarili mo.", "Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist."], ["heart", "b-teal", "Hindi ka nag-iisa.", "May mga kaibigang handang tumulong. Hayaan ninyong tumulong sila."]];
   function viewCare(id) {
@@ -880,6 +965,7 @@
       <div class="sec"><div class="eyebrow">Phone na ito</div>${rowcard("#/intro/0", "info", "b-sun", "Paano gamitin", "Maikling gabay, 4 na pahina")}
         ${fam ? "" : `<button class="rowcard" data-act="sharewk"><span class="bubble b-sage">${ic("share")}</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
         ${isStandalone() ? "" : `<button class="rowcard" data-act="installsheet"><span class="bubble b-teal">${ic("download")}</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
+        ${fam ? `<a class="rowcard" href="#/pin${db.pin ? "" : "/new"}"><span class="bubble b-rose">${ic("shield")}</span><span class="grow">Private mode<small>${db.pin ? "Naka-on ang PIN" : "Lagyan ng PIN kung may ibang gumagamit ng phone"}</small></span><span class="chev">${ic("chev")}</span></a>` : ""}
         <button class="rowcard" data-act="switch"><span class="bubble b-lav">${ic("swap")}</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
         ${rowcard("#/about", "info", "b-sky", "Tungkol sa Kasama", "Saan galing ang mga gabay")}</div>
       <p class="small muted center" style="margin-top:18px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
@@ -887,9 +973,12 @@
   function viewAbout() {
     return hero("learn", "Kasama", "Tungkol sa app", "Ginawa para sa isang kaibigan at sa mga nagmamahal sa kanya.", { top: backBtn("#/", "Bumalik") })
       + `<p class="prose" style="margin-top:20px">Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
+      <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Sa space niya, walang label: tulog, musika, maliliit na plano.</div></div>
       <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small" style="line-height:1.6"><ul class="tight">
-        <li><b>Family psychoeducation:</b> ang pag-aaral ng pamilya tungkol sa kondisyon ay nagpapababa ng pagbabalik ng sintomas at pagkaka-ospital (Cochrane review: Pharoah et al.).</li>
-        <li><b>Expressed emotion:</b> ang batikos, galit at sobrang pakikialam sa bahay ay kaugnay ng mas madalas na pagbabalik (meta-analysis: Butzlaff &amp; Hooley, 1998).</li>
+        <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
+        <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
+        <li><b>Label at self-stigma:</b> ang paraan ng pagbanggit ng diagnosis ay nakakaapekto sa tingin ng tao sa sarili; ang self-stigma ay humaharang sa paggaling (pag-aaral sa first-episode psychosis, 2023; review sa self-stigma).</li>
+        <li><b>Mga pamilyang Pilipino:</b> ang hiya at stigma ay malalaking hadlang sa pagpapatingin; ang suporta ng pamilya ang pinakamalaking tulong (systematic review ng Filipino help-seeking, 2020). Kaya may Private mode at mga mensaheng hindi binabanggit ang diagnosis.</li>
         <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
         <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
         <li><b>Behavioural activation:</b> maliliit at regular na gawain para sa mababang motibasyon at pag-iisa.</li>
@@ -993,12 +1082,19 @@
     else if (a === "sleeptip") { sleepTip++; render(); }
     else if (a === "zoom") { db.zoom = +v; save(); render(); }
     else if (a === "sharefam") shareText("Tungkol sa kanya", $("#fammsg").value);
-    else if (a === "shareplan") shareText("Plano kung lumala", planText());
+    else if (a === "shareplan") shareText("Plano para sa mabibigat na araw", planText());
     else if (a === "psign") { const p = plan(), x = v; p.signs.includes(x) ? p.signs.splice(p.signs.indexOf(x), 1) : p.signs.push(x); el.classList.toggle("on"); save(); }
     else if (a === "installlater") closeInstall(true);
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
     else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Nakopya ang link. I-paste sa browser."), () => prompt("Kopyahin ang link:", u)); }
-    else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; save(); location.hash = "#/"; render(); }
+    else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; unlocked = false; save(); location.hash = "#/"; render(); }
+    else if (a === "connectskip") { connectSkip++; render(); }
+    else if (a === "connectdone") { db.connect[dayKey(Date.now())] = { t: connectToday()[0] }; save(); haptic([8, 30, 12]); render(); }
+    else if (a === "addmoment") { const text = $("#mtext").value.trim(); if (!text) { toast("Isulat kahit isang pangungusap"); return; } db.moments.push({ id: uid(), at: Date.now(), text, idea: db.connect[dayKey(Date.now())]?.t || "" }); save(); toast("Naitala. Salamat."); $("#mtext").value = ""; render(); }
+    else if (a === "delmoment") { if (!confirm("Burahin ito?")) return; db.moments = db.moments.filter(m => m.id !== v); save(); render(); }
+    else if (a === "pinkey") pinKey(v);
+    else if (a === "pinoff") { if (!confirm("Alisin ang PIN?")) return; delete db.pin; save(); toast("Inalis ang PIN"); location.hash = "#/settings"; }
+    else if (a === "pinforgot") { if (!confirm("Hindi mababawi ang PIN. Para makapasok ulit, kailangang burahin ang LAHAT ng nasa app na ito sa phone na ito. Burahin?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
     else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next + "/0" : "#/learn"; }
     else if (a === "pick") { const i = pq % PRACTICE.length; db.practice[i] = +v; save(); render(); }
