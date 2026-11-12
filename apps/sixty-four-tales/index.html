@@ -176,7 +176,11 @@
     .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,14,8,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
     .sheet { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 18px); box-shadow: var(--e3); animation: sheetup .45s var(--spring) both; }
     .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
-    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 8px 0; }
+    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 9px 0; line-height: 1.45; }
+    .ios-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--paper); border: 1px solid var(--line2); vertical-align: -7px; color: #2f7bf6; }
+    .ios-ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .installcard { display: flex; align-items: center; gap: 14px; width: 100%; margin-top: 26px; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+    .installcard img { border-radius: 12px; flex: none; } .installcard b { display: block; font: 500 18px var(--serif); } .installcard .i { color: var(--muted); }
     .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--paper); padding: 11px 18px; border-radius: 999px; font: 550 14.5px var(--sans); box-shadow: var(--e2); animation: rise .3s var(--spring) both; max-width: calc(100% - 40px); text-align: center; }
     .opts { display: flex; gap: 8px; flex-wrap: wrap; }
     .loading { padding: 80px 0; text-align: center; color: var(--muted); font-family: var(--serif); font-style: italic; }
@@ -277,6 +281,7 @@
           <p class="small muted" style="margin:4px 0 0">${due ? `${due} practice card${due === 1 ? "" : "s"} due today.` : "Learn a tale, then practise it until you can tell it without looking."}</p></div></div>
         ${next ? `<a class="item" href="#/h/${next.n}" style="margin-top:10px">${glyph(next.n)}<div><div class="eyebrow" style="font-size:10.5px">Next to learn</div><div class="t">${esc(next.tale.title)}</div><div class="m">${next.n} · ${esc(next.name)}</div></div><span class="n">${ic("chev")}</span></a>` : ""}
         ${due ? `<a class="btn block" href="#/practice" style="margin-top:10px">${ic("cards")} Practise ${due} card${due === 1 ? "" : "s"}</a>` : ""}</div>
+      ${isStandalone() ? "" : `<button class="card installcard" data-act="installsheet"><img src="icons/icon-192.png" alt="" width="46" height="46"><span class="grow"><b>Install on your phone</b><span class="small muted">One tap to open, and every tale works offline.</span></span>${ic("chev")}</button>`}
       ${db.log.length ? `<div class="sec"><div class="eyebrow">Last told</div>${[...db.log].sort((a, b) => b.at - a.at).slice(0, 2).map(entryHTML).join("")}</div>` : ""}`;
   }
 
@@ -436,33 +441,48 @@
         <p style="margin:0">Your learned tales, practice cards and journal stay on this device.</p></div></div>
       <p class="small muted center" style="margin-top:22px">Sixty-Four Tales · v${VER}<br>Font: Newsreader (SIL Open Font License)</p>`;
   }
-  const VER = "1";
+  const VER = "2";
 
-  /* ---------- Install prompt ---------- */
+  /* ---------- Install: one tap on Android Chrome; step by step on iPhone; open in a real browser first
+     when the link was opened inside Messenger, Facebook, Instagram or Viber (they cannot install apps). ---------- */
   let deferredInstall = null;
+  const UA = navigator.userAgent;
   const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(UA);
+  const inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Viber|Line\/|MicroMessenger|Snapchat|TikTok|; wv\)/i.test(UA);
+  const iosOtherBrowser = isIOS && /CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA);
   const SNOOZE = "sixty-four-tales-install-snooze";
   const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  const IC = { share: `<span class="ios-ic"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg></span>`,
+    plus: `<span class="ios-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>`,
+    dots: `<span class="ios-ic"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span>`,
+    vdots: `<span class="ios-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></span>` };
   function installBody() {
-    if (deferredInstall) return `<button class="btn ember block" data-act="install">Install the app</button>`;
-    if (isIOS) return `<ol class="steps"><li>Tap <b>Share</b> in Safari’s toolbar.</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`;
-    if (isAndroid) return `<ol class="steps"><li>Tap the <b>⋮</b> menu at the top right of Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li></ol>`;
+    if (deferredInstall) return `<button class="btn ember block" data-act="install" style="min-height:52px">Install Sixty-Four Tales</button>`;
+    const copy = b => `<button class="btn block" data-act="copylink" style="margin-top:4px">Or copy the link and paste it into ${b}</button>`;
+    if (inApp && isIOS) return `<p class="small" style="margin:0 0 4px"><b>This is open inside another app</b> (Messenger, Facebook or Instagram), which cannot install apps. Open it in Safari first:</p>
+      <ol class="steps"><li>Tap ${IC.dots} or <b>Share</b> ${IC.share} at the top or bottom of the screen.</li><li>Choose <b>Open in Safari</b> (or <b>Open in browser</b>).</li><li>In Safari, this guide comes back with the next step.</li></ol>${copy("Safari")}`;
+    if (inApp) return `<p class="small" style="margin:0 0 4px"><b>This is open inside another app</b> (Messenger, Facebook or Instagram), which cannot install apps. Open it in Chrome first:</p>
+      <ol class="steps"><li>Tap ${IC.vdots} at the top right.</li><li>Choose <b>Open in Chrome</b> (or <b>Open in browser</b>).</li><li>In Chrome, tap <b>Install</b> here.</li></ol>${copy("Chrome")}`;
+    if (isIOS) return `<ol class="steps"><li>${iosOtherBrowser ? "It is easiest in <b>Safari</b>. In this browser, find" : "Tap"} <b>Share</b> ${IC.share} ${iosOtherBrowser ? "in the address bar or menu." : "at the bottom of the screen (at the top on iPad)."}</li>
+      <li>Scroll down and tap <b>Add to Home Screen</b> ${IC.plus}.</li><li>Tap <b>Add</b> at the top right.</li>
+      <li>Open Sixty-Four Tales from your home screen, not from Safari, so it works as an app and offline.</li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li>Tap ${IC.vdots} at the top right of Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Tap <b>Install</b>.</li></ol>`;
     return `<ol class="steps"><li>Click the <b>install</b> icon at the right of the address bar,</li><li>or choose <b>Install Sixty-Four Tales</b> in the browser menu.</li></ol>`;
   }
   function showInstall(force) {
-    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    if (isStandalone() || $(".sheet-back") || $("#tell") || (!force && snoozed())) return;
     const back = document.createElement("div"); back.className = "sheet-back";
     back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
       <div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="64" height="64" style="border-radius:16px;box-shadow:var(--e2)">
-        <div><div class="eyebrow">Free · works offline</div><h2>Install Sixty-Four Tales</h2></div></div>
-      <p class="muted" style="margin:14px 0 16px">Keep all sixty-four tales on your phone, ready for the moment you need one, even without a connection.</p>
+        <div><div class="eyebrow">Free · works offline · private</div><h2>Keep the tales with you</h2></div></div>
+      <p class="muted" style="margin:14px 0 12px">Install it on your home screen: all sixty-four tales open in one tap, even with no signal, ready for the moment someone needs one.</p>
       <div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
     back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
     document.body.appendChild(back);
   }
-  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} if (route().v === "today" || route().v === "about") render(); }
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
   addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed. Open it from your home screen."); });
   const applyTheme = () => db.theme === "auto" ? document.documentElement.removeAttribute("data-theme") : (document.documentElement.dataset.theme = db.theme);
@@ -490,6 +510,7 @@
     else if (a === "dellog") { if (!confirm("Delete this entry?")) return; db.log = db.log.filter(x => x.id !== v); save(); render(); }
     else if (a === "theme") { db.theme = v; save(); applyTheme(); render(); }
     else if (a === "installsheet") showInstall(true);
+    else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Link copied. Paste it into your browser."), () => prompt("Copy the link:", u)); }
     else if (a === "installlater") closeInstall(true);
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
   });
@@ -502,7 +523,7 @@
 
   /* ---------- Start ---------- */
   applyTheme();
-  fetch("data/tales.json").then(r => r.json()).then(d => { T = d; render(); if (Object.keys(db.seen).length >= 2) setTimeout(() => showInstall(false), 2500); })
+  fetch("data/tales.json").then(r => r.json()).then(d => { T = d; render(); setTimeout(() => showInstall(false), 4000); })
     .catch(() => { $("#main").innerHTML = `<div class="loading">The tales could not be loaded. Check your connection and reload.</div>`; });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 })();
