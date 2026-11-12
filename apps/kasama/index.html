@@ -213,6 +213,21 @@
     ol.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); font: 700 13px/26px var(--sans); text-align: center; margin-top: 1px; }
     .ios-ic { display: inline-flex; vertical-align: -5px; width: 22px; height: 22px; border-radius: 6px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line2); align-items: center; justify-content: center; color: #1a73e8; margin: 0 2px; }
     .ios-ic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Bite-sized steps: one idea per screen */
+    .stephead { position: relative; margin: 0 -20px; padding: calc(env(safe-area-inset-top) + 16px) 20px 22px; border-radius: 0 0 30px 30px; }
+    .stephead h2 { font-size: 26px; margin-top: 4px; }
+    .bar { height: 6px; border-radius: 6px; background: var(--line2); overflow: hidden; margin: 18px 4px 14px; } .bar i { display: block; height: 100%; background: var(--teal); border-radius: 6px; transition: width .4s var(--ease); }
+    .stepcard { padding: 24px 22px; min-height: 230px; }
+    .big { font-size: 19.5px; line-height: 1.62; color: var(--ink); margin: 6px 0; text-wrap: pretty; }
+    .stepcard .say { margin-right: 0; font-size: 18.5px; } .stepcard .avoid { font-size: 17px; }
+    .stepnav { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; } .stepnav .btn, .nextstep .row .btn { flex: 1; min-height: 56px; font-size: 16.5px; white-space: nowrap; padding: 12px 14px; } .stepnav .btn svg { width: 18px; height: 18px; }
+    .bigcall { display: flex; align-items: center; gap: 16px; width: 100%; padding: 20px; border-radius: 24px; text-decoration: none; color: #fff; background: var(--red); box-shadow: 0 10px 26px color-mix(in srgb, var(--red) 30%, transparent); }
+    .bigcall + .bigcall { margin-top: 12px; } .bigcall b { display: block; font: 700 28px var(--sans); letter-spacing: .02em; } .bigcall span.l { display: block; font-size: 14.5px; opacity: .92; }
+    .bigcall .bubble { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; } .bigcall.teal { background: var(--teal); box-shadow: 0 10px 26px color-mix(in srgb, var(--teal) 30%, transparent); }
+    @media (prefers-color-scheme: dark) { .bigcall { color: #1a0f0e; } .bigcall .bubble { color: #1a0f0e; background: rgba(0,0,0,.12); } }
+    details.more { margin-top: 14px; } details.more > summary { list-style: none; cursor: pointer; font: 650 15px var(--sans); color: var(--teal); padding: 10px 4px; }
+    details.more > summary::-webkit-details-marker { display: none; } details.more > summary::before { content: "+ "; } details.more[open] > summary::before { content: "\2212  "; }
+    .nextstep { border: 2px solid var(--teal); } .nextstep .row .btn { flex: 1; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
@@ -221,7 +236,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "4", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "5", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -485,28 +500,51 @@
     ["Kung gusto kong kumausap ng doktor", "doctor"],
   ];
 
-  const crisisHTML = (title = "Kung may panganib ngayon") => `<div class="crisis"><div class="row" style="gap:10px"><span class="bubble b-rose" style="width:40px;height:40px">${ic("shield")}</span><h3>${title}</h3></div>
-    <p class="small" style="margin:10px 0 4px;color:var(--ink2)">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Ang NCMH line ay para rin sa pamilya: puwede kayong tumawag para humingi ng payo.</p>
-    ${CRISIS.map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div>`;
-
+  const crisisHTML = () => `<a class="bigcall" href="tel:911"><span class="bubble">${ic("phone")}</span><span class="grow"><b>911</b><span class="l">Emergency: may panganib sa buhay ngayon</span></span></a>
+    <a class="bigcall teal" href="tel:1553"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH Crisis Hotline · libre, 24 oras · para rin sa pamilya</span></span></a>
+    <details class="more"><summary>Ibang numero ng NCMH (cellphone)</summary><div class="crisis" style="margin-top:6px">${CRISIS.slice(2).map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div></details>`;
   /* ---------- Routing ---------- */
   let lastHash = "";
-  function route() { const h = (location.hash || "#/").slice(2).split("/"); return { v: h[0] || "home", id: h[1] }; }
+  function route() { const h = (location.hash || "#/").slice(2).split("/"); return { v: h[0] || "home", id: h[1], n: +(h[2] || 0) }; }
   function render() {
-    const { v, id } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    const { v, id, n } = route(), h = location.hash || "#/", nav = h !== lastHash;
     let html;
-    if (!db.space) html = viewChoose(); else if (db.space === "family") html = familyView(v, id); else html = himView(v, id);
+    if (!db.space) html = viewChoose(); else if (v === "intro") html = viewIntro(+id || 0); else if (db.space === "family") html = familyView(v, id, n); else html = himView(v, id, n);
     if (html == null) return;
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
-    tabs(v); if (nav) scrollTo(0, 0); lastHash = h; afterRender(v, id);
+    if (lastHash.startsWith("#/intro") && v !== "intro") setTimeout(() => showInstall(false), 1500); /* offer install once the intro is done */
+    tabs(v); if (nav) scrollTo(0, 0); lastHash = h; afterRender(v, id); applyZoom();
   }
   addEventListener("hashchange", render);
   function tabs(v) {
     const t = $("#tabs"); if (!db.space) { t.hidden = true; return; } t.hidden = false;
     const items = db.space === "family" ? [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]]
       : [["home", "sun", "Today"], ["sleep", "moon", "Tulog"], ["music", "music", "Music"], ["calm", "wave", "Kalma"]];
-    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", plan: "help", settings: "home", about: "home" }[v] || v;
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", plan: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
     t.innerHTML = items.map(([k, i, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
+  }
+  /* One idea per screen, with big Back and Next buttons. Each step has its own address, so the phone's
+     own back button goes to the previous card. */
+  function stepper({ k = "learn", kicker, title, back, cards, i = 0, base, finish }) {
+    i = Math.max(0, Math.min(cards.length - 1, i)); const last = i === cards.length - 1;
+    return `<div class="stephead" style="background:var(--h-${k})">${backBtn(back[0], back[1])}<div class="eyebrow" style="margin-top:16px">${kicker}</div><h2>${title}</h2></div>
+      <div class="bar" aria-label="${i + 1} sa ${cards.length}"><i style="width:${(i + 1) / cards.length * 100}%"></i></div>
+      <div class="small muted" style="margin:0 6px 10px">${i + 1} sa ${cards.length}</div>
+      <div class="card stepcard">${cards[i]}</div>
+      <div class="stepnav">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")} Bumalik</a>` : ""}${last ? finish : `<a class="btn teal" href="${base}/${i + 1}">Susunod ${ic("chev")}</a>`}</div>`;
+  }
+  const INTRO = {
+    family: [["heart", "b-peach", "Para sa inyo ang app na ito", "Para sa girlfriend, pamilya at mga kaibigan niya. Maiikli ang bawat pahina; basahin kapag may oras."],
+      ["home", "b-sage", "Ang mga button sa ibaba", "Home, Unawain (mga aralin), Kausapin (ano ang sasabihin), Tulong (mga numero at plano), at Para sa ’yo. Pindutin para lumipat."],
+      ["phone", "b-rose", "Kung may emergency", "Pindutin ang Tulong, tapos ang pulang button. Isang pindot lang ang tawag sa 911 o sa NCMH 1553."],
+      ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Walang ipinapadala kahit saan."]],
+    him: [["sun", "b-sun", "Para sa mga araw mo", "Maliliit na plano, tulog, gitara, at mga paraan para kumalma. Walang pressure."],
+      ["check", "b-teal", "Pindutin ang bilog", "Para markahan ang nagawa mo ngayong araw. Kahit isa lang, sapat na."],
+      ["music", "b-peach", "Ang mga button sa ibaba", "Today, Tulog, Music at Kalma. Pindutin para lumipat."],
+      ["shield", "b-lav", "Para sa ’yo lang", "Lahat ng isusulat mo ay nasa phone mo lang. Ikaw ang bahala kung may ibabahagi ka."]] };
+  function viewIntro(i) {
+    const cards = INTRO[db.space].map(([icn, b, t, d]) => `<span class="bubble ${b}" style="width:64px;height:64px;border-radius:20px">${ic(icn)}</span><h2 style="margin-top:18px">${t}</h2><p class="big">${d}</p>`);
+    return stepper({ k: db.space === "family" ? "home" : "today", kicker: "Paano gamitin", title: "Kasama", back: ["#/", "Laktawan"], cards, i, base: "#/intro", finish: `<a class="btn teal" href="#/">Simulan ${ic("chev")}</a>` });
   }
   function viewChoose() {
     return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
@@ -517,61 +555,61 @@
   }
 
   /* ---------- Family views ---------- */
-  function familyView(v, id) {
-    if (v === "learn") return viewLearn(); if (v === "lesson") return viewLesson(id); if (v === "talk") return viewTalk(); if (v === "scene") return viewScene(id);
-    if (v === "practice") return viewPractice(); if (v === "help") return viewHelp(); if (v === "prep") return viewPrep(); if (v === "care") return viewCare();
-    if (v === "notes") return viewNotes(); if (v === "plan") return viewPlan(); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+  function familyView(v, id, n) {
+    if (v === "learn") return viewLearn(); if (v === "lesson") return viewLesson(id, n); if (v === "talk") return viewTalk(); if (v === "scene") return viewScene(id, n);
+    if (v === "practice") return viewPractice(); if (v === "help") return viewHelp(id); if (v === "prep") return viewPrep(); if (v === "care") return viewCare(id);
+    if (v === "notes") return viewNotes(); if (v === "plan") return viewPlan(+id || 0); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
     return viewFamilyHome();
   }
+  const STEP_HOW = { learn: "#/learn", consult: "#/help/where", notes: "#/notes", talk: "#/scene/leap/0", book: "#/help/where", go: "#/prep", plan: "#/plan/0" };
   function viewFamilyHome() {
-    const done = STEPS.filter(s => db.steps[s[0]]).length, notes = db.notes.length, read = Object.keys(db.lessons).length;
+    const done = STEPS.filter(s => db.steps[s[0]]).length, next = STEPS.find(s => !db.steps[s[0]]), ni = next ? STEPS.indexOf(next) : -1, notes = db.notes.length, read = Object.keys(db.lessons).length;
     const tip = SCENES[1 + Math.floor(Date.now() / DAY) % (SCENES.length - 1)];
     return hero("home", "Kasama · para sa pamilya", "Hindi kayo nag-iisa dito.", db.names.him ? `Para kay ${esc(db.names.him)}, at para sa inyo.` : "Isang hakbang sa isang araw.", { top: gearBtn() })
-      + `<div class="card lift"><div class="row between"><div class="eyebrow" style="color:var(--teal)">Pinakamahalaga ngayon</div><span class="small muted">${done}/${STEPS.length}</span></div>
-        <h2 style="margin-top:6px">Tulungan siyang makarating sa psychiatrist</h2>
-        <p class="small muted" style="margin:6px 0 0">Mas maaga ang gamutan, mas maganda ang paggaling.</p><div class="meter"><i style="width:${done / STEPS.length * 100}%"></i></div>
-        <div class="path" style="margin-top:12px">${STEPS.map(([k, t, d]) => `<button class="${db.steps[k] ? "done" : ""}" data-act="step" data-v="${k}"><span class="dot">${db.steps[k] ? ic("check") : ""}</span><span class="grow"><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div>
-        ${done === STEPS.length ? `<div class="key" style="margin-bottom:0">Napakagaling. Ang susunod: alamin mula sa doktor kung paano kayo makakatulong, at bantayan ang tulog niya.</div>` : ""}</div>
+      + `<div class="card lift nextstep">${next ? `<div class="row between"><div class="eyebrow" style="color:var(--teal)">Ang susunod na hakbang</div><span class="small muted">${ni + 1} sa ${STEPS.length}</span></div>
+          <h2 style="margin-top:6px">${next[1]}</h2><p class="big" style="font-size:17px;color:var(--ink2)">${next[2]}</p>
+          <div class="row" style="gap:10px;margin-top:14px"><a class="btn" href="${STEP_HOW[next[0]]}">Paano?</a><button class="btn teal" data-act="step" data-v="${next[0]}">${ic("check")} Tapos na</button></div>`
+        : `<div class="eyebrow" style="color:var(--teal)">Lahat ng hakbang ay tapos na</div><h2 style="margin-top:6px">Napakagaling.</h2><p class="big" style="font-size:17px;color:var(--ink2)">Ang susunod: alamin mula sa doktor kung paano kayo makakatulong, at bantayan ang tulog niya.</p>`}
+        <div class="meter" style="margin-top:16px"><i style="width:${done / STEPS.length * 100}%"></i></div>
+        <details class="more"><summary>Tingnan lahat ng ${STEPS.length} hakbang</summary><div class="path">${STEPS.map(([k, t, d]) => `<button class="${db.steps[k] ? "done" : ""}" data-act="step" data-v="${k}"><span class="dot">${db.steps[k] ? ic("check") : ""}</span><span class="grow"><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div></details></div>
       <div class="sec"><div class="eyebrow">Para sa araw na ito</div><div class="tiles">
-        <a class="tile" href="#/scene/${tip.id}" style="background:var(--peach)"><span class="bubble" style="color:var(--coral)">${ic("chat")}</span><span><b>${esc(tip.t)}</b><small>Script para ngayon</small></span></a>
+        <a class="tile" href="#/scene/${tip.id}/0" style="background:var(--peach)"><span class="bubble" style="color:var(--coral)">${ic("chat")}</span><span><b>${esc(tip.t)}</b><small>Ano ang sasabihin</small></span></a>
         <a class="tile" href="#/learn" style="background:var(--sage)"><span class="bubble" style="color:var(--teal)">${ic("book")}</span><span><b>Unawain</b><small>${read ? `${read} sa ${LESSONS.length} nabasa` : `${LESSONS.length} maiikling aralin`}</small></span></a>
         <a class="tile" href="#/notes" style="background:var(--sun)"><span class="bubble" style="color:#b9862a">${ic("note")}</span><span><b>Talaan</b><small>${notes ? `${notes} na tala para sa doktor` : "Isulat ang napapansin"}</small></span></a>
-        <a class="tile" href="#/help" style="background:var(--rose)"><span class="bubble" style="color:var(--red)">${ic("phone")}</span><span><b>Kung may krisis</b><small>911 · NCMH 1553</small></span></a></div></div>
+        <a class="tile" href="#/help/emergency" style="background:var(--rose)"><span class="bubble" style="color:var(--red)">${ic("phone")}</span><span><b>Emergency</b><small>911 · NCMH 1553</small></span></a></div></div>
       <p class="small muted center" style="margin-top:26px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
   }
   function viewLearn() {
     const n = LESSONS.filter(l => db.lessons[l.id]).length;
     return hero("learn", "Unawain", "Ano ang nararanasan niya", `${n ? `${n} sa ${LESSONS.length} na aralin ang nabasa.` : "Maiikling aralin, 2–3 minuto bawat isa."} Pinakamaganda kung basahin ng buong pamilya.`)
-      + `<div class="lift">${LESSONS.map((l, i) => `<a class="rowcard" href="#/lesson/${l.id}"><span class="bubble ${db.lessons[l.id] ? "b-teal" : "b-sage"}" style="font:600 16px var(--display)">${db.lessons[l.id] ? ic("check") : i + 1}</span><span class="grow">${esc(l.t)}<small>${l.m} minutong basa</small></span><span class="chev">${ic("chev")}</span></a>`).join("")}</div>`;
+      + `<div class="lift">${LESSONS.map((l, i) => `<a class="rowcard" href="#/lesson/${l.id}/0"><span class="bubble ${db.lessons[l.id] ? "b-teal" : "b-sage"}" style="font:600 16px var(--display)">${db.lessons[l.id] ? ic("check") : i + 1}</span><span class="grow">${esc(l.t)}<small>${l.m} minutong basa</small></span><span class="chev">${ic("chev")}</span></a>`).join("")}</div>`;
   }
-  function viewLesson(id) {
+  function viewLesson(id, n) {
     const i = LESSONS.findIndex(l => l.id === id), l = LESSONS[i]; if (!l) { location.hash = "#/learn"; return null; }
     const next = LESSONS[i + 1];
-    return hero("learn", `Aralin ${i + 1} sa ${LESSONS.length} · ${l.m} minuto`, esc(l.t), "", { top: backBtn("#/learn", "Unawain") })
-      + `<div class="dots" style="margin-top:18px">${LESSONS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
-      <div class="prose">${l.body.map(p => `<p>${esc(p)}</p>`).join("")}</div><div class="key">${esc(l.key)}</div>
-      ${l.share ? `<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="color:var(--teal)">Mensaheng puwedeng ipadala</div><textarea id="fammsg" style="min-height:300px;margin-top:10px;font-size:15px">${esc(familyMsg())}</textarea>
-        <button class="btn teal block" data-act="sharefam" style="margin-top:10px">${ic("share")} Ipadala sa pamilya</button></div>` : ""}
-      <button class="btn teal block" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${db.lessons[l.id] ? "Nabasa na" : "Naintindihan ko"}${next ? " · Susunod" : ""}</button>`;
+    const cards = [...l.body.map(p => `<p class="big">${esc(p)}</p>`), `<div class="eyebrow" style="color:var(--teal)">Tandaan</div><div class="key" style="margin:12px 0 0">${esc(l.key)}</div>`];
+    if (l.share) cards.push(`<div class="eyebrow" style="color:var(--teal)">Mensaheng puwedeng ipadala</div><textarea id="fammsg" style="min-height:280px;margin-top:10px;font-size:15.5px">${esc(familyMsg())}</textarea>
+      <button class="btn teal block" data-act="sharefam" style="margin-top:12px">${ic("share")} Ipadala sa pamilya</button>`);
+    return stepper({ k: "learn", kicker: `Aralin ${i + 1} sa ${LESSONS.length}`, title: esc(l.t), back: ["#/learn", "Unawain"], cards, i: n, base: `#/lesson/${l.id}`,
+      finish: `<button class="btn teal" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${ic("check")} Tapos na</button>` });
   }
   const familyMsg = () => `Gusto ko lang ibahagi ang nalaman namin tungkol sa nangyayari kay ${db.names.him || "(pangalan)"}.\n\nAyon sa mga doktor at pananaliksik, ang pinagdadaanan niya ay tinatawag na psychosis: isang medikal na kondisyon ng utak, hindi kahinaan, katamaran, o pag-iinarte. Kaya siya hirap matulog, nagagalit, may mga hinala, at tumigil sa pagtugtog. Hindi niya ito pinili.\n\nNagagamot ito, at mas maganda ang paggaling kapag maaga ang gamutan at kalmado at suportado ang pamilya.\n\nPaano tayo makakatulong:\n- Mahinahong pakikipag-usap; walang sermon, sigawan o pagkukumpara.\n- Huwag pagtalunan ang mga hinala niya; damayan ang takot niya.\n- Tulungan siyang makapagpatingin sa psychiatrist.\n- Iwasan ang alak at droga sa paligid niya.\n\nKung may emergency: 911, o NCMH Crisis Hotline 1553 (libre, 24 oras). Puwede ring tumawag ang pamilya para humingi ng payo.\n\nSalamat sa pagmamahal ninyo sa kanya.`;
   function viewTalk() {
     const p = Object.keys(db.practice).length;
     return hero("talk", "Kausapin", "Paano makipag-usap sa kanya", "Hindi kailangang perpekto. Ang mahalaga ay mahinahon at may pagdamay.")
-      + `<div class="lift">${SCENES.map(s => rowcard(`#/scene/${s.id}`, s.id === "leap" ? "spark" : s.danger ? "shield" : "chat", s.id === "leap" ? "b-teal" : s.danger ? "b-rose" : "b-peach", esc(s.t), esc(s.sit || "Basahin muna ito"))).join("")}</div>
+      + `<div class="lift">${SCENES.map(s => rowcard(`#/scene/${s.id}/0`, s.id === "leap" ? "spark" : s.danger ? "shield" : "chat", s.id === "leap" ? "b-teal" : s.danger ? "b-rose" : "b-peach", esc(s.t), esc(s.sit || "Basahin muna ito"))).join("")}</div>
       <div class="sec"><a class="tile" href="#/practice" style="background:var(--teal);color:#fff;min-height:0;flex-direction:row;align-items:center;gap:14px"><span class="bubble" style="color:var(--teal);background:#fff">${ic("spark")}</span>
         <span class="grow"><b style="color:#fff">Mag-ensayo: ${PRACTICE.length} sitwasyon</b><small style="color:rgba(255,255,255,.85)">Mas madaling maalala kapag na-ensayo na.${p ? ` ${p} na ang nasagot mo.` : ""}</small></span></a></div>`;
   }
-  function viewScene(id) {
+  function viewScene(id, n) {
     const s = SCENES.find(x => x.id === id); if (!s) { location.hash = "#/talk"; return null; }
-    if (s.steps) return hero("talk", "Ang paraan", esc(s.t), "", { top: backBtn("#/talk", "Kausapin") }) + `<p class="prose" style="margin-top:18px">${esc(s.intro)}</p>
-      <div class="steps-big">${s.steps.map(([h, d], i) => `<div class="card"><div class="num">HAKBANG ${i + 1}</div><h3>${esc(h)}</h3><p style="margin:8px 0 0;color:var(--ink2)">${esc(d)}</p></div>`).join("")}</div>
-      <div class="key">${esc(s.key)}</div><p class="small muted">Mula sa aklat na “I Am Not Sick, I Don’t Need Help!” ni Xavier Amador.</p>`;
-    return hero("talk", "Sitwasyon", esc(s.t), esc(s.sit), { top: backBtn("#/talk", "Kausapin") })
-      + `${s.danger ? `<div class="warn" style="margin-top:18px"><b>Kung may panganib</b> sa kanya o sa iba: tumawag sa 911 o NCMH 1553. <a href="#/help">Mga numero</a></div>` : ""}
-      <div class="sec"><div class="eyebrow">Iwasan</div><div class="card" style="padding:6px 18px">${s.avoid.map(a => `<div class="avoid"><span class="x">${ic("x")}</span><span>${esc(a)}</span></div>`).join("")}</div></div>
-      <div class="sec"><div class="eyebrow">Subukan sabihin</div>${s.say.map(a => `<div class="say">${esc(a)}</div>`).join("")}</div>
-      <div class="key" style="font-weight:500;font-size:16px">${esc(s.why)}</div>`;
+    const cards = s.steps ? [`<p class="big">${esc(s.intro)}</p>`, ...s.steps.map(([h, d], i) => `<div class="num">HAKBANG ${i + 1} SA 4</div><h2 style="margin-top:6px">${esc(h)}</h2><p class="big">${esc(d)}</p>`),
+        `<div class="eyebrow" style="color:var(--teal)">Tandaan</div><div class="key" style="margin:12px 0">${esc(s.key)}</div><p class="small muted">Mula sa aklat na “I Am Not Sick, I Don’t Need Help!” ni Xavier Amador.</p>`]
+      : [`<div class="eyebrow">Ang sitwasyon</div><p class="big">${esc(s.sit)}</p>${s.danger ? `<div class="warn"><b>Kung may panganib</b> sa kanya o sa iba: tumawag sa 911 o NCMH 1553. <a href="#/help/emergency">Mga numero</a></div>` : ""}`,
+        `<div class="eyebrow" style="color:var(--teal)">Subukan sabihin</div>${s.say.map(a => `<div class="say">${esc(a)}</div>`).join("")}`,
+        `<div class="eyebrow" style="color:var(--coral)">Iwasan</div>${s.avoid.map(a => `<div class="avoid"><span class="x">${ic("x")}</span><span>${esc(a)}</span></div>`).join("")}`,
+        `<div class="eyebrow">Bakit</div><p class="big">${esc(s.why)}</p>`];
+    return stepper({ k: "talk", kicker: s.steps ? "Ang paraan" : "Ano ang sasabihin", title: esc(s.t), back: ["#/talk", "Kausapin"], cards, i: n, base: `#/scene/${s.id}`, finish: `<a class="btn teal" href="#/talk">${ic("check")} Tapos</a>` });
   }
   let pq = 0;
   function viewPractice() {
@@ -583,37 +621,43 @@
       <div class="fb" id="fb">${ans != null ? esc(q.o[ans][2]) + (q.o[ans][1] ? "" : " " + esc(q.o.find(o => o[1])[2])) : ""}</div>
       <div class="row between" style="margin-top:20px"><button class="btn ghost sm" data-act="pqreset">Ulitin lahat</button><button class="btn teal sm" data-act="pqnext">Susunod</button></div>`;
   }
-  function viewHelp() {
-    return hero("help", "Tulong", "Paano siya madadala sa tulong", "Hakbang-hakbang, kasama ang mga numerong puwedeng tawagan.")
-      + `<div class="lift">${crisisHTML()}</div>
-      <div class="sec"><div class="eyebrow">Para sa konsulta (hindi emergency)</div>
-        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sky">${ic("map")}</span><div class="grow"><h3>National Center for Mental Health</h3><p class="small" style="margin:6px 0">9 De Pebrero St., Mauway, Mandaluyong City. Adult outpatient: <a href="tel:0285319001">(02) 8531-9001</a> local 302, Lunes–Biyernes, 8am–5pm.</p>
-          <p class="small muted" style="margin:0">Tumawag muna para kumpirmahin ang schedule, bayad at kung tumatanggap ng walk-in. Maghanda ng kalahating araw.</p></div></div></div>
-        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sage">${ic("heart")}</span><div class="grow"><h3>Malapit na ospital</h3><p class="small" style="margin:6px 0 0">Maraming government at private hospital ang may Department of Psychiatry o psychiatrist sa OPD. Itanong sa pinakamalapit na ospital o barangay health center kung saan ang pinakamalapit na psychiatrist, at kung may PhilHealth coverage.</p></div></div></div>
-        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-peach">${ic("hand")}</span><div class="grow"><h3>Kung ayaw pa niya</h3><ul class="tight small"><li>Kayo muna ang kumonsulta sa psychiatrist para sa gabay.</li><li>Gamitin ang LEAP: tungkol sa tulog, stress o pagod, hindi sa “sakit.” <a href="#/scene/refuse">Mga script</a></li><li>Isama ang taong pinakapinagkakatiwalaan niya.</li><li>Huwag gumamit ng panlilinlang; kailangan ninyo ang tiwala niya.</li><li>Kung may panganib sa buhay niya o ng iba: emergency na ito.</li></ul></div></div></div></div>
-      <div class="sec"><div class="eyebrow">Paghahanda</div>${rowcard("#/plan", "shield", "b-sage", "Plano kung lumala", "Berde, dilaw, pula: mga senyales, ang gagawin, sino ang tatawagan")}
-        ${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
-        ${rowcard("#/lesson/family", "chat", "b-peach", "Ipaliwanag sa pamilya niya", "Mensaheng handa nang ipadala")}
-        <button class="rowcard" data-act="sharecrisis"><span class="bubble b-rose">${ic("share")}</span><span class="grow">Ibahagi ang crisis numbers<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button></div>`;
+  function viewHelp(id) {
+    if (id === "emergency") return hero("help", "Tulong", "Emergency", "Pindutin para tumawag.", { top: backBtn("#/help", "Tulong") })
+      + `<div class="lift">${crisisHTML()}</div><div class="card" style="margin-top:16px"><p class="big" style="font-size:17px;margin:0">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal.</p></div>
+      <button class="rowcard" data-act="sharecrisis" style="margin-top:12px"><span class="bubble b-rose">${ic("share")}</span><span class="grow">Ibahagi ang mga numero<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button>`;
+    if (id === "where") return hero("help", "Tulong", "Saan magpapatingin", "Hindi emergency? Dito magsimula.", { top: backBtn("#/help", "Tulong") })
+      + `<div class="card lift"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sky">${ic("map")}</span><div class="grow"><h3>National Center for Mental Health</h3><p class="small" style="margin:6px 0">9 De Pebrero St., Mauway, Mandaluyong City. Lunes–Biyernes, 8am–5pm.</p></div></div>
+        <a class="btn teal block" href="tel:0285319001" style="margin-top:10px">${ic("phone")} Tumawag: (02) 8531-9001, local 302</a>
+        <p class="small muted" style="margin:10px 0 0">Tumawag muna para kumpirmahin ang schedule at bayad. Maghanda ng kalahating araw.</p></div>
+      <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sage">${ic("heart")}</span><div class="grow"><h3>Malapit na ospital</h3><p class="small" style="margin:6px 0 0">Maraming ospital ang may psychiatrist sa OPD. Itanong sa pinakamalapit na ospital o barangay health center, at kung may PhilHealth coverage.</p></div></div></div>`;
+    if (id === "refuse") return stepper({ k: "help", kicker: "Tulong", title: "Kung ayaw pa niya", back: ["#/help", "Tulong"], i: route().n, base: "#/help/refuse",
+      cards: [`<h2>Kayo muna ang kumonsulta</h2><p class="big">Puwedeng ang girlfriend o pamilya ang unang pumunta sa psychiatrist para humingi ng gabay, kahit ayaw pa niya.</p>`,
+        `<h2>Pag-usapan ang gusto niya</h2><p class="big">Tungkol sa tulog, stress o pagod, hindi sa “sakit.” Halimbawa: “Hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”</p><a class="btn block" href="#/scene/refuse/0" style="margin-top:12px">Mga puwedeng sabihin</a>`,
+        `<h2>Isama ang pinagkakatiwalaan niya</h2><p class="big">Ang taong pinakapinapakinggan niya, kaibigan man o kamag-anak, ay malaking tulong sa pagkumbinsi.</p>`,
+        `<h2>Huwag manlinlang</h2><p class="big">Kailangan ninyo ang tiwala niya sa susunod. Ang panlilinlang ay nagpapahirap sa lahat ng susunod na hakbang.</p>`,
+        `<h2>Kung may panganib</h2><p class="big">Kung may panganib sa buhay niya o ng iba, emergency na ito: 911 o emergency room.</p><a class="btn block" href="#/help/emergency" style="margin-top:12px">Mga numero</a>`],
+      finish: `<a class="btn teal" href="#/help">${ic("check")} Tapos</a>` });
+    return hero("help", "Tulong", "Ano ang kailangan ninyo?", "Pumili ng isa.")
+      + `<div class="lift"><a class="bigcall" href="#/help/emergency"><span class="bubble">${ic("phone")}</span><span class="grow"><b style="font-size:21px">Emergency ngayon</b><span class="l">911 · NCMH 1553</span></span></a>
+        <div style="margin-top:14px">${rowcard("#/help/where", "map", "b-sky", "Saan magpapatingin", "NCMH at malapit na ospital")}${rowcard("#/help/refuse/0", "hand", "b-peach", "Kung ayaw pa niya", "5 maikling hakbang")}
+        ${rowcard("#/plan/0", "shield", "b-sage", "Plano kung lumala", "Berde, dilaw, pula")}${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
+        ${rowcard("#/lesson/family/0", "chat", "b-lav", "Ipaliwanag sa pamilya niya", "May handang mensahe")}</div></div>`;
   }
   const SIGNS = ["Hindi natutulog nang ilang gabi", "Lumalayo sa lahat", "Mas maraming hinala o takot", "Nagsasalita o tumatawa nang mag-isa", "Hindi kumakain o naliligo", "Biglang galit o pagbabasag", "Gumagamit ng alak o droga", "Nagsasalita tungkol sa kamatayan"];
   const plan = () => (db.plan ||= { signs: [], other: "", green: "", yellow: "", hospital: "", call: "", stay: "", bring: "" });
-  function viewPlan() {
+  function viewPlan(i) {
     const p = plan(), fld = (k, label, ph, rows = 3) => `<label class="f"><span>${label}</span><textarea data-plan="${k}" rows="${rows}" style="min-height:${rows * 26 + 30}px" placeholder="${esc(ph)}">${esc(p[k])}</textarea></label>`;
-    return hero("help", "Plano kung lumala", "Ang plano ng pamilya", "Gawin ito habang kalmado ang lahat. Sa gitna ng krisis, mahirap mag-isip.", { top: backBtn("#/help", "Tulong") })
-      + `<div class="card lift" style="border-top:6px solid #5fae96"><div class="row" style="gap:10px"><span class="bubble b-sage">${ic("leaf")}</span><h3>Berde · maayos siya</h3></div>
-        <p class="small muted" style="margin:8px 0 0">Ano ang nakakatulong para manatili siyang maayos?</p>${fld("green", "Ang nakakatulong", "Hal. tulog bago mag-12, tumutugtog tuwing hapon, walang alak, kalmadong bahay, check-up buwan-buwan")}</div>
-      <div class="card" style="border-top:6px solid #f2b84b"><div class="row" style="gap:10px"><span class="bubble b-sun">${ic("spark")}</span><h3>Dilaw · mga maagang senyales</h3></div>
-        <p class="small muted" style="margin:8px 0 10px">Karaniwang pare-pareho ang mga senyales bago lumala, at madalas tulog ang una. Piliin ang mga napansin ninyo dati.</p>
-        <div class="chips">${SIGNS.map(x => `<button class="chip${p.signs.includes(x) ? " on" : ""}" data-act="psign" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
-        <label class="f"><span>Iba pang senyales niya</span><input type="text" data-plan="other" value="${esc(p.other)}" placeholder="Hal. nakikinig ng iisang kanta nang paulit-ulit"></label>
-        ${fld("yellow", "Ang gagawin namin", "Hal. bawasan ang stress at bisita, tulungan siyang matulog, kausapin siya gamit ang LEAP, tumawag sa doktor sa loob ng ilang araw")}</div>
-      <div class="card" style="border-top:6px solid var(--red)"><div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h3>Pula · krisis</h3></div>
-        <p class="small muted" style="margin:8px 0 0">Kung may panganib sa buhay niya o ng iba, o nagsasalita siya tungkol sa pagpapakamatay: 911, NCMH 1553, o emergency room.</p>
-        ${fld("hospital", "Pinakamalapit na ospital na may emergency room", "Pangalan at address", 2)}${fld("call", "Sino ang tatawagan, sa ganitong pagkakasunod", "Hal. Ana 0917…, Kuya 0918…, Dr. ___", 3)}
-        ${fld("stay", "Sino ang mananatili sa kanya", "", 2)}${fld("bring", "Dadalhin sa ospital", "Listahan ng gamot, ang Talaan, ID, PhilHealth, cellphone charger", 2)}</div>
-      <button class="btn teal block" data-act="shareplan" style="margin-top:16px">${ic("share")} Ibahagi ang plano sa pamilya</button>
-      <p class="small muted center" style="margin-top:10px">Kapag nagsimula na ang gamutan, ipakita ang planong ito sa doktor at sa kanya, kung handa na siya.</p>`;
+    const cards = [
+      `<div class="row" style="gap:10px"><span class="bubble b-sage">${ic("leaf")}</span><h2>Berde · maayos siya</h2></div><p class="big" style="font-size:17px">Ano ang nakakatulong para manatili siyang maayos?</p>${fld("green", "Ang nakakatulong", "Hal. tulog bago mag-12, tumutugtog tuwing hapon, walang alak, kalmadong bahay")}`,
+      `<div class="row" style="gap:10px"><span class="bubble b-sun">${ic("spark")}</span><h2>Dilaw · maagang senyales</h2></div><p class="big" style="font-size:17px">Piliin ang mga napansin ninyo dati, bago siya lumala. Madalas tulog ang una.</p>
+        <div class="chips" style="margin-top:10px">${SIGNS.map(x => `<button class="chip${p.signs.includes(x) ? " on" : ""}" data-act="psign" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+        <label class="f"><span>Iba pang senyales niya</span><input type="text" data-plan="other" value="${esc(p.other)}" placeholder="Hal. paulit-ulit na iisang kanta"></label>`,
+      `<div class="row" style="gap:10px"><span class="bubble b-sun">${ic("spark")}</span><h2>Dilaw · ang gagawin</h2></div><p class="big" style="font-size:17px">Kapag nakita ang mga senyales, ano ang gagawin ninyo?</p>${fld("yellow", "Ang gagawin namin", "Hal. bawasan ang stress at bisita, tulungan siyang matulog, kausapin gamit ang LEAP, tumawag sa doktor")}`,
+      `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · krisis</h2></div><p class="big" style="font-size:17px">Kung may panganib sa buhay: 911, NCMH 1553, o emergency room.</p>${fld("hospital", "Pinakamalapit na ospital na may emergency room", "Pangalan at address", 2)}${fld("call", "Sino ang tatawagan, sa ganitong pagkakasunod", "Hal. Ana 0917…, Kuya 0918…", 2)}`,
+      `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · ang paghahanda</h2></div>${fld("stay", "Sino ang mananatili sa kanya", "", 2)}${fld("bring", "Dadalhin sa ospital", "Listahan ng gamot, ang Talaan, ID, PhilHealth, charger", 2)}`,
+      `<span class="bubble b-teal" style="width:64px;height:64px;border-radius:20px">${ic("share")}</span><h2 style="margin-top:16px">Ibahagi sa pamilya</h2><p class="big">Ipadala ang plano para alam ng lahat ang gagawin. Kapag nagsimula na ang gamutan, ipakita rin ito sa doktor.</p>
+        <button class="btn teal block" data-act="shareplan" style="margin-top:12px">${ic("share")} Ibahagi ang plano</button>`];
+    return stepper({ k: "help", kicker: "Plano kung lumala", title: "Ang plano ng pamilya", back: ["#/help", "Tulong"], cards, i, base: "#/plan", finish: `<a class="btn" href="#/help">${ic("check")} Tapos</a>` });
   }
   function planText() {
     const p = plan();
@@ -634,28 +678,37 @@
       + `<div class="card lift"><textarea id="prep" style="min-height:380px;font-size:15px;box-shadow:none;background:transparent;padding:4px">${esc(prepText())}</textarea></div>
       <div class="row" style="margin-top:14px;gap:10px"><button class="btn teal" data-act="shareprep">${ic("share")} Ibahagi o kopyahin</button><a class="btn ghost" href="#/notes">Magdagdag ng tala</a></div>`;
   }
-  function viewCare() {
-    const last = db.care[db.care.length - 1], today = last && dayKey(last.at) === dayKey(Date.now()) ? last.v : 0;
-    return hero("care", "Para sa ’yo", "Alagaan din ang sarili mo", "Ang pag-aalaga sa sarili mo ay bahagi ng pag-aalaga sa kanya.")
+  const CARE_TIPS = [["shield", "b-lav", "Hindi mo kasalanan.", "Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis."], ["hand", "b-peach", "Hatiin ang pasanin.", "Huwag iisa ang taong laging nagbabantay. Magpalitan."],
+    ["sun", "b-sun", "Matulog, kumain, lumabas.", "Hindi ka makakatulong kung ubos ka na."], ["leaf", "b-sage", "May sariling buhay ka pa rin.", "Okay lang magpahinga at mag-enjoy nang walang guilt."],
+    ["phone", "b-rose", "Humingi ng tulong para sa sarili mo.", "Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist."], ["heart", "b-teal", "Hindi ka nag-iisa.", "May mga kaibigang handang tumulong. Hayaan ninyong tumulong sila."]];
+  function viewCare(id) {
+    if (id === "gf") return stepper({ k: "care", kicker: "Para sa ’yo", title: "Para sa girlfriend", back: ["#/care", "Para sa ’yo"], i: route().n, base: "#/care/gf",
+      cards: [`<h2>Girlfriend ka, hindi nurse</h2><p class="big">Okay lang na maging kasama sa paggaling nang hindi mo pinapasan ang lahat.</p>`,
+        `<h2>Kaligtasan mo muna</h2><p class="big">Kung natatakot ka sa kanya, lumayo muna at humingi ng tulong. Hindi ito pagtalikod sa kanya.</p>`,
+        `<h2>Hatiin ang pag-aalaga</h2><p class="big">Kasama ang pamilya niya at pamilya mo. Hindi dapat ikaw lang.</p>`,
+        `<h2>Okay ang hangganan</h2><p class="big">Mahinahon at malinaw: “Mahal kita, pero hindi okay ang magbasag ng gamit.”</p>`,
+        `<h2>Ang sarili mong buhay</h2><p class="big">Trabaho, kaibigan, pahinga. Mas matagal kang makakatulong kung hindi ka ubos.</p>`], finish: `<a class="btn teal" href="#/care">${ic("check")} Tapos</a>` });
+    if (id === "all") return stepper({ k: "care", kicker: "Para sa ’yo", title: "Mga paalala", back: ["#/care", "Para sa ’yo"], i: route().n, base: "#/care/all",
+      cards: CARE_TIPS.map(([i, b, t, d]) => `<span class="bubble ${b}" style="width:60px;height:60px;border-radius:18px">${ic(i)}</span><h2 style="margin-top:16px">${t}</h2><p class="big">${d}</p>`), finish: `<a class="btn teal" href="#/care">${ic("check")} Tapos</a>` });
+    if (id === "tired") return hero("care", "Para sa ’yo", "Kung pagod ka na", "", { top: backBtn("#/care", "Para sa ’yo") })
+      + `<div class="card lift"><p class="big" style="margin-top:0">Laging iritable, hirap matulog, madalas umiiyak, wala nang gana sa ibang bagay, o pakiramdam na walang pag-asa.</p><p class="big">Kung ganito ka na nang ilang linggo, kausapin ang isang mapagkakatiwalaang tao o propesyonal. Puwede ka ring tumawag sa NCMH 1553.</p></div>
+      <a class="bigcall teal" href="tel:1553" style="margin-top:14px"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH · libre, 24 oras</span></span></a>`;
+    const last = db.care[db.care.length - 1], today = last && dayKey(last.at) === dayKey(Date.now()) ? last.v : 0, tip = CARE_TIPS[Math.floor(Date.now() / DAY) % CARE_TIPS.length];
+    return hero("care", "Para sa ’yo", "Alagaan din ang sarili mo", "Bahagi ito ng pag-aalaga sa kanya.")
       + `<div class="card lift"><h3>Kumusta ka ngayon?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(n => `<button data-act="care" data-v="${n}" class="${today === n ? "on" : ""}" aria-label="${MOOD_LABEL[n - 1]}">${face(n)}</button>`).join("")}</div>
-        <p class="small muted center" style="margin:10px 0 0">${today ? MOOD_LABEL[today - 1] : "Pumili ng isa"}${db.care.length >= 3 ? ` · Nitong linggo: ${careTrend()}` : ""}</p></div>
-      <div class="sec"><div class="eyebrow">Mga paalala</div>
-        ${[["shield", "b-lav", "Hindi mo kasalanan.", "Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis."], ["hand", "b-peach", "Hatiin ang pasanin.", "Huwag iisa ang taong laging nagbabantay. Magpalitan."],
-          ["sun", "b-sun", "Matulog, kumain, lumabas.", "Hindi ka makakatulong kung ubos ka na."], ["leaf", "b-sage", "May sariling buhay ka pa rin.", "Okay lang magpahinga at mag-enjoy nang walang guilt."],
-          ["phone", "b-rose", "Humingi ng tulong para sa sarili mo.", "Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist."], ["heart", "b-teal", "Hindi ka nag-iisa.", "May mga kaibigang handang tumulong. Hayaan ninyong tumulong sila."]]
-          .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>
-      <div class="sec"><div class="eyebrow">Para sa girlfriend</div><div class="card" style="line-height:1.6">
-        <p style="margin-top:0">Girlfriend ka niya, hindi nurse. Okay lang na maging kasama sa paggaling nang hindi mo pinapasan lahat.</p>
-        <ul class="tight small"><li><b>Kaligtasan mo muna.</b> Kung natatakot ka sa kanya, lumayo muna at humingi ng tulong. Hindi ito pagtalikod sa kanya.</li>
-        <li><b>Hatiin ang pag-aalaga</b> sa pamilya niya at pamilya mo. Hindi dapat ikaw lang.</li><li><b>Okay lang magtakda ng hangganan</b>, mahinahon: \u201cMahal kita, pero hindi okay ang magbasag ng gamit.\u201d</li>
-        <li><b>Panatilihin ang sarili mong buhay:</b> trabaho, kaibigan, pahinga. Mas matagal kang makakatulong kung hindi ka ubos.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Para sa mga kaibigan</div>${rowcard("#/lesson/friends", "heart", "b-peach", "Paano tumulong bilang kaibigan", "Ang mga dapat gawin at iwasan")}</div>
-      <div class="sec"><div class="eyebrow">Mga palatandaan na pagod ka na</div><div class="card small" style="line-height:1.6">Laging iritable, hirap matulog, madalas umiiyak, wala nang gana sa ibang bagay, o pakiramdam na walang pag-asa. Kung ganito ka na nang ilang linggo, kausapin ang isang mapagkakatiwalaang tao o propesyonal.</div></div>`;
+        <p class="small muted center" style="margin:10px 0 0">${today ? MOOD_LABEL[today - 1] : "Pindutin ang isa"}${db.care.length >= 3 ? ` · Nitong linggo: ${careTrend()}` : ""}</p></div>
+      <div class="sec"><div class="eyebrow">Paalala ngayong araw</div><div class="rowcard" style="cursor:default"><span class="bubble ${tip[1]}">${ic(tip[0])}</span><span class="grow">${tip[2]}<small>${tip[3]}</small></span></div></div>
+      <div class="sec">${rowcard("#/care/gf/0", "heart", "b-peach", "Para sa girlfriend", "5 maikling paalala")}${rowcard("#/lesson/friends/0", "hand", "b-sage", "Para sa mga kaibigan", "Paano tumulong")}
+        ${rowcard("#/care/all/0", "leaf", "b-lav", "Lahat ng paalala", `${CARE_TIPS.length} maikling paalala`)}${rowcard("#/care/tired", "moon", "b-sky", "Kung pagod ka na", "Mga palatandaan, at saan hihingi ng tulong")}</div>`;
   }
-
   /* ---------- His views ---------- */
-  function himView(v, id) {
+  function himView(v, id, n) {
     if (v === "sleep") return viewSleep(); if (v === "music") return viewMusic(); if (v === "calm") return viewCalm(id); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+    if (v === "goal") return hero("today", "Para sa akin", "Ang gusto ko", "Isang malaking gusto, at isang maliit na hakbang.", { top: backBtn("#/", "Today") })
+      + `<div class="card lift"><label class="f" style="margin-top:0"><span>Ang gusto ko</span><input type="text" data-goal="big" value="${esc(db.goal?.big || "")}" placeholder="Hal. makatugtog ulit sa bar"></label>
+        <label class="f"><span>Isang maliit na hakbang ngayong linggo</span><input type="text" data-goal="step" value="${esc(db.goal?.step || "")}" placeholder="Hal. isang kanta bawat araw"></label></div>
+      <p class="big" style="font-size:16.5px;color:var(--ink2);margin:16px 4px">Ang mga maliliit na bagay sa Today ay mga hakbang papunta rito. Walang deadline.</p>
+      <a class="btn teal block" href="#/">${ic("check")} I-save</a>`;
     return viewToday();
   }
   const things = () => db.things || DEFAULT_THINGS;
@@ -666,10 +719,7 @@
     const msg = n === 0 ? "Kahit isa lang, sapat na." : n === tot ? "Lahat nagawa mo ngayon. Ang galing." : n === 1 ? "Isa na. Magandang simula." : `${n} na. Tuloy lang.`;
     return hero("today", new Date().toLocaleDateString("en-PH", { weekday: "long", day: "numeric", month: "long" }), `${greet}${name}.`, "Ilang maliliit na bagay para sa araw na ito.", { top: gearBtn() })
       + `<div class="card lift ringcard"><div class="ring">${ring(n, tot)}<b>${n}/${tot}</b></div><div class="grow"><h3>Ngayong araw</h3><p class="small muted" style="margin:4px 0 0">${msg}</p></div></div>
-      <div class="card" style="margin-top:12px;background:var(--peach)"><div class="row" style="gap:10px"><span class="bubble" style="background:var(--card);color:var(--coral)">${ic("spark")}</span><h3>Ang gusto ko</h3></div>
-        <input type="text" data-goal="big" value="${esc(db.goal?.big || "")}" placeholder="Hal. makatugtog ulit sa bar" style="margin-top:12px;background:var(--card)">
-        <input type="text" data-goal="step" value="${esc(db.goal?.step || "")}" placeholder="Isang maliit na hakbang ngayong linggo" style="margin-top:8px;background:var(--card)">
-        <p class="small" style="margin:8px 4px 0;color:var(--ink2)">Ang mga maliliit na bagay sa ibaba ay mga hakbang papunta rito.</p></div>
+      <a class="rowcard" href="#/goal" style="margin-top:12px;background:var(--peach)"><span class="bubble" style="background:var(--card);color:var(--coral)">${ic("spark")}</span><span class="grow">${db.goal?.big ? esc(db.goal.big) : "Ano ang gusto mo?"}<small>${db.goal?.big ? (db.goal.step ? `Ngayong linggo: ${esc(db.goal.step)}` : "Magdagdag ng maliit na hakbang") : "Hal. makatugtog ulit sa bar. Pindutin para isulat."}</small></span><span class="chev">${ic("chev")}</span></a>
       <div class="sec" style="margin-top:16px">${things().map((x, i) => `<button class="thing${t[i] ? " done" : ""}" data-act="thing" data-v="${i}"><span class="tick">${ic("check")}</span><span class="grow">${esc(x)}</span></button>`).join("")}</div>
       <div class="sec"><div class="card"><h3>Kumusta ang pakiramdam mo?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(m => `<button data-act="mood" data-v="${m}" class="${db.moods[k] === m ? "on" : ""}" aria-label="${MOOD_LABEL[m - 1]}">${face(m)}</button>`).join("")}</div>
         <p class="small muted center" style="margin:10px 0 0">${db.moods[k] ? MOOD_LABEL[db.moods[k] - 1] : "Pumili ng isa"}</p></div></div>
@@ -679,6 +729,7 @@
   }
   const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a class="rowcard" href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="bubble b-teal">${ic("phone")}</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
   const ncmhRow = () => `<a class="rowcard" href="tel:1553"><span class="bubble b-rose">${ic("phone")}</span><span class="grow">NCMH Crisis Hotline<small>1553 · 0917-899-8727 · 0919-057-1553 · libre, 24 oras</small></span></a>`;
+  let sleepTip = Math.floor(Date.now() / DAY);
   function viewSleep() {
     const k = dayKey(Date.now()), e = db.sleep[k] || {};
     const days = [...Array(7)].map((_, i) => [sleepHours(db.sleep[dayKey(Date.now() - (6 - i) * DAY)]), new Date(Date.now() - (6 - i) * DAY).getDay()]);
@@ -692,11 +743,12 @@
         <div style="margin-top:14px"><div class="small muted" style="margin:0 4px 8px">Gaano kaayos ang tulog mo?</div><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
       <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([h, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${h == null ? "zero" : h < 5 || h > 11 ? "warm" : ""}" style="height:${h == null ? 6 : Math.max(10, Math.min(100, h / 10 * 100))}%"></i><span>${h == null ? ["L", "L", "M", "M", "H", "B", "S"][wd] : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
         <p class="small" style="margin:10px 0 0;color:var(--ink2)">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
-      <div class="sec"><div class="eyebrow">Mga nakakatulong</div>
-        ${[["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras paggising."],
+      <div class="sec"><div class="eyebrow">Tip ngayon</div>${(() => { const T = [["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras paggising."],
           ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "At iwasan ang alak at marijuana: pinapasama nila ang tulog."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
-          ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]]
-          .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>`;
+          ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]];
+          const [i, b, t, d] = T[sleepTip % T.length];
+          return `<div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble ${b}">${ic(i)}</span><div class="grow"><h3>${t}</h3><p class="big" style="font-size:17px;margin:6px 0 0">${d}</p></div></div>
+            <button class="btn ghost sm" data-act="sleeptip" style="margin-top:8px;padding-left:0">Isa pang tip (${sleepTip % T.length + 1} sa ${T.length}) ${ic("chev")}</button></div>`; })()}</div>`;
   }
   function viewMusic() {
     const wk = db.music.filter(m => m.at > Date.now() - 7 * DAY), mins = Math.round(wk.reduce((a, m) => a + m.min, 0)), idea = MUSIC_IDEAS[Math.floor(Date.now() / DAY) % MUSIC_IDEAS.length];
@@ -755,7 +807,8 @@
       + `<div class="card lift"><label class="f" style="margin-top:0"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label></div>
       ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div><div class="card">${[0, 1, 2].map(i => `<div class="row" style="gap:8px;${i ? "margin-top:10px" : ""}"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div></div>
         <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div><div class="card">${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="${i ? "margin-top:10px" : ""}">`).join("")}</div></div>`}
-      <div class="sec"><div class="eyebrow">Phone na ito</div>
+      <div class="sec"><div class="eyebrow">Laki ng letra</div><div class="card"><div class="chips">${[[1, "Normal"], [1.12, "Malaki"], [1.25, "Pinakamalaki"]].map(([z, l]) => `<button class="chip${(db.zoom || 1) === z ? " on" : ""}" data-act="zoom" data-v="${z}" style="font-size:${13 * z}px">${l}</button>`).join("")}</div></div></div>
+      <div class="sec"><div class="eyebrow">Phone na ito</div>${rowcard("#/intro/0", "info", "b-sun", "Paano gamitin", "Maikling gabay, 4 na pahina")}
         ${fam ? "" : `<button class="rowcard" data-act="sharewk"><span class="bubble b-sage">${ic("share")}</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
         ${isStandalone() ? "" : `<button class="rowcard" data-act="installsheet"><span class="bubble b-teal">${ic("download")}</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
         <button class="rowcard" data-act="switch"><span class="bubble b-lav">${ic("swap")}</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
@@ -781,6 +834,8 @@
       <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}<br>Fonts: Fraunces at Inter (SIL Open Font License)</p>`;
   }
 
+  /* Larger text for those who need it: the whole page scales, buttons included. */
+  function applyZoom() { const z = db.zoom || 1; $("#main").style.zoom = z === 1 ? "" : z; }
   /* ---------- After render ---------- */
   let ntags = [], ringRaf = 0;
   function afterRender(v) {
@@ -858,8 +913,10 @@
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el) return;
     const a = el.dataset.act, v = el.dataset.v; if (el.tagName === "BUTTON") haptic(6);
-    if (a === "space") { db.space = v; save(); location.hash = "#/"; render(); setTimeout(() => showInstall(false), 2500); }
+    if (a === "space") { db.space = v; save(); location.hash = "#/intro/0"; render(); }
     else if (a === "installsheet") showInstall(true);
+    else if (a === "sleeptip") { sleepTip++; render(); }
+    else if (a === "zoom") { db.zoom = +v; save(); render(); }
     else if (a === "sharefam") shareText("Tungkol sa kanya", $("#fammsg").value);
     else if (a === "shareplan") shareText("Plano kung lumala", planText());
     else if (a === "psign") { const p = plan(), x = v; p.signs.includes(x) ? p.signs.splice(p.signs.indexOf(x), 1) : p.signs.push(x); el.classList.toggle("on"); save(); }
@@ -867,8 +924,8 @@
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
     else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Nakopya ang link. I-paste sa browser."), () => prompt("Kopyahin ang link:", u)); }
     else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; save(); location.hash = "#/"; render(); }
-    else if (a === "step") { if (v === "plan" && !db.steps.plan) { location.hash = "#/plan"; return; } db.steps[v] = !db.steps[v]; save(); render(); }
-    else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next : "#/learn"; }
+    else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
+    else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next + "/0" : "#/learn"; }
     else if (a === "pick") { const i = pq % PRACTICE.length; db.practice[i] = +v; save(); render(); }
     else if (a === "pqnext") { pq++; render(); scrollTo(0, 0); }
     else if (a === "pqreset") { db.practice = {}; pq = 0; save(); render(); }

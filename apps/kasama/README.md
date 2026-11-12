@@ -1,6 +1,10 @@
 # Kasama
 
 A Taglish companion for a person with psychosis and the people supporting him, as an installable, offline PWA.
+Made for non-technical users: a 4-card "how to use" intro, one idea per screen (lessons, scripts, plans and guides
+are step-by-step cards with big Back and Next buttons that also work with the phone's back button), the home screen
+shows only the next step, Help is a menu of big buttons (Emergency = two large call buttons), and Settings has
+three text sizes.
 Two separate spaces, chosen on first open, meant for separate phones. Everything stays on the phone.
 
 **Family space (Para sa pamilya)**
