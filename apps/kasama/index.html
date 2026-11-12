@@ -3,114 +3,215 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#f6f1e9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#16191a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8f4ef" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121615" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Kasama">
   <meta name="description" content="Para sa pamilya at sa kanya: understanding psychosis, how to talk, getting help in the Philippines, and gentle daily routines, sleep and music.">
+  <link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/fraunces-latin-soft-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>Kasama</title>
   <style>
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-wght-italic.woff2) format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
     :root {
-      --bg: #f6f1e9; --card: #fffdf9; --ink: #1f2a2c; --ink2: #4d5b5d; --muted: #8a9597; --line: rgba(31,42,44,.09); --line2: rgba(31,42,44,.16);
-      --teal: #2f7f78; --teal-soft: rgba(47,127,120,.1); --coral: #d9714f; --coral-soft: rgba(217,113,79,.12); --sun: #e3a93b; --red: #c2453b; --red-soft: rgba(194,69,59,.1);
-      --r: 20px; --ease: cubic-bezier(.2,.7,.2,1); --spring: cubic-bezier(.2,.9,.25,1.15);
-      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
-      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-      --e1: 0 1px 2px rgba(31,42,44,.05), 0 4px 14px rgba(31,42,44,.05); color-scheme: light;
+      --bg: #f8f4ef; --card: #ffffff; --ink: #1c2826; --ink2: #4b5a57; --muted: #8c9895; --line: rgba(28,40,38,.08); --line2: rgba(28,40,38,.14);
+      --teal: #2a7a70; --teal2: #1e5f57; --teal-soft: #e2f0ec; --coral: #d7704f; --coral-soft: #fbe5da; --red: #b8392f; --red-soft: #fbe3e0;
+      --sage: #e3f0e7; --peach: #fbe7db; --sky: #e4ecf7; --lav: #ece7f7; --sun: #fdf1d2; --rose: #fbe4e1;
+      --h-home: linear-gradient(165deg, #fbeedd 0%, #f6e3cf 55%, #f8f4ef 100%);
+      --h-learn: linear-gradient(165deg, #dfeee6 0%, #eaf3ed 60%, #f8f4ef 100%);
+      --h-talk: linear-gradient(165deg, #fbe2d4 0%, #fbede4 60%, #f8f4ef 100%);
+      --h-help: linear-gradient(165deg, #f9dcd8 0%, #fbe9e6 60%, #f8f4ef 100%);
+      --h-care: linear-gradient(165deg, #e6e0f6 0%, #f0ecf9 60%, #f8f4ef 100%);
+      --h-today: linear-gradient(165deg, #fdeac0 0%, #fdf3dc 60%, #f8f4ef 100%);
+      --h-sleep: linear-gradient(170deg, #26305a 0%, #3b4a7a 55%, #5b6f98 100%);
+      --h-music: linear-gradient(165deg, #f9dccb 0%, #fbe9df 60%, #f8f4ef 100%);
+      --h-calm: linear-gradient(165deg, #d9eaf1 0%, #e6f1ee 60%, #f8f4ef 100%);
+      --shadow: 0 1px 2px rgba(28,40,38,.04), 0 8px 26px rgba(28,40,38,.07); --shadow2: 0 2px 6px rgba(28,40,38,.06), 0 18px 44px rgba(28,40,38,.12);
+      --r: 24px; --ease: cubic-bezier(.2,.7,.2,1); --spring: cubic-bezier(.2,.9,.25,1.2);
+      --display: "Fraunces", "Iowan Old Style", Georgia, serif; --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color-scheme: light;
     }
     @media (prefers-color-scheme: dark) { :root {
-      --bg: #16191a; --card: #1f2425; --ink: #e9eeec; --ink2: #b6c1bf; --muted: #7f8a89; --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.15);
-      --teal: #6cc3b9; --teal-soft: rgba(108,195,185,.13); --coral: #ef9271; --coral-soft: rgba(239,146,113,.14); --sun: #f0c062; --red: #ef7b70; --red-soft: rgba(239,123,112,.13); --e1: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; } }
+      --bg: #121615; --card: #1b2120; --ink: #e9efed; --ink2: #b7c3c0; --muted: #7f8b88; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.14);
+      --teal: #6cc4b8; --teal2: #8fd6cb; --teal-soft: #1d302c; --coral: #ee9274; --coral-soft: #33251f; --red: #f07d72; --red-soft: #35201e;
+      --sage: #1c2a23; --peach: #2e2420; --sky: #1c2531; --lav: #24213a; --sun: #2e2919; --rose: #33201f;
+      --h-home: linear-gradient(165deg, #2f2620 0%, #1d1c19 60%, #121615 100%); --h-learn: linear-gradient(165deg, #1d2c25 0%, #161d1a 60%, #121615 100%);
+      --h-talk: linear-gradient(165deg, #33241d 0%, #1d1917 60%, #121615 100%); --h-help: linear-gradient(165deg, #35201f 0%, #1e1716 60%, #121615 100%);
+      --h-care: linear-gradient(165deg, #262238 0%, #18171f 60%, #121615 100%); --h-today: linear-gradient(165deg, #322a17 0%, #1c1a14 60%, #121615 100%);
+      --h-sleep: linear-gradient(170deg, #161b35 0%, #202a4c 55%, #121615 100%); --h-music: linear-gradient(165deg, #33241d 0%, #1d1917 60%, #121615 100%);
+      --h-calm: linear-gradient(165deg, #182833 0%, #15201f 60%, #121615 100%);
+      --shadow: 0 1px 2px rgba(0,0,0,.4); --shadow2: 0 10px 40px rgba(0,0,0,.5); color-scheme: dark; } }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { background: var(--bg); }
-    body { margin: 0; color: var(--ink); font: 16.5px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
-    main { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 20px) 18px calc(env(safe-area-inset-bottom) + 110px); }
+    body { margin: 0; color: var(--ink); font: 16.5px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; font-feature-settings: "ss01", "cv11"; }
+    main { max-width: 620px; margin: 0 auto; padding: 0 20px calc(env(safe-area-inset-bottom) + 116px); }
     a { color: var(--teal); }
-    h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -.015em; line-height: 1.2; text-wrap: balance; }
-    h1 { font-size: 30px; } h2 { font-size: 22px; } h3 { font-size: 17.5px; }
+    h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 560; font-variation-settings: "SOFT" 100; letter-spacing: -.01em; line-height: 1.15; text-wrap: balance; }
+    h1 { font-size: 34px; } h2 { font-size: 24px; } h3 { font-size: 19px; line-height: 1.3; }
     p { margin: .5em 0; text-wrap: pretty; }
-    .muted { color: var(--muted); } .small { font-size: 14px; } .center { text-align: center; }
-    .eyebrow { font: 700 11.5px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .muted { color: var(--muted); } .small { font-size: 14.5px; } .center { text-align: center; }
+    .eyebrow { font: 650 11.5px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
     .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; box-shadow: var(--e1); }
-    .card + .card, .card + .list, .list + .card { margin-top: 12px; }
-    .sec { margin-top: 26px; } .sec > .eyebrow { margin: 0 2px 10px; }
-    .btn { appearance: none; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 999px; min-height: 44px; padding: 10px 18px;
-           font: 600 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: transform .25s var(--spring); }
-    .btn:active { transform: scale(.96); }
-    .btn.teal { background: var(--teal); color: #fff; border-color: transparent; } .btn.red { background: var(--red); color: #fff; border-color: transparent; }
-    .btn.sm { min-height: 36px; padding: 6px 14px; font-size: 14px; } .btn.block { display: flex; width: 100%; }
-    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
-    .view.enter > * { animation: rise .4s var(--ease) both; }
-    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .hello { font: 600 28px/1.2 var(--serif); letter-spacing: -.01em; }
-    .list a, .list button.li { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
-           color: var(--ink); text-decoration: none; font: 600 16px/1.35 var(--sans); cursor: pointer; }
-    .list a + a, .list button + button, .list a + button, .list button + a { margin-top: 8px; }
-    .list small { display: block; font-weight: 500; color: var(--muted); font-size: 13.5px; margin-top: 2px; }
-    .list .ic { width: 38px; height: 38px; border-radius: 12px; background: var(--teal-soft); color: var(--teal); display: grid; place-items: center; flex: none; font-size: 18px; }
-    .list .done .ic, .ic.done { background: var(--teal); color: #fff; }
-    .chev { margin-left: auto; color: var(--muted); }
-    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); font: 500 15px var(--sans); margin: -4px 0 14px -4px; padding: 6px 12px 6px 8px; border-radius: 999px;
-            background: var(--card); border: 1px solid var(--line); cursor: pointer; text-decoration: none; }
-    .prose p { font-size: 17px; line-height: 1.62; }
-    .key { background: var(--teal-soft); border-radius: 16px; padding: 12px 16px; margin: 14px 0; font-weight: 600; color: var(--ink); }
-    .warn { background: var(--red-soft); border-radius: 16px; padding: 12px 16px; margin: 14px 0; }
-    .say { border-left: 3px solid var(--teal); padding: 4px 0 4px 14px; margin: 8px 0; font: italic 17px/1.5 var(--serif); }
-    .avoid { border-left: 3px solid var(--coral); padding: 4px 0 4px 14px; margin: 8px 0; font: 16px/1.5 var(--sans); color: var(--ink2); }
-    ul.tight { margin: 6px 0; padding-left: 20px; } ul.tight li { margin: 4px 0; }
-    .opt { display: block; width: 100%; text-align: left; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 14px; padding: 12px 14px; margin-top: 8px; font: 16px/1.45 var(--sans); cursor: pointer; }
-    .opt.good { border-color: var(--teal); background: var(--teal-soft); } .opt.bad { border-color: var(--coral); background: var(--coral-soft); }
-    .fb { margin-top: 10px; font-size: 15.5px; color: var(--ink2); }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip { border: 1px solid var(--line2); background: var(--card); color: var(--ink2); border-radius: 999px; padding: 6px 12px; font: 600 13.5px var(--sans); cursor: pointer; }
-    .chip.on { background: var(--teal); color: #fff; border-color: transparent; }
-    textarea, input[type=text], input[type=tel], input[type=time] { width: 100%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 14px; padding: 11px 13px; font: 16px var(--sans); outline: 0; }
-    textarea { resize: vertical; min-height: 90px; } textarea:focus, input:focus { border-color: var(--teal); }
-    label.f { display: block; margin-top: 12px; } label.f > span { display: block; font: 600 13px var(--sans); color: var(--muted); margin: 0 2px 5px; }
-    .note { padding: 12px 0; border-bottom: 1px solid var(--line); } .note .d { font: 600 12.5px var(--sans); color: var(--muted); }
-    .crisis { background: var(--red-soft); border: 1px solid rgba(194,69,59,.25); border-radius: var(--r); padding: 16px 18px; }
-    .crisis a.call { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid rgba(194,69,59,.18); text-decoration: none; color: var(--ink); font-weight: 600; }
-    .crisis a.call:first-of-type { border-top: 0; } .crisis a.call b { color: var(--red); white-space: nowrap; }
+    svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .view.enter > * { animation: rise .5s var(--ease) both; } .view.enter > *:nth-child(2) { animation-delay: 50ms; } .view.enter > *:nth-child(n+3) { animation-delay: 100ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* Hero: each section has its own colour world and illustration */
+    .hero { position: relative; margin: 0 -20px; padding: calc(env(safe-area-inset-top) + 22px) 22px 30px; border-radius: 0 0 34px 34px; overflow: hidden; min-height: 210px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .hero .art { position: absolute; right: -6px; top: calc(env(safe-area-inset-top) + 6px); width: 168px; height: 150px; pointer-events: none; }
+    .hero.has-top { padding-top: calc(env(safe-area-inset-top) + 78px); }
+    .hero h1.long { font-size: 27px; }
+    .hero .top { position: absolute; left: 22px; right: 22px; top: calc(env(safe-area-inset-top) + 16px); display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+    .hero h1 { position: relative; max-width: 76%; } .hero p { position: relative; color: var(--ink2); margin: 8px 0 0; max-width: 88%; font-size: 15.5px; }
+    .hero .eyebrow { position: relative; margin-bottom: 6px; color: var(--ink2); opacity: .8; }
+    .hero.dark { color: #f2f1fb; } .hero.dark p, .hero.dark .eyebrow { color: rgba(242,241,251,.8); }
+    .iconbtn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--ink2); border: 0; text-decoration: none;
+               backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: var(--shadow); cursor: pointer; }
+    .hero.dark .iconbtn { background: rgba(255,255,255,.14); color: #fff; }
+    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); font: 600 14.5px var(--sans); padding: 8px 14px 8px 10px; border-radius: 999px; text-decoration: none;
+            background: color-mix(in srgb, var(--card) 72%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: var(--shadow); }
+    .back svg { width: 18px; height: 18px; }
+    .hero.dark .back { background: rgba(255,255,255,.14); color: #fff; }
+
+    .card { position: relative; background: var(--card); border-radius: var(--r); padding: 18px 20px; box-shadow: var(--shadow); }
+    @media (prefers-color-scheme: dark) { .card, .rowcard, .tile, .opt, .thing { border: 1px solid var(--line); } }
+    .card + .card { margin-top: 12px; }
+    .sec { margin-top: 28px; } .sec > .eyebrow { margin: 0 4px 12px; }
+    .lift { margin-top: -22px; position: relative; z-index: 3; }
+    .btn { appearance: none; border: 0; background: var(--card); color: var(--ink); border-radius: 999px; min-height: 48px; padding: 12px 22px; box-shadow: var(--shadow);
+           font: 650 15.5px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: transform .25s var(--spring); }
+    .btn:active { transform: scale(.96); } .btn.teal { background: var(--teal); color: #fff; box-shadow: 0 8px 20px color-mix(in srgb, var(--teal) 30%, transparent); }
+    @media (prefers-color-scheme: dark) { .btn.teal { color: #0f1a18; } }
+    .btn.sm { min-height: 38px; padding: 7px 16px; font-size: 14px; } .btn.block { display: flex; width: 100%; } .btn.ghost { background: transparent; box-shadow: none; color: var(--ink2); }
+
+    /* Rows and tiles */
+    .rowcard { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--card); border: 0; border-radius: 20px; padding: 14px 16px; box-shadow: var(--shadow);
+               color: var(--ink); text-decoration: none; font: 600 16px/1.35 var(--sans); cursor: pointer; transition: transform .2s var(--spring); }
+    .rowcard:active { transform: scale(.98); } .rowcard + .rowcard { margin-top: 10px; }
+    .rowcard small { display: block; font-weight: 450; color: var(--muted); font-size: 13.5px; margin-top: 2px; line-height: 1.4; }
+    .rowcard .chev { color: var(--muted); } .rowcard .chev svg { width: 18px; height: 18px; }
+    .bubble { width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; flex: none; }
+    .b-teal { background: var(--teal-soft); color: var(--teal); } .b-sage { background: var(--sage); color: var(--teal); } .b-peach { background: var(--peach); color: var(--coral); }
+    .b-rose { background: var(--rose); color: var(--red); } .b-lav { background: var(--lav); color: #6b5bb5; } .b-sun { background: var(--sun); color: #b9862a; } .b-sky { background: var(--sky); color: #4b6fa8; }
+    @media (prefers-color-scheme: dark) { .b-lav { color: #b6a8f0; } .b-sun { color: #f0c862; } .b-sky { color: #9fbbe8; } }
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tile { border-radius: 24px; padding: 16px; text-decoration: none; color: var(--ink); min-height: 132px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow); transition: transform .2s var(--spring); }
+    .tile:active { transform: scale(.97); } .tile b { font: 600 17px/1.2 var(--display); font-variation-settings: "SOFT" 100; } .tile small { display: block; color: var(--ink2); font-size: 13px; margin-top: 3px; }
+    .tile .bubble { width: 40px; height: 40px; background: color-mix(in srgb, var(--card) 70%, transparent); }
+
+    /* Path to a psychiatrist: a gentle timeline */
+    .path { position: relative; margin-top: 8px; }
+    .path button { position: relative; display: flex; gap: 14px; width: 100%; text-align: left; border: 0; background: none; padding: 10px 0; cursor: pointer; color: var(--ink); font: inherit; }
+    .path button::before { content: ""; position: absolute; left: 15px; top: 40px; bottom: -10px; width: 2px; background: var(--line2); }
+    .path button:last-child::before { display: none; }
+    .path .dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line2); background: var(--card); flex: none; display: grid; place-items: center; color: #fff; transition: all .3s var(--spring); position: relative; z-index: 1; }
+    .path .done .dot { background: var(--teal); border-color: var(--teal); } .path .done::before { background: var(--teal); }
+    .path b { display: block; font-weight: 650; font-size: 15.5px; } .path span.d { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.45; margin-top: 2px; }
+    .path .done b { color: var(--ink2); }
+    .meter { height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; margin-top: 10px; } .meter i { display: block; height: 100%; background: var(--teal); border-radius: 8px; transition: width .6s var(--ease); }
+
+    /* Reading */
+    .prose p { font-size: 17.5px; line-height: 1.72; color: var(--ink); margin: 0 0 1em; }
+    .key { position: relative; background: var(--teal-soft); border-radius: 22px; padding: 18px 20px 18px 52px; margin: 18px 0; font: 600 17px/1.5 var(--display); font-variation-settings: "SOFT" 100; color: var(--teal2); }
+    .key::before { content: "\201C"; position: absolute; left: 16px; top: 4px; font: 700 48px var(--display); color: var(--teal); opacity: .5; }
+    .warn { background: var(--rose); color: var(--ink); border-radius: 18px; padding: 13px 16px; margin: 14px 0; font-size: 15px; }
+    .avoid { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; font-size: 15.5px; color: var(--ink2); }
+    .avoid .x { width: 26px; height: 26px; border-radius: 50%; background: var(--coral-soft); color: var(--coral); display: grid; place-items: center; flex: none; margin-top: 1px; } .avoid .x svg { width: 14px; height: 14px; stroke-width: 2.6; }
+    .say { position: relative; background: var(--teal-soft); border-radius: 22px 22px 22px 6px; padding: 14px 18px; margin: 10px 26px 10px 0; font: italic 450 17.5px/1.5 var(--display); color: var(--ink); }
+    .say + .say { margin-top: 10px; }
+    ul.tight { margin: 6px 0; padding-left: 20px; } ul.tight li { margin: 7px 0; line-height: 1.5; } ul.tight li::marker { color: var(--teal); }
+    .steps-big .card h3 { margin-top: 2px; } .num { font: 700 12px var(--sans); letter-spacing: .1em; color: var(--teal); }
+    .opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; border: 2px solid transparent; background: var(--card); color: var(--ink); border-radius: 20px; padding: 14px 16px; margin-top: 10px;
+           font: 15.5px/1.5 var(--sans); cursor: pointer; box-shadow: var(--shadow); transition: transform .2s var(--spring); }
+    .opt:active { transform: scale(.98); } .opt .mark { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #fff; }
+    .opt.good { border-color: var(--teal); } .opt.good .mark { background: var(--teal); border-color: var(--teal); } .opt.bad { border-color: var(--coral); opacity: .8; } .opt.bad .mark { background: var(--coral); border-color: var(--coral); }
+    .opt .mark svg { width: 14px; height: 14px; stroke-width: 2.8; }
+    .fb { margin-top: 14px; font-size: 15.5px; color: var(--ink2); line-height: 1.55; }
+    .dots { display: flex; gap: 6px; justify-content: center; margin: 4px 0 14px; } .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); } .dots i.on { background: var(--teal); width: 22px; border-radius: 6px; }
+
+    /* Forms */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border: 0; background: var(--bg); color: var(--ink2); border-radius: 999px; padding: 8px 14px; font: 600 13.5px var(--sans); cursor: pointer; transition: all .2s var(--ease); box-shadow: inset 0 0 0 1px var(--line2); }
+    .chip.on { background: var(--teal); color: #fff; box-shadow: none; }
+    @media (prefers-color-scheme: dark) { .chip.on { color: #0f1a18; } }
+    textarea, input[type=text], input[type=tel], input[type=time] { width: 100%; border: 0; background: var(--bg); color: var(--ink); border-radius: 16px; padding: 13px 15px; font: 16px var(--sans); outline: 0; box-shadow: inset 0 0 0 1px var(--line2); }
+    textarea { resize: vertical; min-height: 96px; line-height: 1.5; } textarea:focus, input:focus { box-shadow: inset 0 0 0 2px var(--teal); }
+    input[type=time] { font: 600 26px var(--sans); text-align: center; padding: 14px 8px; }
+    label.f { display: block; margin-top: 12px; } label.f > span { display: block; font: 650 12px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 4px 6px; }
+    .note { padding: 14px 0; border-top: 1px solid var(--line); } .note:first-child { border-top: 0; } .note .d { font: 600 12.5px var(--sans); color: var(--muted); }
+
+    /* Crisis */
+    .crisis { background: linear-gradient(160deg, var(--rose), var(--card) 85%); border-radius: var(--r); padding: 20px; box-shadow: var(--shadow); }
+    .crisis h3 { color: var(--red); }
+    .crisis a.call { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+    .crisis a.call:first-of-type { border-top: 0; margin-top: 6px; }
+    .crisis a.call .bubble { width: 38px; height: 38px; border-radius: 50%; background: var(--red); color: #fff; } .crisis a.call .bubble svg { width: 18px; height: 18px; }
+    .crisis a.call b { display: block; font: 650 17px var(--sans); letter-spacing: .01em; } .crisis a.call span.l { display: block; font-size: 13px; color: var(--muted); }
+
     /* His space */
-    .things .thing { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); cursor: pointer; text-align: left; color: var(--ink); font: 600 16.5px var(--sans); }
-    .things .thing + .thing { margin-top: 8px; }
-    .tick { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #fff; transition: all .25s var(--spring); }
-    .thing.done .tick { background: var(--teal); border-color: var(--teal); } .thing.done { color: var(--ink2); }
-    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 90px; margin-top: 10px; }
-    .bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
-    .bars i { width: 100%; max-width: 30px; border-radius: 6px; background: var(--teal); opacity: .85; min-height: 4px; } .bars i.zero { background: var(--line2); }
-    .bars span { font: 700 10.5px var(--sans); color: var(--muted); }
-    .timer { font: 300 64px/1 var(--sans); text-align: center; font-variant-numeric: tabular-nums; margin: 10px 0; }
-    .breath { width: 180px; height: 180px; margin: 20px auto; border-radius: 50%; background: radial-gradient(circle, var(--teal-soft), transparent 70%); border: 2px solid var(--teal); display: grid; place-items: center;
-              font: 600 18px var(--sans); color: var(--teal); transform: scale(.7); transition: transform 4s ease-in-out; }
-    .breath.in { transform: scale(1); transition-duration: 4s; } .breath.out { transform: scale(.7); transition-duration: 6s; }
-    .moods { display: flex; justify-content: space-between; gap: 6px; } .moods button { flex: 1; font-size: 26px; padding: 8px 0; border-radius: 14px; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
-    .moods button.on { background: var(--teal-soft); border-color: var(--teal); }
-    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 20; width: min(460px, calc(100% - 20px)); padding: 6px; border-radius: 28px;
-               background: color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6); border: 1px solid var(--line2);
-               box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; }
-    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; border-radius: 22px; color: var(--muted); font: 600 10.5px var(--sans); padding: 7px 0 6px; }
-    nav.tabs a svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    nav.tabs a.on { color: var(--teal); background: var(--teal-soft); }
-    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 96px); background: var(--ink); color: var(--bg);
-             padding: 11px 18px; border-radius: 18px; font: 600 14px var(--sans); z-index: 60; animation: rise .3s var(--spring) both; }
-    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 55; border: 0; background: var(--teal); color: #fff; padding: 11px 20px; border-radius: 999px; font: 700 14px var(--sans); cursor: pointer; }
-    .choose { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; }
-    .choose button { text-align: left; width: 100%; border: 1px solid var(--line2); background: var(--card); border-radius: 22px; padding: 18px 20px; margin-top: 12px; cursor: pointer; color: var(--ink); box-shadow: var(--e1); }
-    .choose button b { display: block; font-size: 19px; } .choose button span { color: var(--ink2); font-size: 15px; }
-    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,25,26,.42); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
-    .sheet { width: min(520px, 100%); background: var(--bg); border-radius: 26px 26px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); max-height: 90vh; overflow-y: auto; animation: up .4s var(--spring) both; }
-    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 16px; }
+    .ringcard { display: flex; align-items: center; gap: 18px; }
+    .ring { width: 92px; height: 92px; flex: none; position: relative; } .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring .track { stroke: var(--line2); } .ring .val { stroke: var(--teal); transition: stroke-dashoffset .8s var(--spring); }
+    .ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 26px var(--display); font-variation-settings: "SOFT" 100; }
+    .thing { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; border-radius: 20px; background: var(--card); border: 0; cursor: pointer; text-align: left; color: var(--ink);
+             font: 600 16.5px var(--sans); box-shadow: var(--shadow); transition: transform .2s var(--spring); }
+    .thing:active { transform: scale(.98); } .thing + .thing { margin-top: 10px; }
+    .tick { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #fff; transition: all .35s var(--spring); }
+    .tick svg { width: 16px; height: 16px; stroke-width: 3; opacity: 0; transform: scale(.4); transition: all .35s var(--spring); }
+    .thing.done .tick { background: var(--teal); border-color: var(--teal); } .thing.done .tick svg { opacity: 1; transform: none; }
+    .thing.done span.grow { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line2); }
+    .moods { display: flex; justify-content: space-between; gap: 8px; }
+    .moods button { flex: 1; aspect-ratio: 1; max-width: 64px; border-radius: 50%; border: 0; background: none; padding: 0; cursor: pointer; transition: transform .25s var(--spring); opacity: .55; filter: saturate(.6); }
+    .moods button svg { width: 100%; height: 100%; } .moods button.on { opacity: 1; filter: none; transform: scale(1.12); } .moods button:active { transform: scale(.92); }
+    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 96px; margin-top: 12px; }
+    .bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 6px; }
+    .bars i { width: 100%; max-width: 30px; border-radius: 10px; background: linear-gradient(180deg, var(--teal2), var(--teal)); min-height: 6px; transition: height .6s var(--ease); }
+    .bars i.zero { background: var(--line2); } .bars i.warm { background: linear-gradient(180deg, #f1a483, var(--coral)); }
+    .bars span { font: 650 11px var(--sans); color: var(--muted); } .bars div.today span { color: var(--teal); }
+    .timer-ring { width: 220px; height: 220px; margin: 6px auto 10px; position: relative; } .timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .timer-ring .track { stroke: var(--line); } .timer-ring .val { stroke: var(--coral); transition: stroke-dashoffset .3s linear; }
+    .timer { position: absolute; inset: 0; display: grid; place-items: center; font: 400 54px var(--display); font-variation-settings: "SOFT" 100; font-variant-numeric: tabular-nums; }
+    .idea { font: italic 450 19px/1.5 var(--display); margin: 8px 0 0; }
+    .breath { width: 220px; height: 220px; margin: 18px auto; border-radius: 50%; display: grid; place-items: center; text-align: center; font: 600 17px var(--sans); color: var(--teal2);
+              background: radial-gradient(circle at 35% 30%, #ffffffaa, transparent 45%), radial-gradient(circle, color-mix(in srgb, var(--teal) 32%, transparent), color-mix(in srgb, var(--teal) 12%, transparent) 70%);
+              box-shadow: 0 0 0 14px color-mix(in srgb, var(--teal) 8%, transparent), 0 0 0 30px color-mix(in srgb, var(--teal) 4%, transparent); transform: scale(.72); transition: transform 4s ease-in-out; }
+    .breath.in { transform: scale(1); transition-duration: 4s; } .breath.out { transform: scale(.72); transition-duration: 6s; }
+    .ground li { font-size: 17.5px; margin: 10px 0; } .ground b { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); margin-right: 8px; font-size: 14px; }
+
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 14px); z-index: 20; width: min(440px, calc(100% - 24px)); padding: 7px; border-radius: 30px;
+               background: color-mix(in srgb, var(--card) 82%, transparent); backdrop-filter: blur(24px) saturate(1.7); -webkit-backdrop-filter: blur(24px) saturate(1.7);
+               box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, var(--shadow2); display: flex; border: 1px solid var(--line); }
+    nav.tabs[hidden] { display: none; }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; border-radius: 24px; color: var(--muted); font: 650 10.5px var(--sans); padding: 8px 0 7px; transition: all .3s var(--ease); }
+    nav.tabs a svg { width: 23px; height: 23px; } nav.tabs a.on { color: var(--teal); background: var(--teal-soft); }
+    .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw; text-align: center; bottom: calc(env(safe-area-inset-bottom) + 100px); background: var(--ink); color: var(--bg);
+             padding: 12px 20px; border-radius: 20px; font: 600 14px var(--sans); z-index: 80; animation: rise .35s var(--spring) both; box-shadow: var(--shadow2); }
+    .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 12px); z-index: 85; border: 0; background: var(--teal); color: #fff; padding: 12px 22px; border-radius: 999px; font: 700 14px var(--sans); cursor: pointer; box-shadow: var(--shadow2); }
+
+    /* First screen */
+    .welcome { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: calc(env(safe-area-inset-top) + 20px) 0 calc(env(safe-area-inset-bottom) + 28px); }
+    .welcome .art { width: 100%; max-width: 330px; margin: 0 auto 14px; display: block; }
+    .welcome h1 { font-size: 36px; } .choice { display: flex; gap: 16px; align-items: center; text-align: left; width: 100%; border: 0; background: var(--card); border-radius: 26px; padding: 18px; margin-top: 12px;
+             cursor: pointer; color: var(--ink); box-shadow: var(--shadow); transition: transform .2s var(--spring); }
+    .choice:active { transform: scale(.98); } .choice b { display: block; font: 600 19px var(--display); font-variation-settings: "SOFT" 100; } .choice span.t { color: var(--ink2); font-size: 14.5px; line-height: 1.45; display: block; margin-top: 2px; }
+    .choice .bubble { width: 56px; height: 56px; border-radius: 18px; }
+
+    /* Sheets (install) */
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(15,22,21,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; backdrop-filter: blur(2px); }
+    .sheet { width: min(520px, 100%); background: var(--bg); border-radius: 30px 30px 0 0; padding: 12px 22px calc(env(safe-area-inset-bottom) + 20px); max-height: 90vh; overflow-y: auto; animation: up .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
     @keyframes up { from { transform: translateY(100%); } to { transform: none; } } @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-    ol.steps { list-style: none; counter-reset: s; margin: 8px 0; padding: 0; }
-    ol.steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15.5px; line-height: 1.45; }
+    ol.steps { list-style: none; counter-reset: s; margin: 8px 0; padding: 0; background: var(--card); border-radius: 20px; padding: 4px 16px; box-shadow: var(--shadow); }
+    ol.steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15.5px; line-height: 1.45; }
     ol.steps li:first-child { border-top: 0; }
-    ol.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 9px; background: var(--teal-soft); color: var(--teal); font: 700 13px/26px var(--sans); text-align: center; margin-top: 1px; }
-    .ios-ic { display: inline-flex; vertical-align: -5px; width: 22px; height: 22px; border-radius: 6px; background: var(--card); border: 1px solid var(--line2); align-items: center; justify-content: center; color: #1a73e8; margin: 0 2px; }
+    ol.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); font: 700 13px/26px var(--sans); text-align: center; margin-top: 1px; }
+    .ios-ic { display: inline-flex; vertical-align: -5px; width: 22px; height: 22px; border-radius: 6px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line2); align-items: center; justify-content: center; color: #1a73e8; margin: 0 2px; }
     .ios-ic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
@@ -120,7 +221,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "2", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "3", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -136,7 +237,65 @@
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
   const him = () => db.names.him || "siya";
 
-  /* ---------- Verified Philippine numbers (November 2026). NCMH Crisis Hotline: free, 24/7. ---------- */
+  /* ---------- Line icons (24px grid) ---------- */
+  const P = {
+    home: `<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5.5h-6V20H5a1 1 0 0 1-1-1z"/>`, book: `<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5V19.5"/>`,
+    chat: `<path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>`, heart: `<path d="M12 20s-7.5-4.6-7.5-10.5A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>`,
+    leaf: `<path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19 13 11"/>`, sun: `<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>`,
+    moon: `<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>`, music: `<path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>`,
+    wave: `<path d="M3 10c2.5-3 5-3 7.5 0s5 3 7.5 0 3-2 3-2"/><path d="M3 15.5c2.5-3 5-3 7.5 0s5 3 7.5 0 3-2 3-2"/>`, phone: `<path d="M6.5 3.5h3l1.5 4.5-2 1.3a12 12 0 0 0 5.7 5.7l1.3-2 4.5 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/>`,
+    note: `<path d="M6 3.5h9l4 4V20a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 20z"/><path d="M14.5 3.5V8H19M9 12h7M9 15.5h7"/>`, check: `<path d="M5 12.5l4.5 4.5L19 7.5"/>`, x: `<path d="M6 6l12 12M18 6 6 18"/>`,
+    chev: `<path d="M9 5.5 15.5 12 9 18.5"/>`, back: `<path d="M15 5.5 8.5 12l6.5 6.5"/>`, gear: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>`,
+    share: `<path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M5 12v7.5h14V12"/>`, download: `<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/>`, swap: `<path d="M7 7h12l-3.5-3.5M17 17H5l3.5 3.5"/>`,
+    info: `<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/>`, plus: `<path d="M12 5v14M5 12h14"/>`, spark: `<path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z"/>`,
+    shield: `<path d="M12 3.5 19 6v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/>`, map: `<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.3"/>`,
+    hand: `<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11.5V5a1.5 1.5 0 0 1 3 0v6.5M14 11.5V6.5a1.5 1.5 0 0 1 3 0V14c0 3.6-2.4 6.5-6 6.5-2.4 0-3.8-1-5-3l-2.2-3.8a1.4 1.4 0 0 1 2.3-1.6L8 13"/>`,
+    clip: `<path d="M9 4.5h6v2.5H9z"/><path d="M15 5.5h2.5a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1H9M9 12h6M9 15.5h4"/>`,
+  };
+  const ic = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
+  /* Mood faces: soft colour, simple features (rough → glad) */
+  const MOODC = ["#f3a9a0", "#f6c49f", "#f2d98f", "#bcdcc5", "#9fd5c6"];
+  const face = n => { const c = MOODC[n - 1], m = [["M17 34c4-5 10-5 14 0", 1], ["M18 32.5c4-2.5 8-2.5 12 0", 1], ["M18 31h12", 0], ["M18 30c4 3 8 3 12 0", 1], ["M16.5 29c4 6 11 6 15 0", 1]][n - 1][0];
+    return `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="${c}"/><circle cx="17.5" cy="20" r="2.4" fill="#2a2522"/><circle cx="30.5" cy="20" r="2.4" fill="#2a2522"/><path d="${m}" fill="none" stroke="#2a2522" stroke-width="2.6" stroke-linecap="round"/>${n >= 4 ? `<circle cx="13" cy="27" r="3" fill="#fff" opacity=".35"/><circle cx="35" cy="27" r="3" fill="#fff" opacity=".35"/>` : ""}</svg>`; };
+  const MOOD_LABEL = ["Mabigat", "Medyo mabigat", "Okay lang", "Maayos", "Masaya"];
+  const ring = (v, max, size = 92, stroke = 9, cls = "") => { const r = (size - stroke) / 2, c = 2 * Math.PI * r, f = max ? Math.min(1, v / max) : 0;
+    return `<svg viewBox="0 0 ${size} ${size}"><circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke-width="${stroke}"/><circle class="val ${cls}" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - f)).toFixed(1)}"/></svg>`; };
+
+  /* ---------- Illustrations (original, simple shapes) ---------- */
+  const ART = {
+    home: `<svg viewBox="0 0 170 150"><circle cx="112" cy="62" r="34" fill="#f5b764" opacity=".85"/><circle cx="112" cy="62" r="48" fill="#f5b764" opacity=".15"/>
+      <path d="M0 132c30-30 62-36 96-22s52 8 74-4v44H0z" fill="#2a7a70" opacity=".85"/><path d="M20 150c26-26 64-34 96-20s38 10 54 2v18z" fill="#9ccfb8"/>
+      <circle cx="66" cy="96" r="7" fill="#1c2826"/><path d="M58 122c0-10 3-17 8-17s8 7 8 17z" fill="#1c2826"/><circle cx="84" cy="94" r="7" fill="#d7704f"/><path d="M76 122c0-11 3-18 8-18s8 7 8 18z" fill="#d7704f"/></svg>`,
+    learn: `<svg viewBox="0 0 170 150"><circle cx="118" cy="48" r="40" fill="#bfe0cd" opacity=".7"/><path d="M40 112c18-10 36-12 52-4V58c-16-8-34-6-52 4z" fill="#fff"/><path d="M144 112c-18-10-36-12-52-4V58c16-8 34-6 52 4z" fill="#f4fbf7"/>
+      <path d="M92 58v50" stroke="#2a7a70" stroke-width="2"/><path d="M52 74c10-4 20-5 30-2M52 86c10-4 20-5 30-2M102 72c10-3 20-2 30 2M102 84c10-3 20-2 30 2" stroke="#9ccfb8" stroke-width="3" stroke-linecap="round"/>
+      <path d="M92 58c0-14 8-24 20-28-1 13-8 23-20 28z" fill="#2a7a70"/><path d="M92 56c-2-10-8-17-17-19 1 10 7 17 17 19z" fill="#5fae96"/></svg>`,
+    talk: `<svg viewBox="0 0 170 150"><circle cx="120" cy="50" r="42" fill="#f6c4a8" opacity=".55"/><rect x="38" y="40" width="80" height="54" rx="22" fill="#fff"/><path d="M58 92l-10 16 24-14z" fill="#fff"/>
+      <rect x="78" y="72" width="70" height="46" rx="20" fill="#d7704f"/><path d="M130 116l12 14-26-12z" fill="#d7704f"/><circle cx="62" cy="67" r="4" fill="#d7704f"/><circle cx="78" cy="67" r="4" fill="#d7704f"/><circle cx="94" cy="67" r="4" fill="#d7704f"/>
+      <path d="M96 95c6 6 14 6 20 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+    help: `<svg viewBox="0 0 170 150"><circle cx="112" cy="58" r="44" fill="#f4b8b0" opacity=".45"/><path d="M98 122s-44-26-44-60a24 24 0 0 1 44-13 24 24 0 0 1 44 13c0 34-44 60-44 60z" fill="#b8392f" opacity=".9"/>
+      <path d="M98 66v28M84 80h28" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>`,
+    care: `<svg viewBox="0 0 170 150"><circle cx="112" cy="54" r="42" fill="#cfc4f0" opacity=".6"/><path d="M76 104h48l-6 34h-36z" fill="#8f7ed6"/><path d="M72 98h56v10H72z" fill="#7a68c7" rx="3"/>
+      <path d="M100 98V62" stroke="#2a7a70" stroke-width="4" stroke-linecap="round"/><path d="M100 72c-4-16-16-24-30-22 2 15 14 23 30 22z" fill="#5fae96"/><path d="M100 64c4-18 18-28 34-26-2 18-16 28-34 26z" fill="#2a7a70"/>
+      <circle cx="136" cy="96" r="4" fill="#f5b764"/><circle cx="62" cy="40" r="3" fill="#f5b764"/></svg>`,
+    today: `<svg viewBox="0 0 170 150"><g stroke="#f0a93b" stroke-width="5" stroke-linecap="round" opacity=".55"><path d="M108 18v14M146 50l-12 6M70 50l12 6M136 24l-9 10M80 24l9 10"/></g>
+      <circle cx="108" cy="82" r="34" fill="#f5b764"/><circle cx="108" cy="82" r="50" fill="#f5b764" opacity=".18"/><path d="M0 122c40-18 80-20 120-8s40 6 50 2v34H0z" fill="var(--card)" opacity=".7"/><path d="M0 136c40-12 90-14 170-4v18H0z" fill="var(--bg)" opacity=".9"/></svg>`,
+    sleep: `<svg viewBox="0 0 170 150"><circle cx="104" cy="64" r="40" fill="#f6e7b8"/><circle cx="122" cy="52" r="36" fill="#3b4a7a"/><g fill="#fff"><circle cx="40" cy="40" r="2.5"/><circle cx="64" cy="22" r="1.8"/><circle cx="150" cy="104" r="2.2"/><circle cx="56" cy="92" r="1.6"/><circle cx="148" cy="30" r="1.6"/></g>
+      <path d="M30 60l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#f6e7b8" opacity=".85"/></svg>`,
+    music: `<svg viewBox="0 0 170 150"><circle cx="116" cy="56" r="42" fill="#f6c4a8" opacity=".55"/><g transform="rotate(-28 100 90)"><rect x="96" y="14" width="10" height="70" rx="3" fill="#7a4a32"/><rect x="92" y="6" width="18" height="16" rx="4" fill="#5c3523"/>
+      <path d="M101 74c-22 0-32 12-32 26 0 10 7 16 7 22 0 14 12 22 25 22s25-8 25-22c0-6 7-12 7-22 0-14-10-26-32-26z" fill="#d7704f"/><circle cx="101" cy="104" r="9" fill="#5c3523"/><rect x="88" y="126" width="26" height="5" rx="2" fill="#5c3523"/></g>
+      <path d="M140 92v-22l14-3v19" stroke="#2a7a70" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="136" cy="93" r="5" fill="#2a7a70"/><circle cx="150" cy="88" r="5" fill="#2a7a70"/></svg>`,
+    calm: `<svg viewBox="0 0 170 150"><circle cx="108" cy="66" r="24" fill="#9fd5c6"/><circle cx="108" cy="66" r="40" fill="none" stroke="#9fd5c6" stroke-width="3" opacity=".6"/><circle cx="108" cy="66" r="56" fill="none" stroke="#9fd5c6" stroke-width="2" opacity=".35"/>
+      <path d="M10 124c18-12 34-12 52 0s34 12 52 0 34-12 52 0" stroke="#2a7a70" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/><path d="M30 140c18-10 34-10 52 0s34 10 52 0" stroke="#7fb9d6" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/></svg>`,
+    welcome: `<svg viewBox="0 0 360 230"><circle cx="230" cy="92" r="54" fill="#f5b764" opacity=".9"/><circle cx="230" cy="92" r="80" fill="#f5b764" opacity=".14"/>
+      <path d="M0 196c60-56 130-70 200-40s110 20 160-6v80H0z" fill="#2a7a70" opacity=".88"/><path d="M40 230c50-44 130-58 200-34s80 18 120 6v28z" fill="#9ccfb8"/>
+      <circle cx="148" cy="134" r="12" fill="#1c2826"/><path d="M134 182c0-18 6-30 14-30s14 12 14 30z" fill="#1c2826"/><circle cx="178" cy="130" r="12" fill="#d7704f"/><path d="M164 182c0-19 6-32 14-32s14 13 14 32z" fill="#d7704f"/>
+      <path d="M160 160c4 3 8 3 12 0" stroke="#f8f4ef" stroke-width="3" stroke-linecap="round" fill="none"/></svg>`,
+  };
+  const hero = (k, eyebrow, title, sub = "", { top = "", dark = false } = {}) => `<header class="hero${dark ? " dark" : ""}${top && top !== gearBtn() ? " has-top" : ""}" style="background:var(--h-${k})"><div class="art">${ART[k] || ""}</div>${top ? `<div class="top">${top}</div>` : ""}
+    ${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ""}<h1${title.length > 34 ? ' class="long"' : ""}>${title}</h1>${sub ? `<p>${sub}</p>` : ""}</header>`;
+  const backBtn = (href, label) => `<a class="back" href="${href}">${ic("back")}${esc(label)}</a>`;
+  const gearBtn = () => `<span></span><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a>`;
+  const rowcard = (href, icon, b, title, sub = "", extra = "") => `<a class="rowcard" href="${href}"${extra}><span class="bubble ${b}">${ic(icon)}</span><span class="grow">${title}${sub ? `<small>${sub}</small>` : ""}</span><span class="chev">${ic("chev")}</span></a>`;
   const CRISIS = [
     ["Emergency (pulis, ambulansya, bumbero)", "911", "911"],
     ["NCMH Crisis Hotline · landline, toll-free", "1553", "1553"],
@@ -145,13 +304,6 @@
     ["NCMH Crisis Hotline · Globe/TM", "0917-899-8727", "09178998727"],
     ["NCMH Crisis Hotline · Globe/TM", "0966-351-4518", "09663514518"],
   ];
-  const crisisHTML = (title = "Kung may panganib ngayon") => `<div class="crisis"><h3 style="color:var(--red)">${title}</h3>
-    <p class="small" style="margin:6px 0 4px;color:var(--ink2)">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Ang NCMH line ay para rin sa pamilya: puwede kayong tumawag para humingi ng payo.</p>
-    ${CRISIS.map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="small">${l}</span><b>${n}</b></a>`).join("")}</div>`;
-
-  /* =================================================================
-     FAMILY SPACE: understanding, talking (LEAP, low expressed emotion), getting help, caring for yourselves
-     ================================================================= */
   const LESSONS = [
     { id: "what", t: "Ano ba talaga ang psychosis?", m: 3, body: [
       "Ang psychosis ay kondisyon kung saan nahihirapan ang utak na paghiwalayin kung ano ang totoo at kung ano ang galing sa sariling isip. Hindi ito kahinaan ng loob, hindi ito katamaran, at hindi niya ito pinili.",
@@ -285,6 +437,10 @@
     ["Kapag pakiramdam mo may banta", "threat"],
   ];
 
+  const crisisHTML = (title = "Kung may panganib ngayon") => `<div class="crisis"><div class="row" style="gap:10px"><span class="bubble b-rose" style="width:40px;height:40px">${ic("shield")}</span><h3>${title}</h3></div>
+    <p class="small" style="margin:10px 0 4px;color:var(--ink2)">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Ang NCMH line ay para rin sa pamilya: puwede kayong tumawag para humingi ng payo.</p>
+    ${CRISIS.map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div>`;
+
   /* ---------- Routing ---------- */
   let lastHash = "";
   function route() { const h = (location.hash || "#/").slice(2).split("/"); return { v: h[0] || "home", id: h[1] }; }
@@ -299,20 +455,17 @@
   addEventListener("hashchange", render);
   function tabs(v) {
     const t = $("#tabs"); if (!db.space) { t.hidden = true; return; } t.hidden = false;
-    const I = { home: `<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>`, learn: `<path d="M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-7"/><path d="M20 5v12h-7"/>`, talk: `<path d="M4 5h16v11H9l-5 4z"/>`,
-      help: `<path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/>`, care: `<circle cx="12" cy="12" r="8"/><path d="M8.5 13.5c1 1.5 2.1 2 3.5 2s2.5-.5 3.5-2M9 9.5h.01M15 9.5h.01"/>`,
-      today: `<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>`,
-      sleep: `<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>`, music: `<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>`, calm: `<path d="M3 12c3-4 6-4 9 0s6 4 9 0"/><path d="M3 17c3-4 6-4 9 0s6 4 9 0" opacity=".5"/>` };
-    const items = db.space === "family" ? [["home", "Home"], ["learn", "Unawain"], ["talk", "Kausapin"], ["help", "Tulong"], ["care", "Para sa ’yo"]]
-      : [["home", "Today"], ["sleep", "Tulog"], ["music", "Music"], ["calm", "Kalma"]];
-    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", settings: "home" }[v] || v;
-    t.innerHTML = items.map(([k, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}"><svg viewBox="0 0 24 24">${I[k === "home" && db.space === "him" ? "today" : k]}</svg>${l}</a>`).join("");
+    const items = db.space === "family" ? [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]]
+      : [["home", "sun", "Today"], ["sleep", "moon", "Tulog"], ["music", "music", "Music"], ["calm", "wave", "Kalma"]];
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", prep: "help", settings: "home", about: "home" }[v] || v;
+    t.innerHTML = items.map(([k, i, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
   }
   function viewChoose() {
-    return `<div class="choose"><div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Para kanino ang phone na ito?</h1>
-      <p class="muted">Dalawang hiwalay na space. Lahat ng nakasulat ay nananatili lang sa phone na ito.</p>
-      <button data-act="space" data-v="family"><b>Sumusuporta ako sa kanya</b><span>Para sa girlfriend, pamilya at mga kaibigan: pag-unawa, paano makipag-usap, paano siya madadala sa tulong, at pag-aalaga sa sarili.</span></button>
-      <button data-act="space" data-v="him"><b>Para sa akin</b><span>Ang mga araw ko: maliliit na plano, tulog, pagtugtog ng gitara, at mga paraan para kumalma.</span></button></div>`;
+    return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
+      <div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Magkasama tayo dito.</h1>
+      <p class="muted">Dalawang hiwalay na space. Lahat ng isusulat mo ay nananatili lang sa phone na ito.</p>
+      <button class="choice" data-act="space" data-v="family"><span class="bubble b-peach">${ic("heart")}</span><span class="grow"><b>Sumusuporta ako sa kanya</b><span class="t">Para sa girlfriend, pamilya at mga kaibigan: pag-unawa, paano makipag-usap, at paano siya madadala sa tulong.</span></span></button>
+      <button class="choice" data-act="space" data-v="him"><span class="bubble b-sun">${ic("sun")}</span><span class="grow"><b>Para sa akin</b><span class="t">Ang mga araw ko: maliliit na plano, tulog, gitara, at mga paraan para kumalma.</span></span></button></div>`;
   }
 
   /* ---------- Family views ---------- */
@@ -323,110 +476,100 @@
     return viewFamilyHome();
   }
   function viewFamilyHome() {
-    const done = STEPS.filter(s => db.steps[s[0]]).length, next = STEPS.find(s => !db.steps[s[0]]), notes = db.notes.length;
+    const done = STEPS.filter(s => db.steps[s[0]]).length, notes = db.notes.length, read = Object.keys(db.lessons).length;
     const tip = SCENES[1 + Math.floor(Date.now() / DAY) % (SCENES.length - 1)];
-    return `<div class="row between"><div><div class="eyebrow">Kasama · para sa pamilya</div><div class="hello" style="margin-top:4px">Hindi kayo nag-iisa dito.</div></div>
-        <a class="btn ghost sm" href="#/settings" aria-label="Settings">⚙︎</a></div>
-      <div class="card" style="margin-top:16px;border-color:var(--teal)"><div class="eyebrow" style="color:var(--teal)">Pinakamahalaga ngayon</div>
-        <h2 style="margin-top:4px">Tulungan siyang makarating sa psychiatrist</h2>
-        <p class="small muted">Mas maaga ang gamutan, mas maganda ang paggaling. ${done}/${STEPS.length} na hakbang ang tapos.</p>
-        <div class="list" style="margin-top:10px">${STEPS.map(([k, t, d]) => `<button class="li${db.steps[k] ? " done" : ""}" data-act="step" data-v="${k}"><span class="ic">${db.steps[k] ? "✓" : "○"}</span><span class="grow">${t}<small>${d}</small></span></button>`).join("")}</div>
-        ${next ? "" : `<p class="key">Napakagaling. Ang susunod: alamin mula sa doktor kung paano kayo makakatulong sa gamutan, at bantayan ang tulog niya.</p>`}</div>
-      <div class="sec"><div class="eyebrow">Mabilis</div><div class="list">
-        <a href="#/scene/${tip.id}"><span class="ic">💬</span><span class="grow">${esc(tip.t)}<small>Script para sa araw na ito</small></span><span class="chev">›</span></a>
-        <a href="#/notes"><span class="ic">📝</span><span class="grow">Talaan ng napapansin<small>${notes ? `${notes} na tala · para sa doktor` : "Isulat ang tulog, galit, hinala, at magagandang araw"}</small></span><span class="chev">›</span></a>
-        <a href="#/help"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">Kung may krisis<small>911 · NCMH Crisis Hotline 1553</small></span><span class="chev">›</span></a></div></div>
-      <p class="small muted center" style="margin-top:24px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
+    return hero("home", "Kasama · para sa pamilya", "Hindi kayo nag-iisa dito.", db.names.him ? `Para kay ${esc(db.names.him)}, at para sa inyo.` : "Isang hakbang sa isang araw.", { top: gearBtn() })
+      + `<div class="card lift"><div class="row between"><div class="eyebrow" style="color:var(--teal)">Pinakamahalaga ngayon</div><span class="small muted">${done}/${STEPS.length}</span></div>
+        <h2 style="margin-top:6px">Tulungan siyang makarating sa psychiatrist</h2>
+        <p class="small muted" style="margin:6px 0 0">Mas maaga ang gamutan, mas maganda ang paggaling.</p><div class="meter"><i style="width:${done / STEPS.length * 100}%"></i></div>
+        <div class="path" style="margin-top:12px">${STEPS.map(([k, t, d]) => `<button class="${db.steps[k] ? "done" : ""}" data-act="step" data-v="${k}"><span class="dot">${db.steps[k] ? ic("check") : ""}</span><span class="grow"><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div>
+        ${done === STEPS.length ? `<div class="key" style="margin-bottom:0">Napakagaling. Ang susunod: alamin mula sa doktor kung paano kayo makakatulong, at bantayan ang tulog niya.</div>` : ""}</div>
+      <div class="sec"><div class="eyebrow">Para sa araw na ito</div><div class="tiles">
+        <a class="tile" href="#/scene/${tip.id}" style="background:var(--peach)"><span class="bubble" style="color:var(--coral)">${ic("chat")}</span><span><b>${esc(tip.t)}</b><small>Script para ngayon</small></span></a>
+        <a class="tile" href="#/learn" style="background:var(--sage)"><span class="bubble" style="color:var(--teal)">${ic("book")}</span><span><b>Unawain</b><small>${read ? `${read} sa ${LESSONS.length} nabasa` : `${LESSONS.length} maiikling aralin`}</small></span></a>
+        <a class="tile" href="#/notes" style="background:var(--sun)"><span class="bubble" style="color:#b9862a">${ic("note")}</span><span><b>Talaan</b><small>${notes ? `${notes} na tala para sa doktor` : "Isulat ang napapansin"}</small></span></a>
+        <a class="tile" href="#/help" style="background:var(--rose)"><span class="bubble" style="color:var(--red)">${ic("phone")}</span><span><b>Kung may krisis</b><small>911 · NCMH 1553</small></span></a></div></div>
+      <p class="small muted center" style="margin-top:26px">Gabay ito, hindi kapalit ng doktor. <a href="#/about">Saan galing ang mga ito?</a></p>`;
   }
   function viewLearn() {
     const n = LESSONS.filter(l => db.lessons[l.id]).length;
-    return `<div class="eyebrow">Unawain</div><h1 style="margin-top:4px">Ano ang nararanasan niya</h1>
-      <p class="muted">${n ? `${n} sa ${LESSONS.length} na aralin ang nabasa.` : "Maiikling aralin, 2 hanggang 3 minuto bawat isa."} Pinakamaganda kung basahin ng buong pamilya.</p>
-      <div class="list" style="margin-top:14px">${LESSONS.map((l, i) => `<a href="#/lesson/${l.id}" class="${db.lessons[l.id] ? "done" : ""}"><span class="ic">${db.lessons[l.id] ? "✓" : i + 1}</span><span class="grow">${esc(l.t)}<small>${l.m} minuto</small></span><span class="chev">›</span></a>`).join("")}</div>`;
+    return hero("learn", "Unawain", "Ano ang nararanasan niya", `${n ? `${n} sa ${LESSONS.length} na aralin ang nabasa.` : "Maiikling aralin, 2–3 minuto bawat isa."} Pinakamaganda kung basahin ng buong pamilya.`)
+      + `<div class="lift">${LESSONS.map((l, i) => `<a class="rowcard" href="#/lesson/${l.id}"><span class="bubble ${db.lessons[l.id] ? "b-teal" : "b-sage"}" style="font:600 16px var(--display)">${db.lessons[l.id] ? ic("check") : i + 1}</span><span class="grow">${esc(l.t)}<small>${l.m} minutong basa</small></span><span class="chev">${ic("chev")}</span></a>`).join("")}</div>`;
   }
   function viewLesson(id) {
     const i = LESSONS.findIndex(l => l.id === id), l = LESSONS[i]; if (!l) { location.hash = "#/learn"; return null; }
     const next = LESSONS[i + 1];
-    return `<a class="back" href="#/learn">‹ Unawain</a><div class="eyebrow">Aralin ${i + 1} · ${l.m} minuto</div><h1 style="margin-top:4px">${esc(l.t)}</h1>
-      <div class="prose" style="margin-top:12px">${l.body.map(p => `<p>${esc(p)}</p>`).join("")}</div><div class="key">${esc(l.key)}</div>
-      <button class="btn teal block" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${db.lessons[l.id] ? "Nabasa na ✓" : "Naintindihan ko"}${next ? " · Susunod ›" : ""}</button>`;
+    return hero("learn", `Aralin ${i + 1} sa ${LESSONS.length} · ${l.m} minuto`, esc(l.t), "", { top: backBtn("#/learn", "Unawain") })
+      + `<div class="dots" style="margin-top:18px">${LESSONS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
+      <div class="prose">${l.body.map(p => `<p>${esc(p)}</p>`).join("")}</div><div class="key">${esc(l.key)}</div>
+      <button class="btn teal block" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${db.lessons[l.id] ? "Nabasa na" : "Naintindihan ko"}${next ? " · Susunod" : ""}</button>`;
   }
   function viewTalk() {
     const p = Object.keys(db.practice).length;
-    return `<div class="eyebrow">Kausapin</div><h1 style="margin-top:4px">Paano makipag-usap sa kanya</h1>
-      <p class="muted">Mga script para sa totoong sitwasyon. Hindi kailangang perpekto; ang mahalaga ay mahinahon at may pagdamay.</p>
-      <div class="list" style="margin-top:14px">${SCENES.map(s => `<a href="#/scene/${s.id}"><span class="ic">${s.id === "leap" ? "★" : s.danger ? "!" : "💬"}</span><span class="grow">${esc(s.t)}${s.sit ? `<small>${esc(s.sit)}</small>` : "<small>Basahin muna ito</small>"}</span><span class="chev">›</span></a>`).join("")}</div>
-      <div class="sec"><div class="eyebrow">Mag-ensayo</div><a class="card" href="#/practice" style="display:block;text-decoration:none;color:var(--ink)"><h3>Subukan ang sarili: ${PRACTICE.length} sitwasyon</h3>
-        <p class="small muted" style="margin:4px 0 0">Mas madaling maalala ang tamang sasabihin kapag na-ensayo na. ${p ? `${p} na ang nasagot mo.` : ""}</p></a></div>`;
+    return hero("talk", "Kausapin", "Paano makipag-usap sa kanya", "Hindi kailangang perpekto. Ang mahalaga ay mahinahon at may pagdamay.")
+      + `<div class="lift">${SCENES.map(s => rowcard(`#/scene/${s.id}`, s.id === "leap" ? "spark" : s.danger ? "shield" : "chat", s.id === "leap" ? "b-teal" : s.danger ? "b-rose" : "b-peach", esc(s.t), esc(s.sit || "Basahin muna ito"))).join("")}</div>
+      <div class="sec"><a class="tile" href="#/practice" style="background:var(--teal);color:#fff;min-height:0;flex-direction:row;align-items:center;gap:14px"><span class="bubble" style="color:var(--teal);background:#fff">${ic("spark")}</span>
+        <span class="grow"><b style="color:#fff">Mag-ensayo: ${PRACTICE.length} sitwasyon</b><small style="color:rgba(255,255,255,.85)">Mas madaling maalala kapag na-ensayo na.${p ? ` ${p} na ang nasagot mo.` : ""}</small></span></a></div>`;
   }
   function viewScene(id) {
     const s = SCENES.find(x => x.id === id); if (!s) { location.hash = "#/talk"; return null; }
-    if (s.steps) return `<a class="back" href="#/talk">‹ Kausapin</a><h1>${esc(s.t)}</h1><p class="prose" style="margin-top:10px">${esc(s.intro)}</p>
-      ${s.steps.map(([h, d], i) => `<div class="card"><div class="eyebrow" style="color:var(--teal)">${i + 1}</div><h3>${esc(h)}</h3><p style="margin:6px 0 0">${esc(d)}</p></div>`).join("")}
+    if (s.steps) return hero("talk", "Ang paraan", esc(s.t), "", { top: backBtn("#/talk", "Kausapin") }) + `<p class="prose" style="margin-top:18px">${esc(s.intro)}</p>
+      <div class="steps-big">${s.steps.map(([h, d], i) => `<div class="card"><div class="num">HAKBANG ${i + 1}</div><h3>${esc(h)}</h3><p style="margin:8px 0 0;color:var(--ink2)">${esc(d)}</p></div>`).join("")}</div>
       <div class="key">${esc(s.key)}</div><p class="small muted">Mula sa aklat na “I Am Not Sick, I Don’t Need Help!” ni Xavier Amador.</p>`;
-    return `<a class="back" href="#/talk">‹ Kausapin</a><h1>${esc(s.t)}</h1><p class="muted" style="margin-top:8px">${esc(s.sit)}</p>
-      ${s.danger ? `<div class="warn small"><b>Kung may panganib</b> sa kanya o sa iba: tumawag sa 911 o NCMH 1553. <a href="#/help">Mga numero</a></div>` : ""}
-      <div class="sec"><div class="eyebrow">Iwasan</div>${s.avoid.map(a => `<div class="avoid">${esc(a)}</div>`).join("")}</div>
+    return hero("talk", "Sitwasyon", esc(s.t), esc(s.sit), { top: backBtn("#/talk", "Kausapin") })
+      + `${s.danger ? `<div class="warn" style="margin-top:18px"><b>Kung may panganib</b> sa kanya o sa iba: tumawag sa 911 o NCMH 1553. <a href="#/help">Mga numero</a></div>` : ""}
+      <div class="sec"><div class="eyebrow">Iwasan</div><div class="card" style="padding:6px 18px">${s.avoid.map(a => `<div class="avoid"><span class="x">${ic("x")}</span><span>${esc(a)}</span></div>`).join("")}</div></div>
       <div class="sec"><div class="eyebrow">Subukan sabihin</div>${s.say.map(a => `<div class="say">${esc(a)}</div>`).join("")}</div>
-      <div class="key" style="font-weight:500">${esc(s.why)}</div>`;
+      <div class="key" style="font-weight:500;font-size:16px">${esc(s.why)}</div>`;
   }
   let pq = 0;
   function viewPractice() {
-    const q = PRACTICE[pq % PRACTICE.length], ans = db.practice[pq % PRACTICE.length];
-    return `<a class="back" href="#/talk">‹ Kausapin</a><div class="eyebrow">Sitwasyon ${pq % PRACTICE.length + 1} sa ${PRACTICE.length}</div><h2 style="margin-top:6px">${esc(q.q)}</h2>
-      <div id="opts">${q.o.map(([t, g], i) => `<button class="opt${ans != null ? (g ? " good" : i === ans ? " bad" : "") : ""}" data-act="pick" data-v="${i}" ${ans != null ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+    const k = pq % PRACTICE.length, q = PRACTICE[k], ans = db.practice[k];
+    return hero("talk", `Sitwasyon ${k + 1} sa ${PRACTICE.length}`, "Mag-ensayo", "", { top: backBtn("#/talk", "Kausapin") })
+      + `<div class="dots" style="margin-top:18px">${PRACTICE.map((_, j) => `<i class="${j === k ? "on" : ""}"></i>`).join("")}</div>
+      <h2 style="font-size:21px;line-height:1.35">${esc(q.q)}</h2>
+      <div id="opts">${q.o.map(([t, g], i) => `<button class="opt${ans != null ? (g ? " good" : i === ans ? " bad" : "") : ""}" data-act="pick" data-v="${i}" ${ans != null ? "disabled" : ""}><span class="mark">${ans != null && (g || i === ans) ? ic(g ? "check" : "x") : ""}</span><span>${esc(t)}</span></button>`).join("")}</div>
       <div class="fb" id="fb">${ans != null ? esc(q.o[ans][2]) + (q.o[ans][1] ? "" : " " + esc(q.o.find(o => o[1])[2])) : ""}</div>
-      <div class="row between" style="margin-top:18px"><button class="btn ghost sm" data-act="pqreset">Ulitin lahat</button><button class="btn teal sm" data-act="pqnext">Susunod ›</button></div>`;
+      <div class="row between" style="margin-top:20px"><button class="btn ghost sm" data-act="pqreset">Ulitin lahat</button><button class="btn teal sm" data-act="pqnext">Susunod</button></div>`;
   }
   function viewHelp() {
-    return `<div class="eyebrow">Tulong</div><h1 style="margin-top:4px">Paano siya madadala sa tulong</h1>
-      ${crisisHTML()}
+    return hero("help", "Tulong", "Paano siya madadala sa tulong", "Hakbang-hakbang, kasama ang mga numerong puwedeng tawagan.")
+      + `<div class="lift">${crisisHTML()}</div>
       <div class="sec"><div class="eyebrow">Para sa konsulta (hindi emergency)</div>
-        <div class="card"><h3>National Center for Mental Health (NCMH)</h3><p class="small" style="margin:4px 0">9 De Pebrero St., Mauway, Mandaluyong City. Adult outpatient: <a href="tel:0285319001">(02) 8531-9001</a> local 302, Lunes–Biyernes, 8am–5pm.</p>
-          <p class="small muted" style="margin:0">Tumawag muna para kumpirmahin ang schedule, bayad at kung tumatanggap ng walk-in. Maghanda ng kalahating araw.</p></div>
-        <div class="card"><h3>Malapit na ospital</h3><p class="small" style="margin:4px 0">Maraming government at private hospital ang may Department of Psychiatry o psychiatrist sa OPD. Itanong sa pinakamalapit na ospital o sa barangay health center kung saan ang pinakamalapit na psychiatrist. Tanungin din kung may PhilHealth coverage.</p></div>
-        <div class="card"><h3>Kung ayaw pa niya</h3><ul class="tight small"><li>Kayo muna ang kumonsulta sa psychiatrist. Humingi ng gabay para sa sitwasyon ninyo.</li><li>Gamitin ang LEAP: i-frame tungkol sa tulog, stress, o pagod, hindi sa “sakit.” <a href="#/scene/refuse">Mga script</a></li><li>Isama ang taong pinakapinagkakatiwalaan niya.</li><li>Huwag gumamit ng panlilinlang; kailangan ninyo ang tiwala niya sa susunod.</li><li>Kung may panganib sa buhay niya o ng iba: emergency na ito. 911 o emergency room.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Paghahanda</div><div class="list">
-        <a href="#/prep"><span class="ic">📋</span><span class="grow">Ihanda para sa doktor<small>Buod ng inyong tala at mga tanong</small></span><span class="chev">›</span></a>
-        <button class="li" data-act="sharecrisis"><span class="ic">↗</span><span class="grow">Ibahagi ang crisis numbers<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button></div></div>`;
+        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sky">${ic("map")}</span><div class="grow"><h3>National Center for Mental Health</h3><p class="small" style="margin:6px 0">9 De Pebrero St., Mauway, Mandaluyong City. Adult outpatient: <a href="tel:0285319001">(02) 8531-9001</a> local 302, Lunes–Biyernes, 8am–5pm.</p>
+          <p class="small muted" style="margin:0">Tumawag muna para kumpirmahin ang schedule, bayad at kung tumatanggap ng walk-in. Maghanda ng kalahating araw.</p></div></div></div>
+        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sage">${ic("heart")}</span><div class="grow"><h3>Malapit na ospital</h3><p class="small" style="margin:6px 0 0">Maraming government at private hospital ang may Department of Psychiatry o psychiatrist sa OPD. Itanong sa pinakamalapit na ospital o barangay health center kung saan ang pinakamalapit na psychiatrist, at kung may PhilHealth coverage.</p></div></div></div>
+        <div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-peach">${ic("hand")}</span><div class="grow"><h3>Kung ayaw pa niya</h3><ul class="tight small"><li>Kayo muna ang kumonsulta sa psychiatrist para sa gabay.</li><li>Gamitin ang LEAP: tungkol sa tulog, stress o pagod, hindi sa “sakit.” <a href="#/scene/refuse">Mga script</a></li><li>Isama ang taong pinakapinagkakatiwalaan niya.</li><li>Huwag gumamit ng panlilinlang; kailangan ninyo ang tiwala niya.</li><li>Kung may panganib sa buhay niya o ng iba: emergency na ito.</li></ul></div></div></div></div>
+      <div class="sec"><div class="eyebrow">Paghahanda</div>${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
+        <button class="rowcard" data-act="sharecrisis"><span class="bubble b-rose">${ic("share")}</span><span class="grow">Ibahagi ang crisis numbers<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button></div>`;
   }
   function viewNotes() {
     const list = [...db.notes].sort((a, b) => b.at - a.at);
-    return `<a class="back" href="#/">‹ Home</a><div class="eyebrow">Talaan</div><h1 style="margin-top:4px">Mga napapansin</h1>
-      <p class="muted small">Maikli lang: ano ang nangyari, kailan. Malaking tulong ito sa doktor, lalo sa unang konsulta.</p>
-      <div class="card" style="margin-top:12px"><div class="chips" id="ntags">${NOTE_TAGS.map(t => `<button class="chip" data-act="ntag" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
-        <textarea id="ntext" placeholder="Hal. Hindi natulog hanggang 4am. Sabi niya may nakikinig sa usapan namin." style="margin-top:10px"></textarea>
-        <button class="btn teal block" data-act="addnote" style="margin-top:10px">I-save</button></div>
-      <div class="sec">${list.length ? list.map(n => `<div class="note"><div class="row between"><span class="d">${dstr(n.at)} · ${new Date(n.at).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" })}</span><button class="btn ghost sm" data-act="delnote" data-v="${n.id}" aria-label="Burahin">×</button></div>
-        ${n.tags.length ? `<div class="chips" style="margin:4px 0">${n.tags.map(t => `<span class="chip on" style="cursor:default">${esc(t)}</span>`).join("")}</div>` : ""}${n.text ? `<div>${esc(n.text)}</div>` : ""}</div>`).join("") : `<p class="muted center">Wala pang tala.</p>`}</div>`;
-  }
-  function prepText() {
-    const since = Date.now() - 60 * DAY, ns = db.notes.filter(n => n.at >= since).sort((a, b) => a.at - b.at), counts = {};
-    ns.forEach(n => n.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
-    return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gumagamit siya ng droga o alak, at kung may gamot siyang iniinom.`;
+    return hero("home", "Talaan", "Mga napapansin", "Maikli lang: ano ang nangyari, kailan. Malaking tulong ito sa doktor.", { top: backBtn("#/", "Home") })
+      + `<div class="card lift"><div class="chips" id="ntags">${NOTE_TAGS.map(t => `<button class="chip" data-act="ntag" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+        <textarea id="ntext" placeholder="Hal. Hindi natulog hanggang 4am. Sabi niya may nakikinig sa usapan namin." style="margin-top:12px"></textarea>
+        <button class="btn teal block" data-act="addnote" style="margin-top:12px">I-save</button></div>
+      <div class="sec">${list.length ? `<div class="card" style="padding:4px 18px">${list.map(n => `<div class="note"><div class="row between"><span class="d">${dstr(n.at)} · ${new Date(n.at).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" })}</span><button class="btn ghost sm" style="min-height:30px;padding:2px 8px" data-act="delnote" data-v="${n.id}" aria-label="Burahin">${ic("x")}</button></div>
+        ${n.tags.length ? `<div class="chips" style="margin:6px 0">${n.tags.map(t => `<span class="chip on" style="cursor:default;padding:5px 11px;font-size:12.5px">${esc(t)}</span>`).join("")}</div>` : ""}${n.text ? `<div>${esc(n.text)}</div>` : ""}</div>`).join("")}</div>
+        <a class="btn block" href="#/prep" style="margin-top:12px">${ic("clip")} Ihanda para sa doktor</a>` : `<p class="muted center">Wala pang tala.</p>`}</div>`;
   }
   function viewPrep() {
-    return `<a class="back" href="#/help">‹ Tulong</a><div class="eyebrow">Para sa doktor</div><h1 style="margin-top:4px">Ihanda ang konsulta</h1>
-      <p class="muted small">Ginawa mula sa inyong Talaan. Puwedeng i-edit bago ibahagi o ipakita.</p>
-      <textarea id="prep" style="min-height:360px;margin-top:10px;font-size:15px">${esc(prepText())}</textarea>
-      <div class="row" style="margin-top:10px;gap:8px"><button class="btn teal" data-act="shareprep">Ibahagi o kopyahin</button><a class="btn ghost" href="#/notes">Magdagdag ng tala</a></div>`;
+    return hero("help", "Para sa doktor", "Ihanda ang konsulta", "Ginawa mula sa inyong Talaan. Puwedeng i-edit bago ibahagi.", { top: backBtn("#/help", "Tulong") })
+      + `<div class="card lift"><textarea id="prep" style="min-height:380px;font-size:15px;box-shadow:none;background:transparent;padding:4px">${esc(prepText())}</textarea></div>
+      <div class="row" style="margin-top:14px;gap:10px"><button class="btn teal" data-act="shareprep">${ic("share")} Ibahagi o kopyahin</button><a class="btn ghost" href="#/notes">Magdagdag ng tala</a></div>`;
   }
   function viewCare() {
-    const last = db.care[db.care.length - 1];
-    return `<div class="eyebrow">Para sa ’yo</div><h1 style="margin-top:4px">Alagaan din ang sarili mo</h1>
-      <p class="prose">Ang pag-aalaga sa taong may psychosis ay mabigat. Ang pagod at stress ng pamilya ay nakakaapekto rin sa kanya, kaya ang pag-aalaga sa sarili mo ay bahagi ng pag-aalaga sa kanya.</p>
-      <div class="card"><h3>Kumusta ka ngayon?</h3><div class="moods" style="margin-top:10px">${["😣", "😟", "😐", "🙂", "😊"].map((m, i) => `<button data-act="care" data-v="${i + 1}" class="${last && dayKey(last.at) === dayKey(Date.now()) && last.v === i + 1 ? "on" : ""}">${m}</button>`).join("")}</div>
-        ${db.care.length >= 3 ? `<p class="small muted" style="margin:10px 0 0">Nitong huling linggo: ${careTrend()}</p>` : ""}</div>
-      <div class="sec"><div class="eyebrow">Mga paalala</div><div class="card"><ul class="tight">
-        <li><b>Hindi mo kasalanan.</b> Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis.</li>
-        <li><b>Hatiin ang pasanin.</b> Huwag iisa ang taong laging nagbabantay. Magpalitan.</li>
-        <li><b>Matulog, kumain, lumabas.</b> Hindi ka makakatulong kung ubos ka na.</li>
-        <li><b>May sariling buhay ka pa rin.</b> Okay lang magpahinga at mag-enjoy nang walang guilt.</li>
-        <li><b>Humingi ng tulong para sa sarili mo.</b> Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist para sa sarili mo.</li>
-        <li><b>Hindi ka nag-iisa.</b> May mga kaibigan na handang tumulong. Hayaan ninyong tumulong sila.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Mga palatandaan na pagod ka na</div><div class="card small">Laging iritable, hirap matulog, umiiyak nang madalas, wala nang gana sa ibang bagay, o pakiramdam na walang pag-asa. Kung ganito ka na nang ilang linggo, kausapin ang isang mapagkakatiwalaang tao o propesyonal.</div></div>`;
+    const last = db.care[db.care.length - 1], today = last && dayKey(last.at) === dayKey(Date.now()) ? last.v : 0;
+    return hero("care", "Para sa ’yo", "Alagaan din ang sarili mo", "Ang pag-aalaga sa sarili mo ay bahagi ng pag-aalaga sa kanya.")
+      + `<div class="card lift"><h3>Kumusta ka ngayon?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(n => `<button data-act="care" data-v="${n}" class="${today === n ? "on" : ""}" aria-label="${MOOD_LABEL[n - 1]}">${face(n)}</button>`).join("")}</div>
+        <p class="small muted center" style="margin:10px 0 0">${today ? MOOD_LABEL[today - 1] : "Pumili ng isa"}${db.care.length >= 3 ? ` · Nitong linggo: ${careTrend()}` : ""}</p></div>
+      <div class="sec"><div class="eyebrow">Mga paalala</div>
+        ${[["shield", "b-lav", "Hindi mo kasalanan.", "Hindi ang pamilya o ang girlfriend ang dahilan ng psychosis."], ["hand", "b-peach", "Hatiin ang pasanin.", "Huwag iisa ang taong laging nagbabantay. Magpalitan."],
+          ["sun", "b-sun", "Matulog, kumain, lumabas.", "Hindi ka makakatulong kung ubos ka na."], ["leaf", "b-sage", "May sariling buhay ka pa rin.", "Okay lang magpahinga at mag-enjoy nang walang guilt."],
+          ["phone", "b-rose", "Humingi ng tulong para sa sarili mo.", "Ang NCMH 1553 ay para rin sa pamilya. Puwede ring kumonsulta sa psychologist."], ["heart", "b-teal", "Hindi ka nag-iisa.", "May mga kaibigang handang tumulong. Hayaan ninyong tumulong sila."]]
+          .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>
+      <div class="sec"><div class="eyebrow">Mga palatandaan na pagod ka na</div><div class="card small" style="line-height:1.6">Laging iritable, hirap matulog, madalas umiiyak, wala nang gana sa ibang bagay, o pakiramdam na walang pag-asa. Kung ganito ka na nang ilang linggo, kausapin ang isang mapagkakatiwalaang tao o propesyonal.</div></div>`;
   }
-  function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Mangyaring kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
 
   /* ---------- His views ---------- */
   function himView(v, id) {
@@ -435,52 +578,125 @@
   }
   const things = () => db.things || DEFAULT_THINGS;
   function viewToday() {
-    const k = dayKey(Date.now()), t = db.today[k] || {}, hr = new Date().getHours(), n = things().filter((_, i) => t[i]).length;
+    const k = dayKey(Date.now()), t = db.today[k] || {}, hr = new Date().getHours(), n = things().filter((_, i) => t[i]).length, tot = things().length;
     const greet = hr < 12 ? "Magandang umaga" : hr < 18 ? "Magandang hapon" : "Magandang gabi", name = db.names.him ? `, ${esc(db.names.him)}` : "";
-    const days = [...Array(7)].map((_, i) => { const d = Date.now() - (6 - i) * DAY, x = db.today[dayKey(d)] || {}; return Object.values(x).filter(Boolean).length; });
-    return `<div class="row between"><div><div class="eyebrow">${new Date().toLocaleDateString("en-PH", { weekday: "long", day: "numeric", month: "long" })}</div><div class="hello" style="margin-top:4px">${greet}${name}.</div></div>
-        <a class="btn ghost sm" href="#/settings" aria-label="Settings">⚙︎</a></div>
-      <p class="muted">Ilang maliliit na bagay para sa araw na ito. Kahit isa lang, sapat na.</p>
-      <div class="things" style="margin-top:12px">${things().map((x, i) => `<button class="thing${t[i] ? " done" : ""}" data-act="thing" data-v="${i}"><span class="tick">${t[i] ? "✓" : ""}</span><span class="grow">${esc(x)}</span></button>`).join("")}</div>
-      ${n ? `<p class="center" style="margin-top:12px;color:var(--teal);font-weight:600">${n === things().length ? "Lahat nagawa mo ngayon. Ang galing." : n === 1 ? "Isa na. Magandang simula." : `${n} na. Tuloy lang.`}</p>` : ""}
-      <div class="card" style="margin-top:16px"><h3>Kumusta ang pakiramdam mo?</h3><div class="moods" style="margin-top:10px">${["😣", "😟", "😐", "🙂", "😊"].map((m, i) => `<button data-act="mood" data-v="${i + 1}" class="${db.moods[k] === i + 1 ? "on" : ""}">${m}</button>`).join("")}</div></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map((c, i) => `<div><i class="${c ? "" : "zero"}" style="height:${c ? Math.max(12, c / things().length * 100) : 5}%"></i><span>${["L", "L", "M", "M", "H", "B", "S"][new Date(Date.now() - (6 - i) * DAY).getDay()]}</span></div>`).join("")}</div>
-        <p class="small muted" style="margin:8px 0 0">Bawat bar: ilan sa maliliit na bagay ang nagawa mo. Walang tama o mali.</p></div></div>
-      <div class="sec"><div class="list"><a href="#/calm"><span class="ic">〰</span><span class="grow">Medyo mabigat ang araw?<small>Mga paraan para kumalma</small></span><span class="chev">›</span></a>
-        ${callsHTML()}</div></div>`;
+    const days = [...Array(7)].map((_, i) => { const d = Date.now() - (6 - i) * DAY, x = db.today[dayKey(d)] || {}; return [Object.values(x).filter(Boolean).length, new Date(d).getDay()]; });
+    const msg = n === 0 ? "Kahit isa lang, sapat na." : n === tot ? "Lahat nagawa mo ngayon. Ang galing." : n === 1 ? "Isa na. Magandang simula." : `${n} na. Tuloy lang.`;
+    return hero("today", new Date().toLocaleDateString("en-PH", { weekday: "long", day: "numeric", month: "long" }), `${greet}${name}.`, "Ilang maliliit na bagay para sa araw na ito.", { top: gearBtn() })
+      + `<div class="card lift ringcard"><div class="ring">${ring(n, tot)}<b>${n}/${tot}</b></div><div class="grow"><h3>Ngayong araw</h3><p class="small muted" style="margin:4px 0 0">${msg}</p></div></div>
+      <div class="sec" style="margin-top:16px">${things().map((x, i) => `<button class="thing${t[i] ? " done" : ""}" data-act="thing" data-v="${i}"><span class="tick">${ic("check")}</span><span class="grow">${esc(x)}</span></button>`).join("")}</div>
+      <div class="sec"><div class="card"><h3>Kumusta ang pakiramdam mo?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(m => `<button data-act="mood" data-v="${m}" class="${db.moods[k] === m ? "on" : ""}" aria-label="${MOOD_LABEL[m - 1]}">${face(m)}</button>`).join("")}</div>
+        <p class="small muted center" style="margin:10px 0 0">${db.moods[k] ? MOOD_LABEL[db.moods[k] - 1] : "Pumili ng isa"}</p></div></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([c, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${c ? "" : "zero"}" style="height:${c ? Math.max(14, c / tot * 100) : 6}%"></i><span>${["L", "L", "M", "M", "H", "B", "S"][wd]}</span></div>`).join("")}</div>
+        <p class="small muted" style="margin:10px 0 0">Ilan sa maliliit na bagay ang nagawa mo bawat araw. Walang tama o mali.</p></div></div>
+      <div class="sec">${rowcard("#/calm", "wave", "b-sky", "Medyo mabigat ang araw?", "Mga paraan para kumalma")}${callsHTML()}</div>`;
   }
-  const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="ic">☎</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
-  function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
+  const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a class="rowcard" href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="bubble b-teal">${ic("phone")}</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
+  const ncmhRow = () => `<a class="rowcard" href="tel:1553"><span class="bubble b-rose">${ic("phone")}</span><span class="grow">NCMH Crisis Hotline<small>1553 · 0917-899-8727 · 0919-057-1553 · libre, 24 oras</small></span></a>`;
   function viewSleep() {
     const k = dayKey(Date.now()), e = db.sleep[k] || {};
-    const days = [...Array(7)].map((_, i) => sleepHours(db.sleep[dayKey(Date.now() - (6 - i) * DAY)]));
-    const got = days.filter(x => x != null), avg = got.length ? got.reduce((a, b) => a + b, 0) / got.length : null;
+    const days = [...Array(7)].map((_, i) => [sleepHours(db.sleep[dayKey(Date.now() - (6 - i) * DAY)]), new Date(Date.now() - (6 - i) * DAY).getDay()]);
+    const got = days.map(d => d[0]).filter(x => x != null), avg = got.length ? got.reduce((a, b) => a + b, 0) / got.length : null;
     const wakes = [...Array(7)].map((_, i) => db.sleep[dayKey(Date.now() - (6 - i) * DAY)]?.wake).filter(Boolean).map(w => { const [h, m] = w.split(":").map(Number); return h * 60 + m; });
-    const spread = wakes.length >= 3 ? Math.max(...wakes) - Math.min(...wakes) : null;
-    return `<div class="eyebrow">Tulog</div><h1 style="margin-top:4px">Kagabi</h1><p class="muted small">Ang maayos na tulog ay isa sa pinakamalaking nakakatulong sa isip at pakiramdam.</p>
-      <div class="card" style="margin-top:12px"><div class="row" style="gap:12px"><label class="f grow" style="margin:0"><span>Natulog</span><input type="time" id="bed" value="${esc(e.bed || "")}"></label>
+    const spread = wakes.length >= 3 ? Math.max(...wakes) - Math.min(...wakes) : null, last = sleepHours(e);
+    return hero("sleep", "Tulog", "Kagabi", "Ang maayos na tulog ay isa sa pinakamalaking nakakatulong sa isip at pakiramdam.", { dark: true })
+      + `<div class="card lift"><div class="row" style="gap:12px"><label class="f grow" style="margin:0"><span>Natulog</span><input type="time" id="bed" value="${esc(e.bed || "")}"></label>
         <label class="f grow" style="margin:0"><span>Gumising</span><input type="time" id="wake" value="${esc(e.wake || "")}"></label></div>
-        <div class="row between" style="margin-top:12px"><span class="small muted">Gaano kaayos?</span><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map((h, i) => `<div><i class="${h == null ? "zero" : ""}" style="height:${h == null ? 5 : Math.min(100, h / 10 * 100)}%;${h != null && (h < 5 || h > 11) ? "background:var(--coral)" : ""}"></i><span>${h == null ? "" : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
-        <p class="small" style="margin:8px 0 0">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
-      <div class="sec"><div class="eyebrow">Mga nakakatulong (mula sa sleep research)</div><div class="card"><ul class="tight">
-        <li><b>Parehong oras ng paggising</b> araw-araw, kahit weekend. Ito ang pinakamalakas na tip.</li><li><b>Liwanag sa umaga:</b> lumabas o buksan ang bintana sa unang oras paggising.</li>
-        <li><b>Walang kape</b> pagkatapos ng tanghali, at iwasan ang alak at marijuana: pinapasama nila ang tulog.</li><li><b>Kama ay para sa tulog.</b> Kung hindi makatulog pagkalipas ng mga 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na.</li>
-        <li><b>Pampakalma bago matulog:</b> mahinang musika, ilang minutong paghinga, walang cellphone sa kama.</li><li><b>Iwasan ang mahabang idlip</b> sa hapon; kung kailangan, 20–30 minuto lang bago mag-3pm.</li></ul></div></div>`;
+        ${last != null ? `<p class="center" style="margin:12px 0 0;font:600 18px var(--display);font-variation-settings:'SOFT' 100">${last.toFixed(1)} oras</p>` : ""}
+        <div style="margin-top:14px"><div class="small muted" style="margin:0 4px 8px">Gaano kaayos ang tulog mo?</div><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([h, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${h == null ? "zero" : h < 5 || h > 11 ? "warm" : ""}" style="height:${h == null ? 6 : Math.max(10, Math.min(100, h / 10 * 100))}%"></i><span>${h == null ? ["L", "L", "M", "M", "H", "B", "S"][wd] : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
+        <p class="small" style="margin:10px 0 0;color:var(--ink2)">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
+      <div class="sec"><div class="eyebrow">Mga nakakatulong</div>
+        ${[["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras paggising."],
+          ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "At iwasan ang alak at marijuana: pinapasama nila ang tulog."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
+          ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]]
+          .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>`;
   }
   function viewMusic() {
     const wk = db.music.filter(m => m.at > Date.now() - 7 * DAY), mins = Math.round(wk.reduce((a, m) => a + m.min, 0)), idea = MUSIC_IDEAS[Math.floor(Date.now() / DAY) % MUSIC_IDEAS.length];
-    return `<div class="eyebrow">Music</div><h1 style="margin-top:4px">Balik-gitara, dahan-dahan</h1>
-      <p class="muted">Walang pressure, walang audience. Para lang sa ’yo.</p>
-      <div class="card" style="margin-top:12px"><div class="eyebrow" style="color:var(--teal)">Ideya para ngayon</div><p style="font:17px/1.5 var(--serif);margin:6px 0 0">${esc(idea)}</p>
-        <button class="btn ghost sm" data-act="newidea" style="margin-top:6px;padding-left:0">Ibang ideya ›</button></div>
-      <div class="card"><div class="timer" id="mtime">${fmtT(mt.left)}</div><div class="chips" style="justify-content:center">${[5, 10, 15, 20].map(m => `<button class="chip${mt.len === m * 60 ? " on" : ""}" data-act="mlen" data-v="${m}">${m} min</button>`).join("")}</div>
-        <button class="btn teal block" data-act="mstart" id="mstart" style="margin-top:12px">${mt.run ? "Tapusin" : "Simulan"}</button>
-        <p class="small muted center" style="margin:8px 0 0">Kahit itigil mo bago matapos ang oras, binibilang pa rin.</p></div>
-      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="row between"><span>${wk.length ? `${wk.length} beses · ${mins} minuto` : "Wala pa. Isang kanta lang, kung kaya."}</span><span style="font-size:22px">🎸</span></div></div></div>
-      <div class="sec"><div class="list"><a href="../woodshed/"><span class="ic">●</span><span class="grow">Mag-record sa Woodshed<small>Para marinig mo ang sarili mo, kung gusto mo</small></span><span class="chev">›</span></a></div></div>
-      <p class="small muted" style="margin-top:16px">Bakit musika: sa pananaliksik, ang music therapy ay nakakatulong sa pakiramdam, motibasyon at pakikisalamuha. Hindi kailangang magaling ngayon. Ang mahalaga ay bumalik ang saya sa pagtugtog.</p>`;
+    return hero("music", "Music", "Balik-gitara, dahan-dahan", "Walang pressure, walang audience. Para lang sa ’yo.")
+      + `<div class="card lift"><div class="eyebrow" style="color:var(--coral)">Ideya para ngayon</div><p class="idea">${esc(idea)}</p>
+        <button class="btn ghost sm" data-act="newidea" style="padding-left:0;margin-top:4px">Ibang ideya</button></div>
+      <div class="card"><div class="timer-ring" id="tring">${ring(mt.left, mt.len, 220, 12)}<div class="timer" id="mtime">${fmtT(mt.left)}</div></div>
+        <div class="chips" style="justify-content:center">${[5, 10, 15, 20].map(m => `<button class="chip${mt.len === m * 60 ? " on" : ""}" data-act="mlen" data-v="${m}">${m} min</button>`).join("")}</div>
+        <button class="btn teal block" data-act="mstart" id="mstart" style="margin-top:14px">${mt.run ? "Tapusin" : "Simulan"}</button>
+        <p class="small muted center" style="margin:10px 0 0">Kahit itigil mo bago matapos, binibilang pa rin.</p></div>
+      <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card ringcard"><div class="ring" style="width:72px;height:72px">${ring(Math.min(wk.length, 7), 7, 72, 8, "music")}<b style="font-size:20px">${wk.length}</b></div>
+        <div class="grow"><h3>${wk.length ? `${wk.length} beses · ${mins} minuto` : "Wala pa"}</h3><p class="small muted" style="margin:4px 0 0">${wk.length ? "Bawat session ay mahalaga." : "Isang kanta lang, kung kaya."}</p></div></div></div>
+      <div class="sec">${rowcard("../woodshed/", "music", "b-peach", "Mag-record sa Woodshed", "Para marinig mo ang sarili mo, kung gusto mo")}</div>
+      <p class="small muted" style="margin-top:18px">Sa pananaliksik, ang music therapy ay nakakatulong sa pakiramdam, motibasyon at pakikisalamuha. Hindi kailangang magaling ngayon. Ang mahalaga ay bumalik ang saya sa pagtugtog.</p>`;
   }
+  function viewCalm(id) {
+    if (id === "breath") return hero("calm", "Kalma", "Huminga nang dahan-dahan", "4 na segundo papasok, 6 na segundo palabas.", { top: backBtn("#/calm", "Kalma") })
+      + `<div class="breath" id="breath">Simulan</div><button class="btn teal block" data-act="breath" id="bbtn">Simulan · 2 minuto</button>
+      <p class="small muted center" style="margin-top:12px">Mas mahaba ang palabas na hinga: ito ang nagpapakalma sa katawan.</p>`;
+    if (id === "ground") return hero("calm", "Kalma", "5-4-3-2-1", "Dahan-dahang pansinin ang paligid mo.", { top: backBtn("#/calm", "Kalma") })
+      + `<div class="card lift"><ul class="ground" style="list-style:none;padding:0;margin:4px 0"><li><b>5</b>na bagay na nakikita mo</li><li><b>4</b>na bagay na nahahawakan mo</li><li><b>3</b>na tunog na naririnig mo</li><li><b>2</b>na amoy</li><li><b>1</b>na nalalasahan mo, o isang magandang bagay tungkol sa sarili mo</li></ul></div>
+      <p class="small muted center" style="margin-top:14px">Ibinabalik ka nito sa ngayon, sa katawan mo at sa lugar kung nasaan ka.</p>`;
+    if (id === "voices") return hero("calm", "Kalma", "Kapag maingay ang isip", "Mga bagay na nakakatulong sa maraming tao.", { top: backBtn("#/calm", "Kalma") })
+      + `<div class="lift">${[["music", "b-peach", "Musika sa headphones", "O tumugtog ng gitara."], ["wave", "b-sky", "Mag-hum o kumanta nang mahina", "Para sa ilan, nababawasan nito ang mga boses."], ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", ""],
+        ["leaf", "b-sage", "Maglakad sa labas", "O gumawa ng isang bagay gamit ang kamay."], ["shield", "b-lav", "Hindi mo kailangang sundin", "ang anumang sinasabi ng mga boses."]].map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}${d ? `<small>${d}</small>` : ""}</span></div>`).join("")}</div>
+      <div class="warn">Kung may nag-uutos sa ’yo na saktan ang sarili mo o ang iba, tumawag agad sa taong pinagkakatiwalaan mo, o sa NCMH Crisis Hotline 1553 (libre, 24 oras).</div>${callsHTML()}${ncmhRow()}`;
+    if (id === "threat") return hero("calm", "Kalma", "Kapag pakiramdam mo may banta", "Totoo at nakakapagod ang ganitong takot.", { top: backBtn("#/calm", "Kalma") })
+      + `<div class="lift">${[["home", "b-sage", "Pumunta sa lugar na ligtas ang pakiramdam", "At huminga nang dahan-dahan."], ["spark", "b-sky", "Tanungin ang sarili", "Ano pa ang posibleng paliwanag? Ano ang sasabihin ng kaibigang pinagkakatiwalaan ko?"],
+        ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", "Bago gumawa ng anumang hakbang."], ["moon", "b-lav", "Mas tumitindi ang takot kapag pagod", "Ang pahinga at tulog ay nakakatulong."], ["x", "b-peach", "Iwasan ang alak at droga", "Pinapalakas nila ang takot."]]
+        .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>
+      <div class="sec">${callsHTML()}${ncmhRow()}</div>`;
+    const CI = { breath: ["wave", "b-sky"], ground: ["leaf", "b-sage"], voices: ["music", "b-peach"], threat: ["shield", "b-lav"] };
+    return hero("calm", "Kalma", "Kapag mabigat", "Pumili ng isa. Okay lang kahit ilang beses.")
+      + `<div class="lift">${CALM.map(([t, k]) => rowcard(`#/calm/${k}`, CI[k][0], CI[k][1], esc(t))).join("")}</div>
+      <div class="sec"><div class="eyebrow">Mga taong puwedeng tawagan</div>${callsHTML() || rowcard("#/settings", "plus", "b-teal", "Idagdag ang mga taong pinagkakatiwalaan mo", "Para isang pindot lang ang tawag")}${ncmhRow()}</div>`;
+  }
+
+  /* ---------- Shared views ---------- */
+  function viewSettings() {
+    const fam = db.space === "family";
+    return hero(fam ? "home" : "today", "Kasama", "Settings", "", { top: backBtn("#/", "Bumalik") })
+      + `<div class="card lift"><label class="f" style="margin-top:0"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label></div>
+      ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div><div class="card">${[0, 1, 2].map(i => `<div class="row" style="gap:8px;${i ? "margin-top:10px" : ""}"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div></div>
+        <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div><div class="card">${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="${i ? "margin-top:10px" : ""}">`).join("")}</div></div>`}
+      <div class="sec"><div class="eyebrow">Phone na ito</div>
+        ${fam ? "" : `<button class="rowcard" data-act="sharewk"><span class="bubble b-sage">${ic("share")}</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
+        ${isStandalone() ? "" : `<button class="rowcard" data-act="installsheet"><span class="bubble b-teal">${ic("download")}</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
+        <button class="rowcard" data-act="switch"><span class="bubble b-lav">${ic("swap")}</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
+        ${rowcard("#/about", "info", "b-sky", "Tungkol sa Kasama", "Saan galing ang mga gabay")}</div>
+      <p class="small muted center" style="margin-top:18px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
+  }
+  function viewAbout() {
+    return hero("learn", "Kasama", "Tungkol sa app", "Ginawa para sa isang kaibigan at sa mga nagmamahal sa kanya.", { top: backBtn("#/", "Bumalik") })
+      + `<p class="prose" style="margin-top:20px">Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
+      <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small" style="line-height:1.6"><ul class="tight">
+        <li><b>Family psychoeducation:</b> ang pag-aaral ng pamilya tungkol sa kondisyon ay nagpapababa ng pagbabalik ng sintomas at pagkaka-ospital (Cochrane review: Pharoah et al.).</li>
+        <li><b>Expressed emotion:</b> ang batikos, galit at sobrang pakikialam sa bahay ay kaugnay ng mas madalas na pagbabalik (meta-analysis: Butzlaff &amp; Hooley, 1998).</li>
+        <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
+        <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
+        <li><b>Behavioural activation:</b> maliliit at regular na gawain para sa mababang motibasyon at pag-iisa.</li>
+        <li><b>Tulog:</b> ang pag-ayos ng tulog ay nagpapabawas ng paranoia (Freeman et al., 2015, 2017); mga tip mula sa CBT for insomnia.</li>
+        <li><b>Music therapy:</b> nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas at sa pakikisalamuha (Cochrane: Geretsegger et al., 2017). Hango rito ang Music section, pero hindi ito kapalit ng music therapist.</li>
+        <li><b>Self-management apps</b> gaya ng FOCUS, Actissist at Horyzons: nakakatulong ang ganitong mga tool kasama ng gamutan.</li></ul></div></div>
+      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
+      <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}<br>Fonts: Fraunces at Inter (SIL Open Font License)</p>`;
+  }
+
+  /* ---------- After render ---------- */
+  let ntags = [], ringRaf = 0;
+  function afterRender(v) {
+    if (v === "notes") ntags = [];
+    cancelAnimationFrame(ringRaf);
+    if (v === "music" && db.space === "him") { const tick = () => { const el = $("#mtime"), rg = $("#tring"); if (!el) return; el.textContent = fmtT(mt.left);
+      const c = rg.querySelector(".val"), circ = +c.getAttribute("stroke-dasharray"); c.setAttribute("stroke-dashoffset", (circ * (1 - mt.left / mt.len)).toFixed(1)); ringRaf = requestAnimationFrame(tick); }; tick(); }
+  }
+  async function shareText(title, text) {
+    try { if (navigator.share) { await navigator.share({ title, text }); return; } } catch (e) { if (e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(text); toast("Nakopya. I-paste sa Messenger o Viber."); } catch (e) { toast("Hindi makopya"); }
+  }
+  function prepText() {
+    const since = Date.now() - 60 * DAY, ns = db.notes.filter(n => n.at >= since).sort((a, b) => a.at - b.at), counts = {};
+    ns.forEach(n => n.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
+    return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gumagamit siya ng droga o alak, at kung may gamot siyang iniinom.`;
+  }
+  function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Mangyaring kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
+  function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
   const mt = { len: 600, left: 600, run: false, t0: 0, iv: 0 };
   const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
   function musicStop(done) {
@@ -488,67 +704,6 @@
     if (played >= .5) { db.music.push({ at: Date.now(), min: Math.round(played * 10) / 10 }); save(); haptic([10, 40, 10]); toast(done ? "Tapos. Salamat sa pagtugtog ngayon." : `${Math.max(1, Math.round(played))} minuto. Binilang.`); }
     if (route().v === "music") render();
   }
-  function viewCalm(id) {
-    if (id === "breath") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Huminga nang dahan-dahan</h1><p class="muted">Sumabay sa bilog: 4 na segundo papasok, 6 na segundo palabas. Mas mahaba ang palabas; ito ang nagpapakalma sa katawan.</p>
-      <div class="breath" id="breath">Simulan</div><button class="btn teal block" data-act="breath" id="bbtn">Simulan · 2 minuto</button>`;
-    if (id === "ground") return `<a class="back" href="#/calm">‹ Kalma</a><h1>5-4-3-2-1</h1><p class="muted">Dahan-dahang pansinin ang paligid mo. Sabihin sa isip, o nang mahina.</p>
-      <div class="card"><ul class="tight" style="font-size:17.5px;line-height:1.7"><li><b>5</b> na bagay na nakikita mo</li><li><b>4</b> na bagay na nahahawakan mo (ang upuan, ang damit mo…)</li><li><b>3</b> na tunog na naririnig mo</li><li><b>2</b> na amoy</li><li><b>1</b> na nalalasahan mo, o isang magandang bagay tungkol sa sarili mo</li></ul></div>
-      <p class="small muted">Ibinabalik ka nito sa ngayon, sa katawan mo at sa lugar kung nasaan ka.</p>`;
-    if (id === "voices") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Kapag maingay ang isip</h1><p class="muted">Mga bagay na nakakatulong sa maraming tao kapag maraming iniisip, o may naririnig na mga boses:</p>
-      <div class="card"><ul class="tight"><li><b>Musika sa headphones</b>, o tumugtog ng gitara.</li><li><b>Mag-hum o kumanta nang mahina.</b> Para sa ilan, nababawasan nito ang mga boses.</li><li><b>Kausapin ang taong pinagkakatiwalaan mo.</b></li><li><b>Maglakad sa labas</b>, o gumawa ng isang bagay gamit ang kamay.</li><li><b>Hindi mo kailangang sundin</b> ang anumang sinasabi ng mga boses.</li></ul></div>
-      <div class="warn small">Kung may nag-uutos sa ’yo na saktan ang sarili mo o ang iba, tumawag agad sa taong pinagkakatiwalaan mo, o sa NCMH Crisis Hotline 1553 (libre, 24 oras).</div>
-      <div class="list">${callsHTML()}<a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · 0917-899-8727 · 0919-057-1553</small></span></a></div>`;
-    if (id === "threat") return `<a class="back" href="#/calm">‹ Kalma</a><h1>Kapag pakiramdam mo may banta</h1><p class="muted">Totoo at nakakapagod ang ganitong takot. Ilang bagay na puwedeng subukan:</p>
-      <div class="card"><ul class="tight"><li><b>Pumunta sa lugar na pakiramdam mo ay ligtas</b>, at huminga nang dahan-dahan.</li><li><b>Tanungin ang sarili:</b> ano pa ang posibleng paliwanag? Ano ang sasabihin ng kaibigang pinagkakatiwalaan ko?</li><li><b>Kausapin ang taong pinagkakatiwalaan mo</b> bago gumawa ng anumang hakbang.</li><li><b>Mas tumitindi ang takot kapag pagod o puyat.</b> Ang pahinga at tulog ay nakakatulong.</li><li><b>Iwasan ang alak at droga</b>; pinapalakas nila ang takot.</li></ul></div>
-      <div class="list">${callsHTML()}<a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · libre, 24 oras</small></span></a></div>`;
-    return `<div class="eyebrow">Kalma</div><h1 style="margin-top:4px">Kapag mabigat</h1><p class="muted">Pumili ng isa. Okay lang kahit ilang beses.</p>
-      <div class="list" style="margin-top:12px">${CALM.map(([t, k]) => `<a href="#/calm/${k}"><span class="ic">〰</span><span class="grow">${esc(t)}</span><span class="chev">›</span></a>`).join("")}</div>
-      <div class="sec"><div class="eyebrow">Mga taong puwedeng tawagan</div><div class="list">${callsHTML() || `<a href="#/settings"><span class="ic">+</span><span class="grow">Idagdag ang mga taong pinagkakatiwalaan mo<small>Para isang pindot lang ang tawag</small></span></a>`}
-        <a href="tel:1553"><span class="ic" style="background:var(--red-soft);color:var(--red)">☎</span><span class="grow">NCMH Crisis Hotline<small>1553 · libre, 24 oras</small></span></a></div></div>`;
-  }
-
-  /* ---------- Shared views ---------- */
-  function viewSettings() {
-    const fam = db.space === "family";
-    return `<a class="back" href="#/">‹ Bumalik</a><h1>Settings</h1>
-      <label class="f"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label>
-      ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div>
-        ${[0, 1, 2].map(i => `<div class="row" style="gap:8px;margin-top:8px"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div>
-        <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div>${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="margin-top:8px">`).join("")}</div>`}
-      <div class="sec"><div class="eyebrow">Phone na ito</div><div class="list">
-        ${fam ? "" : `<button class="li" data-act="sharewk"><span class="ic">↗</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
-        ${isStandalone() ? "" : `<button class="li" data-act="installsheet"><span class="ic">⬇</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
-        <button class="li" data-act="switch"><span class="ic">⇄</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
-        <a href="#/about"><span class="ic">i</span><span class="grow">Tungkol sa Kasama<small>Saan galing ang mga gabay</small></span><span class="chev">›</span></a></div></div>
-      <p class="small muted" style="margin-top:14px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
-  }
-  function viewAbout() {
-    return `<a class="back" href="#/">‹ Bumalik</a><h1>Tungkol sa Kasama</h1>
-      <p class="prose">Ginawa ang Kasama para sa isang kaibigan at sa mga nagmamahal sa kanya. Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
-      <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small"><ul class="tight">
-        <li><b>Family psychoeducation:</b> ang pag-aaral ng pamilya tungkol sa kondisyon ay nagpapababa ng pagbabalik ng sintomas at pagkaka-ospital (Cochrane review: Pharoah et al.).</li>
-        <li><b>Expressed emotion:</b> ang batikos, galit at sobrang pakikialam sa bahay ay kaugnay ng mas madalas na pagbabalik (meta-analysis: Butzlaff &amp; Hooley, 1998).</li>
-        <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
-        <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
-        <li><b>Behavioural activation:</b> maliliit at regular na gawain para sa mababang motibasyon at pag-iisa.</li>
-        <li><b>Tulog:</b> ang pag-ayos ng tulog ay nagpapabawas ng paranoia (Freeman et al., 2015, 2017); mga tip mula sa CBT for insomnia.</li>
-        <li><b>Music therapy:</b> nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas at sa pakikisalamuha (Cochrane: Geretsegger et al., 2017). Ang Music section ay hango rito pero hindi kapalit ng music therapist.</li>
-        <li><b>Self-management apps</b> gaya ng FOCUS, Actissist at Horyzons ang nagpakita na nakakatulong ang ganitong mga tool kasama ng gamutan.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
-      <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}</p>`;
-  }
-
-  /* ---------- After render ---------- */
-  let ntags = [];
-  function afterRender(v) {
-    if (v === "notes") ntags = [];
-    if (v === "music") { const el = $("#mtime"); if (el) el.textContent = fmtT(mt.left); }
-  }
-  async function shareText(title, text) {
-    try { if (navigator.share) { await navigator.share({ title, text }); return; } } catch (e) { if (e.name === "AbortError") return; }
-    try { await navigator.clipboard.writeText(text); toast("Nakopya. I-paste sa Messenger o Viber."); } catch (e) { toast("Hindi makopya"); }
-  }
-
   /* ---------- Install: one tap on Android Chrome; step-by-step for iPhone; open in a real browser first
      when the link was opened inside Messenger, Viber, Facebook or Instagram (they can't install apps). ---------- */
   let deferredInstall = null;

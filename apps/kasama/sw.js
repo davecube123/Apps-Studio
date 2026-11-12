@@ -1,7 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "kasama-v2";
+const VERSION = "kasama-v3";
 // Every file the app needs offline. Add new files here.
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/fraunces-latin-soft-normal.woff2", "./fonts/fraunces-latin-wght-italic.woff2", "./fonts/inter-latin-wght-normal.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
