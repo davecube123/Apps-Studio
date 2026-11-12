@@ -215,6 +215,8 @@
     details.more > summary::-webkit-details-marker { display: none; } details.more > summary::before { content: "+ "; } details.more[open] > summary::before { content: "\2212  "; }
     .nextstep, .connect { border: 2px solid var(--teal); }
     .connect .row .btn { flex: 1; min-height: 56px; font-size: 16.5px; }
+    .card .row .btn { white-space: nowrap; }
+    @media (max-width: 380px) { .card .row .btn { font-size: 15px; padding-left: 12px; padding-right: 12px; } }
     .connect .eyebrow .i { width: 15px; height: 15px; vertical-align: -2px; }
     .quiethelp { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 22px; padding: 12px; border-radius: 16px; color: var(--ink2); text-decoration: none; font-size: 14.5px; border: 1px solid var(--line); }
     .quiethelp .i { width: 18px; height: 18px; color: var(--red); }
@@ -244,7 +246,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "11", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "12", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
