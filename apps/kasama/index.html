@@ -246,7 +246,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "12", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "13", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -680,7 +680,7 @@
       <div class="stepnav">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")} Bumalik</a>` : ""}${last ? finish : `<a class="btn teal" href="${base}/${i + 1}">Susunod ${ic("chev")}</a>`}</div>`;
   }
   const INTRO = {
-    family: [["heart", "b-peach", "Para sa inyo ang app na ito", "Para sa girlfriend, pamilya at mga kaibigan niya. Sa Home, may isang maliit na paraan araw-araw para maging malapit sa kanya. Maiikli ang bawat pahina."],
+    family: [["heart", "b-peach", "Para sa ’yo ang app na ito", "Para sa girlfriend niya. Sa Home, may isang maliit na paraan araw-araw para maging malapit sa kanya. Maiikli ang bawat pahina."],
       ["home", "b-sage", "Ang mga button sa ibaba", "Home, Unawain (mga aralin), Kausapin (ano ang sasabihin), Tulong (mga numero at plano), at Para sa ’yo. Pindutin para lumipat."],
       ["phone", "b-rose", "Kung kailangan ng tulong agad", "Pindutin ang Tulong, tapos ang unang button. Isang pindot lang ang tawag sa 911 o sa NCMH 1553."],
       ["shield", "b-teal", "Pribado", "Lahat ng isusulat ninyo ay nasa phone na ito lang. Kung may ibang gumagamit ng phone, lagyan ng PIN sa Settings."]] };
@@ -691,7 +691,7 @@
   function viewChoose() {
     return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
       <div class="eyebrow">Kasama</div><h1 style="margin-top:6px">Magkasama tayo dito.</h1>
-      <p class="muted">Para sa girlfriend at pamilya niya: paano siya samahan, paano makipag-usap, at paano rin alagaan ang sarili. Lahat ng isusulat ninyo ay nananatili lang sa phone na ito.</p>
+      <p class="muted">Para sa ’yo, bilang girlfriend niya: paano siya samahan, paano makipag-usap, at paano rin alagaan ang sarili mo. Lahat ng isusulat mo ay nananatili lang sa phone na ito.</p>
       <button class="btn teal block" data-act="space" data-v="family" style="margin-top:18px">Simulan ${ic("chev")}</button></div>`;
   }
 
@@ -931,7 +931,7 @@
   function viewAbout() {
     return hero("learn", "Kasama", "Tungkol sa app", "Ginawa para sa isang kaibigan at sa mga nagmamahal sa kanya.", { top: backBtn("#/", "Bumalik") })
       + `<p class="prose" style="margin-top:20px">Gabay ito, hindi kapalit ng psychiatrist o ng emergency services.</p>
-      <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Para lang ito sa girlfriend at pamilya niya; walang bahagi ng app na para sa kanya mismo.</div></div>
+      <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Para lang ito sa girlfriend niya; walang bahagi ng app na para sa kanya mismo o para sa pamilya niya.</div></div>
       <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small" style="line-height:1.6"><ul class="tight">
         <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
         <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
