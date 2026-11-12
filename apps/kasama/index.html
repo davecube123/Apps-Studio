@@ -256,7 +256,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "8", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "9", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -352,12 +352,12 @@
   const LESSONS = [
     { id: "what", t: "Ano ang pinagdadaanan niya?", m: 3, body: [
       "Ang psychosis ay kondisyon kung saan nahihirapan ang utak na paghiwalayin kung ano ang totoo at kung ano ang galing sa sariling isip. Hindi ito kahinaan ng loob, hindi ito katamaran, at hindi niya ito pinili.",
-      "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations), o matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagbabantay sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
+      "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations), o matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagmamanman sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
       "Kaya maaaring tumigil siya sa pagtugtog. Hindi dahil ayaw na niya sa musika; ang “bawas” na sintomas mismo ang kumukuha ng gana at lakas. Hindi ito masosolusyonan ng pagpilit, pero bumabalik ito sa tamang gamutan at panahon.",
       "Ang mga pagsabog ng galit, gaya ng pagtumba ng upuan o pagbasag ng cellphone, ay kadalasang galing sa takot at sobrang stress ng nararanasan niya, lalo na kung pakiramdam niya ay may banta sa kanya. Seryoso pa rin ito, pero tanda ito na kailangan na niya ng tulong, hindi ng sermon." ],
       key: "Hindi siya ang problema. Ang kondisyon ang problema, at kasama ninyo siya sa paglaban dito." },
     { id: "insight", t: "Bakit sinasabi niyang okay lang siya", m: 3, body: [
-      "Isa sa pinakamahirap: maraming taong may psychosis ang tunay na hindi nakikitang may sakit sila. Ito ay tinatawag na anosognosia o lack of insight, at bahagi ito ng kondisyon mismo, galing sa paraan ng pagtrabaho ng utak. Sa pananaliksik, mga kalahati ng may schizophrenia ang nakakaranas nito.",
+      "Isa sa pinakamahirap: maraming taong may psychosis ang talagang hindi nakakakita na may sakit sila. Ito ay tinatawag na anosognosia o lack of insight, at bahagi ito ng kondisyon mismo, dahil sa paraan ng paggana ng utak. Sa pananaliksik, mga kalahati ng may schizophrenia ang nakakaranas nito.",
       "Ibig sabihin, hindi siya nagmamatigas. Para sa kanya, totoo ang nararanasan niya. Kaya kapag pinagtatalunan natin kung totoo o hindi, lalo lang siyang lumalayo at hindi na nagtitiwala.",
       "Ang mas gumagana: huwag pilitin siyang tanggapin na “may sakit” siya. Sa halip, hanapin ang mga bagay na gusto niyang mabago: makatulog nang maayos, mabawasan ang stress o takot, makabalik sa pagtugtog. Doon kayo magtulungan. Ito ang puso ng LEAP, na nasa “Kausapin” tab." ],
       key: "Ang layunin ay hindi manalo sa argumento. Ang layunin ay manatili siyang nagtitiwala sa inyo." },
@@ -368,7 +368,7 @@
       key: "Ang pinakamahalagang magagawa ninyo ngayon: tulungan siyang makarating sa psychiatrist." },
     { id: "treatment", t: "Kapag nagsimula na ang gamutan", m: 3, body: [
       "Karaniwang antipsychotic na gamot ang ibibigay. Kadalasan ilang araw hanggang ilang linggo bago makita ang epekto; madalas na unang gumaganda ang tulog at pagiging kalmado, bago ang mga boses o hinala.",
-      "May mga side effect na dapat sabihin sa doktor, hindi itigil nang mag-isa: antok, pagtaas ng gana at timbang, pagkabalisa o hindi mapakali (akathisia), paninigas o panginginig. Kadalasan naaayos ito sa pagpapalit ng dosis o ng gamot.",
+      "May mga side effect na dapat sabihin sa doktor, sa halip na basta itigil ang gamot: antok, pagtaas ng gana at timbang, pagkabalisa o hindi mapakali (akathisia), paninigas o panginginig. Kadalasan naaayos ito sa pagpapalit ng dosis o ng gamot.",
       "Ang pinakamadalas na dahilan ng pagbabalik ng sintomas ay ang paghinto ng gamot. Kung nahihirapan siyang uminom araw-araw, itanong sa doktor ang long-acting injection: iniksyon kada ilang linggo, kaya hindi na kailangang tandaan araw-araw.",
       "Hindi lang gamot: nakakatulong din ang therapy (CBT for psychosis), mga session para sa pamilya, at unti-unting pagbabalik sa routine, trabaho at musika. Itanong sa doktor kung ano ang mayroon sa inyong lugar.",
       "Paano tumulong nang hindi nagbabantay: pag-usapan kung paano niya gustong maalala (alarm, pillbox), at kumustahin ang pakiramdam niya sa gamot, hindi lang kung uminom na siya." ],
@@ -393,8 +393,8 @@
     { id: "safety", t: "Tungkol sa galit at kaligtasan", m: 3, body: [
       "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag puyat, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
       "Kapag galit o takot siya: bigyan siya ng espasyo, huwag harangan ang daan niya palabas, huwag hawakan o pigilan nang pisikal, magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
-      "Itago ang mga bagay na maaaring makasakit (kutsilyo, gamot na marami, matutulis). Kung may banta sa buhay niya o ng iba, tumawag sa 911 o dalhin siya sa emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal." ],
-      key: "Kaligtasan muna, ng lahat, kasama siya." },
+      "Itago ang mga bagay na maaaring makasakit (kutsilyo, maraming gamot, matutulis na bagay). Kung may banta sa buhay niya o ng iba, tumawag sa 911 o dalhin siya sa emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal." ],
+      key: "Kaligtasan muna ng lahat, pati siya." },
     { id: "suicide", t: "Kung naiisip niyang saktan ang sarili", m: 3, body: [
       "Mas mataas ang panganib ng pagpapakamatay sa mga taong may psychosis, lalo na sa mga unang taon ng sakit at pagkalabas ng ospital. Hindi ito para takutin kayo; para alam ninyo ang hahanapin.",
       "Mga senyales: pagsasalita tungkol sa kamatayan o pagiging pabigat (\u201cmas mabuti kung wala na ako\u201d), pamimigay ng mga gamit, biglang pagiging kalmado pagkatapos ng matinding lungkot, paghahanap ng paraan, mga boses na nag-uutos na saktan ang sarili, at matinding hiya o kawalan ng pag-asa.",
@@ -409,7 +409,7 @@
       "May batas tayo, ang Mental Health Act (RA 11036), na nagbibigay ng karapatan sa maayos at makataong pangangalaga." ],
       key: "Pananampalataya at gamutan: magkasama, hindi magkalaban." },
     { id: "recovery", t: "May pag-asa: ang paggaling", m: 2, body: [
-      "Maraming taong nagkaroon ng unang episode ng psychosis ang gumagaling nang malaki, lalo na kung maaga ang gamutan at may suportadong pamilya. Marami ang nakakabalik sa trabaho, pag-aaral, at sa mga gusto nila, kasama ang musika.",
+      "Maraming taong nagkaroon ng unang episode ng psychosis ang bumubuti nang husto, lalo na kung maaga ang gamutan at may suportadong pamilya. Marami ang nakakabalik sa trabaho, pag-aaral, at sa mga gusto nila, kasama ang musika.",
       "Hindi diretso ang daan; may magagandang linggo at mahihirap na linggo. Ang mahalaga ay ang direksyon, hindi ang bilis.",
       "Ang musika ay maaaring maging malaking bahagi ng paggaling niya. May pananaliksik (Cochrane review) na ang music therapy, kasabay ng karaniwang gamutan, ay nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas, at sa pakikisalamuha. Pero sa tamang panahon at walang pressure." ],
       key: "Hindi ito ang katapusan ng kuwento niya. Isa itong kabanata." },
@@ -428,17 +428,17 @@
   ];
   const SCENES = [
     { id: "leap", t: "Ang LEAP: paraan ng pakikipag-usap", intro: "Binuo ito ni Dr. Xavier Amador, psychologist na ang kapatid ay may schizophrenia, para sa mga taong hindi naniniwalang may sakit sila. Apat na hakbang:", steps: [
-      ["Listen · Makinig", "Makinig para maintindihan, hindi para kumontra. Ulitin sa sariling salita ang narinig mo: “Kung tama ang pagkaintindi ko, pakiramdam mo may nagbabantay sa ’yo.”"],
+      ["Listen · Makinig", "Makinig para maintindihan, hindi para kumontra. Ulitin sa sariling salita ang narinig mo: “Kung tama ang pagkaintindi ko, pakiramdam mo may nagmamanman sa ’yo.”"],
       ["Empathize · Damayan", "Damayan ang nararamdaman, kahit hindi ka sang-ayon sa paniniwala: “Nakakatakot siguro ’yon. Kung ako ’yan, matatakot din ako.”"],
       ["Agree · Sumang-ayon kung saan puwede", "Hanapin ang puwedeng pagkasunduan: “Sang-ayon ako na hindi ka nakakatulog nang maayos, at mahirap ’yon.” Kung tanungin ka kung naniniwala ka sa kanya, puwedeng: “Hindi ko alam, pero alam kong totoo ang takot mo, at nandito ako.”"],
       ["Partner · Magtulungan", "Magtulungan sa layuning gusto rin niya: “Subukan nating humingi ng tulong para makatulog ka. Sasamahan kita.”"] ],
       key: "Hindi mo kailangang sumang-ayon sa paniniwala para damayan ang nararamdaman." },
-    { id: "paranoid", t: "“May sumusunod sa akin / may nagbabantay”", sit: "Kumbinsido siyang may nagmamanman, may sumusunod, o may gustong manakit sa kanya.",
-      avoid: ["“Wala namang ganyan, guni-guni mo lang ’yan.” (Pinapawalang-bisa ang takot niya.)", "“Oo, baka nga may sumusunod.” (Pinapalakas ang paniniwala.)", "Pagtawa, pagbubulungan sa harap niya, o pagtingin-tingin sa isa’t isa."],
+    { id: "paranoid", t: "“May sumusunod sa akin / may nagmamanman sa akin”", sit: "Naniniwala siyang may nagmamanman sa kanya, may sumusunod, o may gustong manakit sa kanya.",
+      avoid: ["“Wala namang ganyan, guni-guni mo lang ’yan.” (Binabalewala nito ang takot niya.)", "“Oo, baka nga may sumusunod.” (Pinapalakas ang paniniwala.)", "Pagtawa, pagbubulungan, o pagtitinginan ninyo sa harap niya."],
       say: ["“Mukhang takot na takot ka. Ano ang makakatulong para maging mas ligtas ang pakiramdam mo ngayon?”", "“Hindi ko nakikita ang nakikita mo, pero naniniwala akong nararamdaman mo talaga ’yan. Nandito lang ako.”", "“Gusto mo bang umupo muna tayo dito, malayo sa ingay?”"],
       why: "Ang pakikipagtalo tungkol sa totoo o hindi ay halos hindi gumagana at sumisira ng tiwala. Ang pagdamay sa takot at pagtulong na maging ligtas ang pakiramdam ay nagpapanatili ng koneksyon." },
     { id: "angry", t: "Galit siya o nagwawala", sit: "Sumisigaw, nagbabato ng gamit, o mukhang malapit nang sumabog.",
-      avoid: ["Sumigaw pabalik o makipagtalo.", "Lumapit nang sobra, hawakan, o harangan ang pinto.", "Magbanta (“Ipapakulong kita”) o mag-sermon habang galit pa siya."],
+      avoid: ["Sumigaw pabalik o makipagtalo.", "Paglapit nang sobra, paghawak sa kanya, o pagharang sa pinto.", "Pagbabanta (“Ipapakulong kita”) o pagsesermon habang galit pa siya."],
       say: ["(Mahina at mabagal) “Nakikita kong galit na galit ka. Nandito lang ako. Hindi kita sasaktan.”", "“Lalayo muna ako nang kaunti para may espasyo ka.”", "Pagkatapos, kapag kalmado na: “Kanina, mukhang sobrang bigat ng nararamdaman mo. Gusto mo bang pag-usapan?”"],
       why: "Sa gitna ng galit, hindi naririnig ang paliwanag. Ang layunin ay pababain ang tensyon at manatiling ligtas ang lahat. Kung may panganib, tumawag sa 911.", danger: true },
     { id: "notsick", t: "“Wala akong sakit!”", sit: "Ayaw niyang tanggapin na may problema, at nagagalit kapag binabanggit.",
@@ -446,24 +446,24 @@
       say: ["“Okay, hindi natin kailangang pag-usapan ang tawag diyan. Pero napansin kong hirap kang matulog. Totoo ba?”", "“Ano ang gusto mong mabago sa buhay mo ngayon?”", "“Nami-miss mo ba ang pagtugtog? Ano sa tingin mo ang pumipigil?”"],
       why: "Ayon sa LEAP, ang pagtutok sa mga layunin niya (tulog, stress, musika) ay mas nagbubukas ng daan sa tulong kaysa sa pagpilit na tanggapin ang diagnosis." },
     { id: "refuse", t: "Ayaw magpatingin sa doktor", sit: "Tumatanggi siya sa psychiatrist o sa anumang “doktor sa utak.”",
-      avoid: ["“Baliw ka kaya kailangan mo ng psychiatrist.”", "Panlilinlang (“pupunta lang tayo sa mall” tapos ospital). Sinisira nito ang tiwala sa susunod.", "Ultimatum habang nasa krisis."],
-      say: ["“Mukhang pagod na pagod ka at hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", "“Hindi mo kailangang magdesisyon ngayon. Pag-isipan mo lang, at sabihin mo kung handa ka na.”", "“Para sa akin na lang, puwede mo bang subukan ang isang beses? Kung ayaw mo pagkatapos, pag-uusapan natin ulit.”"],
+      avoid: ["“Baliw ka kaya kailangan mo ng psychiatrist.”", "Panlilinlang (“pupunta lang tayo sa mall,” pero sa ospital pala). Sinisira nito ang tiwala sa susunod.", "Ultimatum habang nasa krisis."],
+      say: ["“Mukhang pagod na pagod ka at hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", "“Hindi mo kailangang magdesisyon ngayon. Pag-isipan mo lang, at sabihin mo kung handa ka na.”", "“Kahit para sa akin lang, puwede mo bang subukan kahit isang beses? Kung ayaw mo pagkatapos, pag-uusapan natin ulit.”"],
       why: "I-frame ang pagpapatingin sa paraang may saysay para sa kanya (tulog, stress, pagod) at ialok ang inyong presensya. Kung hindi pa rin, kayo muna ang kumonsulta para sa gabay. Kung may panganib, emergency na ito." },
     { id: "voices", t: "Nakakarinig siya ng boses", sit: "Kumikilos na parang may kausap, o sinasabi niyang may naririnig.",
-      avoid: ["“Walang boses diyan!”", "Matakot o tumakbo palayo.", "Magtanong nang paulit-ulit kung ano ang sinasabi ng boses."],
+      avoid: ["“Walang boses diyan!”", "Matakot o tumakbo palayo.", "Paulit-ulit na pagtatanong kung ano ang sinasabi ng boses."],
       say: ["“May naririnig ka ba ngayon? Ano ang pakiramdam mo?”", "“Hindi ko naririnig, pero naniniwala akong naririnig mo. Paano kita matutulungan?”", "“Minsan nakakatulong ang musika o ang pag-hum. Gusto mo bang subukan?”"],
       why: "Mahalaga ring itanong kung inuutusan siya ng boses na saktan ang sarili o iba. Kung oo, emergency ito: tumawag sa 911 o NCMH 1553." },
     { id: "withdrawn", t: "Ayaw kumilos, nasa kwarto lang", sit: "Natutulog nang matagal, hindi naliligo, ayaw lumabas o makipag-usap.",
       avoid: ["“Tamad ka lang.”", "Pagkumpara sa iba (“Tingnan mo si ganito, may trabaho na”).", "Pagpilit sa malalaking gawain."],
-      say: ["“Gusto mo bang samahan kitang maglakad nang sampung minuto?”", "“Kumain ka muna kahit konti. Ginawa ko ’yung gusto mo.”", "Papuri sa maliit: “Ang sarap makita kang nakalabas ngayon.”"],
+      say: ["“Gusto mo bang samahan kitang maglakad nang sampung minuto?”", "“Kumain ka muna kahit konti. Niluto ko ’yung paborito mo.”", "Papuri sa maliit: “Ang sarap makita kang nakalabas ngayon.”"],
       why: "Ang kawalan ng gana ay sintomas, hindi katamaran. Maliliit na imbitasyon at papuri sa maliliit na hakbang ang mas gumagana kaysa pressure." },
     { id: "suicide", t: "Nagsasalita tungkol sa kamatayan o pagpapakamatay", sit: "Sinasabi niyang pagod na siya sa buhay, pabigat siya, o mas mabuti kung wala na siya.",
-      avoid: ["\u201cHuwag kang magsalita nang ganyan.\u201d (Pinapatahimik siya.)", "Pagsesermon tungkol sa kasalanan o sa pamilya.", "Iwanan siyang mag-isa, o mangakong ililihim mo."],
+      avoid: ["\u201cHuwag kang magsalita nang ganyan.\u201d (Pinapatahimik siya.)", "Pagsesermon tungkol sa kasalanan o sa pamilya.", "Pag-iwan sa kanya nang mag-isa, o pangakong ililihim mo ito."],
       say: ["\u201cSeryoso ako sa tanong na \u2019to: naiisip mo bang patayin ang sarili mo?\u201d", "\u201cSalamat at sinabi mo sa akin. Hindi kita iiwan. Hahanap tayo ng tulong ngayon.\u201d", "\u201cTatawag tayo sa NCMH ngayon, magkasama.\u201d"],
       why: "Ang diretsong tanong ay hindi nagtatanim ng ideya. Kung oo ang sagot o may plano siya: manatili sa tabi niya, alisin ang mga mapanganib na bagay, at tumawag sa NCMH 1553 o 911, o pumunta sa emergency room.", danger: true },
     { id: "after", t: "Pagkatapos ng isang insidente", sit: "Gaya ng pagtumba ng upuan sa bar o pagbasag ng cellphone. Kalmado na siya ngayon.",
       avoid: ["Pagbanggit nito sa harap ng ibang tao, o pagpapahiya.", "\u201cTingnan mo ang ginawa mo!\u201d habang sariwa pa.", "Pagpapanggap na walang nangyari."],
-      say: ["\u201cKahapon, mukhang sobrang bigat ng nararamdaman mo. Ano ang nangyari para sa \u2019yo?\u201d", "\u201cHindi kita hinuhusgahan. Gusto ko lang maintindihan para matulungan kita.\u201d", "\u201cAno ang makakatulong para hindi na umabot sa ganoon?\u201d"],
+      say: ["\u201cKahapon, mukhang sobrang bigat ng naramdaman mo. Ano ang pinagdaanan mo noon?\u201d", "\u201cHindi kita hinuhusgahan. Gusto ko lang maintindihan para matulungan kita.\u201d", "\u201cAno ang makakatulong para hindi na umabot sa ganoon?\u201d"],
       why: "Ang mahinahong usapan pagkatapos ay mas nagbubukas ng daan sa tulong kaysa sa sermon. Kung kailangang ayusin ang nasira (hal. sa bar), tulungan siya, at ipaliwanag nang maikli sa may-ari nang may paggalang sa privacy niya. Isulat din ito sa Talaan para sa doktor." },
     { id: "meds", t: "Ayaw uminom ng gamot", sit: "Kapag nagsimula na ang gamutan pero ayaw na niyang uminom, o itinitigil niya.",
       avoid: ["Paglalagay ng gamot sa pagkain nang palihim.", "Pagsigaw, pagbabanta, o paulit-ulit na \u201cuminom ka na!\u201d", "Pagpapabaya hanggang lumala."],
@@ -479,16 +479,16 @@
       why: "Ang paulit-ulit na akusasyon ay isang uri ng batikos, at kilala itong nagpapabigat ng stress at sintomas. Ang pakiramdam na pinaniniwalaan siya ng kahit isang tao ay proteksyon. Pag-usapan ang pamilya niya mamaya, kapag kalmado na siya." },
     { id: "music", t: "Paano banggitin ang musika", sit: "Gusto ninyong bumalik siya sa pagtugtog pero ayaw ninyong ma-pressure siya.",
       avoid: ["“Bakit hindi ka na tumutugtog? Sayang ang talent mo.”", "Pag-aayos ng gig para sa kanya nang hindi niya alam.", "Pagbanggit sa bar incident bilang dahilan para hindi na tumugtog."],
-      say: ["“Narinig ko ulit ’yung kanta mo noon. Ang ganda pala talaga.”", "Iwanan lang ang gitara sa lugar na madaling abutin, walang sinasabi.", "“Gusto mo bang tumugtog tayo ng isang kanta? Kahit simple lang.”"],
+      say: ["“Narinig ko ulit ’yung kanta mo noon. Ang ganda pala talaga.”", "Iwanan lang ang gitara sa lugar na madaling abutin, nang walang sinasabi.", "“Gusto mo bang tumugtog tayo ng isang kanta? Kahit simple lang.”"],
       why: "Ang musika ay dapat maging kanlungan, hindi obligasyon. Mag-imbita, huwag mag-utos. Sa “My days” space niya ay may maliit na Music section na walang pressure." },
   ];
   const PRACTICE = [
     { q: "Sabi niya: “Alam kong pinapakinggan ng kapitbahay ang lahat ng sinasabi ko.” Ano ang pinakamagandang sagot?", o: [
-      ["“Imposible ’yan, wala silang pakialam sa ’yo.”", 0, "Kahit totoo ito sa atin, pinaparamdam nito na hindi siya pinapaniwalaan, kaya lalo siyang lalayo."],
+      ["“Imposible ’yan, wala silang pakialam sa ’yo.”", 0, "Kahit sa tingin natin ay totoo ito, pinaparamdam nito na hindi siya pinapaniwalaan, kaya lalo siyang lalayo."],
       ["“Nakakatakot siguro ’yan. Ano ang makakatulong para maging mas ligtas ang pakiramdam mo?”", 1, "Tama. Dinadamayan ang takot nang hindi sumasang-ayon o kumokontra sa paniniwala (Listen at Empathize sa LEAP)."],
       ["“Baka nga. Isara na natin lahat ng bintana.”", 0, "Pinapalakas nito ang paniniwala. Puwedeng tumulong na maging komportable siya, pero huwag kumpirmahin ang hinala."] ] },
     { q: "Ayaw niyang magpatingin. Alin ang mas malamang na gumana?", o: [
-      ["“Kung hindi ka pupunta, aalis na ako.”", 0, "Ang ultimatum habang may krisis ay madalas nauuwi sa away at mas mababang tiwala."],
+      ["“Kung hindi ka pupunta, aalis na ako.”", 0, "Ang ultimatum habang may krisis ay madalas nauuwi sa away at nasisira ang tiwala."],
       ["“Napansin kong hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", 1, "Tama. Nakatuon ito sa problemang kinikilala niya (tulog) at inaalok ang inyong presensya: ang Partner sa LEAP."],
       ["Sabihin na pupunta kayo sa mall, tapos sa ospital pala.", 0, "Sinisira ng panlilinlang ang tiwala, kaya mas mahirap na siyang madala sa susunod."] ] },
     { q: "Nagbasag siya ng baso at sumisigaw. Ano ang uunahin?", o: [
@@ -497,11 +497,11 @@
       ["Pagsabihan siya nang malakas para matauhan.", 0, "Sa gitna ng galit, hindi naririnig ang sermon; lalo lang tataas ang tensyon."] ] },
     { q: "Buong araw siyang nasa kwarto. Ano ang pinakamainam?", o: [
       ["“Bumangon ka na, ang tamad mo.”", 0, "Ang kawalan ng gana ay sintomas. Ang batikos ay nagpapataas ng stress at ng tsansang lumala."],
-      ["“Gusto mo bang samahan kitang lumabas kahit sampung minuto?”", 1, "Tama. Maliit, malinaw, at may kasama. Ganito ang behavioral activation: maliit na hakbang na may tagumpay."],
+      ["“Gusto mo bang samahan kitang lumabas kahit sampung minuto?”", 1, "Tama. Maliit, malinaw, at may kasama. Ganito ang behavioral activation: maliliit na hakbang na kayang magawa."],
       ["Hayaan siya nang ilang linggo nang walang kumakausap.", 0, "Mahalaga ang espasyo, pero ang tuluyang pag-iwan ay nagpapalalim ng pag-iisa. Mag-imbita pa rin nang mahinahon."] ] },
     { q: "Tinanong ka niya: “Naniniwala ka ba sa akin o hindi?”", o: [
       ["“Hindi, hindi totoo ang sinasabi mo.”", 0, "Tapat, pero kadalasan ito ang katapusan ng usapan."],
-      ["“Oo, naniniwala ako.” (kahit hindi totoo)", 0, "Ang pagsisinungaling ay nagpapalakas ng paniniwala at nasisira ang tiwala kapag nalaman niya."],
+      ["“Oo, naniniwala ako.” (kahit hindi totoo)", 0, "Ang pagsisinungaling ay nagpapalakas ng paniniwala, at masisira ang tiwala kapag nalaman niya."],
       ["“Hindi ko nararanasan ang nararanasan mo, pero naniniwala akong totoo ang takot mo, at nandito ako.”", 1, "Tama. Tapat at may pagdamay. Iginagalang ang karanasan niya nang hindi nagsisinungaling."] ] },
     { q: "Sabi niya: \u201cPagod na ako. Mas mabuti siguro kung wala na ako.\u201d Ano ang gagawin mo?", o: [
       ["\u201cHuwag kang ganyan, maraming nagmamahal sa \u2019yo,\u201d at ibahin ang usapan.", 0, "Mabuti ang intensyon, pero pinapatahimik nito ang usapan. Kailangan niyang maramdamang puwede niyang sabihin ang totoo."],
@@ -509,8 +509,8 @@
       ["Hayaan muna siyang mag-isa para makapag-isip.", 0, "Sa ganitong sandali, mapanganib ang pag-iisa. Manatili at humingi ng tulong."] ] },
     { q: "Kinabukasan pagkatapos ng insidente sa bar, kalmado na siya. Paano ito pag-uusapan?", o: [
       ["\u201cNakakahiya ang ginawa mo kahapon.\u201d", 0, "Ang hiya ay nagpapalayo at nagpapataas ng stress, na nagpapalala ng sintomas."],
-      ["\u201cMukhang sobrang bigat ng nararamdaman mo kahapon. Ano ang nangyari para sa \u2019yo?\u201d", 1, "Tama. Mahinahon, walang paninisi, at nagbubukas ng usapan tungkol sa nararamdaman niya at sa tulong."],
-      ["Huwag na lang itong banggitin kahit kailan.", 0, "Ang pag-iwas ay nag-iiwan ng tensyon at nawawalan ng pagkakataong pag-usapan ang tulong."] ] },
+      ["\u201cMukhang sobrang bigat ng naramdaman mo kahapon. Ano ang pinagdaanan mo noon?\u201d", 1, "Tama. Mahinahon, walang paninisi, at nagbubukas ng usapan tungkol sa nararamdaman niya at sa tulong."],
+      ["Huwag na lang itong banggitin kahit kailan.", 0, "Ang pag-iwas ay nag-iiwan ng tensyon at nasasayang ang pagkakataong pag-usapan ang tulong."] ] },
   ];
   /* One small way a day to be close to him. Warmth at home is one of the strongest protective factors
      known (expressed-emotion meta-analysis, Ma et al. 2021); behavioural family therapy builds it through
@@ -527,7 +527,7 @@
     ["Ngayong araw: walang payo, walang sermon.", "Makinig lang. Kung may gusto kang itama, hintayin ang ibang araw."],
     ["Lutuin o bilhin ang paborito niyang pagkain.", "Hindi kailangang espesyal ang okasyon."],
     ["Magpadala ng maikling mensahe.", "“Iniisip kita. Walang kailangang sagot.”"],
-    ["Umupo sa labas nang magkasama sa umaga.", "Kahit 5 minuto sa araw. Nakakatulong din ito sa tulog niya."],
+    ["Umupo sa labas nang magkasama sa umaga.", "Kahit 5 minuto sa sikat ng araw. Nakakatulong din ito sa tulog niya."],
     ["Imbitahin siyang tumugtog ng isang kanta, kung gusto lang niya.", "Kung ayaw niya, ayos lang. Sabihing “Sige, sa ibang araw,” at ngumiti."],
     ["Mag-alok ng tulong sa isang maliit na bagay.", "At tanggapin kung tumanggi siya. Ang paggalang sa “hindi” niya ay nagpapatibay ng tiwala."]];
   let connectSkip = 0;
@@ -555,7 +555,7 @@
     "Mag-hum o kumanta kasabay ng paborito mong record.",
     "Tune lang ang gitara. Minsan sapat na ’yon para sa araw na ito.",
     "Matuto ng isang bagong kanta na gusto mo, isang linya lang ngayong araw.",
-    "Tugtugin ang kanta na parang ginagawa mo para sa isang tao lang.",
+    "Tugtugin ang isang kanta na parang para sa isang tao lang.",
     "Mag-record ng isang take sa Woodshed, para lang sa ’yo. Hindi mo kailangang pakinggan agad.",
     "Pumili ng tatlong chords at gumawa ng kahit anong tunog. Walang mali.",
   ];
@@ -589,7 +589,7 @@
       ["Isaiah 40:29, 31", "He gives power to the weak… those who wait for the Lord will renew their strength. They will run, and not be weary. They will walk, and not faint.", "Kapag ubos na ang lakas ninyo."],
       ["Galatians 6:9", "Let’s not be weary in doing good, for we will reap in due season, if we don’t give up.", "Mabagal ang paggaling, pero may direksyon."],
       ["Romans 12:12", "Rejoicing in hope; enduring in troubles; continuing steadfastly in prayer.", "Pag-asa, tiyaga, dasal: sabay-sabay."],
-      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts.", "Para sa gabi bago ang konsulta, o anumang gabing puno ng alala."],
+      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts.", "Para sa gabi bago ang konsulta, o anumang gabing puno ng pag-aalala."],
       ["1 Peter 5:7", "Casting all your worries on him, because he cares for you.", "Hindi ninyo kailangang buhatin ang lahat."],
       ["2 Corinthians 1:3–4", "The Father of mercies and God of all comfort; who comforts us in all our affliction, that we may be able to comfort those who are in any affliction.", "Ang inaaliw ay nakakapag-aliw din."],
       ["Psalm 34:18", "The Lord is near to those who have a broken heart, and saves those who have a crushed spirit.", "Sa mga araw na parang wasak ang loob."],
@@ -696,7 +696,7 @@
     if (db.pin && !pinFirst && route().id !== "new") return hero("home", "Settings", "Private mode", "May PIN na ang family space.", { top: backBtn("#/settings", "Settings") })
       + `<div class="card lift"><p style="margin-top:0">Hinihingi ang PIN tuwing bubuksan ang app, at kapag naiwan ito nang higit sa isang minuto.</p>
         <a class="btn block" href="#/pin/new">Palitan ang PIN</a><button class="btn ghost block" data-act="pinoff" style="margin-top:10px">Alisin ang PIN</button></div>`;
-    return `<div style="padding-top:8px">${backBtn("#/settings", "Settings")}</div>` + keypad(pinFirst ? "Ulitin ang PIN" : "Pumili ng 4-digit na PIN", pinFirst ? "Para makasigurong tama." : "Huwag gamitin ang birthday. Tandaan ito: hindi ito mababawi nang hindi binubura ang data.");
+    return `<div style="padding-top:8px">${backBtn("#/settings", "Settings")}</div>` + keypad(pinFirst ? "Ulitin ang PIN" : "Pumili ng 4-digit na PIN", pinFirst ? "Para makasigurong tama." : "Huwag gamitin ang birthday. Tandaan ito: kapag nakalimutan, kailangang burahin ang lahat ng data para makapasok ulit.");
   }
   function pinKey(k) {
     if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) { pinBuf += k; haptic(6); }
@@ -849,7 +849,7 @@
   }
   function viewMoments() {
     const list = [...db.moments].sort((a, b) => b.at - a.at);
-    return hero("home", "Kasama", "Magagandang sandali", "Ang maliliit na magandang nangyari. Basahin ito kapag pagod ka o mabigat ang araw.", { top: backBtn("#/", "Home") })
+    return hero("home", "Kasama", "Magagandang sandali", "Ang maliliit na magagandang nangyari. Basahin ito kapag pagod ka o mabigat ang araw.", { top: backBtn("#/", "Home") })
       + `<div class="card lift" style="padding:4px 18px">${list.map(m => `<div class="note"><div class="row between"><span class="d">${dstr(m.at)}${m.idea ? ` · ${esc(m.idea)}` : ""}</span><button class="btn ghost sm" style="min-height:30px;padding:2px 8px" data-act="delmoment" data-v="${m.id}" aria-label="Burahin">${ic("x")}</button></div>${m.text ? `<div>${esc(m.text)}</div>` : ""}</div>`).join("")}</div>`;
   }
   function viewLearn() {
@@ -866,7 +866,7 @@
     return stepper({ k: "learn", kicker: `Aralin ${i + 1} sa ${LESSONS.length}`, title: esc(l.t), back: ["#/learn", "Unawain"], cards, i: n, base: `#/lesson/${l.id}`,
       finish: `<button class="btn teal" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${ic("check")} Tapos na</button>` });
   }
-  const familyMsg = () => `Gusto ko lang ibahagi ang nalaman namin tungkol sa nangyayari kay ${db.names.him || "(pangalan)"}.\n\nAyon sa mga doktor at pananaliksik, ang pinagdadaanan niya ay tinatawag na psychosis: isang medikal na kondisyon ng utak, hindi kahinaan, katamaran, o pag-iinarte. Kaya siya hirap matulog, nagagalit, may mga hinala, at tumigil sa pagtugtog. Hindi niya ito pinili.\n\nNagagamot ito, at mas maganda ang paggaling kapag maaga ang gamutan at kalmado at suportado ang pamilya.\n\nPaano tayo makakatulong:\n- Mahinahong pakikipag-usap; walang sermon, sigawan o pagkukumpara.\n- Huwag pagtalunan ang mga hinala niya; damayan ang takot niya.\n- Tulungan siyang makapagpatingin sa psychiatrist.\\n- Iwasang akusahan o paghinalaan siya. Hindi ito dahil sa bisyo; maraming nagkakaroon nito nang walang anumang droga.\n\nKung may emergency: 911, o NCMH Crisis Hotline 1553 (libre, 24 oras). Puwede ring tumawag ang pamilya para humingi ng payo.\n\nSalamat sa pagmamahal ninyo sa kanya.`;
+  const familyMsg = () => `Gusto ko lang ibahagi ang nalaman namin tungkol sa nangyayari kay ${db.names.him || "(pangalan)"}.\n\nAyon sa mga doktor at pananaliksik, ang pinagdadaanan niya ay tinatawag na psychosis: isang medikal na kondisyon ng utak, hindi kahinaan, katamaran, o pag-iinarte. Kaya siya hirap matulog, nagagalit, may mga hinala, at tumigil sa pagtugtog. Hindi niya ito pinili.\n\nNagagamot ito, at mas maganda ang paggaling kapag maaga ang gamutan at kalmado at suportado ang pamilya.\n\nPaano tayo makakatulong:\n- Mahinahong pakikipag-usap; walang sermon, sigawan o pagkukumpara.\n- Huwag pagtalunan ang mga hinala niya; damayan ang takot niya.\n- Tulungan siyang makapagpatingin sa psychiatrist.\n- Iwasang akusahan o paghinalaan siya. Hindi ito dahil sa bisyo; maraming nagkakaroon nito nang walang anumang droga.\n\nKung may emergency: 911, o NCMH Crisis Hotline 1553 (libre, 24 oras). Puwede ring tumawag ang pamilya para humingi ng payo.\n\nSalamat sa pagmamahal ninyo sa kanya.`;
   function viewTalk() {
     const p = Object.keys(db.practice).length;
     return hero("talk", "Kausapin", "Paano makipag-usap sa kanya", "Hindi kailangang perpekto. Ang mahalaga ay mahinahon at may pagdamay.")
@@ -934,7 +934,7 @@
       `<div class="row" style="gap:10px"><span class="bubble b-rose">${ic("shield")}</span><h2>Pula · ang paghahanda</h2></div>${fld("stay", "Sino ang mananatili sa kanya", "", 2)}${fld("bring", "Dadalhin sa ospital", "Listahan ng gamot, ang Talaan, ID, PhilHealth, charger", 2)}`,
       `<span class="bubble b-teal" style="width:64px;height:64px;border-radius:20px">${ic("share")}</span><h2 style="margin-top:16px">Ibahagi sa pamilya</h2><p class="big">Ipadala ang plano para alam ng lahat ang gagawin. Kapag nagsimula na ang gamutan, ipakita rin ito sa doktor.</p>
         <button class="btn teal block" data-act="shareplan" style="margin-top:12px">${ic("share")} Ibahagi ang plano</button>`];
-    return stepper({ k: "help", kicker: "Plano kung lumala", title: "Ang plano ng pamilya", back: ["#/help", "Tulong"], cards, i, base: "#/plan", finish: `<a class="btn" href="#/help">${ic("check")} Tapos</a>` });
+    return stepper({ k: "help", kicker: "Plano para sa mabibigat na araw", title: "Ang plano ng pamilya", back: ["#/help", "Tulong"], cards, i, base: "#/plan", finish: `<a class="btn" href="#/help">${ic("check")} Tapos</a>` });
   }
   function planText() {
     const p = plan();
@@ -963,7 +963,7 @@
       cards: [`<h2>Girlfriend ka, hindi nurse</h2><p class="big">Okay lang na maging kasama sa paggaling nang hindi mo pinapasan ang lahat.</p>`,
         `<h2>Kaligtasan mo muna</h2><p class="big">Kung natatakot ka sa kanya, lumayo muna at humingi ng tulong. Hindi ito pagtalikod sa kanya.</p>`,
         `<h2>Hatiin ang pag-aalaga</h2><p class="big">Kasama ang pamilya niya at pamilya mo. Hindi dapat ikaw lang.</p>`,
-        `<h2>Okay ang hangganan</h2><p class="big">Mahinahon at malinaw: “Mahal kita, pero hindi okay ang magbasag ng gamit.”</p>`,
+        `<h2>Okay lang ang may hangganan</h2><p class="big">Mahinahon at malinaw: “Mahal kita, pero hindi okay ang magbasag ng gamit.”</p>`,
         `<h2>Ang sarili mong buhay</h2><p class="big">Trabaho, kaibigan, pahinga. Mas matagal kang makakatulong kung hindi ka ubos.</p>`], finish: `<a class="btn teal" href="#/care">${ic("check")} Tapos</a>` });
     if (id === "all") return stepper({ k: "care", kicker: "Para sa ’yo", title: "Mga paalala", back: ["#/care", "Para sa ’yo"], i: route().n, base: "#/care/all",
       cards: CARE_TIPS.map(([i, b, t, d]) => `<span class="bubble ${b}" style="width:60px;height:60px;border-radius:18px">${ic(i)}</span><h2 style="margin-top:16px">${t}</h2><p class="big">${d}</p>`), finish: `<a class="btn teal" href="#/care">${ic("check")} Tapos</a>` });
@@ -1023,7 +1023,7 @@
         <div style="margin-top:14px"><div class="small muted" style="margin:0 4px 8px">Gaano kaayos ang tulog mo?</div><div class="chips">${["Hindi maayos", "Okay", "Maayos"].map((q, i) => `<button class="chip${e.q === i ? " on" : ""}" data-act="sq" data-v="${i}">${q}</button>`).join("")}</div></div></div>
       <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([h, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${h == null ? "zero" : h < 5 || h > 11 ? "warm" : ""}" style="height:${h == null ? 6 : Math.max(10, Math.min(100, h / 10 * 100))}%"></i><span>${h == null ? ["L", "L", "M", "M", "H", "B", "S"][wd] : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
         <p class="small" style="margin:10px 0 0;color:var(--ink2)">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
-      <div class="sec"><div class="eyebrow">Tip ngayon</div>${(() => { const T = [["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras paggising."],
+      <div class="sec"><div class="eyebrow">Tip ngayon</div>${(() => { const T = [["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras pagkagising."],
           ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "Pati energy drinks at softdrinks na may caffeine sa gabi."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
           ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]];
           const [i, b, t, d] = T[sleepTip % T.length];
@@ -1143,7 +1143,7 @@
     ns.forEach(n => n.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
     return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n- Accredited po ba kayo sa PhilHealth mental health package? Puwede po bang generic ang gamot, o nasa listahan ng libreng gamot ng DOH (MAP-MH)?\n- Puwede po ba kaming humingi ng medical abstract o certificate para sa tulong pinansyal?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gaano kadalas siyang umiinom ng alak o kape, at kung may gamot siyang iniinom.`;
   }
-  function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Mangyaring kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
+  function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Subukang kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
   function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
   const mt = { len: 600, left: 600, run: false, t0: 0, iv: 0 };
   const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -1227,7 +1227,7 @@
     else if (a === "pinkey") pinKey(v);
     else if (a === "verseoff") { db.verseOff = !db.verseOff; save(); render(); }
     else if (a === "pinoff") { if (!confirm("Alisin ang PIN?")) return; delete db.pin; save(); toast("Inalis ang PIN"); location.hash = "#/settings"; }
-    else if (a === "pinforgot") { if (!confirm("Hindi mababawi ang PIN. Para makapasok ulit, kailangang burahin ang LAHAT ng nasa app na ito sa phone na ito. Burahin?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
+    else if (a === "pinforgot") { if (!confirm("Walang paraan para makuha ulit ang PIN. Para makapasok ulit, kailangang burahin ang LAHAT ng nasa app na ito sa phone na ito. Burahin?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
     else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next + "/0" : "#/learn"; }
     else if (a === "pick") { const i = pq % PRACTICE.length; db.practice[i] = +v; save(); render(); }
