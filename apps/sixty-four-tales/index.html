@@ -227,6 +227,7 @@
   /* ---------- Data ---------- */
   let T = null; /* the 64 entries */
   const tale = n => T[n - 1];
+  const culture = src => String(src).split(" · ")[0];
   const REGIONS = ["East Asia", "South Asia", "Middle East", "Bible & Talmud", "Greece & Rome", "Europe", "Africa", "Americas & Pacific"];
 
   /* A stable "tale of the day": walks a fixed shuffle of the 64 so no tale repeats for 64 days. */
@@ -267,7 +268,7 @@
       <h1 style="margin:6px 2px 18px">${greet}</h1>
       <a class="card today" href="#/h/${n}" style="display:block;text-decoration:none;color:var(--ink)">
         <div class="row between" style="align-items:flex-start"><div class="grow"><div class="eyebrow" style="color:var(--ember)">Hexagram ${n} · ${esc(x.name)}</div>
-          <h2 style="margin-top:8px">${esc(x.tale.title)}</h2><div class="src">${esc(x.region)}</div></div>${glyph(n, "med")}</div>
+          <h2 style="margin-top:8px">${esc(x.tale.title)}</h2><div class="src">${esc(culture(x.tale.source))}</div></div>${glyph(n, "med")}</div>
         <p class="theme" style="margin:14px 0 0">${esc(x.theme)}</p></a>
       <div class="actions"><a class="btn ember" href="#/h/${n}">${ic("book")} Read it</a><a class="btn" href="#/cast">${ic("coins")} Cast a hexagram</a></div>
       <div class="sec"><div class="eyebrow">Your sixty-four</div><div class="card row" style="gap:16px">
@@ -289,7 +290,8 @@
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     return T.filter(x => (!region || x.region === region || x.alsoRegion === region) && (!words.length || score(x, words)));
   }
-  const itemHTML = x => `<a class="item" href="#/h/${x.n}">${glyph(x.n)}<div class="grow"><div class="t">${esc(x.tale.title)}</div><div class="m">${x.n} · ${esc(x.name)} · ${esc(x.region)}</div></div><span class="n">${db.learned[x.n] ? `<span class="done">${ic("check")}</span>` : ""}</span></a>`;
+  /* When a region filter matches only the second tale, show that one. */
+  const itemHTML = x => { const alt = region && x.region !== region; return `<a class="item" href="#/h/${x.n}">${glyph(x.n)}<div class="grow"><div class="t">${esc(alt ? x.also.title : x.tale.title)}</div><div class="m">${x.n} · ${esc(x.name)} · ${alt ? `${esc(culture(x.also.source))} · second tale` : esc(culture(x.tale.source))}</div></div><span class="n">${db.learned[x.n] ? `<span class="done">${ic("check")}</span>` : ""}</span></a>`; };
   function viewTales() {
     const r = results();
     return `<h1 style="margin:8px 2px 4px">The tales</h1><p class="muted" style="margin:0 2px 16px">One for each hexagram. Search a situation, a feeling, a place or a name.</p>
