@@ -102,6 +102,16 @@
     .choose { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; }
     .choose button { text-align: left; width: 100%; border: 1px solid var(--line2); background: var(--card); border-radius: 22px; padding: 18px 20px; margin-top: 12px; cursor: pointer; color: var(--ink); box-shadow: var(--e1); }
     .choose button b { display: block; font-size: 19px; } .choose button span { color: var(--ink2); font-size: 15px; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(20,25,26,.42); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
+    .sheet { width: min(520px, 100%); background: var(--bg); border-radius: 26px 26px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); max-height: 90vh; overflow-y: auto; animation: up .4s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 16px; }
+    @keyframes up { from { transform: translateY(100%); } to { transform: none; } } @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    ol.steps { list-style: none; counter-reset: s; margin: 8px 0; padding: 0; }
+    ol.steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15.5px; line-height: 1.45; }
+    ol.steps li:first-child { border-top: 0; }
+    ol.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 9px; background: var(--teal-soft); color: var(--teal); font: 700 13px/26px var(--sans); text-align: center; margin-top: 1px; }
+    .ios-ic { display: inline-flex; vertical-align: -5px; width: 22px; height: 22px; border-radius: 6px; background: var(--card); border: 1px solid var(--line2); align-items: center; justify-content: center; color: #1a73e8; margin: 0 2px; }
+    .ios-ic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
@@ -110,7 +120,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "1", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "2", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -507,6 +517,7 @@
         <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div>${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="margin-top:8px">`).join("")}</div>`}
       <div class="sec"><div class="eyebrow">Phone na ito</div><div class="list">
         ${fam ? "" : `<button class="li" data-act="sharewk"><span class="ic">↗</span><span class="grow">Ibahagi ang linggo ko<small>Kung gusto mo lang: tulog, mga nagawa, musika</small></span></button>`}
+        ${isStandalone() ? "" : `<button class="li" data-act="installsheet"><span class="ic">⬇</span><span class="grow">I-install sa phone na ito<small>Para isang pindot lang ang pagbukas</small></span></button>`}
         <button class="li" data-act="switch"><span class="ic">⇄</span><span class="grow">Palitan ang space<small>${fam ? "Gawing para sa kanya ang phone na ito" : "Gawing para sa pamilya ang phone na ito"}</small></span></button>
         <a href="#/about"><span class="ic">i</span><span class="grow">Tungkol sa Kasama<small>Saan galing ang mga gabay</small></span><span class="chev">›</span></a></div></div>
       <p class="small muted" style="margin-top:14px">Lahat ng nakasulat dito ay nasa phone na ito lang. Walang ipinapadala kahit saan.</p>`;
@@ -538,12 +549,62 @@
     try { await navigator.clipboard.writeText(text); toast("Nakopya. I-paste sa Messenger o Viber."); } catch (e) { toast("Hindi makopya"); }
   }
 
+  /* ---------- Install: one tap on Android Chrome; step-by-step for iPhone; open in a real browser first
+     when the link was opened inside Messenger, Viber, Facebook or Instagram (they can't install apps). ---------- */
+  let deferredInstall = null;
+  const UA = navigator.userAgent;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(UA);
+  const inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Viber|Line\/|MicroMessenger|Snapchat|TikTok|; wv\)/i.test(UA);
+  const iosOtherBrowser = isIOS && /CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA);
+  const SNOOZE = "kasama-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  const IC = { share: `<span class="ios-ic"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg></span>`,
+    plus: `<span class="ios-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>`,
+    dots: `<span class="ios-ic" style="color:var(--ink)"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span>`,
+    vdots: `<span class="ios-ic" style="color:var(--ink)"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></span>` };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn teal block" data-act="install" style="min-height:52px">I-install ang Kasama</button>`;
+    if (inApp && isIOS) return `<p class="small" style="margin:0 0 4px"><b>Nakabukas ito sa loob ng ibang app</b> (Messenger, Viber o Facebook). Hindi puwedeng mag-install mula dito. Buksan muna sa Safari:</p>
+      <ol class="steps"><li><span>I-tap ang ${IC.dots} o ang <b>Share</b> ${IC.share} sa itaas o ibaba ng screen.</span></li><li><span>Piliin ang <b>Open in Safari</b> (o <b>Open in browser</b>).</span></li><li><span>Pagbukas sa Safari, babalik ang gabay na ito para sa susunod na hakbang.</span></li></ol>
+      <button class="btn block" data-act="copylink" style="margin-top:4px">O kopyahin ang link at i-paste sa Safari</button>`;
+    if (inApp) return `<p class="small" style="margin:0 0 4px"><b>Nakabukas ito sa loob ng ibang app</b> (Messenger, Viber o Facebook). Hindi puwedeng mag-install mula dito. Buksan muna sa Chrome:</p>
+      <ol class="steps"><li><span>I-tap ang ${IC.vdots} sa kanang itaas.</span></li><li><span>Piliin ang <b>Open in Chrome</b> (o <b>Open in browser</b>).</span></li><li><span>Pagbukas sa Chrome, i-tap ang <b>I-install</b> dito.</span></li></ol>
+      <button class="btn block" data-act="copylink" style="margin-top:4px">O kopyahin ang link at i-paste sa Chrome</button>`;
+    if (isIOS) return `<ol class="steps"><li><span>${iosOtherBrowser ? "Pinakamadali sa <b>Safari</b>. Sa ibang browser, hanapin ang" : "I-tap ang"} <b>Share</b> ${IC.share} ${iosOtherBrowser ? "sa address bar o menu." : "sa ibaba ng screen (sa iPad, nasa itaas)."}</span></li>
+      <li><span>Mag-scroll pababa at i-tap ang <b>Add to Home Screen</b> ${IC.plus}.</span></li><li><span>I-tap ang <b>Add</b> sa kanang itaas.</span></li>
+      <li><span>Buksan ang Kasama mula sa home screen, hindi sa Safari, para gumana bilang app at offline.</span></li></ol>
+      <p class="small muted" style="margin:4px 0 0">Kung walang “Add to Home Screen”, i-update ang iPhone o subukan sa Safari.</p>`;
+    if (isAndroid) return `<ol class="steps"><li><span>I-tap ang ${IC.vdots} sa kanang itaas ng Chrome.</span></li><li><span>I-tap ang <b>Install app</b> o <b>Add to Home screen</b>.</span></li><li><span>I-tap ang <b>Install</b>.</span></li></ol>`;
+    return `<ol class="steps"><li><span>I-click ang <b>install</b> icon sa kanan ng address bar,</span></li><li><span>o piliin ang <b>Install Kasama</b> sa menu ng browser.</span></li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
+      <div class="row" style="gap:14px"><img src="icons/icon-192.png" alt="" width="58" height="58" style="border-radius:14px;box-shadow:var(--e1)">
+        <div><div class="eyebrow">Libre · gumagana kahit offline · pribado</div><h2>Ilagay sa home screen</h2></div></div>
+      <p class="muted small" style="margin:12px 0 10px">Para isang pindot lang ang pagbukas, parang ibang app. Nasa phone lang ang lahat ng isusulat mo.</p>
+      <div id="install-body">${installBody()}</div>
+      <button class="btn ghost block" data-act="installlater" style="margin-top:6px">Hindi muna</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
+    document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#install-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Na-install na. Buksan mula sa home screen."); });
+
   /* ---------- Actions ---------- */
   let breathT = 0;
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el) return;
     const a = el.dataset.act, v = el.dataset.v; if (el.tagName === "BUTTON") haptic(6);
-    if (a === "space") { db.space = v; save(); location.hash = "#/"; render(); }
+    if (a === "space") { db.space = v; save(); location.hash = "#/"; render(); setTimeout(() => showInstall(false), 2500); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+    else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Nakopya ang link. I-paste sa browser."), () => prompt("Kopyahin ang link:", u)); }
     else if (a === "switch") { if (!confirm("Palitan ang space ng phone na ito? Mananatili ang mga naisulat.")) return; db.space = db.space === "family" ? "him" : "family"; save(); location.hash = "#/"; render(); }
     else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
     else if (a === "lessondone") { db.lessons[v] = Date.now(); if (v && Object.keys(db.lessons).length >= 3) db.steps.learn = true; save(); location.hash = el.dataset.next ? "#/lesson/" + el.dataset.next : "#/learn"; }
@@ -589,6 +650,7 @@
   document.addEventListener("change", e => { if (e.target.id === "bed" || e.target.id === "wake") render(); });
 
   render();
+  if (db.space) setTimeout(() => showInstall(false), 4000);
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
     const had = !!navigator.serviceWorker.controller;
