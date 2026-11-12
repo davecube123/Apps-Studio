@@ -240,6 +240,13 @@
     .keypad button { width: 76px; height: 76px; border-radius: 50%; border: 0; background: var(--card); color: var(--ink); font: 500 28px var(--sans); box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; display: grid; place-items: center; }
     .keypad button:active { background: var(--sage); }
     .keypad .i { width: 26px; height: 26px; }
+    .verse blockquote { margin: 10px 0 0; font: 400 19px/1.5 var(--display); font-variation-settings: 'SOFT' 100; font-style: italic; color: var(--ink); }
+    .verse .vref { margin-top: 8px; font: 600 13px var(--sans); letter-spacing: .04em; color: var(--teal); }
+    .verse + .verse { margin-top: 12px; }
+    .place + .place { margin-top: 10px; }
+    .telrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .telrow .btn { min-height: 40px; font-size: 14px; }
+    .telrow .i { width: 16px; height: 16px; }
     .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; } .nextstep .row .btn { flex: 1; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
@@ -249,7 +256,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "7", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "8", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -368,10 +375,10 @@
       key: "Ang tanong ay hindi \u201cuminom ka na ba?\u201d kundi \u201ckumusta ang pakiramdam mo sa gamot?\u201d" },
     { id: "worse", t: "Ano ang nagpapalala", m: 2, body: [
       "Kulang sa tulog: madalas ito ang unang senyales at nagpapalala rin ng hinala at boses. Ang tulog ay mahalagang bantayan.",
-      "Droga at alak: ang marijuana at lalo na ang shabu (methamphetamine) ay kilalang nagti-trigger at nagpapalala ng psychosis. Pati ang sobrang alak. Kung gumagamit siya, mahalagang sabihin ito sa doktor, nang walang paninisi.",
+      "Puyat, matinding stress, at sobrang alak: pinapabigat nila ang mga sintomas. Mahalaga ring malaman: maraming nagkakaroon nito nang walang anumang bisyo o droga. Huwag siyang akusahan o pilitin; ang hinala at akusasyon ay nagdudulot ng hiya at galit, at sinisira ang tiwala. Kung may tanong ang pamilya, ang doktor ang bahalang magtanong.",
       "Stress at gulo sa bahay: away, sigawan, sobrang daming tao o ingay, pressure na “bumalik ka na sa trabaho.” Ang kalmado at mainit na kapaligiran ay nakakatulong talaga, hindi lang “magandang pakiramdam.”",
       "Biglaang paghinto ng gamot (kapag nagsimula na siya): isa ito sa pinakamadalas na dahilan ng pagbabalik ng sintomas." ],
-      key: "Tulog, walang droga, at kalmadong bahay: tatlong bagay na kayang tulungan ng pamilya araw-araw." },
+      key: "Tulog, mahinahong araw, at kalmadong bahay: tatlong bagay na kayang tulungan ng pamilya araw-araw." },
     { id: "home", t: "Ang kalmadong bahay: ano ang sinasabi ng research", m: 3, body: [
       "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Sa pagsusuri ng 30 pag-aaral (2021), halos dinodoble ng madalas na batikos ang tsansang bumalik ito, at ang init at pagtanggap (warmth) ay nagpapababa nito nang malaki. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
       "Ang nakakatulong: mahinahong boses, maikli at malinaw na pananalita, papuri sa maliliit na hakbang, at pagbibigay ng espasyo kapag kailangan niya. Ang mga pamilyang natuto tungkol sa kondisyon at sa ganitong paraan ng pakikitungo ay may mas kaunting pagbabalik ng sintomas at pagkaka-ospital; ito ay family psychoeducation, isa sa pinakamatibay na ebidensya sa larangang ito.",
@@ -384,7 +391,7 @@
       "Iwasan ang mga salitang tulad ng “baliw,” “sira,” o “may topak,” kahit pabiro, at pakiusapan ang iba na iwasan din ang mga ito." ],
       key: "Pag-usapan ang tao, hindi ang label. Kanya ang kuwento." },
     { id: "safety", t: "Tungkol sa galit at kaligtasan", m: 3, body: [
-      "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag may droga o alak, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
+      "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag puyat, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
       "Kapag galit o takot siya: bigyan siya ng espasyo, huwag harangan ang daan niya palabas, huwag hawakan o pigilan nang pisikal, magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
       "Itago ang mga bagay na maaaring makasakit (kutsilyo, gamot na marami, matutulis). Kung may banta sa buhay niya o ng iba, tumawag sa 911 o dalhin siya sa emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal." ],
       key: "Kaligtasan muna, ng lahat, kasama siya." },
@@ -396,6 +403,8 @@
       key: "Ang pagtatanong nang diretso ay pag-aalaga, hindi panganib." },
     { id: "faith", t: "Pananampalataya, hiya, at ang sasabihin ng iba", m: 2, body: [
       "Sa ating kultura, minsan iniisip na ito ay sinapian, kulam, o kahinaan ng pananampalataya. Igalang ang paniniwala ng pamilya; ang dasal at komunidad ay malaking suporta. Pero hindi ito kapalit ng gamutan; magkasama dapat.",
+      "Kung sasali kayo sa isang simbahan o faith community: malaking tulong ang small group, sabay na pagdarasal, at pagkanta. Puwedeng ipaalam sa isang pastor o leader na pinagkakatiwalaan ninyo, kung papayag siya. Ang pananaliksik ay nagpapakita na ang suporta ng komunidad ng pananampalataya ay nakakatulong sa paggaling, lalo na kapag sinusuportahan din nito ang gamutan.",
+      "Isang paalala: kung ang mga tema ng relihiyon ay nagiging nakakatakot sa kanya (takot sa parusa o sa masasamang espiritu, o pakiramdam na may espesyal siyang misyon), banggitin ito sa doktor nang mahinahon. Hindi ito pagkontra sa pananampalataya niya; bahagi lang ito ng pag-aalaga. May mga talata sa Bibliya sa app na ito na pinili para sa kapayapaan at pahinga.",
       "Ang hiya (“ano ang sasabihin ng kapitbahay”) ay madalas na dahilan kung bakit naaantala ang pagpapatingin. Ang psychosis ay medikal na kondisyon tulad ng diabetes o hika. Walang dapat ikahiya sa pagpapagamot.",
       "May batas tayo, ang Mental Health Act (RA 11036), na nagbibigay ng karapatan sa maayos at makataong pangangalaga." ],
       key: "Pananampalataya at gamutan: magkasama, hindi magkalaban." },
@@ -460,10 +469,14 @@
       avoid: ["Paglalagay ng gamot sa pagkain nang palihim.", "Pagsigaw, pagbabanta, o paulit-ulit na \u201cuminom ka na!\u201d", "Pagpapabaya hanggang lumala."],
       say: ["\u201cAno ang ayaw mo sa gamot? Gusto kong maintindihan.\u201d", "\u201cKung may side effect, sabihin natin sa doktor. Baka may ibang puwede.\u201d", "\u201cAno ang gusto mong mangyari sa buhay mo? Paano tayo makakarating doon?\u201d"],
       why: "Kadalasang dahilan ang side effects o ang hindi paniniwalang may sakit siya. Pakinggan, iparating sa doktor, at iugnay ang gamot sa mga layunin niya: tulog, musika, trabaho." },
-    { id: "hisfamily", t: "Kausapin ang pamilya niyang hindi nakakaintindi", sit: "Iniisip ng pamilya niya na nag-iinarte lang siya, tamad, o \u201cpinapabayaan\u201d ng girlfriend. Nagagalit o nahihiya sila.",
-      avoid: ["Pakikipagtalo kung sino ang may kasalanan.", "Pagbabanta o paghahamon (\u201cKayo kasi\u2026\u201d).", "Pagkukuwento ng lahat ng detalye sa harap ng maraming tao."],
-      say: ["\u201cGusto rin naming gumaling siya, gaya ninyo. Puwede ba naming ibahagi ang sinabi ng doktor?\u201d", "\u201cHindi ito katamaran. Medikal na kondisyon ito, at nagagamot. Mas mabilis siyang gagaling kung magkakasama tayo.\u201d", "\u201cGusto po ba ninyong sumama sa konsulta sa Nobyembre 17? Mas maipapaliwanag ng doktor.\u201d"],
+    { id: "hisfamily", t: "Kausapin ang pamilya niyang hindi nakakaintindi", sit: "Iniisip ng pamilya niya na nag-iinarte lang siya, tamad, nagdodroga, o \u201cpinapabayaan\u201d ng girlfriend. Nagagalit o nahihiya sila.",
+      avoid: ["Pakikipagtalo kung sino ang may kasalanan.", "Pag-uusap tungkol sa droga sa harap niya. Masakit at nakaka-trigger ito sa kanya.", "Pagbabanta o paghahamon (\u201cKayo kasi\u2026\u201d).", "Pagkukuwento ng lahat ng detalye sa harap ng maraming tao."],
+      say: ["\u201cGusto rin naming gumaling siya, gaya ninyo. Puwede ba naming ibahagi ang sinabi ng doktor?\u201d", "\u201cHindi po ito dahil sa droga. Maraming nagkakaroon nito nang walang anumang bisyo. Puwede po nating itanong mismo sa doktor.\u201d", "\u201cHindi ito katamaran. Medikal na kondisyon ito, at nagagamot. Mas mabilis siyang gagaling kung magkakasama tayo.\u201d", "\u201cGusto po ba ninyong sumama sa konsulta sa Nobyembre 17? Mas maipapaliwanag ng doktor.\u201d"],
       why: "Mas pinaniniwalaan ng pamilya ang doktor kaysa sa girlfriend o kaibigan. Ang pag-imbita sa isang kapamilya sa konsulta ay isa sa pinakamabisang paraan para maintindihan nila. Ang pamilyang natuto tungkol sa kondisyon ay nakakatulong na mabawasan ang pagbabalik ng sintomas. Ipadala rin ang handang mensahe sa Unawain." },
+    { id: "accused", t: "Kapag inakusahan siya at nasaktan", sit: "May nag-akusa sa kanya, halimbawa na nagdodroga siya, at sobrang nasaktan o nagalit siya.",
+      avoid: ["“Baka naman kasi…” o anumang pagdududa sa harap niya.", "Pagtatanggol sa nag-akusa (“Nag-aalala lang sila”) habang mainit pa ang ulo niya.", "Pagpilit na makipag-ayos agad."],
+      say: ["“Naniniwala ako sa ’yo.”", "“Ang sakit marinig ’yon. Naiintindihan ko kung bakit ka galit.”", "“Hindi mo kailangang patunayan ang sarili mo sa akin.”", "“Gusto mo bang lumabas muna tayo sandali?”"],
+      why: "Ang paulit-ulit na akusasyon ay isang uri ng batikos, at kilala itong nagpapabigat ng stress at sintomas. Ang pakiramdam na pinaniniwalaan siya ng kahit isang tao ay proteksyon. Pag-usapan ang pamilya niya mamaya, kapag kalmado na siya." },
     { id: "music", t: "Paano banggitin ang musika", sit: "Gusto ninyong bumalik siya sa pagtugtog pero ayaw ninyong ma-pressure siya.",
       avoid: ["“Bakit hindi ka na tumutugtog? Sayang ang talent mo.”", "Pag-aayos ng gig para sa kanya nang hindi niya alam.", "Pagbanggit sa bar incident bilang dahilan para hindi na tumugtog."],
       say: ["“Narinig ko ulit ’yung kanta mo noon. Ang ganda pala talaga.”", "Iwanan lang ang gitara sa lugar na madaling abutin, walang sinasabi.", "“Gusto mo bang tumugtog tayo ng isang kanta? Kahit simple lang.”"],
@@ -529,13 +542,14 @@
     ["family", "Ipaliwanag sa pamilya niya", "May handang mensahe, at paano sila kausapin."],
     ["plan", "Gawin ang plano para sa mabibigat na araw", "Mga maagang senyales, ang gagawin, at sino ang tatawagan."],
   ];
-  const NOTE_TAGS = ["Epekto ng gamot", "Hindi nakatulog", "Galit", "Hinala/takot", "Boses", "Hindi kumakain", "Droga/alak", "Nag-isa buong araw", "Magandang araw", "Tumugtog"];
+  const NOTE_TAGS = ["Epekto ng gamot", "Hindi nakatulog", "Galit", "Hinala/takot", "Boses", "Hindi kumakain", "Stress/pagod", "Nag-isa buong araw", "Magandang araw", "Tumugtog"];
 
   /* =================================================================
      HIS SPACE ("My days"): his goals, never labels. Behavioural activation, sleep, music, calm.
      ================================================================= */
   const DEFAULT_THINGS = ["Bumangon bago mag-9", "Kumain nang maayos", "Lumabas kahit 10 minuto", "10 minuto sa gitara"];
   const MUSIC_IDEAS = [
+    "Tugtugin ang isang worship song o awit na gusto mo, kahit mag-isa.",
     "Tugtugin ang isang kantang mahal mo noon. Isa lang, kahit hindi perpekto.",
     "Isang chord lang. Tugtugin nang dahan-dahan sa loob ng dalawang minuto, at pakinggan ang tunog.",
     "Mag-hum o kumanta kasabay ng paborito mong record.",
@@ -557,6 +571,113 @@
   const crisisHTML = () => `<a class="bigcall" href="tel:911"><span class="bubble">${ic("phone")}</span><span class="grow"><b>911</b><span class="l">Emergency: may panganib sa buhay ngayon</span></span></a>
     <a class="bigcall teal" href="tel:1553"><span class="bubble">${ic("phone")}</span><span class="grow"><b>1553</b><span class="l">NCMH Crisis Hotline · libre, 24 oras · para rin sa pamilya</span></span></a>
     <details class="more"><summary>Ibang numero ng NCMH (cellphone)</summary><div class="crisis" style="margin-top:6px">${CRISIS.slice(2).map(([l, n, d]) => `<a class="call" href="tel:${d}"><span class="bubble">${ic("phone")}</span><span class="grow"><b>${n}</b><span class="l">${l}</span></span></a>`).join("")}</div></details>`;
+  /* Bible verses: World English Bible (public domain), with "Yahweh" rendered "the Lord". Chosen for peace,
+     rest, love and hope; nothing about punishment, enemies or spirits, which can frighten someone under stress.
+     The short Taglish notes are original. */
+  const VERSES = {
+    family: [
+      ["Ecclesiastes 4:9–10", "Two are better than one… For if they fall, the one will lift up his fellow; but woe to him who is alone when he falls, and doesn’t have another to lift him up.", "Ito ang ibig sabihin ng kasama. Hindi kayo nag-iisa, at hindi rin siya."],
+      ["Galatians 6:2", "Bear one another’s burdens, and so fulfill the law of Christ.", "Hatiin ang pasanin: sa pamilya, sa mga kaibigan, sa simbahan."],
+      ["1 Corinthians 13:4–7", "Love is patient and is kind… is not provoked, takes no account of evil… bears all things, believes all things, hopes all things, and endures all things.", "Mahinahon at mainit: iyan din ang sinasabi ng pananaliksik na pinakamakakatulong sa kanya."],
+      ["James 1:19", "Let every man be swift to hear, slow to speak, and slow to anger.", "Makinig muna bago magpayo. Ito ang puso ng LEAP."],
+      ["Proverbs 15:1", "A gentle answer turns away wrath, but a harsh word stirs up anger.", "Kapag mainit ang ulo niya, ang mahinahong boses ang nagpapakalma."],
+      ["Colossians 3:12–13", "Put on… a heart of compassion, kindness, lowliness, humility, and perseverance; bearing with one another, and forgiving each other.", "Pagpapatawad, sa kanya at sa sarili ninyo, sa mga araw na hindi naging maayos."],
+      ["Ruth 1:16", "Where you go, I will go; and where you stay, I will stay.", "Para sa nananatili sa tabi niya."],
+      ["Proverbs 17:17", "A friend loves at all times; and a brother is born for adversity.", "Para sa mga kaibigang hindi lumalayo."],
+      ["Matthew 11:28–29", "Come to me, all you who labor and are heavily burdened, and I will give you rest… for I am gentle and humble in heart; and you will find rest for your souls.", "Para sa mga pagod na. Puwede kayong magpahinga."],
+      ["Mark 6:31", "You come apart into a deserted place, and rest awhile.", "Kahit si Hesus ay pinagpahinga ang mga kasama niya. Hindi kasalanan ang magpahinga."],
+      ["Isaiah 40:29, 31", "He gives power to the weak… those who wait for the Lord will renew their strength. They will run, and not be weary. They will walk, and not faint.", "Kapag ubos na ang lakas ninyo."],
+      ["Galatians 6:9", "Let’s not be weary in doing good, for we will reap in due season, if we don’t give up.", "Mabagal ang paggaling, pero may direksyon."],
+      ["Romans 12:12", "Rejoicing in hope; enduring in troubles; continuing steadfastly in prayer.", "Pag-asa, tiyaga, dasal: sabay-sabay."],
+      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts.", "Para sa gabi bago ang konsulta, o anumang gabing puno ng alala."],
+      ["1 Peter 5:7", "Casting all your worries on him, because he cares for you.", "Hindi ninyo kailangang buhatin ang lahat."],
+      ["2 Corinthians 1:3–4", "The Father of mercies and God of all comfort; who comforts us in all our affliction, that we may be able to comfort those who are in any affliction.", "Ang inaaliw ay nakakapag-aliw din."],
+      ["Psalm 34:18", "The Lord is near to those who have a broken heart, and saves those who have a crushed spirit.", "Sa mga araw na parang wasak ang loob."],
+      ["Lamentations 3:22–23", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bawat umaga ay bagong simula, para sa kanya at para sa inyo."]],
+    him: [
+      ["Psalm 23:1–3", "The Lord is my shepherd: I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.", "Pahinga at tahimik na tubig. Hindi kailangang magmadali."],
+      ["Psalm 4:8", "In peace I will both lay myself down and sleep, for you alone, Lord, make me live in safety.", "Para sa gabi, bago matulog."],
+      ["Psalm 127:2", "It is vain for you to rise up early, to stay up late… for he gives sleep to his loved ones.", "Ang tulog ay regalo, hindi katamaran."],
+      ["Psalm 46:10", "Be still, and know that I am God.", "Isang hinga. Isang sandali ng katahimikan."],
+      ["Isaiah 41:10", "Don’t you be afraid, for I am with you. Don’t be dismayed, for I am your God. I will strengthen you. Yes, I will help you.", "Para sa mga araw na may kaba."],
+      ["John 14:27", "Peace I leave with you. My peace I give to you… Don’t let your heart be troubled, neither let it be fearful.", "Kapayapaan na hindi galing sa mundo."],
+      ["2 Timothy 1:7", "For God didn’t give us a spirit of fear, but of power, love, and self-control.", "Lakas, pagmamahal, at kalmadong isip."],
+      ["Psalm 33:3", "Sing to him a new song. Play skillfully with a shout of joy!", "Para sa gitara at sa boses mo."],
+      ["Psalm 98:4–5", "Burst out and sing for joy, yes, sing praises! Sing praises to the Lord with the harp, with the harp and the voice of melody.", "Ang pagtugtog ay puwede ring dasal."],
+      ["Zephaniah 3:17", "He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.", "May kumakanta rin para sa ’yo."],
+      ["Psalm 139:14", "I will give thanks to you, for I am fearfully and wonderfully made.", "Mahalaga ka, kahit sa mabibigat na araw."],
+      ["Jeremiah 29:11", "“For I know the thoughts that I think toward you,” says the Lord, “thoughts of peace, and not of evil, to give you hope and a future.”", "May bukas pa. May mga kanta pang tutugtugin."],
+      ["Psalm 30:5", "Weeping may stay for the night, but joy comes in the morning.", "Lilipas din ang gabi."],
+      ["Lamentations 3:22–23", "His compassion doesn’t fail. They are new every morning. Great is your faithfulness.", "Bagong umaga, bagong simula."],
+      ["Matthew 11:28", "Come to me, all you who labor and are heavily burdened, and I will give you rest.", "Puwede kang magpahinga."],
+      ["Philippians 4:6–7", "In nothing be anxious, but in everything, by prayer… let your requests be made known to God. And the peace of God… will guard your hearts and your thoughts.", "Sabihin ang laman ng isip mo, sa dasal o sa taong pinagkakatiwalaan mo."]] };
+  const verseToday = sp => { const L = VERSES[sp]; return L[Math.floor(Date.now() / DAY) % L.length]; };
+  const verseCard = (sp, link) => { const [r, t, n] = verseToday(sp); return `<div class="card verse"><div class="eyebrow">Salita para sa araw na ito</div><blockquote>${esc(t)}</blockquote><div class="vref">${esc(r)}</div><p class="small muted" style="margin:8px 0 0">${esc(n)}</p>${link ? `<a class="small" href="#/verses">Lahat ng talata</a>` : ""}</div>`; };
+  function viewVerses() {
+    const sp = db.space === "family" ? "family" : "him";
+    return hero(sp === "family" ? "care" : "today", "Bibliya", sp === "family" ? "Mga talata para sa inyo" : "Mga talata para sa ’yo", sp === "family" ? "Para sa pagod, sa pag-asa, at sa pagmamahal na mahinahon." : "Para sa kapayapaan, pahinga, at musika.", { top: backBtn("#/" + (sp === "family" ? "care" : ""), "Bumalik") })
+      + `<div class="lift">${VERSES[sp].map(([r, t, n]) => `<div class="card verse"><blockquote>${esc(t)}</blockquote><div class="vref">${esc(r)}</div><p class="small muted" style="margin:8px 0 0">${esc(n)}</p></div>`).join("")}</div>
+      <p class="small muted center" style="margin-top:14px">World English Bible (public domain)</p>`;
+  }
+  /* Where they live now: El Nido, Palawan. Numbers come from official pages and directories, checked
+     November 2026; several are from older listings, so the app always says to call first. */
+  const LOCAL = [
+    ["Sa El Nido", [
+      ["El Nido Community Hospital", "Government hospital. Emergency room 24 oras, OPD, botika, ambulansya.", "Para sa: emergency, referral sa espesyalista, medical certificate.", [["0915-837-4260", "09158374260"], ["0994-903-5504", "09949035504"]]],
+      ["Rural Health Unit (Municipal Health Office)", "Brgy. Maligaya (Poblacion), El Nido. Lunes–Biyernes.", "Para sa: itanong kung may libreng gamot mula sa DOH (MAP-MH), referral, at barangay health records.", [["0917-801-1925", "09178011925"], ["0916-234-6720", "09162346720"]]],
+      ["MSWDO El Nido (social welfare)", "Sa munisipyo ng El Nido. Walk-in, Lunes–Biyernes, 8am–5pm.", "Para sa: AICS medical assistance (pera o guarantee letter para sa gamot at konsulta), at PWD ID.", []]]],
+    ["Sa Puerto Princesa (5–6 oras sa van)", [
+      ["Ospital ng Palawan · Mental Health Unit", "220 Malvar St., Puerto Princesa. Government hospital, may psychiatrist at Malasakit Center.", "Para sa: murang konsulta sa psychiatrist, gamot, at tulong pinansyal sa Malasakit.", [["(048) 434-8339 trunk line", "0484348339"], ["0928-474-6134 (Mental Health Unit)", "09284746134"]]],
+      ["Palawan Medical City", "Private hospital, may psychiatrist sa OPD. Lunes–Sabado.", "Para sa: schedule ng psychiatrist; itanong kung may teleconsult para hindi na bumiyahe.", [["0905-836-6830 help desk", "09058366830"]]],
+      ["Sinag Psychological Services", "2/F Mariners Plaza Bldg. II, Peneyra Rd., Brgy. San Pedro.", "Para sa: therapy at counselling (psychologist), para sa kanya o para sa inyo.", [["0916-293-1935", "09162931935"]], "sinagpsychservices@gmail.com"],
+      ["DSWD Palawan (SWAD office)", "Puerto Princesa. Tumawag o mag-email muna para sa address at schedule.", "Para sa: AICS kung kulang ang tulong ng MSWDO.", [["(048) 433-9216", "0484339216"]], "palawanswadt.fomimaropa@dswd.gov.ph"],
+      ["Provincial Social Welfare (PSWDO)", "G/F RVM Bldg., Capitol Complex, Puerto Princesa.", "Para sa: tulong medikal mula sa probinsya.", [["0998-793-2468", "09987932468"]]],
+      ["Philippine Mental Health Association · Palawan", "Grupo ng suporta at impormasyon.", "Para sa: suporta para sa pamilya, at kung saan pa puwedeng lumapit.", [["0936-285-5204", "09362855204"]], "pmhapalawan@pmha.org.ph"]]],
+    ["Kahit saan, anumang oras", [
+      ["NCMH Crisis Hotline", "Libre, 24 oras, may kausap na trained responder.", "Para sa: krisis, o kung kailangan lang ng kausap.", [["1553", "1553"], ["0917-899-8727 (Globe)", "09178998727"], ["0919-057-1553 (Smart)", "09190571553"]]],
+      ["PhilHealth", "Call o text, 24 oras.", "Para sa: alamin kung active ang PhilHealth niya, at aling clinic ang accredited sa mental health package.", [["(02) 8662-2588", "0286622588"], ["0998-857-2957 (Smart)", "09988572957"], ["0917-127-5987 (Globe)", "09171275987"]]]]]];
+  const APPLY = {
+    aics: ["AICS: tulong sa gamot at konsulta", "DSWD, sa MSWDO ng El Nido", [
+      ["Ihanda ang mga papeles", "Reseta (may pangalan, license number at pirma ng doktor, at petsa); medical certificate o medical abstract; at quotation o presyo mula sa botika."],
+      ["Certificate of indigency", "Kunin sa barangay hall ninyo. Sabihing para sa medical assistance sa MSWDO."],
+      ["Mga ID", "Valid ID niya at ng sasama. Kung hindi siya makakasama: authorization letter na may pirma niya, at kopya ng ID niya."],
+      ["Pumunta sa MSWDO", "Sa munisipyo ng El Nido, Lunes–Biyernes, umaga. Sabihin: “Magandang araw po. Mag-a-apply po kami ng medical assistance (AICS) para sa gamot at check-up.”"],
+      ["Interview at resulta", "May maikling interview sa social worker. Ang tulong ay puwedeng cash o guarantee letter sa botika o ospital. Itanong kung ilang araw, at kung kailan puwedeng mag-apply ulit."]]],
+    meds: ["Libreng gamot (DOH MAP-MH)", "Medicine Access Program for Mental Health", [
+      ["Tumawag muna sa RHU", "RHU El Nido: 0917-801-1925. Sabihin: “May supply po ba kayo ng [pangalan ng gamot] sa Medicine Access Program for Mental Health ng DOH?”"],
+      ["Kung wala sa El Nido", "Itanong sa Ospital ng Palawan Mental Health Unit (0928-474-6134) kung saan pinakamalapit na access site, o kung puwedeng doon kumuha."],
+      ["Ang dadalhin", "Updated na reseta, valid ID, at kung mayroon, medical abstract o record ng konsulta."],
+      ["Gawing regular", "Itanong kung gaano kadalas puwedeng kumuha, at magtakda ng paalala bago maubos ang gamot."]]],
+    pwd: ["PWD ID: 20% discount sa gamot", "Ayon sa batas (RA 10754): 20% discount at walang VAT sa gamot at konsulta", [
+      ["Siya ang magpapasya", "Kanya ang desisyon. Ipaliwanag na para ito sa discount sa gamot at konsulta. Maaaring nakasulat sa ID ang uri ng disability, kaya igalang kung ayaw niya."],
+      ["Certificate of disability", "Hilingin sa psychiatrist sa susunod na konsulta. Mas mabuti kung kukunin muna ang form sa MSWDO para iyon ang mapirmahan ng doktor."],
+      ["Ang dadalhin sa MSWDO", "Application form, certificate of disability, 2 piraso ng 1x1 na litrato, valid ID o birth certificate, at barangay certificate of residency."],
+      ["Gamitin", "Ipakita ang PWD ID at purchase booklet sa botika at sa clinic. Malaking tipid ito sa buwanang gamot."]]],
+    malasakit: ["Malasakit Center", "Sa Ospital ng Palawan: isang desk para sa DOH, PhilHealth, DSWD at PCSO", [
+      ["Kailan ito gamitin", "Kapag nagpapakonsulta o kumukuha ng gamot sa Ospital ng Palawan, o kung maa-admit siya."],
+      ["Ang dadalhin", "Valid ID niya at ng kasama, reseta o medical abstract, quotation o bill, PhilHealth ID o number, at certificate of indigency."],
+      ["Sa ospital", "Hanapin ang Malasakit Center desk. Sabihin: “Hihingi po kami ng tulong para sa gamot at konsulta sa psychiatry.” Sila na ang magtuturo kung aling ahensya ang tutulong."],
+      ["Guarantee letter", "Kadalasan, guarantee letter ang ibinibigay: ang ahensya ang magbabayad sa botika o ospital. Itago ang mga kopya."]]],
+    philhealth: ["PhilHealth", "Para mabawasan ang gastos sa konsulta at gamot", [
+      ["Alamin kung active", "Tumawag sa (02) 8662-2588, o mag-text sa 0998-857-2957 (Smart) o 0917-127-5987 (Globe). Ibigay ang pangalan at birthday niya, o ang PhilHealth number."],
+      ["Kung wala pang PhilHealth number", "Sa batas ng Universal Health Care, lahat ng Pilipino ay miyembro. Magparehistro sa PhilHealth office o itanong sa munisipyo kung paano."],
+      ["Itanong sa doktor", "“Accredited po ba kayo sa outpatient mental health package ng PhilHealth?” Kung oo, malaking bahagi ng konsulta at gamot ang sakop."]]] };
+  const telLinks = tels => tels.map(([l, d]) => `<a class="btn sm" href="tel:${d}">${ic("phone")} ${esc(l)}</a>`).join("");
+  function viewLocal() {
+    return hero("help", "Tulong", "Sa El Nido at Palawan", "Mga direktang numero, at para saan ang bawat isa.", { top: backBtn("#/help", "Tulong") })
+      + `<div class="lift">${db.doc?.name || db.doc?.tel ? `<div class="card" style="background:var(--sky)"><div class="eyebrow">Ang doktor ninyo</div><h3 style="margin-top:4px">${esc(db.doc.name || "Doktor")}</h3>${db.doc.tel ? `<div class="telrow">${telLinks([[db.doc.tel, db.doc.tel.replace(/[^\d+]/g, "")]])}</div>` : ""}</div>` : ""}
+      ${LOCAL.map(([g, items]) => `<div class="sec"><div class="eyebrow">${g}</div>${items.map(([n, d, use, tels, mail]) => `<div class="card place"><h3>${esc(n)}</h3><p class="small" style="margin:4px 0 0">${esc(d)}</p><p class="small muted" style="margin:6px 0 0">${esc(use)}</p>
+        ${tels.length || mail ? `<div class="telrow">${telLinks(tels)}${mail ? `<a class="btn sm" href="mailto:${mail}">${ic("share")} Email</a>` : ""}</div>` : ""}</div>`).join("")}</div>`).join("")}</div>
+      <p class="small muted" style="margin:14px 4px">Na-check noong Nobyembre 2026 mula sa mga opisyal na pahina at directory. Nagbabago ang mga numero at schedule: tumawag muna bago bumiyahe, lalo na papuntang Puerto Princesa.</p>`;
+  }
+  function viewApply(id, n) {
+    const x = APPLY[id]; if (!x) { location.hash = "#/help"; return null; }
+    const [t, sub, steps] = x;
+    return stepper({ k: "help", kicker: sub, title: t, back: ["#/help", "Tulong"], i: n, base: `#/apply/${id}`,
+      cards: steps.map(([h, d], i) => `<div class="eyebrow" style="color:var(--teal)">Hakbang ${i + 1}</div><h2 style="margin-top:6px">${esc(h)}</h2><p class="big">${esc(d)}</p>`),
+      finish: `<a class="btn teal" href="#/help">${ic("check")} Tapos</a>` });
+  }
+  const applyRows = () => [["aics", "hand", "b-peach"], ["meds", "leaf", "b-sage"], ["pwd", "clip", "b-sun"], ["malasakit", "home", "b-sky"], ["philhealth", "shield", "b-teal"]].map(([k, i, b]) => rowcard(`#/apply/${k}/0`, i, b, APPLY[k][0], `${APPLY[k][2].length} hakbang`)).join("");
   /* ---------- Private mode ----------
      An optional 4-digit PIN for the family space, for a phone others may pick up. It is a privacy
      curtain, not encryption: it keeps what is written here from being seen at a glance. */
@@ -603,7 +724,7 @@
     const t = $("#tabs"); if (!db.space || locked()) { t.hidden = true; return; } t.hidden = false;
     const items = db.space === "family" ? [["home", "home", "Home"], ["learn", "book", "Unawain"], ["talk", "chat", "Kausapin"], ["help", "heart", "Tulong"], ["care", "leaf", "Para sa ’yo"]]
       : [["home", "sun", "Today"], ["sleep", "moon", "Tulog"], ["music", "music", "Music"], ["calm", "wave", "Kalma"]];
-    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", moments: "home", pin: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
+    const cur = { lesson: "learn", scene: "talk", practice: "talk", notes: "home", moments: "home", verses: db.space === "family" ? "care" : "home", local: "help", apply: "help", pin: "home", prep: "help", plan: "help", appt: "home", funds: "help", settings: "home", about: "home", goal: "home", intro: "home" }[v] || v;
     t.innerHTML = items.map(([k, i, l]) => `<a href="#/${k === "home" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
   }
   /* One idea per screen, with big Back and Next buttons. Each step has its own address, so the phone's
@@ -642,7 +763,7 @@
     if (v === "learn") return viewLearn(); if (v === "lesson") return viewLesson(id, n); if (v === "talk") return viewTalk(); if (v === "scene") return viewScene(id, n);
     if (v === "practice") return viewPractice(); if (v === "help") return viewHelp(id); if (v === "prep") return viewPrep(); if (v === "care") return viewCare(id);
     if (v === "notes") return viewNotes(); if (v === "plan") return viewPlan(+id || 0); if (v === "appt") return viewAppt(); if (v === "funds") return viewFunds(id, n); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
-    if (v === "moments") return viewMoments(); if (v === "pin") return viewPin();
+    if (v === "moments") return viewMoments(); if (v === "verses") return viewVerses(); if (v === "local") return viewLocal(); if (v === "apply") return viewApply(id, n); if (v === "pin") return viewPin();
     return viewFamilyHome();
   }
   const STEP_HOW = { first: "#/appt", learn: "#/learn", prep2: "#/appt", funds: "#/funds", notes: "#/notes", meds: "#/lesson/treatment/0", family: "#/scene/hisfamily/0", plan: "#/plan/0" };
@@ -660,7 +781,10 @@
   function viewAppt() {
     const d = apptDate(), p = db.apptPrep[db.appt] ||= {};
     return hero("help", "Konsulta", d ? tlDate(d) : "Susunod na konsulta", d ? (daysTo(d) >= 0 ? "Ihanda nang paunti-unti. Pindutin ang bawat isa kapag handa na." : "Itakda ang susunod na petsa.") : "Itakda ang petsa para may paalala.", { top: backBtn("#/", "Home") })
-      + `<div class="card lift"><label class="f" style="margin-top:0"><span>Petsa ng konsulta</span><input type="date" data-appt="1" value="${esc(db.appt || "")}" style="font:600 18px var(--sans)"></label></div>
+      + `<div class="card lift"><label class="f" style="margin-top:0"><span>Petsa ng konsulta</span><input type="date" data-appt="1" value="${esc(db.appt || "")}" style="font:600 18px var(--sans)"></label>
+        <label class="f"><span>Doktor o clinic</span><input type="text" data-doc="name" value="${esc(db.doc?.name || "")}" placeholder="Hal. Dr. Santos, Ospital ng Palawan"></label>
+        <label class="f"><span>Numero ng clinic</span><input type="tel" data-doc="tel" value="${esc(db.doc?.tel || "")}" placeholder="Para sa pagkumpirma ng schedule"></label>
+        ${db.doc?.tel ? `<a class="btn block" href="tel:${esc(db.doc.tel.replace(/[^\d+]/g, ""))}" style="margin-top:10px">${ic("phone")} Tawagan ang clinic</a>` : ""}</div>
       ${d ? `<div class="sec"><div class="eyebrow">Ihanda</div>${PREP.map(([k, t, href]) => `<button class="thing${p[k] ? " done" : ""}" data-act="aprep" data-v="${k}"><span class="tick">${ic("check")}</span><span class="grow">${t}</span></button>`).join("")}</div>` : ""}
       <div class="sec">${rowcard("#/prep", "clip", "b-sun", "Buod at mga tanong para sa doktor", "Galing sa inyong Talaan")}${rowcard("#/funds", "coin", "b-sage", "Pondo at mga tanong tungkol sa gastos", "PhilHealth, libreng gamot, Malasakit")}${rowcard("#/scene/hisfamily/0", "chat", "b-peach", "Imbitahin ang pamilya niya", "Mas maipapaliwanag ng doktor")}</div>`;
   }
@@ -691,6 +815,7 @@
         <div class="row" style="gap:8px;margin-top:14px"><input type="text" id="gname" placeholder="Mula kay" style="flex:1.3"><input type="text" id="gamt" inputmode="numeric" placeholder="₱" style="flex:1"></div>
         <button class="btn teal block" data-act="addgift" style="margin-top:10px">${ic("plus")} Idagdag ang tulong</button></div>
       <div class="sec">${rowcard("#/funds/help/0", "coin", "b-sage", "Mga makakatulong sa gastos", "PhilHealth, libreng gamot ng DOH, Malasakit, DSWD, PCSO")}${rowcard("#/funds/msg", "share", "b-peach", "Mensahe para humingi ng tulong", "May paalala tungkol sa privacy niya")}</div>
+      <div class="sec"><div class="eyebrow">Paano mag-apply, hakbang-hakbang</div>${applyRows()}</div>
       ${list.length ? `<div class="sec"><div class="eyebrow">Mga nagbigay</div><div class="card" style="padding:4px 18px">${list.map(g => `<div class="note row between"><span><b>${esc(g.name || "Hindi nagpakilala")}</b><br><span class="d">${dstr(g.at)}</span></span><span class="row" style="gap:6px"><b>${peso(g.amt)}</b><button class="btn ghost sm" style="min-height:30px;padding:2px 8px" data-act="delgift" data-v="${g.id}" aria-label="Burahin">${ic("x")}</button></span></div>`).join("")}</div>
         <p class="small muted" style="margin:8px 4px">Para sa inyong sariling talaan lang. Magandang magpasalamat sa bawat nagbigay.</p></div>` : ""}`;
   }
@@ -741,7 +866,7 @@
     return stepper({ k: "learn", kicker: `Aralin ${i + 1} sa ${LESSONS.length}`, title: esc(l.t), back: ["#/learn", "Unawain"], cards, i: n, base: `#/lesson/${l.id}`,
       finish: `<button class="btn teal" data-act="lessondone" data-v="${l.id}" data-next="${next ? next.id : ""}">${ic("check")} Tapos na</button>` });
   }
-  const familyMsg = () => `Gusto ko lang ibahagi ang nalaman namin tungkol sa nangyayari kay ${db.names.him || "(pangalan)"}.\n\nAyon sa mga doktor at pananaliksik, ang pinagdadaanan niya ay tinatawag na psychosis: isang medikal na kondisyon ng utak, hindi kahinaan, katamaran, o pag-iinarte. Kaya siya hirap matulog, nagagalit, may mga hinala, at tumigil sa pagtugtog. Hindi niya ito pinili.\n\nNagagamot ito, at mas maganda ang paggaling kapag maaga ang gamutan at kalmado at suportado ang pamilya.\n\nPaano tayo makakatulong:\n- Mahinahong pakikipag-usap; walang sermon, sigawan o pagkukumpara.\n- Huwag pagtalunan ang mga hinala niya; damayan ang takot niya.\n- Tulungan siyang makapagpatingin sa psychiatrist.\n- Iwasan ang alak at droga sa paligid niya.\n\nKung may emergency: 911, o NCMH Crisis Hotline 1553 (libre, 24 oras). Puwede ring tumawag ang pamilya para humingi ng payo.\n\nSalamat sa pagmamahal ninyo sa kanya.`;
+  const familyMsg = () => `Gusto ko lang ibahagi ang nalaman namin tungkol sa nangyayari kay ${db.names.him || "(pangalan)"}.\n\nAyon sa mga doktor at pananaliksik, ang pinagdadaanan niya ay tinatawag na psychosis: isang medikal na kondisyon ng utak, hindi kahinaan, katamaran, o pag-iinarte. Kaya siya hirap matulog, nagagalit, may mga hinala, at tumigil sa pagtugtog. Hindi niya ito pinili.\n\nNagagamot ito, at mas maganda ang paggaling kapag maaga ang gamutan at kalmado at suportado ang pamilya.\n\nPaano tayo makakatulong:\n- Mahinahong pakikipag-usap; walang sermon, sigawan o pagkukumpara.\n- Huwag pagtalunan ang mga hinala niya; damayan ang takot niya.\n- Tulungan siyang makapagpatingin sa psychiatrist.\\n- Iwasang akusahan o paghinalaan siya. Hindi ito dahil sa bisyo; maraming nagkakaroon nito nang walang anumang droga.\n\nKung may emergency: 911, o NCMH Crisis Hotline 1553 (libre, 24 oras). Puwede ring tumawag ang pamilya para humingi ng payo.\n\nSalamat sa pagmamahal ninyo sa kanya.`;
   function viewTalk() {
     const p = Object.keys(db.practice).length;
     return hero("talk", "Kausapin", "Paano makipag-usap sa kanya", "Hindi kailangang perpekto. Ang mahalaga ay mahinahon at may pagdamay.")
@@ -771,7 +896,9 @@
   }
   function viewHelp(id) {
     if (id === "emergency") return hero("help", "Tulong", "Emergency", "Pindutin para tumawag.", { top: backBtn("#/help", "Tulong") })
-      + `<div class="lift">${crisisHTML()}</div><div class="card" style="margin-top:16px"><p class="big" style="font-size:17px;margin:0">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal.</p></div>
+      + `<div class="lift">${crisisHTML()}</div>
+      <a class="rowcard" href="tel:09158374260" style="margin-top:12px"><span class="bubble b-rose">${ic("phone")}</span><span class="grow">El Nido Community Hospital<small>Emergency room 24 oras · 0915-837-4260</small></span></a>
+      <div class="card" style="margin-top:16px"><p class="big" style="font-size:17px;margin:0">Kung may posibilidad na masaktan niya ang sarili o ibang tao, tumawag agad sa 911 o dalhin siya sa pinakamalapit na emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal.</p></div>
       <button class="rowcard" data-act="sharecrisis" style="margin-top:12px"><span class="bubble b-rose">${ic("share")}</span><span class="grow">Ibahagi ang mga numero<small>Ipadala sa pamilya sa Messenger o Viber</small></span></button>`;
     if (id === "where") return hero("help", "Tulong", "Saan magpapatingin", "Hindi emergency? Dito magsimula.", { top: backBtn("#/help", "Tulong") })
       + `<div class="card lift"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble b-sky">${ic("map")}</span><div class="grow"><h3>National Center for Mental Health</h3><p class="small" style="margin:6px 0">9 De Pebrero St., Mauway, Mandaluyong City. Lunes–Biyernes, 8am–5pm.</p></div></div>
@@ -788,16 +915,17 @@
     return hero("help", "Tulong", "Ano ang kailangan ninyo?", "Pumili ng isa.")
       + `<div class="lift"><a class="bigcall" href="#/help/emergency"><span class="bubble">${ic("phone")}</span><span class="grow"><b style="font-size:21px">Emergency ngayon</b><span class="l">911 · NCMH 1553</span></span></a>
         <div style="margin-top:14px">${rowcard("#/appt", "cal", "b-sky", "Ang susunod na konsulta", apptDate() ? tlDate(apptDate()) : "Itakda ang petsa")}${rowcard("#/funds", "coin", "b-sage", "Pondo para sa gamutan", "Fundraising at mga programang makakatulong")}
-        ${rowcard("#/help/where", "map", "b-sky", "Saan magpapatingin", "NCMH at malapit na ospital")}${rowcard("#/help/refuse/0", "hand", "b-peach", "Kung ayaw pa niya", "5 maikling hakbang")}
+        ${rowcard("#/local", "map", "b-sky", "Sa El Nido at Palawan", "Mga direktang numero: ospital, RHU, MSWDO, psychiatrist")}${rowcard("#/help/refuse/0", "hand", "b-peach", "Kung ayaw pa niya", "5 maikling hakbang")}
         ${rowcard("#/plan/0", "shield", "b-sage", "Plano para sa mabibigat na araw", "Berde, dilaw, pula")}${rowcard("#/prep", "clip", "b-sun", "Ihanda para sa doktor", "Buod ng inyong tala at mga tanong")}
-        ${rowcard("#/lesson/family/0", "chat", "b-lav", "Ipaliwanag sa pamilya niya", "May handang mensahe")}</div></div>`;
+        ${rowcard("#/lesson/family/0", "chat", "b-lav", "Ipaliwanag sa pamilya niya", "May handang mensahe")}</div>
+        <div class="sec"><div class="eyebrow">Paano mag-apply, hakbang-hakbang</div>${applyRows()}</div></div>`;
   }
-  const SIGNS = ["Hindi natutulog nang ilang gabi", "Lumalayo sa lahat", "Mas maraming hinala o takot", "Nagsasalita o tumatawa nang mag-isa", "Hindi kumakain o naliligo", "Biglang galit o pagbabasag", "Gumagamit ng alak o droga", "Nagsasalita tungkol sa kamatayan"];
+  const SIGNS = ["Hindi natutulog nang ilang gabi", "Lumalayo sa lahat", "Mas maraming hinala o takot", "Nagsasalita o tumatawa nang mag-isa", "Hindi kumakain o naliligo", "Biglang galit o pagbabasag", "Mas iritable o balisa", "Nagsasalita tungkol sa kamatayan"];
   const plan = () => (db.plan ||= { signs: [], other: "", green: "", yellow: "", hospital: "", call: "", stay: "", bring: "" });
   function viewPlan(i) {
     const p = plan(), fld = (k, label, ph, rows = 3) => `<label class="f"><span>${label}</span><textarea data-plan="${k}" rows="${rows}" style="min-height:${rows * 26 + 30}px" placeholder="${esc(ph)}">${esc(p[k])}</textarea></label>`;
     const cards = [
-      `<div class="row" style="gap:10px"><span class="bubble b-sage">${ic("leaf")}</span><h2>Berde · maayos siya</h2></div><p class="big" style="font-size:17px">Ano ang nakakatulong para manatili siyang maayos?</p>${fld("green", "Ang nakakatulong", "Hal. tulog bago mag-12, tumutugtog tuwing hapon, walang alak, kalmadong bahay")}`,
+      `<div class="row" style="gap:10px"><span class="bubble b-sage">${ic("leaf")}</span><h2>Berde · maayos siya</h2></div><p class="big" style="font-size:17px">Ano ang nakakatulong para manatili siyang maayos?</p>${fld("green", "Ang nakakatulong", "Hal. tulog bago mag-12, tumutugtog tuwing hapon, kalmadong bahay")}`,
       `<div class="row" style="gap:10px"><span class="bubble b-sun">${ic("spark")}</span><h2>Dilaw · maagang senyales</h2></div><p class="big" style="font-size:17px">Piliin ang mga napansin ninyo dati, bago siya lumala. Madalas tulog ang una.</p>
         <div class="chips" style="margin-top:10px">${SIGNS.map(x => `<button class="chip${p.signs.includes(x) ? " on" : ""}" data-act="psign" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
         <label class="f"><span>Iba pang senyales niya</span><input type="text" data-plan="other" value="${esc(p.other)}" placeholder="Hal. paulit-ulit na iisang kanta"></label>`,
@@ -846,13 +974,14 @@
     return hero("care", "Para sa ’yo", "Alagaan din ang sarili mo", "Bahagi ito ng pag-aalaga sa kanya.")
       + `<div class="card lift"><h3>Kumusta ka ngayon?</h3><div class="moods" style="margin-top:14px">${[1, 2, 3, 4, 5].map(n => `<button data-act="care" data-v="${n}" class="${today === n ? "on" : ""}" aria-label="${MOOD_LABEL[n - 1]}">${face(n)}</button>`).join("")}</div>
         <p class="small muted center" style="margin:10px 0 0">${today ? MOOD_LABEL[today - 1] : "Pindutin ang isa"}${db.care.length >= 3 ? ` · Nitong linggo: ${careTrend()}` : ""}</p></div>
+      <div class="sec">${verseCard("family", true)}</div>
       <div class="sec"><div class="eyebrow">Paalala ngayong araw</div><div class="rowcard" style="cursor:default"><span class="bubble ${tip[1]}">${ic(tip[0])}</span><span class="grow">${tip[2]}<small>${tip[3]}</small></span></div></div>
       <div class="sec">${rowcard("#/care/gf/0", "heart", "b-peach", "Para sa girlfriend", "5 maikling paalala")}${rowcard("#/lesson/friends/0", "hand", "b-sage", "Para sa mga kaibigan", "Paano tumulong")}
         ${rowcard("#/care/all/0", "leaf", "b-lav", "Lahat ng paalala", `${CARE_TIPS.length} maikling paalala`)}${rowcard("#/care/tired", "moon", "b-sky", "Kung pagod ka na", "Mga palatandaan, at saan hihingi ng tulong")}</div>`;
   }
   /* ---------- His views ---------- */
   function himView(v, id, n) {
-    if (v === "sleep") return viewSleep(); if (v === "music") return viewMusic(); if (v === "calm") return viewCalm(id); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
+    if (v === "sleep") return viewSleep(); if (v === "verses") return viewVerses(); if (v === "music") return viewMusic(); if (v === "calm") return viewCalm(id); if (v === "settings") return viewSettings(); if (v === "about") return viewAbout();
     if (v === "goal") return hero("today", "Para sa akin", "Ang gusto ko", "Isang malaking gusto, at isang maliit na hakbang.", { top: backBtn("#/", "Today") })
       + `<div class="card lift"><label class="f" style="margin-top:0"><span>Ang gusto ko</span><input type="text" data-goal="big" value="${esc(db.goal?.big || "")}" placeholder="Hal. makatugtog ulit sa bar"></label>
         <label class="f"><span>Isang maliit na hakbang ngayong linggo</span><input type="text" data-goal="step" value="${esc(db.goal?.step || "")}" placeholder="Hal. isang kanta bawat araw"></label></div>
@@ -875,6 +1004,7 @@
         <p class="small muted center" style="margin:10px 0 0">${db.moods[k] ? MOOD_LABEL[db.moods[k] - 1] : "Pumili ng isa"}</p></div></div>
       <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([c, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${c ? "" : "zero"}" style="height:${c ? Math.max(14, c / tot * 100) : 6}%"></i><span>${["L", "L", "M", "M", "H", "B", "S"][wd]}</span></div>`).join("")}</div>
         <p class="small muted" style="margin:10px 0 0">Ilan sa maliliit na bagay ang nagawa mo bawat araw. Walang tama o mali.</p></div></div>
+      ${db.verseOff ? "" : `<div class="sec">${verseCard("him", true)}</div>`}
       <div class="sec">${rowcard("#/calm", "wave", "b-sky", "Medyo mabigat ang araw?", "Mga paraan para kumalma")}${rowcard("#/calm/doctor", "chat", "b-teal", "Kung gusto kong kumausap ng doktor", "Para sa tulog, stress, o anumang mabigat")}${callsHTML()}</div>`;
   }
   const callsHTML = () => db.contacts.filter(c => c.tel).map(c => `<a class="rowcard" href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}"><span class="bubble b-teal">${ic("phone")}</span><span class="grow">Tawagan si ${esc(c.name || "kaibigan")}<small>${esc(c.tel)}</small></span></a>`).join("");
@@ -894,7 +1024,7 @@
       <div class="sec"><div class="eyebrow">Nitong linggo</div><div class="card"><div class="bars">${days.map(([h, wd], i) => `<div class="${i === 6 ? "today" : ""}"><i class="${h == null ? "zero" : h < 5 || h > 11 ? "warm" : ""}" style="height:${h == null ? 6 : Math.max(10, Math.min(100, h / 10 * 100))}%"></i><span>${h == null ? ["L", "L", "M", "M", "H", "B", "S"][wd] : h.toFixed(h % 1 ? 1 : 0)}</span></div>`).join("")}</div>
         <p class="small" style="margin:10px 0 0;color:var(--ink2)">${avg == null ? "Ilagay ang oras ng tulog at gising para makita ang pattern mo." : `Average: <b>${avg.toFixed(1)} oras</b>.${spread != null ? ` Ang oras ng paggising mo ay nag-iiba nang ${Math.round(spread / 60 * 10) / 10} oras.` : ""} ${avg < 6 ? "Kulang ito. Subukan ang mga tip sa ibaba, at sabihin sa taong pinagkakatiwalaan mo kung ilang gabi ka nang hirap matulog." : spread != null && spread > 120 ? "Subukang gumising sa halos parehong oras araw-araw; ito ang pinaka-epektibong pagbabago para sa tulog." : "Maganda. Ituloy."}`}</p></div></div>
       <div class="sec"><div class="eyebrow">Tip ngayon</div>${(() => { const T = [["sun", "b-sun", "Parehong oras ng paggising", "Araw-araw, kahit weekend. Ito ang pinakamalakas na tip."], ["spark", "b-sky", "Liwanag sa umaga", "Lumabas o buksan ang bintana sa unang oras paggising."],
-          ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "At iwasan ang alak at marijuana: pinapasama nila ang tulog."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
+          ["x", "b-peach", "Walang kape pagkatapos ng tanghali", "Pati energy drinks at softdrinks na may caffeine sa gabi."], ["moon", "b-lav", "Ang kama ay para sa tulog", "Kung hindi makatulog pagkalipas ng 20 minuto, bumangon, gumawa ng tahimik na bagay sa madilim na ilaw, at bumalik kapag inaantok na."],
           ["music", "b-sage", "Pampakalma bago matulog", "Mahinang musika, ilang minutong paghinga, walang cellphone sa kama."], ["leaf", "b-teal", "Maikling idlip lang", "20–30 minuto, bago mag-3pm."]];
           const [i, b, t, d] = T[sleepTip % T.length];
           return `<div class="card"><div class="row" style="gap:12px;align-items:flex-start"><span class="bubble ${b}">${ic(i)}</span><div class="grow"><h3>${t}</h3><p class="big" style="font-size:17px;margin:6px 0 0">${d}</p></div></div>
@@ -943,7 +1073,7 @@
         .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>`;
     if (id === "threat") return hero("calm", "Kalma", "Kapag pakiramdam mo may banta", "Totoo at nakakapagod ang ganitong takot.", { top: backBtn("#/calm", "Kalma") })
       + `<div class="lift">${[["home", "b-sage", "Pumunta sa lugar na ligtas ang pakiramdam", "At huminga nang dahan-dahan."], ["spark", "b-sky", "Tanungin ang sarili", "Ano pa ang posibleng paliwanag? Ano ang sasabihin ng kaibigang pinagkakatiwalaan ko?"],
-        ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", "Bago gumawa ng anumang hakbang."], ["moon", "b-lav", "Mas tumitindi ang takot kapag pagod", "Ang pahinga at tulog ay nakakatulong."], ["x", "b-peach", "Iwasan ang alak at droga", "Pinapalakas nila ang takot."]]
+        ["chat", "b-teal", "Kausapin ang taong pinagkakatiwalaan mo", "Bago gumawa ng anumang hakbang."], ["moon", "b-lav", "Mas tumitindi ang takot kapag pagod", "Ang pahinga at tulog ay nakakatulong."], ["leaf", "b-peach", "Gawin ang isang simpleng bagay", "Maligo, kumain, o uminom ng tubig. Pinapakalma nito ang katawan."]]
         .map(([i, b, t, d]) => `<div class="rowcard" style="cursor:default"><span class="bubble ${b}">${ic(i)}</span><span class="grow">${t}<small>${d}</small></span></div>`).join("")}</div>
       <div class="sec">${callsHTML()}${ncmhRow()}</div>`;
     const CI = { breath: ["wave", "b-sky"], ground: ["leaf", "b-sage"], voices: ["music", "b-peach"], threat: ["shield", "b-lav"], selfharm: ["heart", "b-rose"], doctor: ["chat", "b-teal"] };
@@ -959,6 +1089,7 @@
       + `<div class="card lift"><label class="f" style="margin-top:0"><span>${fam ? "Pangalan niya (opsyonal)" : "Pangalan mo (opsyonal)"}</span><input type="text" id="nm" value="${esc(db.names.him)}" placeholder="${fam ? "Hal. Migs" : "Para sa pagbati"}"></label></div>
       ${fam ? "" : `<div class="sec"><div class="eyebrow">Mga taong pinagkakatiwalaan mo</div><div class="card">${[0, 1, 2].map(i => `<div class="row" style="gap:8px;${i ? "margin-top:10px" : ""}"><input type="text" data-c="name" data-i="${i}" value="${esc(db.contacts[i]?.name || "")}" placeholder="Pangalan"><input type="tel" data-c="tel" data-i="${i}" value="${esc(db.contacts[i]?.tel || "")}" placeholder="Numero"></div>`).join("")}</div></div>
         <div class="sec"><div class="eyebrow">Ang maliliit kong gagawin araw-araw</div><div class="card">${[0, 1, 2, 3].map(i => `<input type="text" data-t="${i}" value="${esc(things()[i] || "")}" style="${i ? "margin-top:10px" : ""}">`).join("")}</div></div>`}
+      ${fam ? "" : `<div class="sec"><div class="eyebrow">Talata sa Bibliya</div><button class="rowcard" data-act="verseoff"><span class="bubble b-sun">${ic("sun")}</span><span class="grow">${db.verseOff ? "Naka-off" : "Naka-on"}<small>${db.verseOff ? "Ipakita ang talata ng araw sa Today" : "May talata ng araw sa Today"}</small></span></button></div>`}
       ${fam ? "" : `<div class="sec"><div class="eyebrow">Paalala sa gamot</div><button class="rowcard" data-act="medon"><span class="bubble b-teal">${ic("check")}</span><span class="grow">${db.medOn ? "Naka-on" : "Naka-off"}<small>${db.medOn ? "May “Uminom ng gamot” sa Today" : "Idagdag ang “Uminom ng gamot” sa Today"}</small></span></button></div>`}
       <div class="sec"><div class="eyebrow">Susunod na konsulta</div><div class="card"><input type="date" data-appt="1" value="${esc(db.appt || "")}" style="font:600 18px var(--sans)"></div></div>
       <div class="sec"><div class="eyebrow">Laki ng letra</div><div class="card"><div class="chips">${[[1, "Normal"], [1.12, "Malaki"], [1.25, "Pinakamalaki"]].map(([z, l]) => `<button class="chip${(db.zoom || 1) === z ? " on" : ""}" data-act="zoom" data-v="${z}" style="font-size:${13 * z}px">${l}</button>`).join("")}</div></div></div>
@@ -978,6 +1109,7 @@
         <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
         <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
         <li><b>Label at self-stigma:</b> ang paraan ng pagbanggit ng diagnosis ay nakakaapekto sa tingin ng tao sa sarili; ang self-stigma ay humaharang sa paggaling (pag-aaral sa first-episode psychosis, 2023; review sa self-stigma).</li>
+        <li><b>Pananampalataya:</b> ang suporta ng faith community ay kaugnay ng mas magandang paggaling; ang mga talata ay mula sa World English Bible (public domain), pinili para sa kapayapaan at pahinga.</li>
         <li><b>Mga pamilyang Pilipino:</b> ang hiya at stigma ay malalaking hadlang sa pagpapatingin; ang suporta ng pamilya ang pinakamalaking tulong (systematic review ng Filipino help-seeking, 2020). Kaya may Private mode at mga mensaheng hindi binabanggit ang diagnosis.</li>
         <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
         <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
@@ -988,7 +1120,7 @@
         <li><b>Early warning signs at relapse plans:</b> karaniwang may personal na pattern ng senyales bago lumala, madalas kasama ang tulog (Birchwood et al.).</li>
         <li><b>Gamot:</b> ang paghinto ng antipsychotic ang pinakamadalas na dahilan ng pagbabalik; ang long-acting injections ay opsyon para sa iba.</li>
         <li><b>Self-management apps</b> gaya ng FOCUS, Actissist at Horyzons: nakakatulong ang ganitong mga tool kasama ng gamutan.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
+      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang mga numero sa El Nido at Palawan ay mula sa DOH, DSWD, PhilHealth at mga directory; ang ilan ay galing sa mas lumang listahan, kaya tumawag muna. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
       <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}<br>Fonts: Fraunces at Inter (SIL Open Font License)</p>`;
   }
 
@@ -1009,7 +1141,7 @@
   function prepText() {
     const since = Date.now() - 60 * DAY, ns = db.notes.filter(n => n.at >= since).sort((a, b) => a.at - b.at), counts = {};
     ns.forEach(n => n.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
-    return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n- Accredited po ba kayo sa PhilHealth mental health package? Puwede po bang generic ang gamot, o nasa listahan ng libreng gamot ng DOH (MAP-MH)?\n- Puwede po ba kaming humingi ng medical abstract o certificate para sa tulong pinansyal?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gumagamit siya ng droga o alak, at kung may gamot siyang iniinom.`;
+    return `PARA SA DOKTOR · ${db.names.him || "(pangalan)"}\n\nMga napansin sa nakaraang 60 araw (${ns.length} na tala):\n${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t, c]) => `- ${t}: ${c}x`).join("\n") || "- (wala pang tala)"}\n\nMga detalye:\n${ns.map(n => `- ${dstr(n.at)}: ${[n.tags.join(", "), n.text].filter(Boolean).join(" — ")}`).join("\n") || "-"}\n\nMga gustong itanong:\n- Ano ang posibleng diagnosis, at ano ang ibig sabihin nito?\n- Anong gamot ang irerekomenda, ano ang mga side effect, at gaano katagal bago gumana?\n- Ano ang mga senyales na lumalala, at ano ang gagawin namin?\n- Paano kami makakatulong sa bahay?\n- Kailan ang susunod na check-up, at sino ang tatawagan kapag may emergency?\n- May therapy ba o grupo para sa kanya at para sa pamilya?\n- Accredited po ba kayo sa PhilHealth mental health package? Puwede po bang generic ang gamot, o nasa listahan ng libreng gamot ng DOH (MAP-MH)?\n- Puwede po ba kaming humingi ng medical abstract o certificate para sa tulong pinansyal?\n\nIbang mahalagang sabihin sa doktor: kailan nagsimula ang mga pagbabago, kung may kamag-anak na may ganitong kondisyon, kung gaano kadalas siyang umiinom ng alak o kape, at kung may gamot siyang iniinom.`;
   }
   function careTrend() { const w = db.care.filter(c => c.at > Date.now() - 7 * DAY), a = w.reduce((s, c) => s + c.v, 0) / (w.length || 1); return a >= 3.5 ? "medyo okay ka. Ituloy ang pag-aalaga sa sarili." : a >= 2.5 ? "halo-halo. Maglaan ng oras para sa sarili mo ngayong linggo." : "mabigat. Mangyaring kausapin ang isang taong mapagkakatiwalaan, o tumawag sa NCMH 1553."; }
   function sleepHours(e) { if (!e?.bed || !e?.wake) return null; const [bh, bm] = e.bed.split(":").map(Number), [wh, wm] = e.wake.split(":").map(Number); let m = wh * 60 + wm - (bh * 60 + bm); if (m <= 0) m += 1440; return m / 60; }
@@ -1093,6 +1225,7 @@
     else if (a === "addmoment") { const text = $("#mtext").value.trim(); if (!text) { toast("Isulat kahit isang pangungusap"); return; } db.moments.push({ id: uid(), at: Date.now(), text, idea: db.connect[dayKey(Date.now())]?.t || "" }); save(); toast("Naitala. Salamat."); $("#mtext").value = ""; render(); }
     else if (a === "delmoment") { if (!confirm("Burahin ito?")) return; db.moments = db.moments.filter(m => m.id !== v); save(); render(); }
     else if (a === "pinkey") pinKey(v);
+    else if (a === "verseoff") { db.verseOff = !db.verseOff; save(); render(); }
     else if (a === "pinoff") { if (!confirm("Alisin ang PIN?")) return; delete db.pin; save(); toast("Inalis ang PIN"); location.hash = "#/settings"; }
     else if (a === "pinforgot") { if (!confirm("Hindi mababawi ang PIN. Para makapasok ulit, kailangang burahin ang LAHAT ng nasa app na ito sa phone na ito. Burahin?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "step") { db.steps[v] = !db.steps[v]; save(); render(); }
@@ -1136,13 +1269,14 @@
     if (el.dataset.fund) { db.funds[el.dataset.fund] = el.value.replace(/[^\d.]/g, ""); save(); }
     if (el.dataset.mynote) { db.myNote = el.value; save(); }
     if (el.dataset.plan) { plan()[el.dataset.plan] = el.value; db.steps.plan = true; save(); }
+    if (el.dataset.doc) { db.doc ||= {}; db.doc[el.dataset.doc] = el.value; save(); }
     if (el.dataset.goal) { db.goal ||= {}; db.goal[el.dataset.goal] = el.value; save(); }
     if (el.dataset.c) { const i = +el.dataset.i; db.contacts[i] ||= { name: "", tel: "" }; db.contacts[i][el.dataset.c] = el.value.trim(); save(); }
     if (el.dataset.t != null) { const t = [...things()]; t[+el.dataset.t] = el.value; db.things = t.map(x => x.trim()).filter(Boolean).length ? t : null; save(); }
     if (el.id === "bed" || el.id === "wake") { const k = dayKey(Date.now()); db.sleep[k] = { ...(db.sleep[k] || {}), [el.id]: el.value }; save(); }
   });
   /* Re-draw after a field is left, but outside the blur itself (a button tap may be re-drawing at the same moment). */
-  document.addEventListener("change", e => { if (e.target.id === "bed" || e.target.id === "wake" || e.target.dataset.appt || e.target.dataset.fund) setTimeout(render, 0); });
+  document.addEventListener("change", e => { if (e.target.id === "bed" || e.target.id === "wake" || e.target.dataset.appt || e.target.dataset.fund || e.target.dataset.doc === "tel") setTimeout(render, 0); });
 
   render();
   if (db.space) setTimeout(() => showInstall(false), 4000);
