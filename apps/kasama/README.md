@@ -26,7 +26,8 @@ Everything stays on the phone; an optional 4-digit PIN (Private mode) hides it f
   call), and a doctor-visit summary generated from the notes log.
 - *Para sa 'yo:* caregiver check-in and self-care, a section for his girlfriend, and a guide for friends.
 
-- *Bibliya:* a daily verse and a list of 18, in Tagalog (Ang Biblia, 1905) with the English (WEB) one tap away; both public domain.
+- *Mga Awit:* a daily psalm and a list of 18 from the Psalms (rest, lament, hope), in Tagalog (Ang Biblia, 1905) with the
+  English (WEB) one tap away; both public domain. Verses with enemies or wrath, or 1905 words that read differently today, are left out.
 - *Sa El Nido at Palawan:* direct numbers and step-by-step guides for AICS, free DOH medicines, the PWD ID, Malasakit and PhilHealth.
 
 Design: Fraunces (soft) headings and Inter text (SIL OFL, bundled in `fonts/`), an original illustration and colour world per section, line icons, drawn mood faces, light and dark themes.
