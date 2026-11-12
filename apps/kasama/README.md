@@ -1,7 +1,8 @@
 # Kasama
 
-A Taglish companion for the girlfriend and family of a friend with psychosis, as an installable, offline PWA.
-It is for them only; there is no part of the app for him (his personal space was removed in v11).
+A Taglish companion for the girlfriend of a friend with psychosis, as an installable, offline PWA.
+It is for her only: there is no part of the app for him (his personal space was removed in v11), and it is not
+meant to be shared with his family; the lessons and scripts help her talk with them instead.
 Made for non-technical users: a 4-card "how to use" intro, one idea per screen (lessons, scripts, plans and guides
 are step-by-step cards with big Back and Next buttons that also work with the phone's back button), the home screen
 shows only the next step, Help is a menu of big buttons (Emergency = two large call buttons), and Settings has
