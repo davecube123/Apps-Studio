@@ -246,7 +246,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "1", APP_DATE = "13 Nov 2026";
+  const APP_VERSION = "2", APP_DATE = "13 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -715,7 +715,8 @@
     return `<div class="welcome"><svg class="art" viewBox="0 0 360 230" aria-hidden="true">${ART.welcome.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>
       <div class="eyebrow">Kalinga</div><h1 style="margin-top:6px">Para sa pamilyang nag-aalaga.</h1>
       <p class="muted">Isang maikling gabay mula sa isang kaibigang nagmamalasakit: ano ang pinagdadaanan niya, paano makipag-usap sa kanya, saan hihingi ng tulong dito sa El Nido, at paano rin alagaan ang sarili ninyo.</p>
-      <button class="btn teal block" data-act="space" data-v="family" style="margin-top:18px">Simulan ${ic("chev")}</button></div>`;
+      <button class="btn teal block" data-act="space" data-v="family" style="margin-top:18px">Simulan ${ic("chev")}</button>
+      ${isStandalone() ? "" : `<button class="btn ghost block" data-act="installsheet" style="margin-top:8px">${ic("download")} I-install muna sa phone</button>`}</div>`;
   }
 
   /* ---------- Family views ---------- */
@@ -778,6 +779,7 @@
         : `<div class="eyebrow" style="color:var(--teal)">Isang paraan para maging malapit ngayong araw</div><h2 style="margin-top:6px">${esc(ct)}</h2><p class="big" style="font-size:17px;color:var(--ink2)">${esc(cd)}</p>
           <div class="row" style="gap:10px;margin-top:14px"><button class="btn" data-act="connectskip">Iba pa</button><button class="btn teal" data-act="connectdone">${ic("check")} Nagawa namin</button></div>`}
         <p class="small muted" style="margin:12px 0 0">Bakit? Ang init at pagtanggap sa bahay ay isa sa pinakamalakas na proteksyon sa paggaling niya.</p></div>
+      ${isStandalone() ? "" : `<button class="rowcard installrow" data-act="installsheet" style="margin-top:12px"><span class="bubble b-teal">${ic("download")}</span><span class="grow">I-install ang Kalinga sa phone<small>Isang pindot lang ang pagbukas, kahit walang signal</small></span><span class="chev">${ic("chev")}</span></button>`}
       ${db.moments.length ? rowcard("#/moments", "sun", "b-sun", "Magagandang sandali", `${db.moments.length} na naitala. Basahin kapag mabigat ang araw.`) : ""}
       <div style="margin-top:12px">${apptCard()}</div>
       <div class="card" style="margin-top:12px">${next ? `<div class="row between"><div class="eyebrow">Ang susunod na hakbang</div><span class="small muted">${ni + 1} sa ${STEPS.length}</span></div>
@@ -1019,8 +1021,8 @@
     const back = document.createElement("div"); back.className = "sheet-back";
     back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>
       <div class="row" style="gap:14px"><img src="icons/icon-192.png" alt="" width="58" height="58" style="border-radius:14px;box-shadow:var(--e1)">
-        <div><div class="eyebrow">Libre · gumagana kahit offline · pribado</div><h2>Ilagay sa home screen</h2></div></div>
-      <p class="muted small" style="margin:12px 0 10px">Para isang pindot lang ang pagbukas, parang ibang app. Nasa phone lang ang lahat ng isusulat mo.</p>
+        <div><div class="eyebrow">Libre · gumagana kahit offline · pribado</div><h2>Ilagay ang Kalinga sa home screen</h2></div></div>
+      <p class="muted small" style="margin:12px 0 10px">Isang pindot lang ang pagbukas, parang ibang app, at gumagana kahit walang signal. Nasa phone na ito lang ang lahat ng isusulat ninyo.</p>
       <div id="install-body">${installBody()}</div>
       <button class="btn ghost block" data-act="installlater" style="margin-top:6px">Hindi muna</button></div>`;
     back.addEventListener("click", e => { if (e.target === back) closeInstall(true); });
