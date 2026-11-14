@@ -5,8 +5,8 @@ request: not in the studio index or README table; noindex; optional PIN lock off
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
-- **Learn:** 59 lessons in 9 modules (foundations, negotiation, care and structure, presence, scenes, her pleasure,
-  adult play, aftercare, your own care), written in the voice of an experienced dominant. "Her pleasure" and "Adult
+- **Learn:** 70 lessons in 10 modules (foundations, negotiation, care and structure, discipline, presence, scenes,
+  her pleasure, adult play, aftercare, your own care), written in the voice of an experienced dominant. "Her pleasure" and "Adult
   play" (rough sex, bondage during sex, role play, consensual non-consent explained as "not yet", a threesome as a
   couple) are adult-to-adult only, never in or near little space, and grounded in community frameworks (RACK, the 4Cs)
   and research (Lehmiller, Herbenick, Critelli & Bivona, Conley).
@@ -21,6 +21,12 @@ request: not in the studio index or README table; noindex; optional PIN lock off
   nudge and lesson practice, and a 40-term glossary.
 - **Rhythm:** daily, weekly and monthly items (a beginner template included), shown on Today when due, each linked
   to its guide, with a 14-day consistency view and a tappable 14-day chain per daily item.
+- **Discipline:** 11 lessons on structure, the four kinds of reinforcement and punishment, why reinforcement beats
+  punishment, timing and schedules, shaping, reward systems and the overjustification trap, the correction ladder,
+  funishment, maintenance and corner time, disciplinary spanking (agreed, never in anger, non-sexual), brats, and the
+  dominant's own discipline (Skinner, Ferster & Skinner, Gershoff, Baumeister, Gottman, Deci, Koestner & Ryan, Kazdin).
+  Three guides, a Star chart under Her (stars with a reason, a goal and a reward, surprise rewards, never taken
+  away), and discipline items on the yes / maybe / no list.
 - **Journal:** debriefs, a calendar, and notes with the editor ported from Almanac (headings, lists, checklists,
   quotes, highlight, Markdown shortcuts), tags, pinning, search, nine templates with "Why it works" plus your own
   templates, and a Trash kept 30 days.
