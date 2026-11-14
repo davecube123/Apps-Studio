@@ -113,17 +113,23 @@
     .seg { display: flex; background: var(--card); border: 1px solid var(--line2); border-radius: 999px; padding: 4px; gap: 4px; }
     .seg a { flex: 1; text-align: center; padding: 9px 8px; border-radius: 999px; font: 650 13.5px var(--sans); color: var(--ink2); text-decoration: none; }
     .seg a.on { background: var(--gold); color: #1d1608; }
-    .toolbar { position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 5; display: flex; gap: 4px; overflow-x: auto; padding: 6px; border-radius: 14px; background: var(--card2); border: 1px solid var(--line2); scrollbar-width: none; }
+    .toolbar { position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 5; display: flex; align-items: center; gap: 2px; overflow-x: auto; padding: 5px; border-radius: 14px; background: var(--card2); border: 1px solid var(--line2); scrollbar-width: none; box-shadow: var(--e1); }
     .toolbar::-webkit-scrollbar { display: none; }
-    .toolbar button { flex: none; min-width: 40px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: var(--ink); font: 600 16px var(--sans); cursor: pointer; }
-    .toolbar button:active { background: rgba(255,255,255,.08); }
-    .editor { min-height: 46vh; margin-top: 10px; padding: 16px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line); font: 400 17px/1.6 var(--sans); outline: none; overflow-wrap: anywhere; }
-    .editor:empty::before { content: attr(data-ph); color: var(--muted); }
-    .editor h2 { font: 600 21px/1.3 var(--display); margin: 14px 0 6px; } .editor blockquote { margin: 10px 0; padding: 4px 0 4px 14px; border-left: 3px solid var(--gold); color: var(--ink2); font-style: italic; }
-    .editor ul, .editor ol { padding-left: 24px; margin: 6px 0; } .editor hr { border: 0; border-top: 1px solid var(--line2); margin: 14px 0; }
-    .editor ul.checks { list-style: none; padding-left: 0; } .editor ul.checks li { position: relative; padding-left: 32px; margin: 6px 0; }
-    .editor ul.checks li::before { content: ""; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line2); }
-    .editor ul.checks li.done { color: var(--muted); text-decoration: line-through; } .editor ul.checks li.done::before { background: var(--teal); border-color: var(--teal); }
+    .tb-btn { flex: none; width: 40px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: var(--ink2); cursor: pointer; display: grid; place-items: center; }
+    .tb-btn .i { width: 20px; height: 20px; } .tb-btn.on { background: rgba(217,178,111,.18); color: var(--gold); } .tb-btn.dim { opacity: .35; }
+    .tb-sep { flex: none; width: 1px; height: 22px; background: var(--line2); margin: 0 4px; }
+    .note-body { min-height: 46vh; margin-top: 10px; padding: 16px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line); font: 400 17px/1.65 var(--sans); outline: none; overflow-wrap: anywhere; caret-color: var(--gold); }
+    .note-body:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; white-space: pre-wrap; }
+    .note-body > * { margin: 0 0 .55em; } .note-body > :first-child { margin-top: 0; }
+    .note-body h1 { font: 600 1.5em/1.2 var(--display); margin: 1em 0 .4em; } .note-body h2 { font: 600 1.2em/1.3 var(--display); margin: .9em 0 .35em; } .note-body h3 { font-size: 1.05em; font-weight: 700; color: var(--ink2); }
+    .note-body blockquote { margin: .8em 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--gold); color: var(--ink2); font-style: italic; }
+    .note-body hr { margin: 1.4em 0; border: 0; border-top: 1px solid var(--line2); } .note-body mark { background: rgba(240,195,106,.35); color: inherit; border-radius: 3px; padding: 0 1px; }
+    .note-body ul, .note-body ol { padding-left: 1.5em; } .note-body li { margin: .15em 0; } .note-body li::marker { color: var(--muted); }
+    .note-body ul.checklist { list-style: none; padding-left: 0; } .note-body ul.checklist > li { position: relative; padding-left: 32px; min-height: 1.65em; }
+    .note-body ul.checklist > li::before { content: ""; position: absolute; left: 2px; top: .2em; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line2); box-sizing: border-box; cursor: pointer; }
+    .note-body ul.checklist > li.checked { color: var(--muted); text-decoration: line-through; } .note-body ul.checklist > li.checked::before { background: var(--teal); border-color: var(--teal); }
+    .note-body ul.checklist > li.checked::after { content: ""; position: absolute; left: 9px; top: calc(.2em + 4px); width: 5px; height: 10px; border: solid #0d2420; border-width: 0 2.2px 2.2px 0; transform: rotate(45deg); pointer-events: none; }
+    .note-body ul.checklist ul.checklist { padding-left: 4px; margin-top: .15em; } .note-body li > ul, .note-body li > ol { margin: .15em 0 0; } .note-body li.checked > ul, .note-body li.checked > ol { color: var(--ink); text-decoration: none; }
     details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
     details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
     details.how summary::-webkit-details-marker { display: none; }
@@ -152,7 +158,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "6";
+  const KEY = "anchor", VER = "7";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -435,17 +441,91 @@
   }
 
   /* ---------- Journal ---------- */
-  /* ---------- Notes: simple rich text (bold, italic, headings, lists, checklists, quotes) ---------- */
+  /* ---------- Notes: the Almanac editor (ported from davecube123/notebook, js/views/editor.js) ----------
+     contenteditable + toolbar + markdown shortcuts + nested checklists. Sub-tasks tick with their parent. */
   const NOTE_TAGS = ["Her likes", "Scene ideas", "Little space", "To try", "Fantasies", "Other"];
   let ntag = "", nq = "";
-  const plain = h => { const d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<(\/?(?:p|div|li|h2|h3|blockquote|br|hr)\b[^>]*)>/gi, " <$1> "); return (d.textContent || "").replace(/\s+/g, " ").trim(); };
-  const ALLOW = { B: 1, STRONG: 1, I: 1, EM: 1, U: 1, H2: 1, H3: 1, P: 1, DIV: 1, BR: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, HR: 1 };
-  function clean(html) {
-    const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html"), root = doc.body.firstChild;
-    const walk = n => { [...n.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1 || !ALLOW[c.tagName]) { if (c.nodeType === 1) { walk(c); c.replaceWith(...c.childNodes); } else c.remove(); return; }
-      const keep = c.tagName === "UL" && c.classList.contains("checks") ? "checks" : c.tagName === "LI" && c.classList.contains("done") ? "done" : "";
-      [...c.attributes].forEach(a => c.removeAttribute(a.name)); if (keep) c.className = keep; walk(c); }); };
-    walk(root); return root.innerHTML;
+  const plain = h => { const d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<(\/?(?:p|div|li|h1|h2|h3|blockquote|pre|br|hr)\b[^>]*)>/gi, " <$1> "); return (d.textContent || "").replace(/\s+/g, " ").trim(); };
+  const ALLOWED = new Set(["P", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "H1", "H2", "H3", "UL", "OL", "LI", "BLOCKQUOTE", "PRE", "CODE", "MARK", "HR", "DIV"]);
+  function sanitize(html) {
+    /* notes from v6 used ul.checks / li.done: read them as Almanac's checklist / checked */
+    html = String(html || "").replace(/class="checks"/g, 'class="checklist"').replace(/class="done"/g, 'class="checked"');
+    const doc = new DOMParser().parseFromString(`<body>${html}</body>`, "text/html");
+    const walk = node => { [...node.childNodes].forEach(ch => {
+      if (ch.nodeType === 3) return; if (ch.nodeType !== 1) { ch.remove(); return; }
+      walk(ch);
+      if (["SCRIPT", "STYLE", "IFRAME", "OBJECT", "TEMPLATE", "META", "LINK"].includes(ch.tagName)) { ch.remove(); return; }
+      if (!ALLOWED.has(ch.tagName)) { if (/^(SECTION|ARTICLE|HEADER|FOOTER|TABLE|TR|H4|H5|H6)$/.test(ch.tagName)) { const q = doc.createElement("p"); q.append(...ch.childNodes); ch.replaceWith(q); } else ch.replaceWith(...ch.childNodes); return; }
+      const keep = ch.tagName === "UL" && ch.classList.contains("checklist") ? "checklist" : ch.tagName === "LI" && ch.classList.contains("checked") ? "checked" : "";
+      [...ch.attributes].forEach(a => ch.removeAttribute(a.name)); if (keep) ch.className = keep; }); };
+    walk(doc.body); return doc.body.innerHTML;
+  }
+  const topBlock = (ed, n) => { if (!n || n === ed) return null; while (n && n.parentNode !== ed) n = n.parentNode; return n && n.nodeType === 1 ? n : null; };
+  const caretNode = () => { const x = getSelection(); return x.rangeCount ? x.getRangeAt(0).startContainer : null; };
+  const placeCaretIn = (el, atEnd = true) => { const r = document.createRange(); r.selectNodeContents(el); r.collapse(!atEnd); const x = getSelection(); x.removeAllRanges(); x.addRange(r); };
+  function selectedBlocks(ed) { const x = getSelection(); if (!x.rangeCount) return []; const r = x.getRangeAt(0), a = topBlock(ed, r.startContainer), b = topBlock(ed, r.endContainer); if (!a) return []; const out = [a]; let n = a; while (n !== b && n.nextElementSibling) { n = n.nextElementSibling; out.push(n); } return out; }
+  function retag(el, tag) { const n = document.createElement(tag); while (el.firstChild) n.append(el.firstChild); if (!n.childNodes.length) n.append(document.createElement("br")); el.replaceWith(n); return n; }
+  function ensureBlock(ed) { const n = caretNode(); if (n && (n === ed || n.parentNode === ed) && !topBlock(ed, n)) document.execCommand("formatBlock", false, "p"); }
+  function toggleBlock(ed, tag) {
+    const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0).cloneRange() : null; ensureBlock(ed);
+    const blocks = selectedBlocks(ed); if (!blocks.length) { document.execCommand("formatBlock", false, tag); return; }
+    const allSame = blocks.every(b => b.tagName === tag.toUpperCase()); let last;
+    blocks.forEach(b => { if (/^(UL|OL|HR)$/.test(b.tagName)) return; last = retag(b, allSame ? "p" : tag); });
+    try { if (r && ed.contains(r.startContainer)) { x.removeAllRanges(); x.addRange(r); } else if (last) placeCaretIn(last); } catch (e) { if (last) placeCaretIn(last); }
+  }
+  const closestIn = (ed, sel) => { let n = caretNode(); if (n?.nodeType === 3) n = n.parentNode; const el = n?.closest?.(sel); return el && ed.contains(el) ? el : null; };
+  function toggleChecklist(ed) {
+    const ul = closestIn(ed, "ul, ol");
+    if (ul && ul.tagName === "UL" && ul.classList.contains("checklist")) { document.execCommand("insertUnorderedList"); return; }
+    if (ul && ul.tagName === "UL") { ul.classList.add("checklist"); return; }
+    document.execCommand("insertUnorderedList"); closestIn(ed, "ul")?.classList.add("checklist");
+  }
+  function keepCaret(fn) { const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0) : null, sv = r && [r.startContainer, r.startOffset, r.endContainer, r.endOffset]; fn(); if (!sv) return; try { const nr = document.createRange(); nr.setStart(sv[0], sv[1]); nr.setEnd(sv[2], sv[3]); x.removeAllRanges(); x.addRange(nr); } catch (e) {} }
+  const sameListAs = l => { const n = document.createElement(l.tagName); if (l.classList.contains("checklist")) n.className = "checklist"; return n; };
+  const subListOf = li => [...li.children].reverse().find(c => c.tagName === "UL" || c.tagName === "OL") || null;
+  function indentItem(li) { const prev = li.previousElementSibling; if (!prev || prev.tagName !== "LI") return false; const list = li.parentElement;
+    keepCaret(() => { let sub = subListOf(prev); if (!sub || sub.tagName !== list.tagName || sub.classList.contains("checklist") !== list.classList.contains("checklist")) { sub = sameListAs(list); prev.append(sub); } sub.append(li); }); return true; }
+  function outdentItem(li, ed) { const list = li.parentElement, pli = list.parentElement; if (!pli || pli.tagName !== "LI" || !ed.contains(pli)) return false;
+    keepCaret(() => { const after = []; for (let n = li.nextElementSibling; n; n = n.nextElementSibling) after.push(n); if (after.length) { let sub = subListOf(li); if (!sub) { sub = sameListAs(list); li.append(sub); } sub.append(...after); } pli.after(li); if (!list.children.length) list.remove(); }); return true; }
+  const isNested = (li, ed) => { const g = li.parentElement?.parentElement; return !!g && g.tagName === "LI" && ed.contains(g); };
+  function toggleList(ed, ordered) { const cl = closestIn(ed, "ul.checklist"); if (cl && !ordered) { cl.classList.remove("checklist"); return; } document.execCommand(ordered ? "insertOrderedList" : "insertUnorderedList"); }
+  function toggleMark(ed) { const m = closestIn(ed, "mark"); if (m) { m.replaceWith(...m.childNodes); return; } const x = getSelection(); if (!x.rangeCount || x.isCollapsed) { toast("Select some text to highlight"); return; } const r = x.getRangeAt(0), mk = document.createElement("mark"); mk.append(r.extractContents()); r.insertNode(mk); const nr = document.createRange(); nr.selectNodeContents(mk); x.removeAllRanges(); x.addRange(nr); }
+  function makeList(block, tag, cls = "") { const list = document.createElement(tag); if (cls) list.className = cls; const li = document.createElement("li"); li.append(document.createElement("br")); list.append(li); block.replaceWith(list); placeCaretIn(li, false); return li; }
+  const SHORTCUTS = [[/^#$/, ed => toggleBlock(ed, "h1")], [/^##$/, ed => toggleBlock(ed, "h2")], [/^###$/, ed => toggleBlock(ed, "h3")],
+    [/^[-*•]$/, (ed, b) => makeList(b, "ul")], [/^1[.)]$/, (ed, b) => makeList(b, "ol")], [/^\[ ?\]$/, (ed, b) => makeList(b, "ul", "checklist")],
+    [/^\[x\]$/i, (ed, b) => makeList(b, "ul", "checklist").classList.add("checked")], [/^>$/, ed => toggleBlock(ed, "blockquote")], [/^(---|\*\*\*)$/, () => document.execCommand("insertHorizontalRule")]];
+  function normalizeEd(ed) { ed.querySelectorAll(":scope > p").forEach(q => { if (q.querySelector(":scope > ul, :scope > ol, :scope > blockquote, :scope > pre, :scope > h1, :scope > h2, :scope > h3, :scope > hr")) { const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0).cloneRange() : null; q.replaceWith(...q.childNodes); if (r) try { x.removeAllRanges(); x.addRange(r); } catch (e) {} } }); }
+  function tryShortcut(ed) { ensureBlock(ed); const block = topBlock(ed, caretNode()); if (!block || !/^(P|DIV)$/.test(block.tagName)) return false; const txt = block.textContent.replace(/ /g, " "); if (!txt.endsWith(" ")) return false; const key = txt.slice(0, -1);
+    for (const [re, fn] of SHORTCUTS) if (re.test(key)) { block.innerHTML = "<br>"; placeCaretIn(block, false); fn(ed, block); normalizeEd(ed); return true; } return false; }
+  const TI = { checklist: '<rect x="3" y="4" width="6" height="6" rx="1.5"/><path d="m4.5 7 1 1 2-2M13 7h8M3 15.5h6v.5M13 17h8"/><rect x="3" y="14" width="6" height="6" rx="1.5"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>', olist: '<path d="M10 6h10M10 12h10M10 18h10M4 4.5h1.5V9M4 9h3M4 14.5a1.5 1.5 0 0 1 3 .3c0 1-3 2.2-3 3.7h3"/>',
+    indent: '<path d="M10 6h10M10 12h10M10 18h10M4 9l3 3-3 3"/>', outdent: '<path d="M10 6h10M10 12h10M10 18h10M7 9l-3 3 3 3"/>', quote: '<path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/>',
+    bold: '<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>', italic: '<path d="M19 4h-9M14 20H5M15 4 9 20"/>', underline: '<path d="M6 4v7a6 6 0 0 0 12 0V4M4 21h16"/>',
+    strike: '<path d="M16 5.5A4 4 0 0 0 12 4c-2.5 0-4.5 1.3-4.5 3.5 0 1.5.8 2.5 2.5 3.2M4 12h16M8 18.5A4.5 4.5 0 0 0 12 20c2.6 0 4.5-1.4 4.5-3.6 0-.9-.3-1.7-.9-2.4"/>',
+    highlight: '<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>', h1: '<path d="M4 6v12M12 6v12M4 12h8M17 10l3-2v10"/>',
+    h2: '<path d="M4 6v12M12 6v12M4 12h8M16 10a2 2 0 1 1 4 .5c0 1.5-4 4-4 7.5h4"/>', divider: '<path d="M3 12h18"/><path d="M8 7h8M8 17h8" opacity=".4"/>', clear: '<path d="M4 7V5h16v2M9 19h6M12 5l-2 14M3 3l18 18"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>', redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/>' };
+  const TOOLS = [["checklist", "Checklist"], ["list", "Bulleted list"], ["olist", "Numbered list"], ["indent", "Nest under the item above (Tab)"], ["outdent", "Move out a level (Shift+Tab)"], ["quote", "Quote"], "|",
+    ["bold", "Bold"], ["italic", "Italic"], ["underline", "Underline"], ["strike", "Strikethrough"], ["highlight", "Highlight"], "|", ["h1", "Heading"], ["h2", "Subheading"], ["divider", "Divider"], "|", ["clear", "Clear formatting"], ["undo", "Undo"], ["redo", "Redo"]];
+  const toolbarHTML = () => TOOLS.map(t => t === "|" ? '<span class="tb-sep"></span>' : `<button type="button" class="tb-btn" data-cmd="${t[0]}" title="${t[1]}" aria-label="${t[1]}"><svg class="i" viewBox="0 0 24 24">${TI[t[0]]}</svg></button>`).join("");
+  function runCmd(ed, cmd) {
+    ed.focus();
+    switch (cmd) {
+      case "h1": case "h2": return toggleBlock(ed, cmd); case "quote": return toggleBlock(ed, "blockquote");
+      case "bold": case "italic": case "underline": return document.execCommand(cmd); case "strike": return document.execCommand("strikeThrough");
+      case "highlight": return toggleMark(ed); case "checklist": return toggleChecklist(ed); case "list": return toggleList(ed, false); case "olist": return toggleList(ed, true);
+      case "indent": case "outdent": { const li = closestIn(ed, "li"); if (!li) return toast("Put the cursor in a list item first"); if (!(cmd === "indent" ? indentItem(li) : outdentItem(li, ed))) toast(cmd === "indent" ? "Nothing above to nest under" : "Already at the top level"); return; }
+      case "divider": return document.execCommand("insertHorizontalRule");
+      case "clear": document.execCommand("removeFormat"); selectedBlocks(ed).forEach(b => { if (/^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(b.tagName)) retag(b, "p"); }); return;
+      case "undo": return document.execCommand("undo"); case "redo": return document.execCommand("redo");
+    }
+  }
+  function updateToolbar(ed) {
+    const tb = $(".toolbar"); if (!tb) return; const is = sel => !!closestIn(ed, sel), tag = topBlock(ed, caretNode())?.tagName;
+    const st = { h1: tag === "H1", h2: tag === "H2", quote: tag === "BLOCKQUOTE", bold: document.queryCommandState("bold"), italic: document.queryCommandState("italic"), underline: is("u"), strike: is("s, strike, del"), checklist: is("ul.checklist"), list: is("ul:not(.checklist)"), olist: is("ol"), highlight: is("mark") };
+    const li = closestIn(ed, "li");
+    tb.querySelector("[data-cmd=indent]")?.classList.toggle("dim", !li?.previousElementSibling); tb.querySelector("[data-cmd=outdent]")?.classList.toggle("dim", !li || !isNested(li, ed));
+    tb.querySelectorAll("[data-cmd]").forEach(b => b.classList.toggle("on", !!st[b.dataset.cmd]));
   }
   function viewJournal(tab) {
     const notesTab = tab !== "debriefs";
@@ -464,28 +544,17 @@
     if (id === "new") { nedit = { id: uid(), title: "", html: "", tag: "", pin: 0, at: Date.now() }; db.notes.push(nedit); save(); history.replaceState(null, "", `#/note/${nedit.id}`); }
     else nedit = db.notes.find(n => n.id === id);
     if (!nedit) { location.hash = "#/journal"; return ""; }
-    const T = [["bold", "<b>B</b>", "Bold"], ["italic", "<i>I</i>", "Italic"], ["underline", "<u>U</u>", "Underline"], ["h2", "H", "Heading"], ["ul", "•", "Bullets"], ["ol", "1.", "Numbers"], ["check", "☑", "Checklist"], ["quote", "❝", "Quote"], ["hr", "—", "Divider"]];
     return `<div class="top">${backLink("#/journal", "Journal")}<span class="small muted" id="nsaved">Saved</span></div>
       <input type="text" id="ntitle" value="${esc(nedit.title)}" placeholder="Title" style="font:600 22px var(--display);border:0;background:transparent;padding:6px 2px">
       <div class="chips" style="margin:6px 0 12px">${NOTE_TAGS.map(t => `<button class="chip${nedit.tag === t ? " on" : ""}" data-act="nsettag" data-v="${t}">${t}</button>`).join("")}</div>
-      <div class="toolbar">${T.map(([c, l, n]) => `<button data-act="fmt" data-v="${c}" aria-label="${n}" title="${n}">${l}</button>`).join("")}</div>
-      <div class="editor" id="ned" contenteditable="true" data-ph="Write here. Select text and use the buttons above to format it.">${nedit.html}</div>
+      <div class="toolbar" role="toolbar" aria-label="Formatting">${toolbarHTML()}</div>
+      <div class="editor note-body" id="ned" contenteditable="true" spellcheck="true" data-placeholder="Start writing. Type  [ ]  for a checklist,  -  for bullets,  1.  for numbers,  >  for a quote,  #  for a heading.">${sanitize(nedit.html)}</div>
       <div class="row" style="gap:8px;margin-top:14px"><button class="btn sm" data-act="npin">${nedit.pin ? "Unpin" : "📌 Pin to top"}</button><span class="grow"></span><button class="btn ghost sm" data-act="ndel" style="color:var(--red)">Delete note</button></div>
-      <p class="small muted" style="margin-top:10px">Edited ${dstr(nedit.at)}. Tap a checklist item’s box to tick it.</p>`;
+      <p class="small muted" style="margin-top:10px">Edited ${dstr(nedit.at)}. Tap a box to tick it (sub-tasks tick too). Tab nests a list item.</p>`;
   }
   let nT = 0;
-  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; nedit.html = clean(ed.innerHTML); nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const s = $("#nsaved"); if (s) s.textContent = "Saved"; }
-  function fmt(c) {
-    const ed = $("#ned"); ed.focus();
-    if (c === "bold" || c === "italic" || c === "underline") document.execCommand(c);
-    else if (c === "h2") { const cur = document.queryCommandValue("formatBlock").toLowerCase(); document.execCommand("formatBlock", false, cur === "h2" ? "<div>" : "<h2>"); }
-    else if (c === "quote") { const cur = document.queryCommandValue("formatBlock").toLowerCase(); document.execCommand("formatBlock", false, cur === "blockquote" ? "<div>" : "<blockquote>"); }
-    else if (c === "ul") document.execCommand("insertUnorderedList");
-    else if (c === "ol") document.execCommand("insertOrderedList");
-    else if (c === "hr") document.execCommand("insertHorizontalRule");
-    else if (c === "check") { const sel = getSelection(), t = sel && sel.toString() ? sel.toString() : ""; document.execCommand("insertHTML", false, `<ul class="checks"><li>${esc(t) || "<br>"}</li></ul>`); }
-    noteSave();
-  }
+  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; const h = ed.innerHTML === "<br>" ? "" : ed.innerHTML; nedit.html = sanitize(h); nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const st = $("#nsaved"); if (st) st.textContent = "Saved"; }
+  const saveSoon = () => { const st = $("#nsaved"); if (st) st.textContent = "Saving…"; clearTimeout(nT); nT = setTimeout(noteSave, 350); };
 
   function viewDebriefs() {
     const D = [...db.debriefs].sort((a, b) => b.at - a.at);
@@ -547,7 +616,6 @@
     const a = el.dataset.act, v = el.dataset.v;
     if (a === "pinkey") pinKey(v);
     else if (a === "guidedone") { db.guides ||= {}; if (db.guides[v]) delete db.guides[v]; else db.guides[v] = Date.now(); save(); toast(db.guides[v] ? "Well done. On to the next." : "Unmarked"); location.hash = "#/start"; }
-    else if (a === "fmt") { e.preventDefault(); fmt(v); }
     else if (a === "ntag") { ntag = v; render(); }
     else if (a === "nsettag") { nedit.tag = nedit.tag === v ? "" : v; save(); el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === nedit.tag)); }
     else if (a === "npin") { nedit.pin = nedit.pin ? 0 : 1; save(); el.textContent = nedit.pin ? "Unpin" : "📌 Pin to top"; }
@@ -585,11 +653,35 @@
     else if (a === "closesheet") $(".sheet-back")?.remove();
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
-  document.addEventListener("mousedown", e => { if (e.target.closest(".toolbar button")) e.preventDefault(); });
-  document.addEventListener("click", e => { const li = e.target.closest("#ned ul.checks > li"); if (!li) return; const r = li.getBoundingClientRect(); if (e.clientX - r.left < 30) { li.classList.toggle("done"); noteSave(); } });
+  /* Editor events (as in Almanac) */
+  let savedRange = null;
+  document.addEventListener("pointerdown", e => { if (!e.target.closest(".toolbar [data-cmd]")) return; e.preventDefault(); const x = getSelection(), ed = $("#ned"); savedRange = ed && x.rangeCount && ed.contains(x.anchorNode) ? x.getRangeAt(0).cloneRange() : null; });
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".toolbar [data-cmd]"), ed = $("#ned"); if (!ed) return;
+    if (b) { if (savedRange && !ed.contains(getSelection().anchorNode)) { ed.focus(); const x = getSelection(); x.removeAllRanges(); x.addRange(savedRange); } else if (!ed.contains(getSelection().anchorNode)) { ed.focus(); placeCaretIn(ed); }
+      runCmd(ed, b.dataset.cmd); normalizeEd(ed); updateToolbar(ed); saveSoon(); return; }
+    const li = e.target.closest("#ned ul.checklist > li");
+    if (li && e.clientX - li.getBoundingClientRect().left < 30) { e.preventDefault(); const on = li.classList.toggle("checked"); if (on) li.querySelectorAll("ul.checklist > li").forEach(c => c.classList.add("checked")); noteSave(); }
+  });
+  document.addEventListener("selectionchange", () => { const ed = $("#ned"); if (ed && ed.contains(getSelection().anchorNode)) updateToolbar(ed); });
+  document.addEventListener("keydown", e => {
+    const ed = $("#ned"); if (!ed || e.target !== ed) return;
+    if (e.key === "Tab") { const li = closestIn(ed, "li"); if (li) { e.preventDefault(); (e.shiftKey ? outdentItem(li, ed) : indentItem(li)) && saveSoon(); } }
+    if (e.key === "Enter" && !e.shiftKey) {
+      const li = closestIn(ed, "li");
+      if (li && !li.textContent.trim() && !subListOf(li) && isNested(li, ed)) { e.preventDefault(); outdentItem(li, ed); saveSoon(); return; }
+      setTimeout(() => { const nli = closestIn(ed, "ul.checklist > li"); if (nli && !nli.textContent.trim()) nli.classList.remove("checked"); });
+      const bq = closestIn(ed, "blockquote, h1, h2, h3"); if (bq && !bq.textContent.trim()) { e.preventDefault(); retag(bq, "p"); placeCaretIn(topBlock(ed, caretNode()) || ed); }
+    }
+    if (e.key === "Backspace") { const x = getSelection(), nli = closestIn(ed, "li");
+      if (nli && x.isCollapsed && isNested(nli, ed)) { const r = x.getRangeAt(0).cloneRange(); r.setStart(nli, 0); if (!r.toString().length) { e.preventDefault(); outdentItem(nli, ed); saveSoon(); return; } }
+      const blk = topBlock(ed, caretNode()); if (blk && /^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(blk.tagName) && x.isCollapsed) { const r = x.getRangeAt(0).cloneRange(); r.setStart(blk, 0); if (!r.toString().length) { e.preventDefault(); placeCaretIn(retag(blk, "p"), false); saveSoon(); } } }
+  });
+  document.addEventListener("paste", e => { const ed = $("#ned"); if (!ed || !ed.contains(e.target)) return; const h = e.clipboardData.getData("text/html"), t = e.clipboardData.getData("text/plain"); e.preventDefault(); if (h) document.execCommand("insertHTML", false, sanitize(h)); else document.execCommand("insertText", false, t); });
   document.addEventListener("input", e => {
     const el = e.target;
-    if (el.id === "ned" || el.id === "ntitle") { const s = $("#nsaved"); if (s) s.textContent = "Saving…"; clearTimeout(nT); nT = setTimeout(noteSave, 400); return; }
+    if (el.id === "ned") { if (e.inputType === "insertText" && e.data === " ") tryShortcut(el); saveSoon(); return; }
+    if (el.id === "ntitle") { saveSoon(); return; }
     if (el.id === "nq") { nq = el.value; const L = $("#nlist"); const h = viewJournal(); const d = document.createElement("div"); d.innerHTML = h; L.innerHTML = d.querySelector("#nlist").innerHTML; return; }
     if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
     if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
