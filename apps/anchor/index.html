@@ -108,6 +108,14 @@
     .keypad button { width: 74px; height: 74px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 500 27px var(--sans); cursor: pointer; display: grid; place-items: center; }
     .keypad button:active { background: var(--card2); }
     .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
+    details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+    details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
+    details.how summary::-webkit-details-marker { display: none; }
+    details.how ol { margin: 10px 0 8px; padding-left: 22px; font: 400 15.5px/1.5 var(--sans); } details.how ol li { margin: 6px 0; }
+    .sayline { font: italic 500 16.5px/1.5 var(--display); border-left: 3px solid var(--gold); padding: 2px 0 2px 12px; margin: 10px 0; color: var(--ink); }
+    .step .num { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(217,178,111,.16); color: var(--gold); font: 700 14px var(--sans); }
+    .step b { font: 600 16.5px var(--sans); }
+    ul.field { margin: 8px 0 0; padding-left: 18px; } ul.field li { margin: 6px 0; color: var(--ink2); }
     .loading { padding: 90px 0; text-align: center; color: var(--muted); }
     @media (max-width: 380px) { h1 { font-size: 28px; } .lesson-card p { font-size: 18.5px; } .ymn button { width: 33px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
@@ -161,6 +169,12 @@
     ["Firm no for everyone (high risk)", ["Breath play or anything on the neck"]] ];
   const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
 
+  /* A four-week beginner path through the guides, in a sensible order. */
+  const PATH = [
+    ["Week 1 · Talk and agree", ["first-talk", "the-list", "safewords", "tone"]],
+    ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
+    ["Week 3 · Rules and care", ["first-rules", "rewards", "consequences", "little-evening", "her-bad-day"]],
+    ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]] ];
   let C = null;
   const byMod = m => C.lessons.filter(l => l.module === m);
 
@@ -199,15 +213,46 @@
     if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
     else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0);
     else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
-    else if (v === "journal") html = viewJournal(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
+    else if (v === "journal") html = viewJournal(); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
     else html = viewToday();
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     const t = $("#tabs"); t.hidden = locked() || !db.pinAsked || v === "pin";
-    const cur = { l: "learn", scene: "her", before: "her", debrief: "journal", settings: "today" }[v] || v;
+    const cur = { l: "learn", g: "learn", start: "today", words: "learn", scene: "her", before: "her", debrief: "journal", settings: "today" }[v] || v;
     t.innerHTML = [["today", "anchor", "Today"], ["learn", "book", "Learn"], ["her", "heart", "Her"], ["journal", "pen", "Journal"]].map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
     if (nav) scrollTo(0, 0); lastHash = h;
   }
   addEventListener("hashchange", render);
+
+  /* ---------- Beginner how-tos ---------- */
+  const howPrompt = t => (C.howto?.prompts || []).find(h => h.text === t);
+  const howPractice = id => (C.howto?.practice || []).find(h => h.lesson === id);
+  const guide = id => (C.guides || []).find(g => g.id === id);
+  const howBox = (h, open) => !h ? "" : `<details class="how"${open ? " open" : ""}><summary>${ic("list")} How to do this</summary><ol>${h.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+    ${h.say ? `<p class="sayline">${esc(h.say)}</p>` : ""}${h.guide && guide(h.guide) ? `<a class="btn sm" href="#/g/${h.guide}">Full guide: ${esc(guide(h.guide).title)} ${ic("chev")}</a>` : ""}</details>`;
+  const pathDone = () => PATH.flatMap(([, ids]) => ids).filter(id => db.guides?.[id]).length;
+  const pathTotal = () => PATH.flatMap(([, ids]) => ids).filter(id => guide(id)).length;
+  function viewStart() {
+    const d = pathDone(), t = pathTotal();
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 6px">Start here</h1>
+      <p class="muted" style="margin:0 2px 14px">A four-week path for a new dominant. One or two guides a few times a week. Do each one for real with her, then tick it. ${d} of ${t} done.</p>
+      ${PATH.map(([wk, ids]) => `<div class="sec"><div class="eyebrow">${wk}</div>${ids.filter(guide).map(id => { const g = guide(id); return `<a class="item" href="#/g/${id}"><span class="dot${db.guides?.[id] ? " on" : ""}">${db.guides?.[id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(g.title)}</div><div class="m">${esc(g.time || "")}${g.time ? " · " : ""}${esc(g.why)}</div></div>${ic("chev")}</a>`; }).join("")}</div>`).join("")}
+      <a class="btn block" href="#/words" style="margin-top:20px">${ic("book")} Words you’ll hear: the glossary</a>`;
+  }
+  function viewGuide(id) {
+    const g = guide(id); if (!g) { location.hash = "#/start"; return ""; }
+    return `<div class="top">${backLink("#/start", "Start here")}<span class="small muted">${esc(g.time || "")}</span></div><h1 style="margin:6px 2px 8px;font-size:29px">${esc(g.title)}</h1>
+      <p class="muted" style="margin:0 2px 14px">${esc(g.why)}</p>
+      ${(g.prepare || []).length ? `<div class="card"><div class="eyebrow" style="color:var(--gold)">Have ready</div><ul class="field">${g.prepare.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      <div class="sec"><div class="eyebrow">Step by step</div>${g.steps.map((st, i) => `<div class="card step"><div class="row" style="gap:12px;align-items:flex-start"><span class="num">${i + 1}</span><div class="grow"><b>${esc(st.h)}</b><p style="margin:6px 0 0">${esc(st.d)}</p>${st.say ? `<p class="sayline">${esc(st.say)}</p>` : ""}</div></div></div>`).join("")}</div>
+      <div class="sec"><div class="eyebrow" style="color:var(--amber)">Beginner mistakes</div><div class="card"><ul class="field">${g.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div>
+      <div class="card" style="border-color:rgba(127,207,154,.35)"><div class="eyebrow" style="color:var(--green)">How you know it went well</div><p style="margin:8px 0 0">${esc(g.good)}</p></div>
+      <button class="btn gold block" data-act="guidedone" data-v="${g.id}" style="margin-top:16px">${ic("check")} ${db.guides?.[g.id] ? "Done" : "I did this"}</button>`;
+  }
+  function viewWords() {
+    const G = [...(C.glossary || [])].sort((a, b) => a.t.localeCompare(b.t));
+    return `<div class="top">${backLink("#/learn", "Learn")}</div><h1 style="margin:6px 2px 14px">Glossary</h1>
+      <input type="text" id="gq" placeholder="Search a word" autocomplete="off"><div class="card" style="margin-top:12px;padding:4px 18px" id="glist">${G.map(x => `<div class="note gw"><b>${esc(x.t)}</b><div class="small" style="margin-top:3px;color:var(--ink2)">${esc(x.d)}</div></div>`).join("")}</div>`;
+  }
 
   /* ---------- Today ---------- */
   function viewToday() {
@@ -218,7 +263,8 @@
     const neg = db.negotiated ? Math.floor((Date.now() - db.negotiated) / DAY) : null;
     const yes = Object.values(db.limits).filter(x => x === "y").length;
     return `<div class="top"><div class="eyebrow">Anchor</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
-      <div class="card" style="margin-top:6px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">From the old hand</div><p class="prompt" style="margin:10px 0 0">${esc(prompt)}</p></div>
+      <div class="card" style="margin-top:6px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">From the old hand</div><p class="prompt" style="margin:10px 0 0">${esc(prompt)}</p>${howBox(howPrompt(prompt))}</div>
+      ${(C.guides || []).length && pathDone() < pathTotal() ? `<a class="item" href="#/start" style="margin-top:12px;border-color:rgba(217,178,111,.4)">${modIc("foundations")}<div class="grow"><div class="t">Start here: your first four weeks</div><div class="m">${pathDone()} of ${pathTotal()} steps · step by step, with words to say</div></div>${ic("chev")}</a>` : ""}
       ${recent.map(s => `<div class="card" style="border-color:rgba(127,207,154,.4)"><div class="eyebrow" style="color:var(--green)">Aftercare window</div><p style="margin:8px 0 10px">Your scene “${esc(s.title || "untitled")}” ${(h => h < 1 ? "ended just now" : h < 48 ? `was ${h} hour${h === 1 ? "" : "s"} ago` : `was ${Math.round(h / 24)} days ago`)(Math.round((Date.now() - s.at) / 36e5))}. Drop can come a day or two later. Check in with her today, gently.</p>
         <div class="row" style="gap:8px"><button class="btn sm gold" data-act="followed" data-v="${s.id}">${ic("check")} I checked in</button><a class="btn sm" href="#/debrief/${s.id}">Debrief</a></div></div>`).join("")}
       ${db.rituals.length ? `<div class="sec"><div class="eyebrow">Today’s rituals</div><div class="card" style="padding:6px 18px">${db.rituals.map(r => `<button class="check${done[r.id] ? " on" : ""}" data-act="ritual" data-v="${r.id}"><span class="box">${done[r.id] ? ic("check") : ""}</span><span class="lbl grow">${esc(r.text)}</span></button>`).join("")}</div></div>` : ""}
@@ -234,6 +280,7 @@
   function viewLearn() {
     const r = C.lessons.filter(l => db.lessons[l.id]).length;
     return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons. Short, practical, from someone who has made the mistakes so you don’t have to.</p>
+      ${(C.guides || []).length ? `<div class="row" style="gap:10px;margin-bottom:14px"><a class="btn gold" href="#/start" style="flex:1">${ic("list")} Step-by-step guides</a><a class="btn" href="#/words">${ic("book")} Glossary</a></div>` : ""}
       <div class="mods">${Object.entries(MODS).map(([k, [n, i, col, sub]]) => { const ls = byMod(k), d = ls.filter(l => db.lessons[l.id]).length;
         return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}24, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${d}/${ls.length}</small><span class="bar" style="width:${ls.length ? d / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div>`;
   }
@@ -248,7 +295,7 @@
     const head = `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}</div><h2 style="margin:4px 2px 0">${esc(l.title)}</h2><div class="pips">${[...l.cards, 0].map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}</div>`;
     if (i < n) return head + `<div class="card lesson-card"><p>${esc(l.cards[i])}</p></div><div class="row" style="gap:10px;margin-top:14px">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")}</a>` : ""}<a class="btn gold" href="${base}/${i + 1}" style="flex:1">Next ${ic("chev")}</a></div>`;
     return head + `<div class="card keep">“${esc(l.remember)}”</div>
-      <div class="card"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p></div>
+      <div class="card"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p>${howBox(howPractice(l.id), true)}</div>
       <div class="card"><div class="eyebrow">Ask</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.ask)}</p></div>
       <button class="btn gold block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${ic("check")} ${db.lessons[l.id] ? "Done" : "Understood"}</button>`;
   }
@@ -267,34 +314,35 @@
         ${nav("#/her/rewards", "star", "care", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`)}
         ${nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)}${nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes")}`; }
     const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
+    const gl = id => guide(id) ? `<a class="btn sm" href="#/g/${id}" style="margin:0 2px 14px">${ic("list")} How to do this: ${esc(guide(id).title)}</a>` : "";
     if (sec === "limits") return head("Yes / maybe / no", "Go through it together. Maybe means talk first, never “maybe in the moment”. Anything unmarked is a no until discussed.")
-      + `${ACTS.map(([cat, items]) => `<div class="sec"><div class="eyebrow">${cat}</div><div class="card" style="padding:4px 16px">${items.map(it => { const v = db.limits[it] || (cat.startsWith("Firm no") ? "n" : "");
+      + gl("the-list") + `${ACTS.map(([cat, items]) => `<div class="sec"><div class="eyebrow">${cat}</div><div class="card" style="padding:4px 16px">${items.map(it => { const v = db.limits[it] || (cat.startsWith("Firm no") ? "n" : "");
           return `<div class="limit"><span class="grow">${esc(it)}</span>${cat.startsWith("Firm no") ? `<span class="tag n">No</span>` : `<span class="ymn">${["y", "m", "n"].map(x => `<button class="${x}${v === x ? " on" : ""}" data-act="lim" data-v="${esc(it)}" data-x="${x}">${x === "y" ? "Yes" : x === "m" ? "?" : "No"}</button>`).join("")}</span>`}</div>`; }).join("")}</div></div>`).join("")}
         <label class="f"><span>Notes from the conversation</span><textarea data-f="limitNote" placeholder="Details, conditions, things to revisit.">${esc(db.limitNote || "")}</textarea></label>
         <button class="btn gold block" data-act="negotiated" style="margin-top:14px">${ic("check")} We went through this together today</button>
         ${db.negotiated ? `<p class="small muted center" style="margin-top:8px">Last negotiated ${dstr(db.negotiated)}</p>` : ""}`;
     if (sec === "safe") return head("Safewords and signals", "Agree them out loud, and use them in a low-stakes moment so they feel normal. Honour them instantly, without sulking.")
-      + `<div class="card">${[["stop", "Stop everything"], ["slow", "Slow down / check in"], ["go", "All good, more"], ["signal", "Non-verbal signal (when she can’t speak)"]].map(([k, l]) => `<label class="f" style="margin-top:${k === "stop" ? 0 : 14}px"><span>${l}</span><input type="text" data-safe="${k}" value="${esc(db.safe[k])}"></label>`).join("")}</div>
+      + gl("safewords") + `<div class="card">${[["stop", "Stop everything"], ["slow", "Slow down / check in"], ["go", "All good, more"], ["signal", "Non-verbal signal (when she can’t speak)"]].map(([k, l]) => `<label class="f" style="margin-top:${k === "stop" ? 0 : 14}px"><span>${l}</span><input type="text" data-safe="${k}" value="${esc(db.safe[k])}"></label>`).join("")}</div>
         <div class="warnbox" style="margin-top:12px">A safeword is never a failure. Thank her for using it, then care for her first and talk later.</div>`;
     if (sec === "after") return head("Aftercare she needs", "Ask her, then watch what actually helps. Needs change with the scene and the day.")
-      + `<div class="card"><div class="chips">${AFTER.map(a => `<button class="chip${db.aftercare.includes(a) ? " on" : ""}" data-act="ac" data-v="${esc(a)}">${a}</button>`).join("")}</div>
+      + gl("aftercare-first") + `<div class="card"><div class="chips">${AFTER.map(a => `<button class="chip${db.aftercare.includes(a) ? " on" : ""}" data-act="ac" data-v="${esc(a)}">${a}</button>`).join("")}</div>
         <label class="f"><span>Details</span><textarea data-f="aftercareNote" placeholder="e.g. likes to be wrapped up and talked to softly; needs a text the next afternoon.">${esc(db.aftercareNote)}</textarea></label></div>
         <label class="f"><span>What you need afterwards (your own aftercare)</span><textarea data-f="mine" placeholder="Quiet, a walk, to hear that she’s okay, to write it down.">${esc(db.mine)}</textarea></label>`;
     if (sec === "little") return head("Her little space", "Little space here is rest, play and being looked after. Keep it non-sexual, and keep adult play for when she is fully herself.")
-      + `<div class="card">${[["comfort", "Comforts", "Her stuffie’s name, a blanket, a cartoon, colouring"], ["favourites", "Favourite things", "Snacks, songs, games"], ["bedtime", "Bedtime routine", "e.g. brush teeth, story, stuffie, lights at 11"], ["signs", "Signs she’s slipping into little space", "Voice changes, wants to be held, gets giggly"], ["out", "What pulls her out (and how to bring her back gently)", "Work calls, stress, being rushed"]].map(([k, l, ph], i) => `<label class="f" style="${i ? "" : "margin-top:0"}"><span>${l}</span><textarea data-little="${k}" placeholder="${ph}" style="min-height:64px">${esc(db.little[k])}</textarea></label>`).join("")}</div>`;
+      + gl("little-evening") + `<div class="card">${[["comfort", "Comforts", "Her stuffie’s name, a blanket, a cartoon, colouring"], ["favourites", "Favourite things", "Snacks, songs, games"], ["bedtime", "Bedtime routine", "e.g. brush teeth, story, stuffie, lights at 11"], ["signs", "Signs she’s slipping into little space", "Voice changes, wants to be held, gets giggly"], ["out", "What pulls her out (and how to bring her back gently)", "Work calls, stress, being rushed"]].map(([k, l, ph], i) => `<label class="f" style="${i ? "" : "margin-top:0"}"><span>${l}</span><textarea data-little="${k}" placeholder="${ph}" style="min-height:64px">${esc(db.little[k])}</textarea></label>`).join("")}</div>`;
     if (sec === "rules") return head("Rules", "Few, clear, and each with a reason that serves her. Five good rules beat twenty you can’t keep track of.")
-      + (db.rules.length > 6 ? `<div class="warnbox" style="margin-bottom:12px">${db.rules.length} rules. Can you hold all of them consistently? An unenforced rule teaches that rules don’t matter.</div>` : "")
+      + gl("first-rules") + (db.rules.length > 6 ? `<div class="warnbox" style="margin-bottom:12px">${db.rules.length} rules. Can you hold all of them consistently? An unenforced rule teaches that rules don’t matter.</div>` : "")
       + listEditor("rules", "Rules", "e.g. Water bottle finished by 6 pm", "Why it helps her (e.g. she forgets to drink and gets headaches)");
     if (sec === "rituals") return head("Rituals", "Small, daily, reliable. They are the heartbeat of the dynamic. Tick them off on Today.")
-      + listEditor("rituals", "Rituals", "e.g. Good-morning message before 9", "");
+      + gl("bedtime") + gl("morning") + listEditor("rituals", "Rituals", "e.g. Good-morning message before 9", "");
     if (sec === "rewards") return head("Rewards and consequences", "")
-      + `<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
+      + `${gl("rewards")}${gl("consequences")}<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
         <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
         ${listEditor("conseq", "Consequences", "e.g. Ten lines, early bedtime, phone off for the evening", "")}
         <p class="small muted" style="margin-top:8px">New consequences are marked “not yet agreed” until you tick them with her.</p>
         ${db.conseq.filter(c => c.agreed === false).map(c => `<button class="btn sm" data-act="agree" data-v="${c.id}" style="margin:6px 6px 0 0">${ic("check")} She agreed: ${esc(c.text)}</button>`).join("")}</div>`;
     if (sec === "checkin") { const Q = C.checkin || []; return head("Check-in questions", "Once a week, out of role, over coffee. Ask two or three, listen more than you talk.")
-      + `<div class="card" style="padding:4px 18px">${Q.map(q => `<div class="note">${esc(q)}</div>`).join("")}</div>
+      + gl("weekly") + `<div class="card" style="padding:4px 18px">${Q.map(q => `<div class="note">${esc(q)}</div>`).join("")}</div>
         <label class="f"><span>What she said this week</span><textarea id="cin" placeholder="Her words, as close as you can."></textarea></label><button class="btn gold block" data-act="savecheckin" style="margin-top:10px">${ic("check")} Save check-in</button>
         ${db.checkins.length ? `<div class="sec"><div class="eyebrow">Earlier check-ins</div><div class="card" style="padding:4px 18px">${[...db.checkins].reverse().map(c => `<div class="note"><div class="small muted">${dstr(c.at)}</div><div style="white-space:pre-wrap">${esc(c.text)}</div></div>`).join("")}</div></div>` : ""}`; }
     location.hash = "#/her"; return "";
@@ -308,7 +356,7 @@
     const all = ACTS.flatMap(([, it]) => it).filter(it => !it.startsWith("Breath"));
     const KIT = ["Safety shears", "Water", "Blanket", "Snack", "Her stuffie for after", "Phone off", "Lube and condoms if relevant", "First-aid basics"];
     const saved = db.scenes.some(s => s.id === sdraft.id);
-    return `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${saved ? "Scene" : "Plan a scene"}</h1><p class="muted" style="margin:0 2px 14px">Only what she said yes to. Maybe means ask her first, before the day.</p>
+    return `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${saved ? "Scene" : "Plan a scene"}</h1><p class="muted" style="margin:0 2px 14px">Only what she said yes to. Maybe means ask her first, before the day.</p>${guide("first-scene") ? `<a class="btn sm" href="#/g/first-scene" style="margin:0 2px 14px">${ic("list")} New to this? Your first simple scene, step by step</a>` : ""}
       <div class="card"><label class="f" style="margin-top:0"><span>Name</span><input type="text" data-s="title" value="${esc(sdraft.title)}" placeholder="e.g. Friday, slow and close"></label>
         <label class="f"><span>The intent (what you want her to feel)</span><textarea data-s="intent" placeholder="Held, safe, a little teased, very proud of herself.">${esc(sdraft.intent)}</textarea></label></div>
       <div class="sec"><div class="eyebrow">What’s in it</div><div class="card"><div class="chips">${all.map(it => { const v = db.limits[it]; return `<button class="chip${sdraft.acts.includes(it) ? " on" : ""}${v === "m" ? " warn" : ""}" data-act="sact" data-v="${esc(it)}" ${v === "y" || v === "m" ? "" : "disabled"}>${esc(it)}${v === "m" ? " ?" : ""}</button>`; }).join("")}</div>
@@ -326,7 +374,7 @@
     const B = ["We are both sober enough to consent clearly", "She’s had a normal day: no illness, no big news, eaten", "Tonight’s plan uses only her yeses", "Safewords said out loud just now", "Safety shears, water and blanket within reach", "Time and privacy: nothing to rush", "I am calm, not playing out frustration", "Aftercare is planned, and I’ll check in tomorrow"];
     return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 6px;font-size:29px">Before a scene</h1><p class="muted" style="margin:0 2px 14px">Two minutes. If any line is a no, change the plan or wait. That is what competence looks like.</p>
       <div class="card" style="padding:6px 18px">${B.map((b, i) => `<button class="check" data-act="tog"><span class="box"></span><span class="lbl">${b}</span></button>`).join("")}</div>
-      <a class="btn gold block" href="#/scene/new" style="margin-top:14px">Plan the scene</a>`;
+      <a class="btn gold block" href="#/scene/new" style="margin-top:14px">Plan the scene</a>${guide("safeword-used") ? `<a class="btn block" href="#/g/safeword-used" style="margin-top:8px">If she uses her safeword: what to do</a>` : ""}`;
   }
 
   /* ---------- Journal ---------- */
@@ -342,7 +390,7 @@
   function viewDebrief(id) {
     const s = db.scenes.find(x => x.id === id);
     return `<div class="top">${backLink("#/journal", "Journal")}</div><h1 style="margin:6px 2px 14px;font-size:29px">${s ? `Debrief: ${esc(s.title || "scene")}` : "Journal entry"}</h1>
-      <label class="f" style="margin-top:0"><span>What went well</span><textarea id="dgood"></textarea></label>
+      ${guide("debrief") ? `<a class="btn sm" href="#/g/debrief" style="margin:0 2px 12px">${ic("list")} How to debrief</a>` : ""}<label class="f" style="margin-top:0"><span>What went well</span><textarea id="dgood"></textarea></label>
       <label class="f"><span>What to change next time</span><textarea id="dchange"></textarea></label>
       <label class="f"><span>What she said (ask her, out of role)</span><textarea id="dhers"></textarea></label>
       <label class="f"><span>How I feel now (dom drop is real)</span><textarea id="dme" style="min-height:60px"></textarea></label>
@@ -358,7 +406,7 @@
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
       <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
-      <p class="small muted center" style="margin-top:20px">Anchor · v1 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+      <p class="small muted center" style="margin-top:20px">Anchor · v2 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
   }
 
   /* ---------- Install ---------- */
@@ -389,6 +437,7 @@
     const el = e.target.closest("[data-act]"); if (!el) return;
     const a = el.dataset.act, v = el.dataset.v;
     if (a === "pinkey") pinKey(v);
+    else if (a === "guidedone") { db.guides ||= {}; if (db.guides[v]) delete db.guides[v]; else db.guides[v] = Date.now(); save(); toast(db.guides[v] ? "Well done. On to the next." : "Unmarked"); location.hash = "#/start"; }
     else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
     else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "pinoff") { if (!confirm("Remove the PIN?")) return; db.pin = null; save(); render(); }
@@ -418,6 +467,7 @@
   });
   document.addEventListener("input", e => {
     const el = e.target;
+    if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
     if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
     if (el.dataset.safe) { db.safe[el.dataset.safe] = el.value; save(); }
     if (el.dataset.little) { db.little[el.dataset.little] = el.value; save(); }
