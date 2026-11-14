@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Forge</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Daily training: knowledge, action and reflection.">
+  <meta name="theme-color" content="#120d0a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Forge">
+  <style>
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+    :root {
+      --bg: #120d0a; --bg2: #1a1310; --card: #211813; --card2: #2a1f18; --ink: #f5ebe0; --ink2: #cdbfae; --muted: #8e7f70;
+      --line: rgba(255,220,180,.08); --line2: rgba(255,220,180,.16);
+      --ember: #ff7a3d; --ember2: #ffb347; --gold: #f2c14e; --rose: #ff5d73; --teal: #4fd1b5; --violet: #a78bfa; --sky: #6cb6ff;
+      --glow: 0 0 0 1px rgba(255,122,61,.25), 0 10px 40px rgba(255,122,61,.18);
+      --e1: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+      --display: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, sans-serif;
+      --spring: cubic-bezier(.2,.9,.25,1.15); --r: 22px; color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; background: radial-gradient(120% 60% at 50% -10%, #2b1810 0%, var(--bg) 55%) fixed, var(--bg); color: var(--ink); font: 400 16.5px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+    #main { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 110px); }
+    h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.015em; margin: 0; line-height: 1.12; font-variation-settings: "SOFT" 50; }
+    h1 { font-size: 34px; } h2 { font-size: 24px; } h3 { font-size: 19px; }
+    p { margin: 0 0 10px; } a { color: var(--ember2); }
+    .muted { color: var(--muted); } .small { font-size: 13.5px; } .center { text-align: center; }
+    .eyebrow { font: 700 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .card { background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--e1); }
+    .card + .card { margin-top: 12px; }
+    .sec { margin-top: 24px; } .sec > .eyebrow { margin: 0 4px 10px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 650 15px var(--sans); cursor: pointer; text-decoration: none; transition: transform .15s; white-space: nowrap; }
+    .btn:active { transform: scale(.96); }
+    .btn.fire { background: linear-gradient(135deg, var(--ember), var(--ember2)); color: #1b0e06; border: 0; box-shadow: 0 6px 24px rgba(255,122,61,.35); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.block { display: flex; width: 100%; } .btn.sm { min-height: 36px; padding: 6px 13px; font-size: 13.5px; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .view.enter { animation: rise .35s var(--spring) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+    @keyframes pop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes flick { 0%, 100% { transform: scaleY(1) rotate(-2deg); } 50% { transform: scaleY(1.08) rotate(2deg); } }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes sheetup { from { transform: translateY(100%); } }
+    /* top & rank */
+    .top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-bottom: 4px; }
+    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); text-decoration: none; font: 600 15px var(--sans); padding: 8px 2px; }
+    .iconbtn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink2); text-decoration: none; background: transparent; border: 0; cursor: pointer; }
+    .rank { padding: 20px; background: radial-gradient(120% 140% at 100% 0%, rgba(255,122,61,.25), transparent 55%), linear-gradient(180deg, var(--card2), var(--card)); box-shadow: var(--glow); }
+    .flame { width: 54px; height: 54px; flex: none; display: grid; place-items: center; border-radius: 18px; background: rgba(255,122,61,.14); }
+    .flame svg { width: 32px; height: 32px; animation: flick 1.6s ease-in-out infinite; transform-origin: 50% 90%; }
+    .xpbar { height: 10px; border-radius: 10px; background: rgba(255,255,255,.07); overflow: hidden; margin-top: 12px; }
+    .xpbar i { display: block; height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--ember), var(--gold)); transition: width .8s var(--spring); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .stat { background: rgba(255,255,255,.04); border-radius: 14px; padding: 10px; text-align: center; }
+    .stat b { display: block; font: 600 22px var(--display); } .stat span { font-size: 11.5px; color: var(--muted); }
+    /* quests */
+    .quest { display: flex; gap: 14px; align-items: flex-start; padding: 15px 16px; text-decoration: none; color: var(--ink); cursor: pointer; width: 100%; text-align: left; font: inherit; }
+    .quest .ic { width: 42px; height: 42px; border-radius: 14px; flex: none; display: grid; place-items: center; }
+    .quest .t { font: 600 16px/1.3 var(--sans); } .quest .d { font-size: 13.5px; color: var(--ink2); margin-top: 3px; line-height: 1.4; }
+    .quest .xp { font: 700 12px var(--sans); color: var(--gold); white-space: nowrap; margin-top: 2px; }
+    .quest.done { opacity: .55; } .quest.done .t { text-decoration: line-through; }
+    .tick { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; background: transparent; color: #1b0e06; cursor: pointer; }
+    .tick.on { background: var(--teal); border-color: var(--teal); }
+    .habits { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .habit { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px 10px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--ink2); font: 600 11px/1.2 var(--sans); text-align: center; cursor: pointer; }
+    .habit .i { width: 24px; height: 24px; }
+    .habit.on { background: rgba(79,209,181,.14); border-color: rgba(79,209,181,.4); color: var(--teal); }
+    /* modules */
+    .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mod { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); min-height: 132px; position: relative; overflow: hidden; }
+    .mod .i { width: 26px; height: 26px; }
+    .mod b { font: 600 18px/1.15 var(--display); } .mod small { color: var(--ink2); font-size: 12.5px; }
+    .mod .bar { position: absolute; left: 0; bottom: 0; height: 4px; background: currentColor; opacity: .8; }
+    .list a.item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+    .list a.item + a.item { margin-top: 8px; }
+    .item .t { font: 600 15.5px/1.3 var(--sans); } .item .m { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; border: 2px solid var(--line2); }
+    .dot.on { background: var(--teal); border-color: var(--teal); color: #10251f; }
+    /* lesson */
+    .lesson-card { min-height: 260px; display: flex; flex-direction: column; justify-content: center; padding: 26px 22px; }
+    .lesson-card p { font: 400 20px/1.55 var(--display); font-variation-settings: "SOFT" 100; margin: 0; }
+    .pips { display: flex; gap: 6px; margin: 14px 0; } .pips i { flex: 1; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); } .pips i.on { background: var(--ember); }
+    .sci { border-left: 3px solid var(--sky); padding: 4px 0 4px 12px; margin: 10px 0; } .sci .src { color: var(--sky); font: 600 12.5px var(--sans); margin-top: 4px; }
+    ul.field { margin: 6px 0 0; padding-left: 18px; } ul.field li { margin: 6px 0; color: var(--ink2); }
+    .doit { background: linear-gradient(135deg, rgba(255,122,61,.18), rgba(242,193,78,.1)); border: 1px solid rgba(255,122,61,.35); }
+    /* quiz */
+    .opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 500 15.5px/1.4 var(--sans); cursor: pointer; margin-top: 8px; }
+    .opt.good { border-color: var(--teal); background: rgba(79,209,181,.1); } .opt.bad { border-color: var(--rose); background: rgba(255,93,115,.08); }
+    .fb { margin-top: 12px; color: var(--ink2); }
+    /* chips, inputs */
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--ink2); font: 600 13px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--ember); border-color: var(--ember); color: #1b0e06; }
+    .chips.scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .chips.scroll::-webkit-scrollbar { display: none; }
+    textarea, input[type=text], input[type=number] { width: 100%; font: 400 16px/1.45 var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: var(--ink); }
+    textarea { min-height: 80px; resize: vertical; }
+    label.f { display: block; margin-top: 14px; } label.f > span { display: block; font: 650 12.5px var(--sans); color: var(--ink2); margin-bottom: 6px; }
+    .counter { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .counter:last-child { border-bottom: 0; }
+    .stepper { display: flex; align-items: center; gap: 6px; } .stepper button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 600 20px var(--sans); cursor: pointer; }
+    .stepper b { min-width: 30px; text-align: center; font: 600 20px var(--display); }
+    /* timers */
+    .orb { width: 220px; height: 220px; border-radius: 50%; margin: 18px auto; display: grid; place-items: center; text-align: center; font: 600 22px var(--display); background: radial-gradient(circle, rgba(255,122,61,.35), rgba(255,122,61,.05) 70%); border: 2px solid rgba(255,122,61,.5); transition: transform .6s ease; }
+    .orb.squeeze { transform: scale(.8); background: radial-gradient(circle, rgba(242,193,78,.5), rgba(242,193,78,.08) 70%); }
+    .orb small { display: block; font: 500 13px var(--sans); color: var(--ink2); margin-top: 4px; }
+    .big { font: 600 54px var(--display); text-align: center; font-variant-numeric: tabular-nums; }
+    /* field session */
+    .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tbtn { padding: 18px 10px; border-radius: 20px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); cursor: pointer; text-align: center; }
+    .tbtn b { display: block; font: 600 34px var(--display); } .tbtn span { font: 600 12.5px var(--sans); color: var(--ink2); }
+    .tbtn:active { transform: scale(.96); }
+    /* charts */
+    .bars { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 80px; }
+    .bars i { display: block; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--ember2), var(--ember)); min-height: 3px; }
+    .bars i.zero { background: rgba(255,255,255,.08); }
+    .hbar { display: grid; grid-template-columns: 110px 1fr 28px; gap: 10px; align-items: center; margin: 8px 0; font-size: 13.5px; }
+    .hbar .tr { height: 8px; border-radius: 8px; background: rgba(255,255,255,.07); overflow: hidden; } .hbar .tr i { display: block; height: 100%; background: var(--rose); border-radius: 8px; }
+    /* tabs */
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 40; display: flex; gap: 2px; padding: 6px; border-radius: 999px; background: rgba(33,24,19,.88); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--line2); box-shadow: 0 10px 40px rgba(0,0,0,.5); width: min(440px, calc(100% - 24px)); }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 999px; text-decoration: none; color: var(--muted); font: 650 11px var(--sans); }
+    nav.tabs a.on { color: var(--ink); background: rgba(255,122,61,.16); } nav.tabs a.on .i { color: var(--ember); }
+    nav.tabs[hidden] { display: none; }
+    /* toast, xp pop, sheet */
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 999px; font: 650 14px var(--sans); box-shadow: var(--e1); animation: rise .3s var(--spring) both; max-width: calc(100% - 40px); text-align: center; }
+    .xppop { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 90; font: 700 40px var(--display); color: var(--gold); text-shadow: 0 4px 30px rgba(255,122,61,.6); pointer-events: none; animation: pop .5s var(--spring) both; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 9px 0; line-height: 1.45; }
+    .ios-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,.08); border: 1px solid var(--line2); vertical-align: -7px; color: #5aa9ff; }
+    .ios-ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .loading { padding: 90px 0; text-align: center; color: var(--muted); }
+    @media (max-width: 380px) { h1 { font-size: 29px; } .habits { gap: 5px; } .habit { font-size: 10px; } .lesson-card p { font-size: 18.5px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"><div class="loading">Lighting the forge…</div></main>
+  <nav class="tabs" id="tabs" hidden></nav>
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const DAY = 864e5;
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const dstr = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
+
+  /* Everything stays on this device. */
+  const KEY = "forge";
+  const db = Object.assign({ xp: 0, tier: 3, lessons: {}, quiz: {}, missions: {}, habits: {}, days: {}, reports: [], kegel: [], plan: {}, field: null },
+    (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+
+  const P = {
+    flame: '<path d="M12 21c-4 0-6.5-2.7-6.5-6.2 0-3.6 2.7-5.7 3.8-9.3 2 1.6 2.6 3.4 2.6 4.8 1-1 1.6-2.4 1.6-4.3 2.6 2 5 5 5 8.8 0 3.5-2.5 6.2-6.5 6.2z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+    book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
+    bolt: '<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6z"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>', back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>', dumbbell: '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+    drop: '<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/>', glass: '<path d="M7 3.5h10l-1 8a4 4 0 0 1-8 0zM12 15.5V20.5M8.5 20.5h7"/><path d="M5 5l14 14"/>',
+    target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>', chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>',
+    eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>', map: '<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+    heart: '<path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+    brain: '<path d="M9 4.5a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.5A3 3 0 0 0 9 18.5h.5V4.5zM15 4.5a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.5A3 3 0 0 1 15 18.5h-.5V4.5z"/>',
+    trio: '<circle cx="12" cy="7" r="2.6"/><circle cx="6.5" cy="12.5" r="2.6"/><circle cx="17.5" cy="12.5" r="2.6"/><path d="M2.5 20c.5-2.6 2-4 4-4s3.4 1.4 4 4M13.5 20c.5-2.6 2-4 4-4s3.4 1.4 4 4M8.5 15.2c.9-1.6 2.1-2.4 3.5-2.4s2.6.8 3.5 2.4"/>',
+    timer: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 2M9.5 3h5"/>', wind: '<path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', play: '<path d="M7 4.5v15l12-7.5z"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>' };
+  const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
+
+  const MODS = {
+    mindset: ["Mindset", "brain", "#a78bfa", "State, confidence, rejection"], attraction: ["Attraction", "spark", "#ffb347", "Presence, body, voice"],
+    conversation: ["Conversation", "chat", "#6cb6ff", "Rapport, humour, depth"], reading: ["Reading her", "eye", "#4fd1b5", "Interest, consent, timing"],
+    logistics: ["Logistics", "map", "#ff7a3d", "Venues, moving, home"], threesome: ["Threesomes", "trio", "#ff5d73", "Set up, balance, care"],
+    energy: ["Energy", "bolt", "#f2c14e", "Sleep, training, drive"], skill: ["The craft", "heart", "#ff8fa3", "Pleasure, stamina, care"] };
+  const RANKS = [[0, "Spark"], [250, "Ember"], [700, "Flame"], [1500, "Blaze"], [3000, "Forge"], [5500, "Inferno"], [9000, "Phoenix"]];
+  const rankOf = xp => { let i = 0; while (i + 1 < RANKS.length && xp >= RANKS[i + 1][0]) i++; return i; };
+  const HABITS = [["sleep", "moon", "Slept 7h+"], ["train", "dumbbell", "Trained"], ["sun", "sun", "Sun 10 min"], ["dry", "glass", "≤ 2 drinks"], ["floor", "drop", "Pelvic floor"]];
+  const STICK = ["Opening", "Conversation", "Attraction", "Reading her", "Escalation", "Logistics", "Nerves", "Energy", "In bed"];
+  const STICK_MOD = { Opening: "mindset", Conversation: "conversation", Attraction: "attraction", "Reading her": "reading", Escalation: "reading", Logistics: "logistics", Nerves: "mindset", Energy: "energy", "In bed": "skill" };
+
+  let C = null; /* content: lessons, missions, quiz */
+  const byMod = (arr, m) => arr.filter(x => x.module === m);
+
+  /* ---------- XP, days, streak ---------- */
+  function gain(n, why) {
+    const before = rankOf(db.xp); db.xp += n; const k = dayKey(); db.days[k] = (db.days[k] || 0) + n; save();
+    const p = document.createElement("div"); p.className = "xppop"; p.textContent = `+${n} XP`; document.body.appendChild(p); setTimeout(() => p.remove(), 900); haptic([10, 40, 10]);
+    const after = rankOf(db.xp); if (after > before) setTimeout(() => toast(`Rank up: ${RANKS[after][1]}`, 3200), 700); else if (why) toast(why);
+  }
+  function streak() { let s = 0, t = Date.now(); if (!db.days[dayKey(t)]) t -= DAY; while (db.days[dayKey(t)]) { s++; t -= DAY; } return s; }
+
+  /* ---------- Today's plan: one lesson, one field mission, one drill ---------- */
+  const MOD_ORDER = ["reading", "conversation", "logistics", "attraction", "threesome", "mindset", "skill", "energy"];
+  function todayPlan() {
+    const k = dayKey(); if (db.plan.day === k) return db.plan;
+    const d = Math.floor(Date.now() / DAY);
+    const lesson = C.lessons.find(l => !db.lessons[l.id] && l.module === MOD_ORDER[d % MOD_ORDER.length]) || C.lessons.find(l => !db.lessons[l.id]) || C.lessons[d % C.lessons.length];
+    const ok = m => m.level <= Math.min(5, db.tier + 1) && m.level >= Math.max(1, db.tier - 1);
+    const pick = arr => { const fresh = arr.filter(m => !db.missions[m.id]); const pool = fresh.length ? fresh : arr; return pool[(d * 7) % pool.length]; };
+    const field = pick(C.missions.filter(m => m.type === "field" && ok(m)).length ? C.missions.filter(m => m.type === "field" && ok(m)) : C.missions.filter(m => m.type === "field"));
+    const drills = C.missions.filter(m => m.type !== "field" && ok(m));
+    const drill = pick(drills.length ? drills : C.missions.filter(m => m.type !== "field"));
+    db.plan = { day: k, lesson: lesson?.id, field: field?.id, drill: drill?.id, done: {} }; save(); return db.plan;
+  }
+
+  /* ---------- Routing ---------- */
+  let lastHash = "";
+  const route = () => { const p = (location.hash || "#/").slice(2).split("/"); return { v: p[0] || "today", a: p[1], b: p[2] }; };
+  function render() {
+    if (!C) return;
+    const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    stopTimers();
+    let html;
+    if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0); else if (v === "quiz") html = viewQuiz(a);
+    else if (v === "train") html = viewTrain(a); else if (v === "m") html = viewMission(a); else if (v === "kegel") html = viewKegel(); else if (v === "breathe") html = viewBreathe();
+    else if (v === "log") html = viewLog(); else if (v === "report") html = viewReport(); else if (v === "field") html = viewField(); else if (v === "settings") html = viewSettings();
+    else html = viewToday();
+    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    tabs(v); if (nav) scrollTo(0, 0); lastHash = h;
+  }
+  addEventListener("hashchange", render);
+  function tabs(v) {
+    const t = $("#tabs"); t.hidden = false;
+    const cur = { l: "learn", quiz: "learn", m: "train", kegel: "train", breathe: "train", report: "log", field: "today", settings: "today" }[v] || v;
+    t.innerHTML = [["today", "flame", "Today"], ["learn", "book", "Learn"], ["train", "bolt", "Train"], ["log", "pen", "Log"]]
+      .map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
+  }
+  const backLink = (href, label) => `<a class="back" href="${href}">${ic("back")}${label}</a>`;
+  const modIc = (m, size = 42) => { const [, i, col] = MODS[m] || MODS.mindset; return `<span class="ic" style="width:${size}px;height:${size}px;border-radius:14px;display:grid;place-items:center;flex:none;background:${col}22;color:${col}">${ic(i)}</span>`; };
+
+  /* ---------- Today ---------- */
+  function viewToday() {
+    const p = todayPlan(), r = rankOf(db.xp), next = RANKS[r + 1], lo = RANKS[r][0], pct = next ? (db.xp - lo) / (next[0] - lo) * 100 : 100;
+    const L = C.lessons.find(x => x.id === p.lesson), F = C.missions.find(x => x.id === p.field), D = C.missions.find(x => x.id === p.drill);
+    const hk = db.habits[dayKey()] || {}, hcount = HABITS.filter(h => hk[h[0]]).length, reported = db.reports.some(x => dayKey(x.at) === dayKey());
+    const done = [p.done.lesson, p.done.field, p.done.drill, hcount >= 3, reported].filter(Boolean).length;
+    const r30 = db.reports.filter(x => x.at > Date.now() - 30 * DAY), sum = k => r30.reduce((s, x) => s + (+x[k] || 0), 0);
+    const quest = (href, mod, title, desc, xp, isDone, act) => `<${act ? `button data-act="${act}"` : `a href="${href}"`} class="card quest${isDone ? " done" : ""}" style="margin-top:10px">${modIc(mod)}<div class="grow"><div class="t">${esc(title)}</div><div class="d">${esc(desc)}</div></div><div class="xp">${isDone ? ic("check") : `+${xp}`}</div></${act ? "button" : "a"}>`;
+    return `<div class="top"><div class="eyebrow">Forge</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+      <div class="card rank"><div class="row" style="gap:14px"><div class="flame"><svg viewBox="0 0 24 24" fill="url(#fg)"><defs><linearGradient id="fg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7a3d"/><stop offset="1" stop-color="#f2c14e"/></linearGradient></defs>${P.flame.replace("<path", '<path stroke="none"')}</svg></div>
+        <div class="grow"><div class="eyebrow" style="color:var(--ember2)">Rank ${r + 1} · ${streak()} day streak</div><h2 style="margin-top:4px">${RANKS[r][1]}</h2></div><div class="center"><b style="font:600 24px var(--display)">${db.xp}</b><div class="small muted">XP</div></div></div>
+        <div class="xpbar"><i style="width:${pct.toFixed(1)}%"></i></div><div class="small muted" style="margin-top:6px">${next ? `${next[0] - db.xp} XP to ${next[1]}` : "Top rank. Keep the fire going."}</div>
+        <div class="eyebrow" style="margin-top:16px">Last 30 days</div><div class="stats" style="margin-top:8px"><div class="stat"><b>${sum("approaches")}</b><span>approaches</span></div><div class="stat"><b>${sum("dates")}</b><span>dates</span></div><div class="stat"><b>${sum("pulls")}</b><span>nights together</span></div></div></div>
+      <div class="sec"><div class="row between" style="margin:0 4px 6px"><div class="eyebrow">Today’s forge</div><div class="small" style="color:var(--gold)">${done}/5 done</div></div>
+        ${L ? quest(`#/l/${L.id}/0`, L.module, `Learn: ${L.title}`, L.hook, 20, p.done.lesson) : ""}
+        ${F ? quest(`#/m/${F.id}`, F.module, `Field: ${F.title}`, F.task, F.xp, p.done.field) : ""}
+        ${D ? quest(`#/m/${D.id}`, D.module, `${D.type === "habit" ? "Habit" : "Drill"}: ${D.title}`, D.task, D.xp, p.done.drill) : ""}
+        <div class="card" style="margin-top:10px"><div class="row between"><b style="font-size:15px">Energy habits</b><span class="small" style="color:var(--gold)">${hcount}/5 · +5 each</span></div>
+          <div class="habits" style="margin-top:12px">${HABITS.map(([k, i, l]) => `<button class="habit${hk[k] ? " on" : ""}" data-act="habit" data-v="${k}">${ic(i)}${l}</button>`).join("")}</div></div>
+        ${quest("#/report", "mindset", reported ? "Report filed" : "Tonight: field report", reported ? "Reflection done. Sleep well." : "Three minutes: what happened, what worked, one lesson.", 25, reported)}</div>
+      <div class="sec"><div class="eyebrow">Going out?</div><div class="row" style="gap:10px"><a class="btn fire" href="#/field" style="flex:1">${ic("play")} ${db.field ? "Resume session" : "Start field session"}</a><a class="btn" href="#/breathe">${ic("wind")} State</a></div></div>
+      ${isStandalone() ? "" : `<button class="card quest" data-act="installsheet" style="margin-top:22px"><span class="ic" style="width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.06)">${ic("download")}</span><div class="grow"><div class="t">Install on your phone</div><div class="d">Opens in one tap, works offline, stays private.</div></div></button>`}`;
+  }
+
+  /* ---------- Learn ---------- */
+  function viewLearn() {
+    const tot = C.lessons.length, read = C.lessons.filter(l => db.lessons[l.id]).length;
+    return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${read} of ${tot} lessons. Research where it exists, field notes where it doesn’t, and one thing to do today.</p>
+      <div class="mods">${Object.entries(MODS).map(([k, [n, i, col, sub]]) => { const ls = byMod(C.lessons, k), r = ls.filter(l => db.lessons[l.id]).length;
+        return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}26, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${r}/${ls.length} lessons</small><span class="bar" style="width:${ls.length ? r / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div>`;
+  }
+  function viewModule(m) {
+    const [n, , col, sub] = MODS[m] || []; if (!n) { location.hash = "#/learn"; return ""; }
+    const ls = byMod(C.lessons, m), qs = byMod(C.quiz, m), qd = qs.filter(q => db.quiz[q.id] != null).length;
+    return `<div class="top">${backLink("#/learn", "Learn")}</div><div class="row" style="gap:14px;margin:6px 2px 18px">${modIc(m, 54)}<div><h1 style="font-size:30px">${n}</h1><div class="muted small">${sub}</div></div></div>
+      <div class="list">${ls.map(l => `<a class="item" href="#/l/${l.id}/0"><span class="dot${db.lessons[l.id] ? " on" : ""}">${db.lessons[l.id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(l.title)}</div><div class="m">${l.minutes || 2} min · ${esc(l.hook)}</div></div>${ic("chev")}</a>`).join("")}</div>
+      ${qs.length ? `<a class="btn fire block" href="#/quiz/${m}" style="margin-top:16px">${ic("target")} Sharpen: ${qs.length} scenarios${qd ? ` · ${qd} done` : ""}</a>` : ""}
+      <a class="btn block" href="#/train/${m}" style="margin-top:10px">${ic("bolt")} Missions for ${n.toLowerCase()}</a>`;
+  }
+  function viewLesson(id, i) {
+    const l = C.lessons.find(x => x.id === id); if (!l) { location.hash = "#/learn"; return ""; }
+    const n = l.cards.length, last = i >= n, base = `#/l/${l.id}`;
+    const pips = `<div class="pips">${[...l.cards, 0].map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}</div>`;
+    const head = `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}<span class="small muted">${l.minutes || 2} min</span></div><h2 style="margin:4px 2px 0">${esc(l.title)}</h2>${pips}`;
+    if (!last) return head + `<div class="card lesson-card"><p>${esc(l.cards[i])}</p></div>
+      <div class="row" style="gap:10px;margin-top:14px">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")}</a>` : ""}<a class="btn fire" href="${base}/${i + 1}" style="flex:1">${i === n - 1 ? "The evidence and the move" : "Next"} ${ic("chev")}</a></div>`;
+    return head + `${(l.science || []).length ? `<div class="card"><div class="eyebrow" style="color:var(--sky)">What the research says</div>${l.science.map(s => `<div class="sci">${esc(s.finding)}<div class="src">${esc(s.source)}</div></div>`).join("")}</div>` : ""}
+      ${(l.field || []).length ? `<div class="card"><div class="eyebrow" style="color:var(--ember2)">Field notes</div><ul class="field">${l.field.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div>` : ""}
+      <div class="card doit"><div class="eyebrow" style="color:var(--gold)">Do this today</div><p style="margin:8px 0 0;font-weight:600">${esc(l.do)}</p></div>
+      <div class="card"><div class="eyebrow">Tonight, ask yourself</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.reflect)}</p></div>
+      <button class="btn fire block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${db.lessons[l.id] ? `${ic("check")} Learned` : `${ic("check")} Got it · +20 XP`}</button>`;
+  }
+  let qi = 0;
+  function viewQuiz(m) {
+    const qs = byMod(C.quiz, m); if (!qs.length) { location.hash = "#/learn"; return ""; }
+    const k = qi % qs.length, q = qs[k], ans = db.quiz[q.id];
+    return `<div class="top">${backLink(`#/learn/${m}`, MODS[m][0])}<span class="small muted">${k + 1} of ${qs.length}</span></div>
+      <div class="eyebrow" style="color:var(--ember2);margin:6px 2px 8px">Sharpen</div><h2 style="font-size:21px;line-height:1.35;margin:0 2px">${esc(q.q)}</h2>
+      ${q.o.map(([t, g], i) => `<button class="opt${ans != null ? (g ? " good" : i === ans ? " bad" : "") : ""}" data-act="pick" data-v="${i}" data-q="${q.id}" ${ans != null ? "disabled" : ""}>${ans != null && (g || i === ans) ? ic(g ? "check" : "x") : `<span style="width:20px"></span>`}<span>${esc(t)}</span></button>`).join("")}
+      ${ans != null ? `<div class="fb">${esc(q.o[ans][2])}${q.o[ans][1] ? "" : " " + esc(q.o.find(o => o[1])[2])}</div>` : ""}
+      <div class="row between" style="margin-top:18px"><button class="btn ghost sm" data-act="qreset" data-v="${m}">Reset</button><button class="btn sm" data-act="qnext">Next ${ic("chev")}</button></div>`;
+  }
+
+  /* ---------- Train ---------- */
+  let tfilter = "";
+  function viewTrain(m) {
+    if (m) tfilter = m;
+    const list = C.missions.filter(x => !tfilter || x.module === tfilter).sort((a, b) => a.level - b.level);
+    return `<h1 style="margin:8px 2px 6px">Train</h1><p class="muted" style="margin:0 2px 14px">Field missions, drills and habits. Your level: ${db.tier} of 5.</p>
+      <div class="row" style="gap:10px"><a class="card quest" href="#/kegel" style="flex:1;padding:14px">${modIc("skill")}<div><div class="t">Pelvic floor</div><div class="d">Guided, 4 min</div></div></a><a class="card quest" href="#/breathe" style="flex:1;padding:14px;margin-top:0">${modIc("mindset")}<div><div class="t">State reset</div><div class="d">Breath, 2 min</div></div></a></div>
+      <div class="chips scroll" style="margin-top:16px">${[["", "All"], ...Object.entries(MODS).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button class="chip${tfilter === k ? " on" : ""}" data-act="tfilter" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="list" style="margin-top:12px">${list.map(x => `<a class="item" href="#/m/${x.id}">${modIc(x.module, 36)}<div class="grow"><div class="t">${esc(x.title)}</div><div class="m">Level ${x.level} · ${x.type} · +${x.xp} XP${db.missions[x.id] ? ` · done ${db.missions[x.id].n}×` : ""}</div></div>${db.missions[x.id] ? `<span class="dot on">${ic("check")}</span>` : ic("chev")}</a>`).join("")}</div>`;
+  }
+  function viewMission(id) {
+    const x = C.missions.find(m => m.id === id); if (!x) { location.hash = "#/train"; return ""; }
+    const d = db.missions[x.id];
+    return `<div class="top">${backLink("#/train", "Train")}</div><div class="row" style="gap:14px;margin:6px 2px 16px">${modIc(x.module, 54)}<div><div class="eyebrow">${MODS[x.module][0]} · level ${x.level} · ${x.type}</div><h1 style="font-size:28px;margin-top:4px">${esc(x.title)}</h1></div></div>
+      <div class="card doit"><div class="eyebrow" style="color:var(--gold)">The mission</div><p style="margin:8px 0 0;font-size:18px;font-weight:600;line-height:1.45">${esc(x.task)}</p></div>
+      <div class="card"><div class="eyebrow">Why</div><p style="margin:8px 0 0">${esc(x.why)}</p></div>
+      ${x.module === "skill" && /pelvic|kegel|floor/i.test(x.title + x.task) ? `<a class="btn block" href="#/kegel" style="margin-top:12px">${ic("timer")} Open the guided timer</a>` : ""}
+      <button class="btn fire block" data-act="mdone" data-v="${x.id}" style="margin-top:16px">${ic("check")} Done · +${x.xp} XP</button>
+      ${d ? `<p class="small muted center" style="margin-top:10px">Completed ${d.n}× · last ${dstr(d.at)}</p>` : ""}`;
+  }
+
+  /* ---------- Pelvic floor coach: quick flicks, then long holds; holds grow with practice ---------- */
+  let T = 0, T2 = 0;
+  const stopTimers = () => { clearTimeout(T); clearInterval(T2); T = T2 = 0; };
+  function kegelPlan() { const n = db.kegel.length; const hold = Math.min(10, 5 + Math.floor(n / 6)); return { flicks: 10, hold, holds: 10, rest: hold }; }
+  function viewKegel() {
+    const k = kegelPlan(), wk = db.kegel.filter(t => t > Date.now() - 7 * DAY).length;
+    return `<div class="top">${backLink("#/train", "Train")}<span class="small muted">${wk} this week</span></div><h1 style="margin:6px 2px 6px">Pelvic floor</h1>
+      <p class="muted" style="margin:0 2px">The muscle you’d use to stop urinating midstream. Squeeze and lift, keep buttocks, thighs and belly relaxed, breathe normally.</p>
+      <div class="orb" id="orb">Ready<small>${k.flicks} quick flicks, then ${k.holds} × ${k.hold}s holds</small></div>
+      <button class="btn fire block" data-act="kegel" id="kbtn">${ic("play")} Start</button>
+      <p class="small muted" style="margin-top:14px">Daily, lying or sitting at first, later standing. The hold length grows with your sessions (now ${k.hold}s, up to 10s). Pain, or persistent erection or ejaculation problems, are a reason to see a doctor.</p>`;
+  }
+  function runKegel() {
+    const k = kegelPlan(), orb = $("#orb"), btn = $("#kbtn"); if (!orb) return;
+    btn.textContent = "Stop"; btn.dataset.act = "kstop";
+    const seq = [];
+    for (let i = 0; i < k.flicks; i++) seq.push(["Squeeze", "quick", 1000, true], ["Release", "", 1000, false]);
+    seq.push(["Rest", "now the long holds", 4000, false]);
+    for (let i = 0; i < k.holds; i++) seq.push(["Hold", `${i + 1} of ${k.holds}`, k.hold * 1000, true], ["Relax", "fully", k.rest * 1000, false]);
+    let j = 0;
+    const step = () => { const o = $("#orb"); if (!o) return stopTimers(); if (j >= seq.length) { o.className = "orb"; o.innerHTML = "Done<small>Nice work</small>"; db.kegel.push(Date.now()); save(); markHabit("floor", true); gain(15, "Pelvic floor done"); const b = $("#kbtn"); if (b) { b.textContent = "Again"; b.dataset.act = "kegel"; } return; }
+      const [t, s, ms, sq] = seq[j++]; o.className = "orb" + (sq ? " squeeze" : ""); let left = Math.round(ms / 1000);
+      o.innerHTML = `${t}<small>${s}${ms >= 2000 ? ` · ${left}s` : ""}</small>`; haptic(sq ? 20 : 0);
+      clearInterval(T2); if (ms >= 2000) T2 = setInterval(() => { left--; const oo = $("#orb"); if (oo && left > 0) oo.innerHTML = `${t}<small>${s} · ${left}s</small>`; }, 1000);
+      T = setTimeout(step, ms); };
+    step();
+  }
+  function viewBreathe() {
+    return `<div class="top">${backLink("#/train", "Train")}</div><h1 style="margin:6px 2px 6px">State reset</h1>
+      <p class="muted" style="margin:0 2px">Before you walk in or walk up: slow breathing (in 4, out 6) lowers arousal of the nervous kind. Shoulders down, chest open, eyes up.</p>
+      <div class="orb" id="orb">2:00<small>in 4 · out 6</small></div><button class="btn fire block" data-act="breathe" id="bbtn">${ic("play")} Start</button>`;
+  }
+  function runBreathe() {
+    const end = Date.now() + 120000; const b = $("#bbtn"); b.textContent = "Stop"; b.dataset.act = "bstop";
+    const cyc = () => { const o = $("#orb"); if (!o) return; if (Date.now() > end) { o.className = "orb"; o.innerHTML = "Go<small>you’re ready</small>"; gain(10); const bb = $("#bbtn"); if (bb) { bb.textContent = "Again"; bb.dataset.act = "breathe"; } return; }
+      o.className = "orb"; o.innerHTML = "Breathe in<small>4</small>"; T = setTimeout(() => { const oo = $("#orb"); if (!oo) return; oo.className = "orb squeeze"; oo.innerHTML = "Breathe out<small>6</small>"; T = setTimeout(cyc, 6000); }, 4000); };
+    cyc();
+  }
+
+  /* ---------- Field session: tally while out, then a quick report ---------- */
+  const TALLY = [["approaches", "Approaches"], ["numbers", "Numbers / socials"], ["kisses", "Kisses"], ["dates", "Dates set"], ["pulls", "Nights together"], ["threesome", "Threesomes"]];
+  function viewField() {
+    if (!db.field) { db.field = { start: Date.now(), c: {} }; save(); }
+    const f = db.field, mins = Math.round((Date.now() - f.start) / 6e4);
+    return `<div class="top">${backLink("#/", "Today")}<span class="small muted">${mins} min out</span></div><h1 style="margin:6px 2px 6px">Field session</h1>
+      <p class="muted" style="margin:0 2px 14px">Tap as it happens. Approaches earn XP whatever the outcome: reps are the point.</p>
+      <div class="tally">${TALLY.map(([k, l]) => `<button class="tbtn" data-act="tally" data-v="${k}"><b>${f.c[k] || 0}</b><span>${l}</span></button>`).join("")}</div>
+      <div class="row" style="gap:10px;margin-top:14px"><button class="btn sm ghost" data-act="untally">Undo last</button><span class="grow"></span><button class="btn fire" data-act="endfield">End and report</button></div>`;
+  }
+
+  /* ---------- Log: reports and what they show ---------- */
+  let draft = null;
+  function viewReport() {
+    const f = db.field?.c || {}; draft ||= { kind: "Night", stick: [], c: { ...f } };
+    return `<div class="top">${backLink("#/log", "Log")}</div><h1 style="margin:6px 2px 4px">Field report</h1><p class="muted" style="margin:0 2px 12px">Three minutes. Honest beats impressive.</p>
+      <div class="card"><div class="chips">${["Day game", "Night", "Date", "Social", "Online", "No outing"].map(k => `<button class="chip${draft.kind === k ? " on" : ""}" data-act="rkind" data-v="${k}">${k}</button>`).join("")}</div>
+        <div style="margin-top:10px">${TALLY.map(([k, l]) => `<div class="counter"><span>${l}</span><span class="stepper"><button data-act="rc" data-v="${k}" data-d="-1">−</button><b id="rc-${k}">${draft.c[k] || 0}</b><button data-act="rc" data-v="${k}" data-d="1">+</button></span></div>`).join("")}</div></div>
+      <label class="f"><span>What worked</span><textarea id="rwin" placeholder="A line that landed, a moment you read well, a smooth move.">${esc(draft.win || "")}</textarea></label>
+      <label class="f"><span>Sticking point (pick any)</span></label><div class="chips">${STICK.map(s => `<button class="chip${draft.stick.includes(s) ? " on" : ""}" data-act="rstick" data-v="${s}">${s}</button>`).join("")}</div>
+      <label class="f"><span>One lesson for next time</span><textarea id="rlesson" placeholder="If I could replay one moment, I would…">${esc(draft.lesson || "")}</textarea></label>
+      <label class="f"><span>Energy today (1–5)</span></label><div class="chips">${[1, 2, 3, 4, 5].map(n => `<button class="chip${draft.energy === n ? " on" : ""}" data-act="renergy" data-v="${n}">${n}</button>`).join("")}</div>
+      <button class="btn fire block" data-act="savereport" style="margin-top:18px">${ic("check")} Save report · +25 XP</button>`;
+  }
+  function viewLog() {
+    const R = [...db.reports].sort((a, b) => b.at - a.at), r30 = R.filter(x => x.at > Date.now() - 30 * DAY);
+    const days = [...Array(14)].map((_, i) => { const k = dayKey(Date.now() - (13 - i) * DAY); return R.filter(x => dayKey(x.at) === k).reduce((s, x) => s + (+x.approaches || 0), 0); }), mx = Math.max(1, ...days);
+    const sc = {}; r30.forEach(x => (x.stick || []).forEach(s => sc[s] = (sc[s] || 0) + 1)); const top = Object.entries(sc).sort((a, b) => b[1] - a[1]); const tmax = top[0]?.[1] || 1;
+    const sum = k => r30.reduce((s, x) => s + (+x[k] || 0), 0), ap = sum("approaches");
+    const rec = top[0] ? STICK_MOD[top[0][0]] : null, recL = rec && (C.lessons.find(l => l.module === rec && !db.lessons[l.id]) || C.lessons.find(l => l.module === rec));
+    return `<div class="row between" style="margin:8px 2px 14px"><h1>Log</h1><a class="btn fire sm" href="#/report">${ic("plus")} Report</a></div>
+      <div class="card"><div class="row between"><div class="eyebrow">Approaches, last 14 days</div><span class="small muted">${ap} in 30 days</span></div>
+        <div class="bars" style="margin-top:12px">${days.map(d => `<i class="${d ? "" : "zero"}" style="height:${d ? Math.max(6, d / mx * 100) : 4}%"></i>`).join("")}</div>
+        <div class="stats"><div class="stat"><b>${ap ? Math.round(sum("numbers") / ap * 100) : 0}%</b><span>approach → number</span></div><div class="stat"><b>${sum("numbers") ? Math.round(sum("dates") / sum("numbers") * 100) : 0}%</b><span>number → date</span></div><div class="stat"><b>${sum("dates") ? Math.round(sum("pulls") / sum("dates") * 100) : 0}%</b><span>date → night</span></div></div></div>
+      ${top.length ? `<div class="card"><div class="eyebrow">Where you get stuck · 30 days</div>${top.slice(0, 5).map(([s, n]) => `<div class="hbar"><span>${s}</span><span class="tr"><i style="width:${n / tmax * 100}%"></i></span><b>${n}</b></div>`).join("")}
+        ${recL ? `<a class="btn block" href="#/l/${recL.id}/0" style="margin-top:12px">${ic("book")} Fix it: ${esc(recL.title)}</a>` : ""}</div>` : ""}
+      <div class="sec"><div class="eyebrow">Reports</div>${R.length ? R.slice(0, 40).map(x => `<div class="card" style="padding:14px 16px"><div class="row between"><b>${esc(x.kind)} · ${dstr(x.at)}</b><button class="btn ghost sm" data-act="delreport" data-v="${x.id}" aria-label="Delete" style="min-height:28px;padding:0 4px">${ic("x")}</button></div>
+        <div class="small muted">${TALLY.filter(([k]) => +x[k]).map(([k, l]) => `${x[k]} ${l.toLowerCase()}`).join(" · ") || "no tallies"}${x.energy ? ` · energy ${x.energy}/5` : ""}</div>
+        ${x.win ? `<p class="small" style="margin:8px 0 0"><b style="color:var(--teal)">Worked:</b> ${esc(x.win)}</p>` : ""}${x.lesson ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--gold)">Lesson:</b> ${esc(x.lesson)}</p>` : ""}
+        ${(x.stick || []).length ? `<div class="small muted" style="margin-top:6px">Stuck: ${x.stick.map(esc).join(", ")}</div>` : ""}</div>`).join("") : `<div class="card"><p style="margin:0">No reports yet. After any outing, date or night, file one: it is where the learning sticks.</p></div>`}</div>`;
+  }
+
+  /* ---------- Settings ---------- */
+  function viewSettings() {
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 14px">Settings</h1>
+      <div class="card"><div class="eyebrow">Your level</div><p class="small muted" style="margin:6px 0 10px">Sets which missions come up each day.</p>
+        <div class="chips">${[[1, "Building"], [2, "Approaching"], [3, "Dating well"], [4, "Advanced"], [5, "Master"]].map(([n, l]) => `<button class="chip${db.tier === n ? " on" : ""}" data-act="tier" data-v="${n}">${n} · ${l}</button>`).join("")}</div></div>
+      <div class="card"><div class="eyebrow">The line this app holds</div><p class="small" style="margin:8px 0 0">Every skill here aims at a real, enthusiastic yes from her, and from both of them in a threesome. Reading interest accurately, checking in smoothly and taking a no well are trained as skills, because they are. Safer sex is part of the craft.</p></div>
+      <div class="card"><div class="eyebrow">Your data</div><p class="small muted" style="margin:6px 0 10px">Everything stays on this phone. Nothing is sent anywhere.</p>
+        <button class="btn block" data-act="export">${ic("share")} Copy a backup</button>
+        ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
+        <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--rose)">Erase everything</button></div>
+      <p class="small muted center" style="margin-top:20px">Forge · v1 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+  }
+
+  /* ---------- Install ---------- */
+  let deferredInstall = null;
+  const UA = navigator.userAgent;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(UA);
+  const inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Viber|Line\/|MicroMessenger|Snapchat|TikTok|; wv\)/i.test(UA);
+  const SNOOZE = "forge-install-snooze";
+  const snoozed = () => { try { return Date.now() < +(localStorage.getItem(SNOOZE) || 0); } catch (e) { return false; } };
+  const IC = { share: `<span class="ios-ic"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg></span>`, plus: `<span class="ios-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>`,
+    vdots: `<span class="ios-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></span>` };
+  function installBody() {
+    if (deferredInstall) return `<button class="btn fire block" data-act="install">Install Forge</button>`;
+    if (inApp) return `<p class="small" style="margin:0 0 6px">This is open inside another app, which cannot install. Open it in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p><button class="btn block" data-act="copylink">Copy the link</button>`;
+    if (isIOS) return `<ol class="steps"><li>Tap <b>Share</b> ${IC.share} in Safari.</li><li>Tap <b>Add to Home Screen</b> ${IC.plus}, then <b>Add</b>.</li><li>Open Forge from your home screen.</li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li>Tap ${IC.vdots} at the top right of Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li></ol>`;
+    return `<ol class="steps"><li>Click the install icon in the address bar, or choose <b>Install Forge</b> in the browser menu.</li></ol>`;
+  }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back") || (!force && snoozed())) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="60" height="60" style="border-radius:15px">
+      <div><div class="eyebrow">Private · works offline</div><h2>Put Forge on your phone</h2></div></div>
+      <p class="muted" style="margin:14px 0 12px">One tap from your home screen, with a plain name and icon. Your logs never leave the phone.</p>
+      <div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="installlater" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) closeInstall(true); }); document.body.appendChild(back);
+  }
+  function closeInstall(later) { $(".sheet-back")?.remove(); if (later) try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (e) {} }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { deferredInstall = null; closeInstall(false); toast("Installed."); });
+
+  /* ---------- Actions ---------- */
+  function markHabit(k, on) { const d = dayKey(); db.habits[d] ||= {}; if (!!db.habits[d][k] === on) return false; db.habits[d][k] = on; save(); return true; }
+  function planDone(kind, id) { const p = todayPlan(); if (p[kind] === id && !p.done[kind]) { p.done[kind] = true; save(); } }
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, v = el.dataset.v;
+    if (a === "habit") { const on = !(db.habits[dayKey()] || {})[v]; markHabit(v, on); if (on) gain(5); else { db.xp = Math.max(0, db.xp - 5); save(); } render(); }
+    else if (a === "lessondone") { if (!db.lessons[v]) { db.lessons[v] = Date.now(); planDone("lesson", v); gain(20, "Lesson learned"); } const l = C.lessons.find(x => x.id === v); location.hash = `#/learn/${l.module}`; }
+    else if (a === "pick") { const id = el.dataset.q; if (db.quiz[id] != null) return; db.quiz[id] = +v; const q = C.quiz.find(x => x.id === id); save(); if (q.o[+v][1]) gain(10); else haptic([30, 40, 30]); render(); }
+    else if (a === "qnext") { qi++; render(); scrollTo(0, 0); }
+    else if (a === "qreset") { byMod(C.quiz, v).forEach(q => delete db.quiz[q.id]); qi = 0; save(); render(); }
+    else if (a === "tfilter") { tfilter = v; render(); }
+    else if (a === "mdone") { const x = C.missions.find(m => m.id === v); const d = db.missions[v] ||= { n: 0 }; d.n++; d.at = Date.now(); save(); const p = todayPlan(); if (p.field === v) planDone("field", v); if (p.drill === v) planDone("drill", v); gain(x.xp, "Mission done"); render(); }
+    else if (a === "kegel") runKegel();
+    else if (a === "kstop") { stopTimers(); render(); }
+    else if (a === "breathe") runBreathe();
+    else if (a === "bstop") { stopTimers(); render(); }
+    else if (a === "tally") { const f = db.field; f.c[v] = (f.c[v] || 0) + 1; (f.hist ||= []).push(v); save(); if (v === "approaches") gain(5); else gain(10); render(); }
+    else if (a === "untally") { const f = db.field, k = f.hist?.pop(); if (k) { f.c[k] = Math.max(0, (f.c[k] || 0) - 1); db.xp = Math.max(0, db.xp - (k === "approaches" ? 5 : 10)); save(); render(); } }
+    else if (a === "endfield") { draft = { kind: "Night", stick: [], c: { ...(db.field?.c || {}) } }; location.hash = "#/report"; }
+    else if (a === "rkind") { draft.kind = v; render(); }
+    else if (a === "rc") { draft.c[v] = Math.max(0, (draft.c[v] || 0) + +el.dataset.d); $(`#rc-${v}`).textContent = draft.c[v]; }
+    else if (a === "rstick") { const i = draft.stick.indexOf(v); i < 0 ? draft.stick.push(v) : draft.stick.splice(i, 1); el.classList.toggle("on"); }
+    else if (a === "renergy") { draft.energy = +v; render(); }
+    else if (a === "savereport") { draft.win = $("#rwin").value.trim(); draft.lesson = $("#rlesson").value.trim();
+      db.reports.push({ id: uid(), at: Date.now(), kind: draft.kind, ...draft.c, win: draft.win, lesson: draft.lesson, stick: draft.stick, energy: draft.energy }); db.field = null; draft = null; save(); gain(25, "Report saved"); location.hash = "#/log"; }
+    else if (a === "delreport") { if (!confirm("Delete this report?")) return; db.reports = db.reports.filter(x => x.id !== v); save(); render(); }
+    else if (a === "tier") { db.tier = +v; db.plan = {}; save(); render(); }
+    else if (a === "export") { const t = JSON.stringify(db); navigator.clipboard?.writeText(t).then(() => toast("Backup copied. Keep it somewhere private."), () => prompt("Copy your backup:", t)); }
+    else if (a === "wipe") { if (!confirm("Erase all progress, reports and settings on this phone?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "installlater") closeInstall(true);
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeInstall(false)).catch(() => {}); }
+    else if (a === "copylink") { const u = location.href.split("#")[0]; navigator.clipboard?.writeText(u).then(() => toast("Link copied"), () => prompt("Copy the link:", u)); }
+  });
+  document.addEventListener("input", e => { if (!draft) return; if (e.target.id === "rwin") draft.win = e.target.value; if (e.target.id === "rlesson") draft.lesson = e.target.value; });
+
+  fetch("data/content.json").then(r => r.json()).then(d => { C = d; render(); setTimeout(() => showInstall(false), 5000); })
+    .catch(() => { $("#main").innerHTML = `<div class="loading">Could not load. Check your connection and reload.</div>`; });
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+})();
+</script>
+</body>
+</html>
