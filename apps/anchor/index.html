@@ -145,6 +145,7 @@
     .cal .dots { display: flex; gap: 2px; min-height: 6px; } .cal .dots i, .lg { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
     .lg { margin-right: 5px; vertical-align: 1px; }
     .d-scene { background: var(--amber); } .d-debrief { background: var(--violet); } .d-checkin { background: var(--teal); } .d-note { background: var(--blush); } .d-rhythm { background: var(--gold); }
+    .stars { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; font-size: 28px; line-height: 1; color: var(--line2); } .stars .on { color: var(--gold); text-shadow: 0 0 12px rgba(217,178,111,.45); }
     details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
     details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
     details.how summary::-webkit-details-marker { display: none; }
@@ -176,13 +177,14 @@
   const KEY = "anchor", VER = "8";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
-    rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
+    rules: [], rituals: [], ritualLog: {}, rewards: [], stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
     (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
 
   const P = {
     anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v13M7.5 10.5h9M4.5 13.5c0 4 3.4 6.5 7.5 6.5s7.5-2.5 7.5-6.5"/>',
     book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
+    gavel: '<path d="M13.5 4.5l6 6M11 7l6 6M12.2 5.8l-4.4 4.4M18.2 11.8l-4.4 4.4M10 12l-6.5 6.5"/><path d="M14 20.5h7"/>',
     flame: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.6 2.7-5.6 4-8.8.6 2 1.7 3 2.7 3.6.3-2.4 1.2-4.4 2.8-6.1.3 3.5 3.5 5.9 3.5 10.6 0 4-2.7 6.9-6.5 6.9z"/>',
     heart: '<path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>', back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
@@ -193,13 +195,14 @@
     chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', upload: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
   const MODS = { foundations: ["Foundations", "anchor", "#d9b26f", "What a dominant is"], negotiation: ["Negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
-    care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
+    care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], discipline: ["Discipline", "gavel", "#e0a46a", "Rewards, reinforcement, correction"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
     scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
   const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
 
   /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
   const ACTS = [
     ["Care & structure", ["Rules from me", "Daily rituals (morning, bedtime)", "Check-in texts during the day", "Praise and pet names", "Calling me Daddy", "Rewards", "Agreed consequences (early bedtime, a chore, a written reflection)", "Being looked after (meals, water, bedtime)", "Little-space play (non-sexual: stuffies, colouring, cartoons)", "Reports or a journal for me"]],
+    ["Discipline (non-sexual, agreed in advance)", ["A star chart or points", "Reminders and warnings before any consequence", "Corner time", "Disciplinary spanking (hand only)", "Maintenance or reminder spankings", "Funishment (playful, not real correction)", "Bratting and being tamed (play)"]],
     ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
     ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
     ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
@@ -215,6 +218,7 @@
     ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
     ["Week 3 · Rules and care", ["first-rules", "rewards", "consequences", "little-evening", "her-bad-day"]],
     ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]],
+    ["Discipline · Rewards and correction", ["reward-chart", "correction-ladder", "discipline-spanking"]],
     ["Adult time · Her pleasure", ["learn-her", "her-orgasm"]],
     ["Adult time · Rough, bound, roles, three", ["rough-sex", "bondage-sex", "roleplay", "threesome-couple"]] ];
   /* Rhythm: daily, weekly and monthly. Old "rituals" become daily rhythm items.
@@ -378,6 +382,7 @@
         ${nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`)}${nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`)}
         ${nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set")}${nav("#/her/little", "heart", "care", "Her little space", "Comforts, bedtime, signs")}
         ${nav("#/her/rules", "list", "care", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}`)}${nav("#/her/rhythm", "moon", "care", "Rhythm", `${rh().daily.length} daily · ${rh().weekly.length} weekly · ${rh().monthly.length} monthly`)}
+        ${nav("#/her/stars", "star", "discipline", "Star chart", `${(db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }).n} of ${db.stars.goal} stars${db.stars.reward ? " · " + esc(db.stars.reward) : ""}`)}
         ${nav("#/her/rewards", "star", "care", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`)}
         ${nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)}${nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes")}`; }
     const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
@@ -419,6 +424,21 @@
         <div class="sec"><div class="eyebrow">Monthly</div><div class="card">${R.monthly.map(x => row("monthly", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
           <div class="row" style="gap:8px;margin-top:12px"><input type="text" id="rh-monthly" placeholder="e.g. A whole day out together"><button class="btn sm" data-act="radd" data-k="monthly">${ic("plus")}</button></div></div></div>
         <div class="card small" style="margin-top:16px"><b>How rhythm works for beginners.</b> Start with two daily items for the first two weeks, then add a third. Agree each one with her, out of role. If one keeps slipping, make it smaller rather than scolding yourself or her. On her bad days, drop everything except care.</div>`; }
+    if (sec === "stars") { const S = db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }, full = S.n >= S.goal;
+      const quick = [...db.rules.map(r => r.text), ...rh().daily.map(r => r.text)].slice(0, 8);
+      return head("Star chart", "Catch her doing well and say so. A star is praise she can see. Stars are never taken away: correction lives elsewhere.")
+        + gl("reward-chart") + `<div class="card center"><div class="stars">${[...Array(S.goal)].map((_, i) => `<span class="${i < S.n ? "on" : ""}">★</span>`).join("")}</div>
+          <div style="font:600 30px var(--display);margin-top:10px">${S.n} of ${S.goal}</div><div class="small muted">${S.reward ? `Reward: ${esc(S.reward)}` : "Choose the reward below, together."}</div>
+          ${full ? `<button class="btn gold block" data-act="starredeem" style="margin-top:14px">${ic("check")} She earned it: ${esc(S.reward || "her reward")}</button>` : ""}</div>
+        <div class="card"><div class="eyebrow">Give a star</div><input type="text" id="starwhy" placeholder="What for? Be specific: “went to bed on time without a reminder”" style="margin-top:10px">
+          ${quick.length ? `<div class="chips" style="margin-top:8px">${quick.map(q => `<button class="chip" data-act="starwhy" data-v="${esc(q)}">${esc(q.length > 34 ? q.slice(0, 33) + "…" : q)}</button>`).join("")}</div>` : ""}
+          <button class="btn gold block" data-act="stargive" style="margin-top:10px">★ Give her a star</button><p class="small muted" style="margin:8px 0 0">Tell her too, in words, the moment it happens. The star is the reminder; your praise is the reward.</p></div>
+        <div class="card"><div class="eyebrow">Goal and reward</div><div class="row" style="gap:8px;margin-top:10px"><label class="small muted">Stars</label>${[5, 7, 10, 15, 20].map(g => `<button class="chip${S.goal === g ? " on" : ""}" data-act="stargoal" data-v="${g}">${g}</button>`).join("")}</div>
+          <input type="text" data-f="stars.reward" value="${esc(S.reward)}" placeholder="e.g. A day out of her choosing" style="margin-top:10px">
+          ${db.rewards.length ? `<div class="chips" style="margin-top:8px">${db.rewards.map(r => `<button class="chip" data-act="starrew" data-v="${esc(r.text)}">${esc(r.text)}</button>`).join("")}</div>` : `<p class="small muted" style="margin:8px 0 0">Add rewards to your <a href="#/her/rewards">reward list</a> and pick one here.</p>`}
+          ${db.rewards.length ? `<button class="btn sm" data-act="starsurprise" style="margin-top:12px">🎁 Suggest a surprise reward</button><p class="small muted" style="margin:6px 0 0">Now and then, give a small unexpected reward. Surprises keep it alive longer than a fixed prize.</p>` : ""}</div>
+        ${S.log.length ? `<div class="sec"><div class="eyebrow">Recent stars</div><div class="card" style="padding:6px 16px">${S.log.slice(-12).reverse().map(l => `<div class="note"><span style="color:var(--gold)">★</span> ${esc(l.why || "A star")} <span class="small muted">· ${dstr(l.at)}</span></div>`).join("")}</div><button class="linkbtn small" data-act="starundo" style="margin:8px 4px">Undo the last star (a mistake, not a punishment)</button></div>` : ""}
+        ${S.earned.length ? `<div class="sec"><div class="eyebrow">Rewards earned</div>${S.earned.slice(-6).reverse().map(e => `<div class="item"><div class="grow"><div class="t">${esc(e.reward || "Reward")}</div><div class="m">${dstr(e.at)}</div></div></div>`).join("")}</div>` : ""}`; }
     if (sec === "rewards") return head("Rewards and consequences", "")
       + `${gl("rewards")}${gl("consequences")}<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
         <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
@@ -746,6 +766,13 @@
     else if (a === "ac") { const i = db.aftercare.indexOf(v); i < 0 ? db.aftercare.push(v) : db.aftercare.splice(i, 1); save(); el.classList.toggle("on"); }
     else if (a === "add") { const k = el.dataset.k, t = $(`#new-${k}`).value.trim(); if (!t) return toast("Write it first"); const w = $(`#why-${k}`)?.value.trim() || ""; db[k].push({ id: uid(), text: t, why: w, ...(k === "conseq" ? { agreed: false } : {}) }); save(); render(); }
     else if (a === "del") { const k = el.dataset.k; if (!confirm("Delete this?")) return; db[k] = db[k].filter(x => x.id !== v); save(); render(); }
+    else if (a === "stargive") { const S = db.stars; S.n = Math.min(S.goal, S.n + 1); S.log.push({ at: Date.now(), why: $("#starwhy").value.trim() }); save(); toast(S.n >= S.goal ? "Chart full. Time for her reward." : "★ Now tell her why, out loud."); render(); }
+    else if (a === "starwhy") { $("#starwhy").value = v; }
+    else if (a === "stargoal") { db.stars.goal = +v; save(); render(); }
+    else if (a === "starrew") { db.stars.reward = v; save(); render(); }
+    else if (a === "starsurprise") { const r = db.rewards[Math.floor(Math.random() * db.rewards.length)]; toast("Surprise idea: " + r.text, 3500); }
+    else if (a === "starredeem") { const S = db.stars; S.earned.push({ at: Date.now(), reward: S.reward }); S.n = 0; save(); toast("Enjoy it together. A new chart starts now."); render(); }
+    else if (a === "starundo") { const S = db.stars; if (S.log.length && confirm("Remove the last star? Only for a mistake.")) { S.log.pop(); S.n = Math.max(0, S.n - 1); save(); render(); } }
     else if (a === "agree") { const c = db.conseq.find(x => x.id === v); if (c) c.agreed = true; save(); render(); }
     else if (a === "rdone") { const k = el.dataset.k, key = el.dataset.key; if (k === "monthly") { db.monthLog ||= {}; db.monthLog[key] ||= {}; db.monthLog[key][v] = !db.monthLog[key][v]; } else { db.ritualLog[key] ||= {}; db.ritualLog[key][v] = !db.ritualLog[key][v]; } save(); render(); }
     else if (a === "calm") { calM += +v; calDay = null; render(); }
@@ -814,7 +841,7 @@ ${toMd(n.html)}`).join("\n\n---\n\n"), "text/markdown"); toast("Notes exported")
       if (!confirm("Restore this backup? Notes, debriefs, scenes and check-ins are merged; settings and lists are replaced by the backup’s.")) return;
       const merge = (k, key = "id") => { const have = new Set((db[k] || []).map(x => x[key])); db[k] = [...(db[k] || []), ...(d[k] || []).filter(x => !have.has(x[key]))]; };
       merge("notes"); merge("debriefs"); merge("scenes"); merge("checkins", "at"); merge("tpls");
-      ["limits", "limitNote", "negotiated", "safe", "aftercare", "aftercareNote", "mine", "little", "rules", "rewards", "conseq", "rhythm", "ritualLog", "monthLog", "lessons", "guides", "lockMin"].forEach(k => { if (k in d) db[k] = d[k]; });
+      ["limits", "limitNote", "negotiated", "safe", "aftercare", "aftercareNote", "mine", "little", "rules", "rewards", "stars", "conseq", "rhythm", "ritualLog", "monthLog", "lessons", "guides", "lockMin"].forEach(k => { if (k in d) db[k] = d[k]; });
       save(); toast("Backup restored"); render(); }).catch(() => toast("That file isn’t an Anchor backup"));
     e.target.value = "";
   });
@@ -826,7 +853,7 @@ ${toMd(n.html)}`).join("\n\n---\n\n"), "text/markdown"); toast("Notes exported")
     if (el.id === "gsq") { gq = el.value; $("#gsr").innerHTML = resultsHTML(gq); return; }
     if (el.id === "nq") { nq = el.value; const L = $("#nlist"); const h = viewJournal(); const d = document.createElement("div"); d.innerHTML = h; L.innerHTML = d.querySelector("#nlist").innerHTML; return; }
     if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
-    if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
+    if (el.dataset.f) { const [k1, k2] = el.dataset.f.split("."); if (k2) (db[k1] ||= {})[k2] = el.value; else db[k1] = el.value; save(); }
     if (el.dataset.safe) { db.safe[el.dataset.safe] = el.value; save(); }
     if (el.dataset.little) { db.little[el.dataset.little] = el.value; save(); }
     if (el.dataset.s && sdraft) sdraft[el.dataset.s] = el.value;
