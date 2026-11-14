@@ -163,7 +163,7 @@
 
   /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
   const ACTS = [
-    ["Care & structure", ["Rules from me", "Daily rituals (morning, bedtime)", "Check-in texts during the day", "Praise and pet names", "Calling me Daddy", "Rewards", "Agreed consequences (lines, early bedtime, a chore)", "Being looked after (meals, water, bedtime)", "Little-space play (non-sexual: stuffies, colouring, cartoons)", "Reports or a journal for me"]],
+    ["Care & structure", ["Rules from me", "Daily rituals (morning, bedtime)", "Check-in texts during the day", "Praise and pet names", "Calling me Daddy", "Rewards", "Agreed consequences (early bedtime, a chore, a written reflection)", "Being looked after (meals, water, bedtime)", "Little-space play (non-sexual: stuffies, colouring, cartoons)", "Reports or a journal for me"]],
     ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
     ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
     ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
@@ -257,8 +257,8 @@
   }
   function viewGuide(id) {
     const g = guide(id); if (!g) { location.hash = "#/start"; return ""; }
-    return `<div class="top">${backLink("#/start", "Start here")}<span class="small muted">${esc(g.time || "")}</span></div><h1 style="margin:6px 2px 8px;font-size:29px">${esc(g.title)}</h1>
-      <p class="muted" style="margin:0 2px 14px">${esc(g.why)}</p>
+    return `<div class="top">${backLink("#/start", "Start here")}</div><h1 style="margin:6px 2px 8px;font-size:29px">${esc(g.title)}</h1>
+      ${g.time ? `<div class="small" style="margin:0 2px 8px;color:var(--gold)">${ic("clock")} ${esc(g.time)}</div>` : ""}<p class="muted" style="margin:0 2px 14px">${esc(g.why)}</p>
       ${(g.prepare || []).length ? `<div class="card"><div class="eyebrow" style="color:var(--gold)">Have ready</div><ul class="field">${g.prepare.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
       <div class="sec"><div class="eyebrow">Step by step</div>${g.steps.map((st, i) => `<div class="card step"><div class="row" style="gap:12px;align-items:flex-start"><span class="num">${i + 1}</span><div class="grow"><b>${esc(st.h)}</b><p style="margin:6px 0 0">${esc(st.d)}</p>${st.say ? `<p class="sayline">${esc(st.say)}</p>` : ""}</div></div></div>`).join("")}</div>
       <div class="sec"><div class="eyebrow" style="color:var(--amber)">Beginner mistakes</div><div class="card"><ul class="field">${g.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div>
@@ -370,7 +370,7 @@
     if (sec === "rewards") return head("Rewards and consequences", "")
       + `${gl("rewards")}${gl("consequences")}<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
         <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
-        ${listEditor("conseq", "Consequences", "e.g. Ten lines, early bedtime, phone off for the evening", "")}
+        ${listEditor("conseq", "Consequences", "e.g. Early bedtime, a short written reflection, phone off for the evening", "")}
         <p class="small muted" style="margin-top:8px">New consequences are marked “not yet agreed” until you tick them with her.</p>
         ${db.conseq.filter(c => c.agreed === false).map(c => `<button class="btn sm" data-act="agree" data-v="${c.id}" style="margin:6px 6px 0 0">${ic("check")} She agreed: ${esc(c.text)}</button>`).join("")}</div>`;
     if (sec === "checkin") { const Q = C.checkin || []; return head("Check-in questions", "Once a week, out of role, over coffee. Ask two or three, listen more than you talk.")
