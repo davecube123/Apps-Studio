@@ -108,6 +108,8 @@
     .keypad button { width: 74px; height: 74px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 500 27px var(--sans); cursor: pointer; display: grid; place-items: center; }
     .keypad button:active { background: var(--card2); }
     .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
+    .cons { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 54px; margin-top: 12px; }
+    .cons div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; } .cons i { display: block; width: 100%; border-radius: 4px; } .cons span { font: 600 10px var(--sans); color: var(--muted); }
     details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
     details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
     details.how summary::-webkit-details-marker { display: none; }
@@ -175,6 +177,21 @@
     ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
     ["Week 3 · Rules and care", ["first-rules", "rewards", "consequences", "little-evening", "her-bad-day"]],
     ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]] ];
+  /* Rhythm: daily, weekly and monthly. Old "rituals" become daily rhythm items.
+     Monthly items appear on Today at weekends and in the month's last week, until done. */
+  const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const TEMPLATE = {
+    daily: [["Good-morning message", "morning"], ["Midday check-in text", "rituals-text"], ["Bedtime ritual", "bedtime"], ["Two minutes: how did I lead today?", ""]],
+    weekly: [["Weekly check-in conversation", 0, "weekly"], ["Little-space evening (non-sexual)", 3, "little-evening"], ["Connection or date night", 5, ""], ["Plan next week’s rhythm", 0, ""]],
+    monthly: [["Go through her yes / maybe / no list again", "the-list"], ["Review rules and rituals: keep, change, drop", "first-rules"], ["Something just for you (your own care)", ""]] };
+  const rh = () => (db.rhythm ||= { daily: (db.rituals || []).map(r => ({ id: r.id, text: r.text })), weekly: [], monthly: [] });
+  const monthKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}`; };
+  function dueToday() {
+    const R = rh(), wd = new Date().getDay(), mk = monthKey();
+    return [...R.daily.map(x => ({ ...x, kind: "daily", key: dayKey() })), ...R.weekly.filter(x => +x.day === wd).map(x => ({ ...x, kind: "weekly", key: dayKey() })),
+      ...(((n, last) => wd === 0 || wd === 6 || n.getDate() > last - 7)(new Date(), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) ? R.monthly : []).filter(x => !(db.monthLog?.[mk] || {})[x.id]).map(x => ({ ...x, kind: "monthly", key: mk }))];
+  }
+  const isDone = it => it.kind === "monthly" ? !!(db.monthLog?.[it.key] || {})[it.id] : !!(db.ritualLog[it.key] || {})[it.id];
   let C = null;
   const byMod = m => C.lessons.filter(l => l.module === m);
 
@@ -258,7 +275,7 @@
   function viewToday() {
     const d = Math.floor(Date.now() / DAY), prompt = C.prompts[d % C.prompts.length];
     const next = C.lessons.find(l => !db.lessons[l.id]) || C.lessons[d % C.lessons.length];
-    const k = dayKey(), done = db.ritualLog[k] || {};
+    
     const recent = db.scenes.filter(s => s.at && s.at > Date.now() - 3 * DAY && !s.followed);
     const neg = db.negotiated ? Math.floor((Date.now() - db.negotiated) / DAY) : null;
     const yes = Object.values(db.limits).filter(x => x === "y").length;
@@ -267,7 +284,8 @@
       ${(C.guides || []).length && pathDone() < pathTotal() ? `<a class="item" href="#/start" style="margin-top:12px;border-color:rgba(217,178,111,.4)">${modIc("foundations")}<div class="grow"><div class="t">Start here: your first four weeks</div><div class="m">${pathDone()} of ${pathTotal()} steps · step by step, with words to say</div></div>${ic("chev")}</a>` : ""}
       ${recent.map(s => `<div class="card" style="border-color:rgba(127,207,154,.4)"><div class="eyebrow" style="color:var(--green)">Aftercare window</div><p style="margin:8px 0 10px">Your scene “${esc(s.title || "untitled")}” ${(h => h < 1 ? "ended just now" : h < 48 ? `was ${h} hour${h === 1 ? "" : "s"} ago` : `was ${Math.round(h / 24)} days ago`)(Math.round((Date.now() - s.at) / 36e5))}. Drop can come a day or two later. Check in with her today, gently.</p>
         <div class="row" style="gap:8px"><button class="btn sm gold" data-act="followed" data-v="${s.id}">${ic("check")} I checked in</button><a class="btn sm" href="#/debrief/${s.id}">Debrief</a></div></div>`).join("")}
-      ${db.rituals.length ? `<div class="sec"><div class="eyebrow">Today’s rituals</div><div class="card" style="padding:6px 18px">${db.rituals.map(r => `<button class="check${done[r.id] ? " on" : ""}" data-act="ritual" data-v="${r.id}"><span class="box">${done[r.id] ? ic("check") : ""}</span><span class="lbl grow">${esc(r.text)}</span></button>`).join("")}</div></div>` : ""}
+      ${(() => { const D = dueToday(); if (!D.length) return `<a class="item" href="#/her/rhythm" style="margin-top:12px">${modIc("care")}<div class="grow"><div class="t">Set up your rhythm</div><div class="m">Daily, weekly and monthly. A beginner template is ready.</div></div>${ic("chev")}</a>`;
+        const n = D.filter(isDone).length; return `<div class="sec"><div class="row between" style="margin:0 4px 10px"><div class="eyebrow">Today’s rhythm</div><a class="small" href="#/her/rhythm" style="color:var(--muted);text-decoration:none">${n}/${D.length} · edit</a></div><div class="card" style="padding:6px 18px">${D.map(it => `<div class="row"><button class="check${isDone(it) ? " on" : ""}" data-act="rdone" data-v="${it.id}" data-k="${it.kind}" data-key="${it.key}" style="flex:1"><span class="box">${isDone(it) ? ic("check") : ""}</span><span class="lbl grow">${esc(it.text)}${it.kind !== "daily" ? ` <span class="tag ${it.kind === "weekly" ? "y" : "m"}">${it.kind}</span>` : ""}</span></button>${it.guide && guide(it.guide) ? `<a class="iconbtn" href="#/g/${it.guide}" aria-label="How to">${ic("list")}</a>` : ""}</div>`).join("")}</div></div>`; })()}
       <div class="sec"><div class="eyebrow">Learn today</div><a class="item" href="#/l/${next.id}/0">${modIc(next.module)}<div class="grow"><div class="t">${esc(next.title)}</div><div class="m">${esc(next.hook)}</div></div>${ic("chev")}</a></div>
       <div class="sec"><div class="eyebrow">The dynamic</div>
         <a class="item" href="#/before">${modIc("scenes")}<div class="grow"><div class="t">Before a scene</div><div class="m">The two-minute check</div></div>${ic("chev")}</a>
@@ -310,7 +328,7 @@
       return `<h1 style="margin:8px 2px 6px">Her</h1><p class="muted" style="margin:0 2px 16px">What you have agreed together, in one place. Fill it in with her, not about her.</p>
         ${nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`)}${nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`)}
         ${nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set")}${nav("#/her/little", "heart", "care", "Her little space", "Comforts, bedtime, signs")}
-        ${nav("#/her/rules", "list", "care", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}`)}${nav("#/her/rituals", "moon", "care", "Rituals", `${db.rituals.length} daily`)}
+        ${nav("#/her/rules", "list", "care", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}`)}${nav("#/her/rhythm", "moon", "care", "Rhythm", `${rh().daily.length} daily · ${rh().weekly.length} weekly · ${rh().monthly.length} monthly`)}
         ${nav("#/her/rewards", "star", "care", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`)}
         ${nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)}${nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes")}`; }
     const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
@@ -333,8 +351,22 @@
     if (sec === "rules") return head("Rules", "Few, clear, and each with a reason that serves her. Five good rules beat twenty you can’t keep track of.")
       + gl("first-rules") + (db.rules.length > 6 ? `<div class="warnbox" style="margin-bottom:12px">${db.rules.length} rules. Can you hold all of them consistently? An unenforced rule teaches that rules don’t matter.</div>` : "")
       + listEditor("rules", "Rules", "e.g. Water bottle finished by 6 pm", "Why it helps her (e.g. she forgets to drink and gets headaches)");
-    if (sec === "rituals") return head("Rituals", "Small, daily, reliable. They are the heartbeat of the dynamic. Tick them off on Today.")
-      + gl("bedtime") + gl("morning") + listEditor("rituals", "Rituals", "e.g. Good-morning message before 9", "");
+    if (sec === "rituals") { location.hash = "#/her/rhythm"; return ""; }
+    if (sec === "rhythm") { const R = rh(), empty = !R.daily.length && !R.weekly.length && !R.monthly.length;
+      const days = [...Array(14)].map((_, i) => { const t = Date.now() - (13 - i) * DAY, k = dayKey(t), wd = new Date(t).getDay(); const due = R.daily.length + R.weekly.filter(x => +x.day === wd).length; const d = Object.values(db.ritualLog[k] || {}).filter(Boolean).length; return [due ? Math.min(1, d / due) : null, WD[wd][0]]; });
+      const row = (kind, x) => `<div class="rule"><div class="grow"><div>${esc(x.text)}</div><div class="w">${kind === "weekly" ? `Every ${WD[+x.day]}` : kind === "monthly" ? "Once a month" : "Every day"}${x.guide && guide(x.guide) ? ` · <a href="#/g/${x.guide}">how to</a>` : ""}</div></div><button class="iconbtn" data-act="rdel" data-k="${kind}" data-v="${x.id}" aria-label="Delete">${ic("x")}</button></div>`;
+      return head("Rhythm", "The small things you do reliably are the dynamic. Few and steady beats many and patchy. Her bad days always come first.")
+      + (empty ? `<div class="card" style="border-color:rgba(217,178,111,.4)"><div class="eyebrow" style="color:var(--gold)">Beginner template</div><p class="small" style="margin:8px 0 10px">Daily: good-morning message, a midday check-in text, the bedtime ritual, two minutes of reflection for you. Weekly: a check-in conversation (Sun), a little-space evening (Wed), a connection night (Fri), planning the week (Sun). Monthly: her list again, a review of rules and rituals, something for you.</p>
+          <button class="btn gold block" data-act="template">${ic("check")} Use this template</button><p class="small muted" style="margin:8px 0 0">Change anything afterwards. Agree the daily ones with her first.</p></div>`
+        : `<div class="card"><div class="eyebrow">Last 14 days</div><div class="cons">${days.map(([f, l]) => `<div><i style="opacity:${f == null ? .12 : .25 + f * .75};background:${f == null ? "var(--line2)" : "var(--gold)"};height:${f == null ? 6 : 8 + f * 26}px"></i><span>${l}</span></div>`).join("")}</div><p class="small muted" style="margin:8px 0 0">Brighter means more of the day’s rhythm kept. Missed days are information, not failure.</p></div>`)
+      + `<div class="sec"><div class="eyebrow">Daily</div><div class="card">${R.daily.map(x => row("daily", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
+          <div class="row" style="gap:8px;margin-top:12px"><input type="text" id="rh-daily" placeholder="e.g. Good-night text at 10:30"><button class="btn sm" data-act="radd" data-k="daily">${ic("plus")}</button></div></div></div>
+        <div class="sec"><div class="eyebrow">Weekly</div><div class="card">${R.weekly.map(x => row("weekly", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
+          <input type="text" id="rh-weekly" placeholder="e.g. Pancake breakfast together" style="margin-top:12px"><div class="chips" style="margin-top:8px">${WD.map((d, i) => `<button class="chip${wday === i ? " on" : ""}" data-act="rwd" data-v="${i}">${d}</button>`).join("")}</div>
+          <button class="btn sm block" data-act="radd" data-k="weekly" style="margin-top:10px">${ic("plus")} Add weekly</button></div></div>
+        <div class="sec"><div class="eyebrow">Monthly</div><div class="card">${R.monthly.map(x => row("monthly", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
+          <div class="row" style="gap:8px;margin-top:12px"><input type="text" id="rh-monthly" placeholder="e.g. A whole day out together"><button class="btn sm" data-act="radd" data-k="monthly">${ic("plus")}</button></div></div></div>
+        <div class="card small" style="margin-top:16px"><b>How rhythm works for beginners.</b> Start with two daily items for the first two weeks, then add a third. Agree each one with her, out of role. If one keeps slipping, make it smaller rather than scolding yourself or her. On her bad days, drop everything except care.</div>`; }
     if (sec === "rewards") return head("Rewards and consequences", "")
       + `${gl("rewards")}${gl("consequences")}<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
         <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
@@ -349,7 +381,7 @@
   }
 
   /* ---------- Scenes: built only from her yes list ---------- */
-  let sdraft = null;
+  let sdraft = null, wday = new Date().getDay();
   function viewScene(id) {
     if (id === "new" || !sdraft || sdraft.id !== id) sdraft = id === "new" ? { id: uid(), title: "", intent: "", acts: [], kit: [], notes: "" } : JSON.parse(JSON.stringify(db.scenes.find(s => s.id === id) || { id: uid(), acts: [], kit: [] }));
     if (id === "new") history.replaceState(null, "", `#/scene/${sdraft.id}`);
@@ -448,6 +480,11 @@
     else if (a === "add") { const k = el.dataset.k, t = $(`#new-${k}`).value.trim(); if (!t) return toast("Write it first"); const w = $(`#why-${k}`)?.value.trim() || ""; db[k].push({ id: uid(), text: t, why: w, ...(k === "conseq" ? { agreed: false } : {}) }); save(); render(); }
     else if (a === "del") { const k = el.dataset.k; if (!confirm("Delete this?")) return; db[k] = db[k].filter(x => x.id !== v); save(); render(); }
     else if (a === "agree") { const c = db.conseq.find(x => x.id === v); if (c) c.agreed = true; save(); render(); }
+    else if (a === "rdone") { const k = el.dataset.k, key = el.dataset.key; if (k === "monthly") { db.monthLog ||= {}; db.monthLog[key] ||= {}; db.monthLog[key][v] = !db.monthLog[key][v]; } else { db.ritualLog[key] ||= {}; db.ritualLog[key][v] = !db.ritualLog[key][v]; } save(); render(); }
+    else if (a === "template") { const R = rh(); TEMPLATE.daily.forEach(([t, g]) => R.daily.push({ id: uid(), text: t, guide: g })); TEMPLATE.weekly.forEach(([t, d, g]) => R.weekly.push({ id: uid(), text: t, day: d, guide: g })); TEMPLATE.monthly.forEach(([t, g]) => R.monthly.push({ id: uid(), text: t, guide: g })); save(); toast("Template added. Agree the daily ones with her."); render(); }
+    else if (a === "radd") { const k = el.dataset.k, inp = $(`#rh-${k}`), t = inp.value.trim(); if (!t) return toast("Write it first"); rh()[k].push({ id: uid(), text: t, ...(k === "weekly" ? { day: wday } : {}) }); save(); render(); }
+    else if (a === "rwd") { wday = +v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
+    else if (a === "rdel") { if (!confirm("Remove this from your rhythm?")) return; const R = rh(); R[el.dataset.k] = R[el.dataset.k].filter(x => x.id !== v); save(); render(); }
     else if (a === "ritual") { const k = dayKey(); db.ritualLog[k] ||= {}; db.ritualLog[k][v] = !db.ritualLog[k][v]; save(); render(); }
     else if (a === "savecheckin") { const t = $("#cin").value.trim(); if (!t) return toast("Write what she said"); db.checkins.push({ at: Date.now(), text: t }); save(); toast("Saved"); render(); }
     else if (a === "sact") { const i = sdraft.acts.indexOf(v); i < 0 ? sdraft.acts.push(v) : sdraft.acts.splice(i, 1); render(); }
