@@ -5,7 +5,7 @@ request: not in the studio index or README table; noindex; optional PIN lock off
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
-- **Learn:** 70 lessons in 10 modules (foundations, negotiation, care and structure, discipline, presence, scenes,
+- **Learn:** 71 lessons in 10 modules (foundations, negotiation, care and structure, discipline, presence, scenes,
   her pleasure, adult play, aftercare, your own care), written in the voice of an experienced dominant. "Her pleasure" and "Adult
   play" (rough sex, bondage during sex, role play, consensual non-consent explained as "not yet", a threesome as a
   couple) are adult-to-adult only, never in or near little space, and grounded in community frameworks (RACK, the 4Cs)
@@ -27,6 +27,13 @@ request: not in the studio index or README table; noindex; optional PIN lock off
   dominant's own discipline (Skinner, Ferster & Skinner, Gershoff, Baumeister, Gottman, Deci, Koestner & Ryan, Kazdin).
   Three guides, a Star chart under Her (stars with a reason, a goal and a reward, surprise rewards, never taken
   away), and discipline items on the yes / maybe / no list.
+- **Examples:** a bank of 82 rules (body, mind, sleep, care, connection, safety, growth, home, little space,
+  protocol; with reasons, tips and sources), 58 rewards, 24 mild consequences, 49 rhythm items, 45 praise lines,
+  35 check-in texts and 46 little-space ideas, added with one tap from each Her page or browsed under Learn.
+- **Weekly goals:** any rule can carry a target (e.g. work out 3 times a week, cyclic sighing 5 days a week), tracked
+  on a Mon to Sun row and on Today. A lesson and guide on wellbeing goals (her goals, behaviour not body, WHO 2020,
+  Balban et al. 2023, and whether to lead her workouts).
+- **Stories:** 40 composite stories (clearly labelled as composites, not real accounts), linked to their lessons.
 - **Journal:** debriefs, a calendar, and notes with the editor ported from Almanac (headings, lists, checklists,
   quotes, highlight, Markdown shortcuts), tags, pinning, search, nine templates with "Why it works" plus your own
   templates, and a Trash kept 30 days.
