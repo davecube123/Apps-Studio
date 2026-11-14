@@ -138,7 +138,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor";
+  const KEY = "anchor", VER = "5";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -210,11 +210,12 @@
   const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Anchor</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
     <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
     <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"].map(k => k === "" ? "<span></span>" : `<button data-act="pinkey" data-v="${k}" aria-label="${k === "del" ? "Delete" : k}">${k === "del" ? ic("back") : k}</button>`).join("")}</div></div>`;
-  function viewLock() { return keypad("Enter PIN", "") + `<div class="center" style="margin-top:20px"><button class="linkbtn small" data-act="pinforgot">Forgot the PIN?</button></div>`; }
+  function viewLock() { return keypad("Enter PIN", "") + `<div class="center" style="margin-top:20px"><button class="linkbtn small" data-act="pinforgot">Forgot the PIN?</button></div>${verLine()}`; }
+  const verLine = () => `<p class="small muted center" style="margin-top:28px;opacity:.7">Anchor · v${VER}</p>`;
   function viewPinSet() {
     const first = !db.pinAsked;
-    return `${first ? "" : `<div class="top">${backLink("#/settings", "Settings")}</div>`}` + keypad(pinFirst ? "Repeat the PIN" : "Choose a 4-digit PIN", pinFirst ? "To be sure." : "The app will ask for it each time it opens, and after a minute away.")
-      + (first ? `<div class="center" style="margin-top:18px"><button class="linkbtn small" data-act="pinskip">Skip for now</button></div>` : "");
+    return `${first ? "" : `<div class="top">${backLink("#/settings", "Settings")}</div>`}` + keypad(pinFirst ? "Repeat the PIN" : "Choose a 4-digit PIN", pinFirst ? "To be sure." : "The app will ask for it when it opens, and after 5 minutes away (you can change this in Settings).")
+      + (first ? `<div class="center" style="margin-top:18px"><button class="linkbtn small" data-act="pinskip">Skip for now</button></div>` : "") + verLine();
   }
   function pinKey(k) {
     if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) pinBuf += k;
@@ -446,7 +447,7 @@
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
       <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
-      <p class="small muted center" style="margin-top:20px">Anchor · v4 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+      <p class="small muted center" style="margin-top:20px">Anchor · v${VER} · Fonts: Fraunces, Inter (SIL OFL)</p>`;
   }
 
   /* ---------- Install ---------- */
