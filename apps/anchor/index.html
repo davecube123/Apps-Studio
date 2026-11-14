@@ -110,6 +110,20 @@
     .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
     .cons { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 54px; margin-top: 12px; }
     .cons div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; } .cons i { display: block; width: 100%; border-radius: 4px; } .cons span { font: 600 10px var(--sans); color: var(--muted); }
+    .seg { display: flex; background: var(--card); border: 1px solid var(--line2); border-radius: 999px; padding: 4px; gap: 4px; }
+    .seg a { flex: 1; text-align: center; padding: 9px 8px; border-radius: 999px; font: 650 13.5px var(--sans); color: var(--ink2); text-decoration: none; }
+    .seg a.on { background: var(--gold); color: #1d1608; }
+    .toolbar { position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 5; display: flex; gap: 4px; overflow-x: auto; padding: 6px; border-radius: 14px; background: var(--card2); border: 1px solid var(--line2); scrollbar-width: none; }
+    .toolbar::-webkit-scrollbar { display: none; }
+    .toolbar button { flex: none; min-width: 40px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: var(--ink); font: 600 16px var(--sans); cursor: pointer; }
+    .toolbar button:active { background: rgba(255,255,255,.08); }
+    .editor { min-height: 46vh; margin-top: 10px; padding: 16px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line); font: 400 17px/1.6 var(--sans); outline: none; overflow-wrap: anywhere; }
+    .editor:empty::before { content: attr(data-ph); color: var(--muted); }
+    .editor h2 { font: 600 21px/1.3 var(--display); margin: 14px 0 6px; } .editor blockquote { margin: 10px 0; padding: 4px 0 4px 14px; border-left: 3px solid var(--gold); color: var(--ink2); font-style: italic; }
+    .editor ul, .editor ol { padding-left: 24px; margin: 6px 0; } .editor hr { border: 0; border-top: 1px solid var(--line2); margin: 14px 0; }
+    .editor ul.checks { list-style: none; padding-left: 0; } .editor ul.checks li { position: relative; padding-left: 32px; margin: 6px 0; }
+    .editor ul.checks li::before { content: ""; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line2); }
+    .editor ul.checks li.done { color: var(--muted); text-decoration: line-through; } .editor ul.checks li.done::before { background: var(--teal); border-color: var(--teal); }
     details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
     details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
     details.how summary::-webkit-details-marker { display: none; }
@@ -138,7 +152,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "5";
+  const KEY = "anchor", VER = "6";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -167,7 +181,9 @@
     ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
     ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
     ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
-    ["Adult play (never in little space)", ["Being pleasured with hands", "Being pleasured with mouth", "A vibrator", "Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Role play (adult scenarios)"]],
+    ["Rough and bound (adult time)", ["Rough play: grabbing, pinning, being held down", "Hair pulling", "Biting", "Scratching", "Spanking during sex", "Cuffs during sex", "Rope during sex", "Being gagged (with a non-verbal signal)"]],
+    ["Roles and more (adult time)", ["Role play: strangers at a bar, boss and employee, captor and captive (adults only)", "Consensual non-consent role play (advanced: later, if ever)", "Threesome with another woman", "Watching or being watched with a third"]],
+    ["Adult play (never in little space)", ["Being pleasured with hands", "Being pleasured with mouth", "A vibrator", "Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Other role play (adult scenarios)"]],
     ["Firm no for everyone (high risk)", ["Breath play or anything on the neck"]] ];
   const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
 
@@ -234,15 +250,16 @@
   function render() {
     if (!C) return;
     const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    if (db.notes && v !== "note") { const n0 = db.notes.length; db.notes = db.notes.filter(n => n.title.trim() || plain(n.html)); if (db.notes.length !== n0) save(); } /* drop empty notes */
     let html;
     if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
     else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0);
     else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
-    else if (v === "journal") html = viewJournal(); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
+    else if (v === "journal") html = viewJournal(a); else if (v === "note") html = viewNote(a); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
     else html = viewToday();
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     const t = $("#tabs"); t.hidden = locked() || !db.pinAsked || v === "pin";
-    const cur = { l: "learn", g: "learn", start: "today", words: "learn", scene: "her", before: "her", debrief: "journal", settings: "today" }[v] || v;
+    const cur = { l: "learn", g: "learn", start: "today", words: "learn", scene: "her", before: "her", debrief: "journal", note: "journal", settings: "today" }[v] || v;
     t.innerHTML = [["today", "anchor", "Today"], ["learn", "book", "Learn"], ["her", "heart", "Her"], ["journal", "pen", "Journal"]].map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
     if (nav) scrollTo(0, 0); lastHash = h;
   }
@@ -418,10 +435,61 @@
   }
 
   /* ---------- Journal ---------- */
-  function viewJournal() {
+  /* ---------- Notes: simple rich text (bold, italic, headings, lists, checklists, quotes) ---------- */
+  const NOTE_TAGS = ["Her likes", "Scene ideas", "Little space", "To try", "Fantasies", "Other"];
+  let ntag = "", nq = "";
+  const plain = h => { const d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<(\/?(?:p|div|li|h2|h3|blockquote|br|hr)\b[^>]*)>/gi, " <$1> "); return (d.textContent || "").replace(/\s+/g, " ").trim(); };
+  const ALLOW = { B: 1, STRONG: 1, I: 1, EM: 1, U: 1, H2: 1, H3: 1, P: 1, DIV: 1, BR: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, HR: 1 };
+  function clean(html) {
+    const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html"), root = doc.body.firstChild;
+    const walk = n => { [...n.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1 || !ALLOW[c.tagName]) { if (c.nodeType === 1) { walk(c); c.replaceWith(...c.childNodes); } else c.remove(); return; }
+      const keep = c.tagName === "UL" && c.classList.contains("checks") ? "checks" : c.tagName === "LI" && c.classList.contains("done") ? "done" : "";
+      [...c.attributes].forEach(a => c.removeAttribute(a.name)); if (keep) c.className = keep; walk(c); }); };
+    walk(root); return root.innerHTML;
+  }
+  function viewJournal(tab) {
+    const notesTab = tab !== "debriefs";
+    const seg = `<div class="seg" style="margin:0 0 16px"><a href="#/journal" class="${notesTab ? "on" : ""}">Notes · ${(db.notes || []).length}</a><a href="#/journal/debriefs" class="${notesTab ? "" : "on"}">Debriefs · ${db.debriefs.length}</a></div>`;
+    if (!notesTab) return `<h1 style="margin:8px 2px 14px">Journal</h1>` + seg + viewDebriefs();
+    const N = (db.notes || []).filter(n => (!ntag || n.tag === ntag) && (!nq || (n.title + " " + plain(n.html)).toLowerCase().includes(nq.toLowerCase()))).sort((a, b) => (b.pin - a.pin) || b.at - a.at);
+    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><a class="btn gold sm" href="#/note/new">${ic("plus")} Note</a></div>` + seg
+      + `<input type="text" id="nq" placeholder="Search notes" value="${esc(nq)}" autocomplete="off">
+      <div class="chips" style="margin:10px 0 4px">${["", ...NOTE_TAGS].map(t => `<button class="chip${ntag === t ? " on" : ""}" data-act="ntag" data-v="${t}">${t || "All"}</button>`).join("")}</div>
+      <div id="nlist" style="margin-top:10px">${N.length ? N.map(n => `<a class="item" href="#/note/${n.id}"><div class="grow"><div class="t">${n.pin ? "📌 " : ""}${esc(n.title || "Untitled")}</div><div class="m">${n.tag ? `${esc(n.tag)} · ` : ""}${dstr(n.at)} · ${esc(plain(n.html).slice(0, 70))}</div></div>${ic("chev")}</a>`).join("")
+        : `<div class="card"><p style="margin:0">${(db.notes || []).length ? "No notes match." : "Notes for anything: what she likes, scene ideas, things to try, words that land. Tap Note to start."}</p></div>`}</div>`;
+  }
+  let nedit = null;
+  function viewNote(id) {
+    db.notes ||= [];
+    if (id === "new") { nedit = { id: uid(), title: "", html: "", tag: "", pin: 0, at: Date.now() }; db.notes.push(nedit); save(); history.replaceState(null, "", `#/note/${nedit.id}`); }
+    else nedit = db.notes.find(n => n.id === id);
+    if (!nedit) { location.hash = "#/journal"; return ""; }
+    const T = [["bold", "<b>B</b>", "Bold"], ["italic", "<i>I</i>", "Italic"], ["underline", "<u>U</u>", "Underline"], ["h2", "H", "Heading"], ["ul", "•", "Bullets"], ["ol", "1.", "Numbers"], ["check", "☑", "Checklist"], ["quote", "❝", "Quote"], ["hr", "—", "Divider"]];
+    return `<div class="top">${backLink("#/journal", "Journal")}<span class="small muted" id="nsaved">Saved</span></div>
+      <input type="text" id="ntitle" value="${esc(nedit.title)}" placeholder="Title" style="font:600 22px var(--display);border:0;background:transparent;padding:6px 2px">
+      <div class="chips" style="margin:6px 0 12px">${NOTE_TAGS.map(t => `<button class="chip${nedit.tag === t ? " on" : ""}" data-act="nsettag" data-v="${t}">${t}</button>`).join("")}</div>
+      <div class="toolbar">${T.map(([c, l, n]) => `<button data-act="fmt" data-v="${c}" aria-label="${n}" title="${n}">${l}</button>`).join("")}</div>
+      <div class="editor" id="ned" contenteditable="true" data-ph="Write here. Select text and use the buttons above to format it.">${nedit.html}</div>
+      <div class="row" style="gap:8px;margin-top:14px"><button class="btn sm" data-act="npin">${nedit.pin ? "Unpin" : "📌 Pin to top"}</button><span class="grow"></span><button class="btn ghost sm" data-act="ndel" style="color:var(--red)">Delete note</button></div>
+      <p class="small muted" style="margin-top:10px">Edited ${dstr(nedit.at)}. Tap a checklist item’s box to tick it.</p>`;
+  }
+  let nT = 0;
+  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; nedit.html = clean(ed.innerHTML); nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const s = $("#nsaved"); if (s) s.textContent = "Saved"; }
+  function fmt(c) {
+    const ed = $("#ned"); ed.focus();
+    if (c === "bold" || c === "italic" || c === "underline") document.execCommand(c);
+    else if (c === "h2") { const cur = document.queryCommandValue("formatBlock").toLowerCase(); document.execCommand("formatBlock", false, cur === "h2" ? "<div>" : "<h2>"); }
+    else if (c === "quote") { const cur = document.queryCommandValue("formatBlock").toLowerCase(); document.execCommand("formatBlock", false, cur === "blockquote" ? "<div>" : "<blockquote>"); }
+    else if (c === "ul") document.execCommand("insertUnorderedList");
+    else if (c === "ol") document.execCommand("insertOrderedList");
+    else if (c === "hr") document.execCommand("insertHorizontalRule");
+    else if (c === "check") { const sel = getSelection(), t = sel && sel.toString() ? sel.toString() : ""; document.execCommand("insertHTML", false, `<ul class="checks"><li>${esc(t) || "<br>"}</li></ul>`); }
+    noteSave();
+  }
+
+  function viewDebriefs() {
     const D = [...db.debriefs].sort((a, b) => b.at - a.at);
-    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><a class="btn gold sm" href="#/debrief/free">${ic("plus")} Entry</a></div>
-      <p class="muted" style="margin:0 2px 14px">Debriefs after scenes, and anything worth remembering. The best dominants are the ones who review.</p>
+    return `<div class="row between" style="margin:0 2px 12px"><p class="muted small" style="margin:0">After a scene, within a day or two.</p><a class="btn gold sm" href="#/debrief/free">${ic("plus")} Debrief</a></div>
       ${D.length ? D.map(d => `<div class="card"><div class="row between"><b>${esc(d.title || "Entry")} · ${dstr(d.at)}</b><button class="iconbtn" data-act="deldeb" data-v="${d.id}" aria-label="Delete">${ic("x")}</button></div>
         ${d.good ? `<p class="small" style="margin:8px 0 0"><b style="color:var(--green)">Went well:</b> ${esc(d.good)}</p>` : ""}${d.change ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--amber)">Next time:</b> ${esc(d.change)}</p>` : ""}
         ${d.hers ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--blush)">Her words:</b> ${esc(d.hers)}</p>` : ""}${d.me ? `<p class="small muted" style="margin:6px 0 0">How I feel: ${esc(d.me)}</p>` : ""}</div>`).join("")
@@ -479,6 +547,11 @@
     const a = el.dataset.act, v = el.dataset.v;
     if (a === "pinkey") pinKey(v);
     else if (a === "guidedone") { db.guides ||= {}; if (db.guides[v]) delete db.guides[v]; else db.guides[v] = Date.now(); save(); toast(db.guides[v] ? "Well done. On to the next." : "Unmarked"); location.hash = "#/start"; }
+    else if (a === "fmt") { e.preventDefault(); fmt(v); }
+    else if (a === "ntag") { ntag = v; render(); }
+    else if (a === "nsettag") { nedit.tag = nedit.tag === v ? "" : v; save(); el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === nedit.tag)); }
+    else if (a === "npin") { nedit.pin = nedit.pin ? 0 : 1; save(); el.textContent = nedit.pin ? "Unpin" : "📌 Pin to top"; }
+    else if (a === "ndel") { if (!confirm("Delete this note?")) return; db.notes = db.notes.filter(n => n.id !== nedit.id); nedit = null; save(); location.hash = "#/journal"; }
     else if (a === "lockmin") { db.lockMin = +v; save(); stamp(); render(); }
     else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
     else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
@@ -512,8 +585,12 @@
     else if (a === "closesheet") $(".sheet-back")?.remove();
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
+  document.addEventListener("mousedown", e => { if (e.target.closest(".toolbar button")) e.preventDefault(); });
+  document.addEventListener("click", e => { const li = e.target.closest("#ned ul.checks > li"); if (!li) return; const r = li.getBoundingClientRect(); if (e.clientX - r.left < 30) { li.classList.toggle("done"); noteSave(); } });
   document.addEventListener("input", e => {
     const el = e.target;
+    if (el.id === "ned" || el.id === "ntitle") { const s = $("#nsaved"); if (s) s.textContent = "Saving…"; clearTimeout(nT); nT = setTimeout(noteSave, 400); return; }
+    if (el.id === "nq") { nq = el.value; const L = $("#nlist"); const h = viewJournal(); const d = document.createElement("div"); d.innerHTML = h; L.innerHTML = d.querySelector("#nlist").innerHTML; return; }
     if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
     if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
     if (el.dataset.safe) { db.safe[el.dataset.safe] = el.value; save(); }
