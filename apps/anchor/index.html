@@ -158,7 +158,7 @@
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
   const MODS = { foundations: ["Foundations", "anchor", "#d9b26f", "What a dominant is"], negotiation: ["Negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
     care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
-    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
+    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
   const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
 
   /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
@@ -167,7 +167,7 @@
     ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
     ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
     ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
-    ["Adult play (never in little space)", ["Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Role play (adult scenarios)"]],
+    ["Adult play (never in little space)", ["Being pleasured with hands", "Being pleasured with mouth", "A vibrator", "Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Role play (adult scenarios)"]],
     ["Firm no for everyone (high risk)", ["Breath play or anything on the neck"]] ];
   const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
 
@@ -176,7 +176,8 @@
     ["Week 1 · Talk and agree", ["first-talk", "the-list", "safewords", "tone"]],
     ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
     ["Week 3 · Rules and care", ["first-rules", "rewards", "consequences", "little-evening", "her-bad-day"]],
-    ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]] ];
+    ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]],
+    ["Adult time · Her pleasure", ["learn-her", "her-orgasm"]] ];
   /* Rhythm: daily, weekly and monthly. Old "rituals" become daily rhythm items.
      Monthly items appear on Today at weekends and in the month's last week, until done. */
   const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -438,7 +439,7 @@
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
       <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
-      <p class="small muted center" style="margin-top:20px">Anchor · v2 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+      <p class="small muted center" style="margin-top:20px">Anchor · v3 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
   }
 
   /* ---------- Install ---------- */
