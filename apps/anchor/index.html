@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Anchor</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Notes and planning.">
+  <meta name="theme-color" content="#0e1120">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Anchor">
+  <style>
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+    :root {
+      --bg: #0e1120; --card: #171b2d; --card2: #1d2238; --ink: #eee8f2; --ink2: #c3bccf; --muted: #8c869c;
+      --line: rgba(220,210,255,.08); --line2: rgba(220,210,255,.16);
+      --gold: #d9b26f; --blush: #ec9fb6; --teal: #7cc6b8; --violet: #a99bf2; --red: #ef7c7c; --amber: #f0c36a; --green: #7fcf9a;
+      --e1: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+      --display: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, sans-serif;
+      --spring: cubic-bezier(.2,.9,.25,1.15); --r: 22px; color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; background: radial-gradient(120% 60% at 50% -10%, #1f2340 0%, var(--bg) 55%) fixed, var(--bg); color: var(--ink); font: 400 16.5px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+    #main { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 110px); }
+    h1, h2, h3 { font-family: var(--display); font-weight: 560; letter-spacing: -.012em; margin: 0; line-height: 1.14; font-variation-settings: "SOFT" 100; }
+    h1 { font-size: 33px; } h2 { font-size: 24px; } h3 { font-size: 19px; }
+    p { margin: 0 0 10px; } a { color: var(--gold); }
+    .muted { color: var(--muted); } .small { font-size: 13.5px; } .center { text-align: center; }
+    .eyebrow { font: 700 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .card { background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--e1); }
+    .card + .card { margin-top: 12px; }
+    .sec { margin-top: 24px; } .sec > .eyebrow { margin: 0 4px 10px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 650 15px var(--sans); cursor: pointer; text-decoration: none; transition: transform .15s; white-space: nowrap; }
+    .btn:active { transform: scale(.96); }
+    .btn.gold { background: linear-gradient(135deg, #e7c98d, var(--gold)); color: #1d1608; border: 0; box-shadow: 0 6px 24px rgba(217,178,111,.25); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    .btn.block { display: flex; width: 100%; } .btn.sm { min-height: 36px; padding: 6px 13px; font-size: 13.5px; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .view.enter { animation: rise .35s var(--spring) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes sheetup { from { transform: translateY(100%); } }
+    .top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-bottom: 4px; }
+    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); text-decoration: none; font: 600 15px var(--sans); padding: 8px 2px; }
+    .iconbtn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink2); text-decoration: none; background: transparent; border: 0; cursor: pointer; }
+    .ic { width: 42px; height: 42px; border-radius: 14px; flex: none; display: grid; place-items: center; }
+    a.item, button.item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px; font: inherit; text-align: left; cursor: pointer; }
+    .item + .item { margin-top: 8px; }
+    .item .t { font: 600 15.5px/1.3 var(--sans); } .item .m { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; border: 2px solid var(--line2); }
+    .dot.on { background: var(--teal); border-color: var(--teal); color: #0d2420; }
+    .prompt { font: 500 21px/1.45 var(--display); }
+    .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mod { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 20px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); min-height: 120px; position: relative; overflow: hidden; }
+    .mod b { font: 560 18px/1.15 var(--display); } .mod small { color: var(--ink2); font-size: 12.5px; }
+    .mod .bar { position: absolute; left: 0; bottom: 0; height: 4px; background: currentColor; opacity: .8; }
+    .lesson-card { min-height: 250px; display: flex; flex-direction: column; justify-content: center; padding: 26px 22px; }
+    .lesson-card p { font: 400 20px/1.55 var(--display); margin: 0; }
+    .pips { display: flex; gap: 6px; margin: 14px 0; } .pips i { flex: 1; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); } .pips i.on { background: var(--gold); }
+    .keep { text-align: center; font: italic 500 21px/1.4 var(--display); color: var(--gold); padding: 22px 18px; }
+    /* yes/maybe/no */
+    .ymn { display: flex; gap: 4px; flex: none; }
+    .ymn button { width: 38px; height: 34px; border-radius: 10px; border: 1px solid var(--line2); background: transparent; color: var(--muted); font: 700 12.5px var(--sans); cursor: pointer; }
+    .ymn button.y.on { background: var(--green); border-color: var(--green); color: #0c2014; }
+    .ymn button.m.on { background: var(--amber); border-color: var(--amber); color: #2a1e05; }
+    .ymn button.n.on { background: var(--red); border-color: var(--red); color: #2a0b0b; }
+    .limit { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .limit:last-child { border-bottom: 0; } .limit .grow { font-size: 15px; }
+    .tag { display: inline-block; font: 700 11px var(--sans); padding: 3px 8px; border-radius: 999px; }
+    .tag.y { background: rgba(127,207,154,.16); color: var(--green); } .tag.m { background: rgba(240,195,106,.16); color: var(--amber); } .tag.n { background: rgba(239,124,124,.16); color: var(--red); }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--ink2); font: 600 13px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--gold); border-color: var(--gold); color: #1d1608; }
+    .chip:disabled { opacity: .35; cursor: not-allowed; }
+    .chip.warn { border-color: var(--amber); color: var(--amber); }
+    textarea, input[type=text], input[type=date] { width: 100%; font: 400 16px/1.45 var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: var(--ink); }
+    textarea { min-height: 80px; resize: vertical; }
+    label.f { display: block; margin-top: 14px; } label.f > span { display: block; font: 650 12.5px var(--sans); color: var(--ink2); margin-bottom: 6px; }
+    .check { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); cursor: pointer; width: 100%; background: none; border-left: 0; border-right: 0; border-top: 0; color: var(--ink); font: inherit; text-align: left; }
+    .check:last-child { border-bottom: 0; }
+    .check .box { width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #0d2420; }
+    .check.on .box { background: var(--teal); border-color: var(--teal); }
+    .check.on .lbl { color: var(--muted); }
+    .note { padding: 12px 0; border-bottom: 1px solid var(--line); } .note:last-child { border-bottom: 0; }
+    .warnbox { border-radius: 16px; padding: 12px 14px; background: rgba(240,195,106,.1); border: 1px solid rgba(240,195,106,.35); color: var(--ink); font-size: 14.5px; }
+    .rule { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); } .rule:last-child { border-bottom: 0; }
+    .rule .w { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 40; display: flex; gap: 2px; padding: 6px; border-radius: 999px; background: rgba(23,27,45,.9); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--line2); box-shadow: 0 10px 40px rgba(0,0,0,.5); width: min(440px, calc(100% - 24px)); }
+    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 999px; text-decoration: none; color: var(--muted); font: 650 11px var(--sans); }
+    nav.tabs a.on { color: var(--ink); background: rgba(217,178,111,.15); } nav.tabs a.on .i { color: var(--gold); }
+    nav.tabs[hidden] { display: none; }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 999px; font: 650 14px var(--sans); animation: rise .3s var(--spring) both; max-width: calc(100% - 40px); text-align: center; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+    .sheet { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); animation: sheetup .45s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
+    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 9px 0; }
+    /* lock */
+    .lock { text-align: center; padding: 60px 8px 0; }
+    .pindots { display: flex; gap: 18px; justify-content: center; margin: 30px 0; }
+    .pindots i { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--gold); } .pindots i.on { background: var(--gold); }
+    .keypad { display: grid; grid-template-columns: repeat(3, 74px); gap: 16px 24px; justify-content: center; }
+    .keypad button { width: 74px; height: 74px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 500 27px var(--sans); cursor: pointer; display: grid; place-items: center; }
+    .keypad button:active { background: var(--card2); }
+    .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
+    .loading { padding: 90px 0; text-align: center; color: var(--muted); }
+    @media (max-width: 380px) { h1 { font-size: 28px; } .lesson-card p { font-size: 18.5px; } .ymn button { width: 33px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="main"><div class="loading">…</div></main>
+  <nav class="tabs" id="tabs" hidden></nav>
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const DAY = 864e5;
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const dstr = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+
+  /* Everything stays on this device. */
+  const KEY = "anchor";
+  const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
+    aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
+    rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
+    (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+
+  const P = {
+    anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v13M7.5 10.5h9M4.5 13.5c0 4 3.4 6.5 7.5 6.5s7.5-2.5 7.5-6.5"/>',
+    book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
+    heart: '<path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>', back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>', shield: '<path d="M12 3.5 19 6v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/>', list: '<path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
+    moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>', star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/>',
+    scale: '<path d="M12 4v16M6 20h12M5 8h14M7.5 8 4.5 14a3 3 0 0 0 6 0zM16.5 8l-3 6a3 3 0 0 0 6 0z"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+    blanket: '<path d="M4 8.5c2.5-2 5.5-2 8 0s5.5 2 8 0v9c-2.5 2-5.5 2-8 0s-5.5-2-8 0z"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
+    chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
+  const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
+  const MODS = { foundations: ["Foundations", "anchor", "#d9b26f", "What a dominant is"], negotiation: ["Negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
+    care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
+    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
+  const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
+
+  /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
+  const ACTS = [
+    ["Care & structure", ["Rules from me", "Daily rituals (morning, bedtime)", "Check-in texts during the day", "Praise and pet names", "Calling me Daddy", "Rewards", "Agreed consequences (lines, early bedtime, a chore)", "Being looked after (meals, water, bedtime)", "Little-space play (non-sexual: stuffies, colouring, cartoons)", "Reports or a journal for me"]],
+    ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
+    ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
+    ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
+    ["Adult play (never in little space)", ["Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Role play (adult scenarios)"]],
+    ["Firm no for everyone (high risk)", ["Breath play or anything on the neck"]] ];
+  const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
+
+  let C = null;
+  const byMod = m => C.lessons.filter(l => l.module === m);
+
+  /* ---------- PIN lock: a privacy curtain, not encryption ---------- */
+  const pinHash = pin => String([..."anchor:" + pin].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7));
+  let unlocked = false, pinBuf = "", pinFirst = "", hiddenAt = 0;
+  const locked = () => !!db.pin && !unlocked;
+  addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = Date.now(); else if (db.pin && unlocked && Date.now() - hiddenAt > 60000) { unlocked = false; pinBuf = ""; render(); } });
+  const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Anchor</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
+    <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
+    <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"].map(k => k === "" ? "<span></span>" : `<button data-act="pinkey" data-v="${k}" aria-label="${k === "del" ? "Delete" : k}">${k === "del" ? ic("back") : k}</button>`).join("")}</div></div>`;
+  function viewLock() { return keypad("Enter PIN", "") + `<div class="center" style="margin-top:20px"><button class="linkbtn small" data-act="pinforgot">Forgot the PIN?</button></div>`; }
+  function viewPinSet() {
+    const first = !db.pinAsked;
+    return `${first ? "" : `<div class="top">${backLink("#/settings", "Settings")}</div>`}` + keypad(pinFirst ? "Repeat the PIN" : "Choose a 4-digit PIN", pinFirst ? "To be sure." : "The app will ask for it each time it opens, and after a minute away.")
+      + (first ? `<div class="center" style="margin-top:18px"><button class="linkbtn small" data-act="pinskip">Skip for now</button></div>` : "");
+  }
+  function pinKey(k) {
+    if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) pinBuf += k;
+    if (pinBuf.length < 4) return render();
+    const e = pinBuf; pinBuf = "";
+    if (locked()) { if (pinHash(e) === db.pin) unlocked = true; else toast("Wrong PIN"); return render(); }
+    if (!pinFirst) { pinFirst = e; return render(); }
+    if (e !== pinFirst) { pinFirst = ""; toast("They didn’t match. Try again."); return render(); }
+    db.pin = pinHash(e); db.pinAsked = true; pinFirst = ""; unlocked = true; save(); toast("PIN set"); location.hash = "#/"; render();
+  }
+
+  /* ---------- Routing ---------- */
+  let lastHash = "";
+  const route = () => { const p = (location.hash || "#/").slice(2).split("/"); return { v: p[0] || "today", a: p[1], b: p[2] }; };
+  const backLink = (href, label) => `<a class="back" href="${href}">${ic("back")}${label}</a>`;
+  function render() {
+    if (!C) return;
+    const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
+    let html;
+    if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
+    else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0);
+    else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
+    else if (v === "journal") html = viewJournal(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
+    else html = viewToday();
+    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
+    const t = $("#tabs"); t.hidden = locked() || !db.pinAsked || v === "pin";
+    const cur = { l: "learn", scene: "her", before: "her", debrief: "journal", settings: "today" }[v] || v;
+    t.innerHTML = [["today", "anchor", "Today"], ["learn", "book", "Learn"], ["her", "heart", "Her"], ["journal", "pen", "Journal"]].map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
+    if (nav) scrollTo(0, 0); lastHash = h;
+  }
+  addEventListener("hashchange", render);
+
+  /* ---------- Today ---------- */
+  function viewToday() {
+    const d = Math.floor(Date.now() / DAY), prompt = C.prompts[d % C.prompts.length];
+    const next = C.lessons.find(l => !db.lessons[l.id]) || C.lessons[d % C.lessons.length];
+    const k = dayKey(), done = db.ritualLog[k] || {};
+    const recent = db.scenes.filter(s => s.at && s.at > Date.now() - 3 * DAY && !s.followed);
+    const neg = db.negotiated ? Math.floor((Date.now() - db.negotiated) / DAY) : null;
+    const yes = Object.values(db.limits).filter(x => x === "y").length;
+    return `<div class="top"><div class="eyebrow">Anchor</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+      <div class="card" style="margin-top:6px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">From the old hand</div><p class="prompt" style="margin:10px 0 0">${esc(prompt)}</p></div>
+      ${recent.map(s => `<div class="card" style="border-color:rgba(127,207,154,.4)"><div class="eyebrow" style="color:var(--green)">Aftercare window</div><p style="margin:8px 0 10px">Your scene “${esc(s.title || "untitled")}” ${(h => h < 1 ? "ended just now" : h < 48 ? `was ${h} hour${h === 1 ? "" : "s"} ago` : `was ${Math.round(h / 24)} days ago`)(Math.round((Date.now() - s.at) / 36e5))}. Drop can come a day or two later. Check in with her today, gently.</p>
+        <div class="row" style="gap:8px"><button class="btn sm gold" data-act="followed" data-v="${s.id}">${ic("check")} I checked in</button><a class="btn sm" href="#/debrief/${s.id}">Debrief</a></div></div>`).join("")}
+      ${db.rituals.length ? `<div class="sec"><div class="eyebrow">Today’s rituals</div><div class="card" style="padding:6px 18px">${db.rituals.map(r => `<button class="check${done[r.id] ? " on" : ""}" data-act="ritual" data-v="${r.id}"><span class="box">${done[r.id] ? ic("check") : ""}</span><span class="lbl grow">${esc(r.text)}</span></button>`).join("")}</div></div>` : ""}
+      <div class="sec"><div class="eyebrow">Learn today</div><a class="item" href="#/l/${next.id}/0">${modIc(next.module)}<div class="grow"><div class="t">${esc(next.title)}</div><div class="m">${esc(next.hook)}</div></div>${ic("chev")}</a></div>
+      <div class="sec"><div class="eyebrow">The dynamic</div>
+        <a class="item" href="#/before">${modIc("scenes")}<div class="grow"><div class="t">Before a scene</div><div class="m">The two-minute check</div></div>${ic("chev")}</a>
+        <a class="item" href="#/her/limits">${modIc("negotiation")}<div class="grow"><div class="t">Her yes / maybe / no</div><div class="m">${yes ? `${yes} yeses` : "Not filled in yet"}${neg != null ? ` · negotiated ${neg} days ago` : ""}</div></div>${ic("chev")}</a>
+        ${neg != null && neg > 90 ? `<div class="warnbox" style="margin-top:10px">It has been ${neg} days since you last went through her list together. People change; renegotiate.</div>` : ""}</div>
+      ${isStandalone() ? "" : `<button class="item" data-act="installsheet" style="margin-top:22px">${modIc("self")}<div class="grow"><div class="t">Install on your phone</div><div class="m">Opens in one tap, behind your PIN.</div></div></button>`}`;
+  }
+
+  /* ---------- Learn ---------- */
+  function viewLearn() {
+    const r = C.lessons.filter(l => db.lessons[l.id]).length;
+    return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons. Short, practical, from someone who has made the mistakes so you don’t have to.</p>
+      <div class="mods">${Object.entries(MODS).map(([k, [n, i, col, sub]]) => { const ls = byMod(k), d = ls.filter(l => db.lessons[l.id]).length;
+        return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}24, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${d}/${ls.length}</small><span class="bar" style="width:${ls.length ? d / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div>`;
+  }
+  function viewModule(m) {
+    const [n, , , sub] = MODS[m] || []; if (!n) { location.hash = "#/learn"; return ""; }
+    return `<div class="top">${backLink("#/learn", "Learn")}</div><div class="row" style="gap:14px;margin:6px 2px 18px">${modIc(m, 54)}<div><h1 style="font-size:29px">${n}</h1><div class="muted small">${sub}</div></div></div>
+      ${byMod(m).map(l => `<a class="item" href="#/l/${l.id}/0"><span class="dot${db.lessons[l.id] ? " on" : ""}">${db.lessons[l.id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(l.title)}</div><div class="m">${esc(l.hook)}</div></div>${ic("chev")}</a>`).join("")}`;
+  }
+  function viewLesson(id, i) {
+    const l = C.lessons.find(x => x.id === id); if (!l) { location.hash = "#/learn"; return ""; }
+    const n = l.cards.length, base = `#/l/${l.id}`;
+    const head = `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}</div><h2 style="margin:4px 2px 0">${esc(l.title)}</h2><div class="pips">${[...l.cards, 0].map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}</div>`;
+    if (i < n) return head + `<div class="card lesson-card"><p>${esc(l.cards[i])}</p></div><div class="row" style="gap:10px;margin-top:14px">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")}</a>` : ""}<a class="btn gold" href="${base}/${i + 1}" style="flex:1">Next ${ic("chev")}</a></div>`;
+    return head + `<div class="card keep">“${esc(l.remember)}”</div>
+      <div class="card"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p></div>
+      <div class="card"><div class="eyebrow">Ask</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.ask)}</p></div>
+      <button class="btn gold block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${ic("check")} ${db.lessons[l.id] ? "Done" : "Understood"}</button>`;
+  }
+
+  /* ---------- Her: limits, safewords, aftercare, little space, rules, rituals, rewards, consequences, scenes ---------- */
+  const listEditor = (key, title, ph, why) => `<div class="card">${db[key].length ? db[key].map(r => `<div class="rule"><div class="grow"><div>${esc(r.text)}</div>${r.why ? `<div class="w">${esc(r.why)}</div>` : ""}${r.agreed === false ? `<div class="w" style="color:var(--amber)">Not yet agreed with her</div>` : ""}</div><button class="iconbtn" data-act="del" data-k="${key}" data-v="${r.id}" aria-label="Delete">${ic("x")}</button></div>`).join("") : `<p class="muted small" style="margin:0">None yet.</p>`}
+    <input type="text" id="new-${key}" placeholder="${esc(ph)}" style="margin-top:12px">${why ? `<input type="text" id="why-${key}" placeholder="${esc(why)}" style="margin-top:8px">` : ""}
+    <button class="btn block" data-act="add" data-k="${key}" style="margin-top:10px">${ic("plus")} Add</button></div>`;
+  function viewHer(sec) {
+    const nav = (href, icn, mod, t, m) => `<a class="item" href="${href}">${modIc(mod)}<div class="grow"><div class="t">${t}</div><div class="m">${m}</div></div>${ic("chev")}</a>`;
+    if (!sec) { const yes = Object.values(db.limits).filter(x => x === "y").length, no = Object.values(db.limits).filter(x => x === "n").length;
+      return `<h1 style="margin:8px 2px 6px">Her</h1><p class="muted" style="margin:0 2px 16px">What you have agreed together, in one place. Fill it in with her, not about her.</p>
+        ${nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`)}${nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`)}
+        ${nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set")}${nav("#/her/little", "heart", "care", "Her little space", "Comforts, bedtime, signs")}
+        ${nav("#/her/rules", "list", "care", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}`)}${nav("#/her/rituals", "moon", "care", "Rituals", `${db.rituals.length} daily`)}
+        ${nav("#/her/rewards", "star", "care", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`)}
+        ${nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)}${nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes")}`; }
+    const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
+    if (sec === "limits") return head("Yes / maybe / no", "Go through it together. Maybe means talk first, never “maybe in the moment”. Anything unmarked is a no until discussed.")
+      + `${ACTS.map(([cat, items]) => `<div class="sec"><div class="eyebrow">${cat}</div><div class="card" style="padding:4px 16px">${items.map(it => { const v = db.limits[it] || (cat.startsWith("Firm no") ? "n" : "");
+          return `<div class="limit"><span class="grow">${esc(it)}</span>${cat.startsWith("Firm no") ? `<span class="tag n">No</span>` : `<span class="ymn">${["y", "m", "n"].map(x => `<button class="${x}${v === x ? " on" : ""}" data-act="lim" data-v="${esc(it)}" data-x="${x}">${x === "y" ? "Yes" : x === "m" ? "?" : "No"}</button>`).join("")}</span>`}</div>`; }).join("")}</div></div>`).join("")}
+        <label class="f"><span>Notes from the conversation</span><textarea data-f="limitNote" placeholder="Details, conditions, things to revisit.">${esc(db.limitNote || "")}</textarea></label>
+        <button class="btn gold block" data-act="negotiated" style="margin-top:14px">${ic("check")} We went through this together today</button>
+        ${db.negotiated ? `<p class="small muted center" style="margin-top:8px">Last negotiated ${dstr(db.negotiated)}</p>` : ""}`;
+    if (sec === "safe") return head("Safewords and signals", "Agree them out loud, and use them in a low-stakes moment so they feel normal. Honour them instantly, without sulking.")
+      + `<div class="card">${[["stop", "Stop everything"], ["slow", "Slow down / check in"], ["go", "All good, more"], ["signal", "Non-verbal signal (when she can’t speak)"]].map(([k, l]) => `<label class="f" style="margin-top:${k === "stop" ? 0 : 14}px"><span>${l}</span><input type="text" data-safe="${k}" value="${esc(db.safe[k])}"></label>`).join("")}</div>
+        <div class="warnbox" style="margin-top:12px">A safeword is never a failure. Thank her for using it, then care for her first and talk later.</div>`;
+    if (sec === "after") return head("Aftercare she needs", "Ask her, then watch what actually helps. Needs change with the scene and the day.")
+      + `<div class="card"><div class="chips">${AFTER.map(a => `<button class="chip${db.aftercare.includes(a) ? " on" : ""}" data-act="ac" data-v="${esc(a)}">${a}</button>`).join("")}</div>
+        <label class="f"><span>Details</span><textarea data-f="aftercareNote" placeholder="e.g. likes to be wrapped up and talked to softly; needs a text the next afternoon.">${esc(db.aftercareNote)}</textarea></label></div>
+        <label class="f"><span>What you need afterwards (your own aftercare)</span><textarea data-f="mine" placeholder="Quiet, a walk, to hear that she’s okay, to write it down.">${esc(db.mine)}</textarea></label>`;
+    if (sec === "little") return head("Her little space", "Little space here is rest, play and being looked after. Keep it non-sexual, and keep adult play for when she is fully herself.")
+      + `<div class="card">${[["comfort", "Comforts", "Her stuffie’s name, a blanket, a cartoon, colouring"], ["favourites", "Favourite things", "Snacks, songs, games"], ["bedtime", "Bedtime routine", "e.g. brush teeth, story, stuffie, lights at 11"], ["signs", "Signs she’s slipping into little space", "Voice changes, wants to be held, gets giggly"], ["out", "What pulls her out (and how to bring her back gently)", "Work calls, stress, being rushed"]].map(([k, l, ph], i) => `<label class="f" style="${i ? "" : "margin-top:0"}"><span>${l}</span><textarea data-little="${k}" placeholder="${ph}" style="min-height:64px">${esc(db.little[k])}</textarea></label>`).join("")}</div>`;
+    if (sec === "rules") return head("Rules", "Few, clear, and each with a reason that serves her. Five good rules beat twenty you can’t keep track of.")
+      + (db.rules.length > 6 ? `<div class="warnbox" style="margin-bottom:12px">${db.rules.length} rules. Can you hold all of them consistently? An unenforced rule teaches that rules don’t matter.</div>` : "")
+      + listEditor("rules", "Rules", "e.g. Water bottle finished by 6 pm", "Why it helps her (e.g. she forgets to drink and gets headaches)");
+    if (sec === "rituals") return head("Rituals", "Small, daily, reliable. They are the heartbeat of the dynamic. Tick them off on Today.")
+      + listEditor("rituals", "Rituals", "e.g. Good-morning message before 9", "");
+    if (sec === "rewards") return head("Rewards and consequences", "")
+      + `<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
+        <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
+        ${listEditor("conseq", "Consequences", "e.g. Ten lines, early bedtime, phone off for the evening", "")}
+        <p class="small muted" style="margin-top:8px">New consequences are marked “not yet agreed” until you tick them with her.</p>
+        ${db.conseq.filter(c => c.agreed === false).map(c => `<button class="btn sm" data-act="agree" data-v="${c.id}" style="margin:6px 6px 0 0">${ic("check")} She agreed: ${esc(c.text)}</button>`).join("")}</div>`;
+    if (sec === "checkin") { const Q = C.checkin || []; return head("Check-in questions", "Once a week, out of role, over coffee. Ask two or three, listen more than you talk.")
+      + `<div class="card" style="padding:4px 18px">${Q.map(q => `<div class="note">${esc(q)}</div>`).join("")}</div>
+        <label class="f"><span>What she said this week</span><textarea id="cin" placeholder="Her words, as close as you can."></textarea></label><button class="btn gold block" data-act="savecheckin" style="margin-top:10px">${ic("check")} Save check-in</button>
+        ${db.checkins.length ? `<div class="sec"><div class="eyebrow">Earlier check-ins</div><div class="card" style="padding:4px 18px">${[...db.checkins].reverse().map(c => `<div class="note"><div class="small muted">${dstr(c.at)}</div><div style="white-space:pre-wrap">${esc(c.text)}</div></div>`).join("")}</div></div>` : ""}`; }
+    location.hash = "#/her"; return "";
+  }
+
+  /* ---------- Scenes: built only from her yes list ---------- */
+  let sdraft = null;
+  function viewScene(id) {
+    if (id === "new" || !sdraft || sdraft.id !== id) sdraft = id === "new" ? { id: uid(), title: "", intent: "", acts: [], kit: [], notes: "" } : JSON.parse(JSON.stringify(db.scenes.find(s => s.id === id) || { id: uid(), acts: [], kit: [] }));
+    if (id === "new") history.replaceState(null, "", `#/scene/${sdraft.id}`);
+    const all = ACTS.flatMap(([, it]) => it).filter(it => !it.startsWith("Breath"));
+    const KIT = ["Safety shears", "Water", "Blanket", "Snack", "Her stuffie for after", "Phone off", "Lube and condoms if relevant", "First-aid basics"];
+    const saved = db.scenes.some(s => s.id === sdraft.id);
+    return `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${saved ? "Scene" : "Plan a scene"}</h1><p class="muted" style="margin:0 2px 14px">Only what she said yes to. Maybe means ask her first, before the day.</p>
+      <div class="card"><label class="f" style="margin-top:0"><span>Name</span><input type="text" data-s="title" value="${esc(sdraft.title)}" placeholder="e.g. Friday, slow and close"></label>
+        <label class="f"><span>The intent (what you want her to feel)</span><textarea data-s="intent" placeholder="Held, safe, a little teased, very proud of herself.">${esc(sdraft.intent)}</textarea></label></div>
+      <div class="sec"><div class="eyebrow">What’s in it</div><div class="card"><div class="chips">${all.map(it => { const v = db.limits[it]; return `<button class="chip${sdraft.acts.includes(it) ? " on" : ""}${v === "m" ? " warn" : ""}" data-act="sact" data-v="${esc(it)}" ${v === "y" || v === "m" ? "" : "disabled"}>${esc(it)}${v === "m" ? " ?" : ""}</button>`; }).join("")}</div>
+        <p class="small muted" style="margin:10px 0 0">Greyed out: not a yes on her list yet. Amber: a maybe, so talk to her first.</p></div></div>
+      ${sdraft.acts.some(a => db.limits[a] === "m") ? `<div class="warnbox" style="margin-top:12px">This plan includes a maybe. Ask her about it before the day, out of role, and only keep it if she says yes.</div>` : ""}
+      <div class="sec"><div class="eyebrow">Safewords for this scene</div><div class="card small"><b style="color:var(--red)">${esc(db.safe.stop)}</b> stops everything · <b style="color:var(--amber)">${esc(db.safe.slow)}</b> slows down · <b style="color:var(--green)">${esc(db.safe.go)}</b> all good<br><span class="muted">Signal: ${esc(db.safe.signal)}</span></div></div>
+      <div class="sec"><div class="eyebrow">Kit</div><div class="card" style="padding:6px 18px">${KIT.map(k => `<button class="check${sdraft.kit.includes(k) ? " on" : ""}" data-act="skit" data-v="${esc(k)}"><span class="box">${sdraft.kit.includes(k) ? ic("check") : ""}</span><span class="lbl">${k}</span></button>`).join("")}</div></div>
+      <div class="sec"><div class="eyebrow">Aftercare plan</div><div class="card small">${db.aftercare.length ? esc(db.aftercare.join(", ")) : `<a href="#/her/after">Set her aftercare needs</a>`}${db.aftercareNote ? `<br><span class="muted">${esc(db.aftercareNote)}</span>` : ""}</div></div>
+      <label class="f"><span>Notes</span><textarea data-s="notes" placeholder="Shape: how it opens, builds, lands.">${esc(sdraft.notes)}</textarea></label>
+      <button class="btn gold block" data-act="savescene" style="margin-top:16px">${ic("check")} Save plan</button>
+      ${saved ? `<button class="btn block" data-act="scenedone" data-v="${sdraft.id}" style="margin-top:8px">${ic("clock")} It happened: start the aftercare window</button><button class="btn ghost block" data-act="delscene" data-v="${sdraft.id}" style="margin-top:4px;color:var(--red)">Delete plan</button>` : ""}
+      ${db.scenes.length ? `<div class="sec"><div class="eyebrow">Your plans</div>${db.scenes.map(s => `<a class="item" href="#/scene/${s.id}">${modIc("scenes", 36)}<div class="grow"><div class="t">${esc(s.title || "Untitled")}</div><div class="m">${s.at ? `Happened ${dstr(s.at)}` : "Planned"} · ${s.acts.length} elements</div></div>${ic("chev")}</a>`).join("")}</div>` : ""}`;
+  }
+  function viewBefore() {
+    const B = ["We are both sober enough to consent clearly", "She’s had a normal day: no illness, no big news, eaten", "Tonight’s plan uses only her yeses", "Safewords said out loud just now", "Safety shears, water and blanket within reach", "Time and privacy: nothing to rush", "I am calm, not playing out frustration", "Aftercare is planned, and I’ll check in tomorrow"];
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 6px;font-size:29px">Before a scene</h1><p class="muted" style="margin:0 2px 14px">Two minutes. If any line is a no, change the plan or wait. That is what competence looks like.</p>
+      <div class="card" style="padding:6px 18px">${B.map((b, i) => `<button class="check" data-act="tog"><span class="box"></span><span class="lbl">${b}</span></button>`).join("")}</div>
+      <a class="btn gold block" href="#/scene/new" style="margin-top:14px">Plan the scene</a>`;
+  }
+
+  /* ---------- Journal ---------- */
+  function viewJournal() {
+    const D = [...db.debriefs].sort((a, b) => b.at - a.at);
+    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><a class="btn gold sm" href="#/debrief/free">${ic("plus")} Entry</a></div>
+      <p class="muted" style="margin:0 2px 14px">Debriefs after scenes, and anything worth remembering. The best dominants are the ones who review.</p>
+      ${D.length ? D.map(d => `<div class="card"><div class="row between"><b>${esc(d.title || "Entry")} · ${dstr(d.at)}</b><button class="iconbtn" data-act="deldeb" data-v="${d.id}" aria-label="Delete">${ic("x")}</button></div>
+        ${d.good ? `<p class="small" style="margin:8px 0 0"><b style="color:var(--green)">Went well:</b> ${esc(d.good)}</p>` : ""}${d.change ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--amber)">Next time:</b> ${esc(d.change)}</p>` : ""}
+        ${d.hers ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--blush)">Her words:</b> ${esc(d.hers)}</p>` : ""}${d.me ? `<p class="small muted" style="margin:6px 0 0">How I feel: ${esc(d.me)}</p>` : ""}</div>`).join("")
+        : `<div class="card"><p style="margin:0">Nothing yet. After a scene, mark it as happened in its plan, then debrief here within a day or two.</p></div>`}`;
+  }
+  function viewDebrief(id) {
+    const s = db.scenes.find(x => x.id === id);
+    return `<div class="top">${backLink("#/journal", "Journal")}</div><h1 style="margin:6px 2px 14px;font-size:29px">${s ? `Debrief: ${esc(s.title || "scene")}` : "Journal entry"}</h1>
+      <label class="f" style="margin-top:0"><span>What went well</span><textarea id="dgood"></textarea></label>
+      <label class="f"><span>What to change next time</span><textarea id="dchange"></textarea></label>
+      <label class="f"><span>What she said (ask her, out of role)</span><textarea id="dhers"></textarea></label>
+      <label class="f"><span>How I feel now (dom drop is real)</span><textarea id="dme" style="min-height:60px"></textarea></label>
+      <button class="btn gold block" data-act="savedeb" data-v="${id}" style="margin-top:16px">${ic("check")} Save</button>`;
+  }
+
+  /* ---------- Settings ---------- */
+  function viewSettings() {
+    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 14px">Settings</h1>
+      <div class="card"><div class="eyebrow">Privacy</div><p class="small muted" style="margin:6px 0 10px">Everything is stored on this phone only. The PIN is a curtain against a glance, not encryption.</p>
+        <a class="btn block" href="#/pin">${db.pin ? "Change PIN" : "Set a PIN"}</a>${db.pin ? `<button class="btn ghost block" data-act="pinoff" style="margin-top:6px">Remove PIN</button>` : ""}</div>
+      <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="export" style="margin-top:10px">${ic("share")} Copy a backup</button>
+        ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
+        <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
+      <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
+      <p class="small muted center" style="margin-top:20px">Anchor · v1 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+  }
+
+  /* ---------- Install ---------- */
+  let deferredInstall = null;
+  const UA = navigator.userAgent;
+  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(UA);
+  const inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Viber|Line\/|MicroMessenger|Snapchat|TikTok|; wv\)/i.test(UA);
+  function installBody() {
+    if (deferredInstall) return `<button class="btn gold block" data-act="install">Install Anchor</button>`;
+    if (inApp) return `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu; apps like Messenger cannot install.</p>`;
+    if (isIOS) return `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`;
+    if (isAndroid) return `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li></ol>`;
+    return `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
+  }
+  function showInstall() {
+    if (isStandalone() || $(".sheet-back")) return;
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="60" height="60" style="border-radius:15px"><div><div class="eyebrow">Private · offline</div><h2>Install Anchor</h2></div></div>
+      <p class="muted" style="margin:14px 0 12px">A plain name and icon on your home screen, behind your PIN.</p><div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="closesheet" style="margin-top:6px">Not now</button></div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return;
+    const a = el.dataset.act, v = el.dataset.v;
+    if (a === "pinkey") pinKey(v);
+    else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
+    else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
+    else if (a === "pinoff") { if (!confirm("Remove the PIN?")) return; db.pin = null; save(); render(); }
+    else if (a === "lessondone") { db.lessons[v] = Date.now(); save(); const l = C.lessons.find(x => x.id === v); toast("Noted."); location.hash = `#/learn/${l.module}`; }
+    else if (a === "lim") { const x = el.dataset.x; db.limits[v] = db.limits[v] === x ? "" : x; save(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.x === db.limits[v])); }
+    else if (a === "negotiated") { db.negotiated = Date.now(); save(); toast("Saved. Renegotiate every few months."); render(); }
+    else if (a === "ac") { const i = db.aftercare.indexOf(v); i < 0 ? db.aftercare.push(v) : db.aftercare.splice(i, 1); save(); el.classList.toggle("on"); }
+    else if (a === "add") { const k = el.dataset.k, t = $(`#new-${k}`).value.trim(); if (!t) return toast("Write it first"); const w = $(`#why-${k}`)?.value.trim() || ""; db[k].push({ id: uid(), text: t, why: w, ...(k === "conseq" ? { agreed: false } : {}) }); save(); render(); }
+    else if (a === "del") { const k = el.dataset.k; if (!confirm("Delete this?")) return; db[k] = db[k].filter(x => x.id !== v); save(); render(); }
+    else if (a === "agree") { const c = db.conseq.find(x => x.id === v); if (c) c.agreed = true; save(); render(); }
+    else if (a === "ritual") { const k = dayKey(); db.ritualLog[k] ||= {}; db.ritualLog[k][v] = !db.ritualLog[k][v]; save(); render(); }
+    else if (a === "savecheckin") { const t = $("#cin").value.trim(); if (!t) return toast("Write what she said"); db.checkins.push({ at: Date.now(), text: t }); save(); toast("Saved"); render(); }
+    else if (a === "sact") { const i = sdraft.acts.indexOf(v); i < 0 ? sdraft.acts.push(v) : sdraft.acts.splice(i, 1); render(); }
+    else if (a === "skit") { const i = sdraft.kit.indexOf(v); i < 0 ? sdraft.kit.push(v) : sdraft.kit.splice(i, 1); render(); }
+    else if (a === "savescene") { const i = db.scenes.findIndex(s => s.id === sdraft.id); i < 0 ? db.scenes.push({ ...sdraft }) : (db.scenes[i] = { ...db.scenes[i], ...sdraft }); save(); toast("Plan saved"); render(); }
+    else if (a === "scenedone") { const s = db.scenes.find(x => x.id === v); s.at = Date.now(); s.followed = false; save(); sdraft = null; toast("Aftercare window open. Today will remind you."); location.hash = "#/"; }
+    else if (a === "delscene") { if (!confirm("Delete this plan?")) return; db.scenes = db.scenes.filter(x => x.id !== v); sdraft = null; save(); location.hash = "#/her"; }
+    else if (a === "followed") { const s = db.scenes.find(x => x.id === v); if (s) s.followed = true; save(); toast("Good. That is the job."); render(); }
+    else if (a === "savedeb") { const s = db.scenes.find(x => x.id === v); db.debriefs.push({ id: uid(), at: Date.now(), title: s?.title || "", good: $("#dgood").value.trim(), change: $("#dchange").value.trim(), hers: $("#dhers").value.trim(), me: $("#dme").value.trim() }); if (s) s.followed = true; save(); location.hash = "#/journal"; }
+    else if (a === "deldeb") { if (!confirm("Delete this entry?")) return; db.debriefs = db.debriefs.filter(x => x.id !== v); save(); render(); }
+    else if (a === "tog") { el.classList.toggle("on"); el.querySelector(".box").innerHTML = el.classList.contains("on") ? ic("check") : ""; }
+    else if (a === "export") { const t = JSON.stringify(db); navigator.clipboard?.writeText(t).then(() => toast("Backup copied. Keep it private."), () => prompt("Copy:", t)); }
+    else if (a === "wipe") { if (!confirm("Erase everything in Anchor on this phone?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
+    else if (a === "installsheet") showInstall();
+    else if (a === "closesheet") $(".sheet-back")?.remove();
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
+  });
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
+    if (el.dataset.safe) { db.safe[el.dataset.safe] = el.value; save(); }
+    if (el.dataset.little) { db.little[el.dataset.little] = el.value; save(); }
+    if (el.dataset.s && sdraft) sdraft[el.dataset.s] = el.value;
+  });
+
+  fetch("data/content.json").then(r => r.json()).then(d => { C = d; render(); })
+    .catch(() => { $("#main").innerHTML = `<div class="loading">Could not load. Check your connection and reload.</div>`; });
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+})();
+</script>
+</body>
+</html>
