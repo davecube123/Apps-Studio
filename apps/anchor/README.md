@@ -5,8 +5,8 @@ request: not in the studio index or README table; noindex; optional PIN lock off
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
-- **Learn:** 42 lessons in 7 modules (foundations, negotiation, care and structure, presence, scenes, aftercare,
-  your own care), written in the voice of an experienced dominant.
+- **Learn:** 50 lessons in 8 modules (foundations, negotiation, care and structure, presence, scenes, her pleasure,
+  aftercare, your own care); "Her pleasure" is adult-to-adult only, never in or near little space,, written in the voice of an experienced dominant.
 - **Her:** a yes / maybe / no list filled in together; safewords and a non-verbal signal; her aftercare needs and
   his; her little space (comforts, bedtime, signs); rules with reasons; daily rituals; rewards; consequences that
   stay "not yet agreed" until she agrees; a scene planner that only offers her yeses and flags maybes; a
