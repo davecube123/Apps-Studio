@@ -130,6 +130,21 @@
     .note-body ul.checklist > li.checked { color: var(--muted); text-decoration: line-through; } .note-body ul.checklist > li.checked::before { background: var(--teal); border-color: var(--teal); }
     .note-body ul.checklist > li.checked::after { content: ""; position: absolute; left: 9px; top: calc(.2em + 4px); width: 5px; height: 10px; border: solid #0d2420; border-width: 0 2.2px 2.2px 0; transform: rotate(45deg); pointer-events: none; }
     .note-body ul.checklist ul.checklist { padding-left: 4px; margin-top: .15em; } .note-body li > ul, .note-body li > ol { margin: .15em 0 0; } .note-body li.checked > ul, .note-body li.checked > ol { color: var(--ink); text-decoration: none; }
+    .seg a { white-space: nowrap; }
+    .chain { display: grid; grid-template-columns: repeat(14, 1fr); gap: 0; margin-top: 8px; }
+    .cc { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+    .cc i { width: 100%; height: 16px; display: flex; justify-content: center; } .cc i::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line2); box-sizing: border-box; }
+    .cc.on i { background: transparent; } .cc.on i::before { background: var(--gold); border-color: var(--gold); }
+    .cc.on.jl i { background: linear-gradient(90deg, rgba(217,178,111,.45) 50%, transparent 50%) center / 100% 4px no-repeat; } .cc.on.jr i { background: linear-gradient(90deg, transparent 50%, rgba(217,178,111,.45) 50%) center / 100% 4px no-repeat; }
+    .cc.on.jl.jr i { background: linear-gradient(rgba(217,178,111,.45), rgba(217,178,111,.45)) center / 100% 4px no-repeat; }
+    .cc span { font: 600 9px var(--sans); color: var(--muted); }
+    .calgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calgrid .wd { text-align: center; font: 700 11px var(--sans); color: var(--muted); padding: 4px 0; }
+    .cal { aspect-ratio: 1 / 1.05; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 0; }
+    .cal b { font: 600 14px var(--sans); } .cal.today { border-color: var(--gold); } .cal.sel { background: rgba(217,178,111,.18); }
+    .cal .dots { display: flex; gap: 2px; min-height: 6px; } .cal .dots i, .lg { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .lg { margin-right: 5px; vertical-align: 1px; }
+    .d-scene { background: var(--amber); } .d-debrief { background: var(--violet); } .d-checkin { background: var(--teal); } .d-note { background: var(--blush); } .d-rhythm { background: var(--gold); }
     details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
     details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
     details.how summary::-webkit-details-marker { display: none; }
@@ -158,7 +173,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "7";
+  const KEY = "anchor", VER = "8";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -168,17 +183,18 @@
   const P = {
     anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v13M7.5 10.5h9M4.5 13.5c0 4 3.4 6.5 7.5 6.5s7.5-2.5 7.5-6.5"/>',
     book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
+    flame: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.6 2.7-5.6 4-8.8.6 2 1.7 3 2.7 3.6.3-2.4 1.2-4.4 2.8-6.1.3 3.5 3.5 5.9 3.5 10.6 0 4-2.7 6.9-6.5 6.9z"/>',
     heart: '<path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>', back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
     plus: '<path d="M12 5v14M5 12h14"/>', shield: '<path d="M12 3.5 19 6v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/>', list: '<path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
     moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>', star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/>',
     scale: '<path d="M12 4v16M6 20h12M5 8h14M7.5 8 4.5 14a3 3 0 0 0 6 0zM16.5 8l-3 6a3 3 0 0 0 6 0z"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
     blanket: '<path d="M4 8.5c2.5-2 5.5-2 8 0s5.5 2 8 0v9c-2.5 2-5.5 2-8 0s-5.5-2-8 0z"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
-    chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
+    chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', upload: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
   const MODS = { foundations: ["Foundations", "anchor", "#d9b26f", "What a dominant is"], negotiation: ["Negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
     care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
-    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
+    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
   const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
 
   /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
@@ -199,7 +215,8 @@
     ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
     ["Week 3 · Rules and care", ["first-rules", "rewards", "consequences", "little-evening", "her-bad-day"]],
     ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]],
-    ["Adult time · Her pleasure", ["learn-her", "her-orgasm"]] ];
+    ["Adult time · Her pleasure", ["learn-her", "her-orgasm"]],
+    ["Adult time · Rough, bound, roles, three", ["rough-sex", "bondage-sex", "roleplay", "threesome-couple"]] ];
   /* Rhythm: daily, weekly and monthly. Old "rituals" become daily rhythm items.
      Monthly items appear on Today at weekends and in the month's last week, until done. */
   const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -256,16 +273,17 @@
   function render() {
     if (!C) return;
     const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
-    if (db.notes && v !== "note") { const n0 = db.notes.length; db.notes = db.notes.filter(n => n.title.trim() || plain(n.html)); if (db.notes.length !== n0) save(); } /* drop empty notes */
+    if (db.notes) { const t0 = db.notes.length; db.notes = db.notes.filter(n => !n.trashed || Date.now() - n.trashed < 30 * DAY); if (db.notes.length !== t0) save(); }
+    if (db.notes && v !== "note") { const n0 = db.notes.length; db.notes = db.notes.filter(n => (n.title.trim() || plain(n.html)) && !n.fresh); if (db.notes.length !== n0) save(); } /* drop empty notes, and template notes never edited */
     let html;
     if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
     else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0);
     else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
-    else if (v === "journal") html = viewJournal(a); else if (v === "note") html = viewNote(a); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
+    else if (v === "journal") html = viewJournal(a); else if (v === "search") html = viewSearch(); else if (v === "note") html = viewNote(a); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings();
     else html = viewToday();
     $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
     const t = $("#tabs"); t.hidden = locked() || !db.pinAsked || v === "pin";
-    const cur = { l: "learn", g: "learn", start: "today", words: "learn", scene: "her", before: "her", debrief: "journal", note: "journal", settings: "today" }[v] || v;
+    const cur = { l: "learn", g: "learn", start: "today", words: "learn", scene: "her", before: "her", debrief: "journal", note: "journal", search: "today", settings: "today" }[v] || v;
     t.innerHTML = [["today", "anchor", "Today"], ["learn", "book", "Learn"], ["her", "heart", "Her"], ["journal", "pen", "Journal"]].map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
     if (nav) scrollTo(0, 0); lastHash = h;
   }
@@ -310,7 +328,7 @@
     const recent = db.scenes.filter(s => s.at && s.at > Date.now() - 3 * DAY && !s.followed);
     const neg = db.negotiated ? Math.floor((Date.now() - db.negotiated) / DAY) : null;
     const yes = Object.values(db.limits).filter(x => x === "y").length;
-    return `<div class="top"><div class="eyebrow">Anchor</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+    return `<div class="top"><div class="eyebrow">Anchor</div><div class="row" style="gap:0"><a class="iconbtn" href="#/search" aria-label="Search">${ic("search")}</a><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div></div>
       <div class="card" style="margin-top:6px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">From the old hand</div><p class="prompt" style="margin:10px 0 0">${esc(prompt)}</p>${howBox(howPrompt(prompt))}</div>
       ${(C.guides || []).length && pathDone() < pathTotal() ? `<a class="item" href="#/start" style="margin-top:12px;border-color:rgba(217,178,111,.4)">${modIc("foundations")}<div class="grow"><div class="t">Start here: your first four weeks</div><div class="m">${pathDone()} of ${pathTotal()} steps · step by step, with words to say</div></div>${ic("chev")}</a>` : ""}
       ${recent.map(s => `<div class="card" style="border-color:rgba(127,207,154,.4)"><div class="eyebrow" style="color:var(--green)">Aftercare window</div><p style="margin:8px 0 10px">Your scene “${esc(s.title || "untitled")}” ${(h => h < 1 ? "ended just now" : h < 48 ? `was ${h} hour${h === 1 ? "" : "s"} ago` : `was ${Math.round(h / 24)} days ago`)(Math.round((Date.now() - s.at) / 36e5))}. Drop can come a day or two later. Check in with her today, gently.</p>
@@ -385,7 +403,10 @@
     if (sec === "rituals") { location.hash = "#/her/rhythm"; return ""; }
     if (sec === "rhythm") { const R = rh(), empty = !R.daily.length && !R.weekly.length && !R.monthly.length;
       const days = [...Array(14)].map((_, i) => { const t = Date.now() - (13 - i) * DAY, k = dayKey(t), wd = new Date(t).getDay(); const due = R.daily.length + R.weekly.filter(x => +x.day === wd).length; const d = Object.values(db.ritualLog[k] || {}).filter(Boolean).length; return [due ? Math.min(1, d / due) : null, WD[wd][0]]; });
-      const row = (kind, x) => `<div class="rule"><div class="grow"><div>${esc(x.text)}</div><div class="w">${kind === "weekly" ? `Every ${WD[+x.day]}` : kind === "monthly" ? "Once a month" : "Every day"}${x.guide && guide(x.guide) ? ` · <a href="#/g/${x.guide}">how to</a>` : ""}</div></div><button class="iconbtn" data-act="rdel" data-k="${kind}" data-v="${x.id}" aria-label="Delete">${ic("x")}</button></div>`;
+      const chain = x => { const cells = [...Array(14)].map((_, i) => { const t = Date.now() - (13 - i) * DAY, k = dayKey(t); return [k, !!(db.ritualLog[k] || {})[x.id], WD[new Date(t).getDay()][0]]; });
+        let st = 0; for (let i = 13; i >= 0; i--) { if (cells[i][1]) st++; else if (i === 13) continue; else break; }
+        return `<div class="chain">${cells.map(([k, on, l], i) => `<button class="cc${on ? " on" : ""}${on && cells[i - 1]?.[1] ? " jl" : ""}${on && cells[i + 1]?.[1] ? " jr" : ""}" data-act="cell" data-v="${x.id}" data-key="${k}" aria-label="${k}: ${on ? "done" : "not done"}"><i></i><span>${l}</span></button>`).join("")}</div>${st > 1 ? `<div class="w" style="color:var(--gold)">${st} days in a row</div>` : ""}`; };
+      const row = (kind, x) => `<div class="rule"><div class="grow"><div>${esc(x.text)}</div>${kind === "daily" ? chain(x) : ""}<div class="w">${kind === "weekly" ? `Every ${WD[+x.day]}` : kind === "monthly" ? "Once a month" : "Every day"}${x.guide && guide(x.guide) ? ` · <a href="#/g/${x.guide}">how to</a>` : ""}</div></div><button class="iconbtn" data-act="rdel" data-k="${kind}" data-v="${x.id}" aria-label="Delete">${ic("x")}</button></div>`;
       return head("Rhythm", "The small things you do reliably are the dynamic. Few and steady beats many and patchy. Her bad days always come first.")
       + (empty ? `<div class="card" style="border-color:rgba(217,178,111,.4)"><div class="eyebrow" style="color:var(--gold)">Beginner template</div><p class="small" style="margin:8px 0 10px">Daily: good-morning message, a midday check-in text, the bedtime ritual, two minutes of reflection for you. Weekly: a check-in conversation (Sun), a little-space evening (Wed), a connection night (Fri), planning the week (Sun). Monthly: her list again, a review of rules and rituals, something for you.</p>
           <button class="btn gold block" data-act="template">${ic("check")} Use this template</button><p class="small muted" style="margin:8px 0 0">Change anything afterwards. Agree the daily ones with her first.</p></div>`
@@ -528,34 +549,125 @@
     tb.querySelectorAll("[data-cmd]").forEach(b => b.classList.toggle("on", !!st[b.dataset.cmd]));
   }
   function viewJournal(tab) {
-    const notesTab = tab !== "debriefs";
-    const seg = `<div class="seg" style="margin:0 0 16px"><a href="#/journal" class="${notesTab ? "on" : ""}">Notes · ${(db.notes || []).length}</a><a href="#/journal/debriefs" class="${notesTab ? "" : "on"}">Debriefs · ${db.debriefs.length}</a></div>`;
+    const notesTab = tab !== "debriefs" && tab !== "calendar";
+    const seg = `<div class="seg" style="margin:0 0 16px"><a href="#/journal" class="${notesTab ? "on" : ""}">Notes · ${(db.notes || []).filter(n => !n.trashed).length}</a><a href="#/journal/debriefs" class="${tab === "debriefs" ? "on" : ""}">Debriefs · ${db.debriefs.length}</a><a href="#/journal/calendar" class="${tab === "calendar" ? "on" : ""}">Calendar</a></div>`;
+    if (tab === "calendar") return `<h1 style="margin:8px 2px 14px">Journal</h1>` + seg + viewCalendar();
     if (!notesTab) return `<h1 style="margin:8px 2px 14px">Journal</h1>` + seg + viewDebriefs();
-    const N = (db.notes || []).filter(n => (!ntag || n.tag === ntag) && (!nq || (n.title + " " + plain(n.html)).toLowerCase().includes(nq.toLowerCase()))).sort((a, b) => (b.pin - a.pin) || b.at - a.at);
-    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><a class="btn gold sm" href="#/note/new">${ic("plus")} Note</a></div>` + seg
+    const trash = ntag === "Trash", N = (db.notes || []).filter(n => (trash ? n.trashed : !n.trashed) && (trash || !ntag || n.tag === ntag) && (!nq || (n.title + " " + plain(n.html)).toLowerCase().includes(nq.toLowerCase()))).sort((a, b) => (b.pin - a.pin) || b.at - a.at);
+    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><button class="btn gold sm" data-act="tplsheet">${ic("plus")} Note</button></div>` + seg
       + `<input type="text" id="nq" placeholder="Search notes" value="${esc(nq)}" autocomplete="off">
-      <div class="chips" style="margin:10px 0 4px">${["", ...NOTE_TAGS].map(t => `<button class="chip${ntag === t ? " on" : ""}" data-act="ntag" data-v="${t}">${t || "All"}</button>`).join("")}</div>
-      <div id="nlist" style="margin-top:10px">${N.length ? N.map(n => `<a class="item" href="#/note/${n.id}"><div class="grow"><div class="t">${n.pin ? "📌 " : ""}${esc(n.title || "Untitled")}</div><div class="m">${n.tag ? `${esc(n.tag)} · ` : ""}${dstr(n.at)} · ${esc(plain(n.html).slice(0, 70))}</div></div>${ic("chev")}</a>`).join("")
+      <div class="chips" style="margin:10px 0 4px">${["", ...NOTE_TAGS, "Trash"].map(t => `<button class="chip${ntag === t ? " on" : ""}" data-act="ntag" data-v="${t}">${t === "Trash" ? `🗑 Trash${(db.notes || []).some(n => n.trashed) ? ` · ${(db.notes || []).filter(n => n.trashed).length}` : ""}` : t || "All"}</button>`).join("")}</div>
+      <div id="nlist" style="margin-top:10px">${trash && N.length ? `<p class="small muted" style="margin:0 4px 10px">Deleted notes stay here for 30 days. <button class="linkbtn" data-act="emptytrash">Empty trash</button></p>` : ""}${N.length ? N.map(n => trash ? `<div class="item"><div class="grow"><div class="t">${esc(n.title || "Untitled")}</div><div class="m">Deleted ${dstr(n.trashed)} · ${esc(plain(n.html).slice(0, 60))}</div></div><button class="btn sm" data-act="restore" data-v="${n.id}">Restore</button></div>` : `<a class="item" href="#/note/${n.id}"><div class="grow"><div class="t">${n.pin ? "📌 " : ""}${esc(n.title || "Untitled")}</div><div class="m">${n.tag ? `${esc(n.tag)} · ` : ""}${dstr(n.at)} · ${esc(plain(n.html).slice(0, 70))}</div></div>${ic("chev")}</a>`).join("")
         : `<div class="card"><p style="margin:0">${(db.notes || []).length ? "No notes match." : "Notes for anything: what she likes, scene ideas, things to try, words that land. Tap Note to start."}</p></div>`}</div>`;
+  }
+  /* Note templates, as in Almanac: each built-in has a purpose and "Why it works" with sources. */
+  const h3 = (t, body = "<p><br></p>") => `<h3>${t}</h3>${body}`;
+  const items = (n, cls = "") => `<ul${cls ? ` class="${cls}"` : ""}>${"<li><br></li>".repeat(n)}</ul>`;
+  const TPL = [
+    { id: "scene", name: "Scene plan", tag: "Scene ideas", purpose: "Plan a scene from her yes list, with its shape, safety and aftercare.",
+      html: () => h3("What I want her to feel") + h3("From her yes list (check it first)", items(3)) + h3("Shape: opening, build, peak, landing", "<ol><li><br></li><li><br></li><li><br></li><li><br></li></ol>") + h3("Safewords and signal said out loud", items(1, "checklist")) + h3("Kit within reach", "<ul class=\"checklist\"><li>Safety shears</li><li>Water</li><li>Blanket</li></ul>") + h3("Aftercare plan") + h3("Next-day check-in", items(1, "checklist")),
+      why: [["Planning with explicit negotiation, safewords and aftercare is the core of risk-aware consensual practice in the kink community.", "RACK and the 4Cs (Williams et al., 2014); The New Topping Book (Easton & Hardy)"], ["Turning an intention into a concrete plan makes follow-through much more likely.", "Gollwitzer & Sheeran (2006), meta-analysis"]] },
+    { id: "negotiation", name: "Negotiation notes", tag: "Her likes", purpose: "Write down what you agreed, out of role, so nothing depends on memory.",
+      html: () => h3("Date and how we both felt going in") + h3("Yes", items(2)) + h3("Maybe (talk again before trying)", items(2)) + h3("No / hard limits", items(2)) + h3("Safewords and signal") + h3("Anything about her health, mood or week to keep in mind") + h3("When we will revisit this"),
+      why: [["Explicit, ongoing negotiation is the foundation of consensual BDSM practice; consent can be revisited and withdrawn at any time.", "Williams et al. (2014), the 4Cs; community practice"], ["Talking openly about sex is linked with higher sexual and relationship satisfaction.", "Mallory, Stanton & Handy (2019), meta-analysis"]] },
+    { id: "debrief", name: "Scene debrief", tag: "Other", purpose: "What happened, what worked, what to change, in her words and yours.",
+      html: () => h3("What happened") + h3("What went well", items(2)) + h3("What to change next time", items(2)) + h3("Her words (asked out of role)") + h3("How I feel now (dom drop is real)") + h3("One thing to do differently", items(1, "checklist")),
+      why: [["Structured debriefs (what happened, why, what next) improve later performance by about 20 to 25 percent.", "Tannenbaum & Cerasoli (2013), meta-analysis, Human Factors"], ["Debriefing after a scene is standard aftercare practice and helps catch sub drop early.", "Community practice; The New Topping Book (Easton & Hardy)"]] },
+    { id: "weekly", name: "Weekly review of the dynamic", tag: "Other", purpose: "Look back at the week together and set next week’s rhythm.",
+      html: () => h3("What felt good this week") + h3("What slipped, and why") + h3("What she asked for") + h3("Rules and rituals: keep, change, drop", items(2)) + h3("Next week", items(3, "checklist")) + h3("If-then plan: “If [moment], then I will [action]”"),
+      why: [["Writing down progress toward a goal makes reaching it more likely.", "Harkin et al. (2016), meta-analysis, Psychological Bulletin"], ["If-then plans have a medium-to-large effect on actually doing what you intend.", "Gollwitzer & Sheeran (2006)"]] },
+    { id: "map", name: "Her map", tag: "Her likes", purpose: "What she loves, what she doesn’t, and what helps her, kept up to date.",
+      html: () => h3("Things she loves", items(3)) + h3("Things she doesn’t like, or that upset her", items(2)) + h3("Words and names she likes") + h3("Signs she’s enjoying it / signs to slow down") + h3("What helps her after (aftercare)") + h3("Her comforts on a bad day"),
+      why: [["Partners who know and act on each other’s preferences report more satisfaction; asking and praise are linked with more orgasms for women.", "Frederick et al. (2018); Mallory et al. (2019)"]] },
+    { id: "ideas", name: "Fantasies and ideas", tag: "Fantasies", purpose: "Collect ideas to bring to a negotiation, not to spring on her.",
+      html: () => h3("Idea") + h3("Where it came from (hers, mine, both)") + h3("What appeals about it") + h3("Risks and how we’d handle them") + h3("Status", "<ul class=\"checklist\"><li>Talked about it</li><li>On her yes list</li><li>Tried it</li></ul>"),
+      why: [["Fantasies are common and varied, and sharing them is linked with closeness; acting on one is a separate, negotiated choice.", "Lehmiller (2018), Tell Me What You Want"]] },
+    { id: "little", name: "Little-space ideas", tag: "Little space", purpose: "Non-sexual ideas for rest, play and comfort.",
+      html: () => h3("Comfort things", items(3)) + h3("Play and activities", items(3)) + h3("Bedtime and routines") + h3("Gentle ways to bring her back out"),
+      why: [["Predictable, caring routines build a sense of safety and trust.", "Community practice in DD/lg; general attachment research"]] },
+    { id: "repair", name: "When I got it wrong", tag: "Other", purpose: "A repair note: own it, understand it, make it right.",
+      html: () => h3("What happened, plainly") + h3("How it affected her") + h3("What I’ll say to her") + h3("What I’ll change", items(2, "checklist")) + h3("Do I need outside help (a kink-aware therapist)?"),
+      why: [["Owning a mistake and repairing it is a core skill in healthy relationships and in consensual kink.", "Community practice; Gottman’s research on repair attempts"]] },
+    { id: "daily", name: "My daily note", tag: "Other", purpose: "Two minutes for you: a plan, a feeling, three good moments.",
+      html: () => h3("If-then plan for today: “If [moment], then I will [action]”") + h3("How I feel, in a word or two") + h3("Three good moments with her today", "<ol><li><br></li><li><br></li><li><br></li></ol>") + h3("Tomorrow", items(2, "checklist")),
+      why: [["If-then plans make follow-through much more likely.", "Gollwitzer & Sheeran (2006)"], ["Putting a feeling into words calms the brain’s alarm response.", "Lieberman et al. (2007), Psychological Science"], ["Writing three good things each evening raised happiness for months.", "Seligman et al. (2005), American Psychologist"]] } ];
+  const userTpls = () => (db.tpls || []);
+  function tplSheet() {
+    const back = document.createElement("div"); back.className = "sheet-back";
+    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><h2>New note</h2>
+      <button class="item" data-act="newnote" data-v="" style="margin-top:12px">${modIc("foundations")}<div class="grow"><div class="t">Blank note</div></div></button>
+      ${userTpls().length ? `<div class="eyebrow" style="margin:16px 4px 8px">My templates</div>${userTpls().map(t => `<div class="row" style="gap:6px"><button class="item" data-act="newnote" data-v="u:${t.id}" style="flex:1">${modIc("care")}<div class="grow"><div class="t">${esc(t.title || "Untitled")}</div></div></button><button class="iconbtn" data-act="deltpl" data-v="${t.id}" aria-label="Delete template">${ic("x")}</button></div>`).join("")}` : ""}
+      <div class="eyebrow" style="margin:16px 4px 8px">Templates</div>${TPL.map(t => `<div class="card" style="padding:12px 14px;margin-top:8px"><div class="row"><div class="grow"><b>${esc(t.name)}</b><div class="small muted">${esc(t.purpose)}</div></div><button class="btn gold sm" data-act="newnote" data-v="${t.id}">Use</button></div>
+        <details class="how" style="margin-top:8px;padding-top:8px"><summary>Why it works</summary><ul class="field">${t.why.map(([c, src]) => `<li>${esc(c)} <span style="color:var(--gold)">${esc(src)}</span></li>`).join("")}</ul></details></div>`).join("")}</div>`;
+    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
+  }
+  function newNote(tid) {
+    db.notes ||= []; let n = { id: uid(), title: "", html: "", tag: "", pin: 0, at: Date.now() };
+    if (tid.startsWith("u:")) { const u = userTpls().find(t => t.id === tid.slice(2)); if (u) Object.assign(n, { title: u.title, html: u.html, tag: u.tag || "" }); }
+    else { const t = TPL.find(x => x.id === tid); if (t) Object.assign(n, { title: `${t.name} · ${new Date().toLocaleDateString(undefined, { day: "numeric", month: "short" })}`, html: t.html(), tag: t.tag, tpl: t.id, fresh: true }); }
+    db.notes.push(n); save(); $(".sheet-back")?.remove(); location.hash = `#/note/${n.id}`;
   }
   let nedit = null;
   function viewNote(id) {
     db.notes ||= [];
-    if (id === "new") { nedit = { id: uid(), title: "", html: "", tag: "", pin: 0, at: Date.now() }; db.notes.push(nedit); save(); history.replaceState(null, "", `#/note/${nedit.id}`); }
-    else nedit = db.notes.find(n => n.id === id);
+    if (id === "new") { setTimeout(tplSheet, 0); location.hash = "#/journal"; return ""; }
+    nedit = db.notes.find(n => n.id === id && !n.trashed);
     if (!nedit) { location.hash = "#/journal"; return ""; }
     return `<div class="top">${backLink("#/journal", "Journal")}<span class="small muted" id="nsaved">Saved</span></div>
       <input type="text" id="ntitle" value="${esc(nedit.title)}" placeholder="Title" style="font:600 22px var(--display);border:0;background:transparent;padding:6px 2px">
       <div class="chips" style="margin:6px 0 12px">${NOTE_TAGS.map(t => `<button class="chip${nedit.tag === t ? " on" : ""}" data-act="nsettag" data-v="${t}">${t}</button>`).join("")}</div>
       <div class="toolbar" role="toolbar" aria-label="Formatting">${toolbarHTML()}</div>
       <div class="editor note-body" id="ned" contenteditable="true" spellcheck="true" data-placeholder="Start writing. Type  [ ]  for a checklist,  -  for bullets,  1.  for numbers,  >  for a quote,  #  for a heading.">${sanitize(nedit.html)}</div>
-      <div class="row" style="gap:8px;margin-top:14px"><button class="btn sm" data-act="npin">${nedit.pin ? "Unpin" : "📌 Pin to top"}</button><span class="grow"></span><button class="btn ghost sm" data-act="ndel" style="color:var(--red)">Delete note</button></div>
+      <div class="row" style="gap:8px;margin-top:14px"><button class="btn sm" data-act="npin">${nedit.pin ? "Unpin" : "📌 Pin to top"}</button><span class="grow"></span><button class="btn sm" data-act="savetpl">Save as template</button><button class="btn ghost sm" data-act="ndel" style="color:var(--red)">Delete</button></div>
       <p class="small muted" style="margin-top:10px">Edited ${dstr(nedit.at)}. Tap a box to tick it (sub-tasks tick too). Tab nests a list item.</p>`;
   }
+  let gq = "";
+  function searchResults(q) {
+    const w = q.toLowerCase().split(/\s+/).filter(Boolean); if (!w.length) return [];
+    const hit = t => w.every(x => t.toLowerCase().includes(x)), out = [];
+    (db.notes || []).filter(n => !n.trashed).forEach(n => { const t = n.title + " " + plain(n.html); if (hit(t)) out.push(["Note", n.title || "Untitled", plain(n.html).slice(0, 80), `#/note/${n.id}`]); });
+    db.debriefs.forEach(d => { const t = [d.title, d.good, d.change, d.hers, d.me].join(" "); if (hit(t)) out.push(["Debrief", d.title || "Entry", (d.good || d.change || "").slice(0, 80), "#/journal/debriefs"]); });
+    (C.guides || []).forEach(g => { const t = g.title + " " + g.why + " " + g.steps.map(x => x.h + " " + x.d + " " + (x.say || "")).join(" "); if (hit(t)) out.push(["Guide", g.title, g.why, `#/g/${g.id}`]); });
+    C.lessons.forEach(l => { const t = l.title + " " + l.hook + " " + l.cards.join(" ") + " " + l.practice; if (hit(t)) out.push(["Lesson", l.title, l.hook, `#/l/${l.id}/0`]); });
+    (C.glossary || []).forEach(x => { if (hit(x.t + " " + x.d)) out.push(["Word", x.t, x.d, "#/words"]); });
+    return out.slice(0, 60);
+  }
+  const resultsHTML = q => { const R = searchResults(q); return !q.trim() ? `<p class="muted small" style="margin:6px 4px">Search everything: your notes and debriefs, the lessons, the guides and the glossary.</p>` : R.length ? R.map(([k, t, m, h]) => `<a class="item" href="${h}"><span class="tag ${k === "Note" || k === "Debrief" ? "y" : "m"}" style="flex:none">${k}</span><div class="grow"><div class="t">${esc(t)}</div><div class="m">${esc(m)}</div></div>${ic("chev")}</a>`).join("") : `<p class="muted center" style="margin-top:24px">Nothing found.</p>`; };
+  function viewSearch() { setTimeout(() => $("#gsq")?.focus(), 60);
+    return `<div class="top">${backLink("#/", "Today")}</div><input type="text" id="gsq" placeholder="Search Anchor" value="${esc(gq)}" autocomplete="off" style="font-size:18px"><div id="gsr" style="margin-top:12px">${resultsHTML(gq)}</div>`; }
+  const download = (name, text, type) => { const b = new Blob([text], { type }), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
+  function toMd(html) {
+    const d = document.createElement("div"); d.innerHTML = sanitize(html);
+    const inl = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.tagName === "B" || c.tagName === "STRONG" ? `**${inl(c)}**` : c.tagName === "I" || c.tagName === "EM" ? `*${inl(c)}*` : /^(S|DEL|STRIKE)$/.test(c.tagName) ? `~~${inl(c)}~~` : c.tagName === "MARK" ? `==${inl(c)}==` : c.tagName === "BR" ? "\n" : /^(UL|OL)$/.test(c.tagName) ? "" : inl(c)).join("");
+    const list = (l, depth) => [...l.children].map((li, i) => { const sub = [...li.children].filter(c => /^(UL|OL)$/.test(c.tagName)); const mark = l.classList.contains("checklist") ? `- [${li.classList.contains("checked") ? "x" : " "}] ` : l.tagName === "OL" ? `${i + 1}. ` : "- ";
+      return "  ".repeat(depth) + mark + inl(li).trim() + sub.map(sl => "\n" + list(sl, depth + 1)).join(""); }).join("\n");
+    return [...d.childNodes].map(b => b.nodeType === 3 ? b.textContent : /^H1$/.test(b.tagName) ? `# ${inl(b)}` : b.tagName === "H2" ? `## ${inl(b)}` : b.tagName === "H3" ? `### ${inl(b)}` : b.tagName === "BLOCKQUOTE" ? `> ${inl(b)}` : b.tagName === "HR" ? "---" : /^(UL|OL)$/.test(b.tagName) ? list(b, 0) : inl(b)).filter(x => x.trim()).join("\n\n");
+  }
   let nT = 0;
-  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; const h = ed.innerHTML === "<br>" ? "" : ed.innerHTML; nedit.html = sanitize(h); nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const st = $("#nsaved"); if (st) st.textContent = "Saved"; }
+  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; const h = ed.innerHTML === "<br>" ? "" : ed.innerHTML; const nh = sanitize(h); if (nh !== nedit.html || $("#ntitle").value !== nedit.title) delete nedit.fresh; nedit.html = nh; nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const st = $("#nsaved"); if (st) st.textContent = "Saved"; }
   const saveSoon = () => { const st = $("#nsaved"); if (st) st.textContent = "Saving…"; clearTimeout(nT); nT = setTimeout(noteSave, 350); };
 
+  let calM = 0, calDay = null;
+  function dayEvents(k) {
+    const E = [], same = t => t && dayKey(t) === k;
+    db.scenes.filter(x => same(x.at)).forEach(x => E.push(["star", "Scene", x.title || "Scene", `#/scene/${x.id}`]));
+    db.debriefs.filter(x => same(x.at)).forEach(x => E.push(["pen", "Debrief", x.title || "Entry", "#/journal/debriefs"]));
+    db.checkins.filter(x => same(x.at)).forEach(x => E.push(["chat", "Check-in", x.text.slice(0, 50), "#/her/checkin"]));
+    (db.notes || []).filter(x => !x.trashed && same(x.at)).forEach(x => E.push(["book", "Note", x.title || "Untitled", `#/note/${x.id}`]));
+    const done = Object.values(db.ritualLog[k] || {}).filter(Boolean).length; if (done) E.push(["moon", "Rhythm", `${done} kept`, "#/her/rhythm"]);
+    return E;
+  }
+  function viewCalendar() {
+    const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + calM);
+    const y = base.getFullYear(), m = base.getMonth(), first = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), today = dayKey();
+    const cells = [...Array(first)].map(() => `<span></span>`).concat([...Array(n)].map((_, i) => { const k = dayKey(new Date(y, m, i + 1)), E = dayEvents(k), kinds = [...new Set(E.map(e => e[1]))];
+      return `<button class="cal${k === today ? " today" : ""}${k === calDay ? " sel" : ""}" data-act="calday" data-v="${k}"><b>${i + 1}</b><span class="dots">${kinds.slice(0, 4).map(t => `<i class="d-${t.toLowerCase().replace(/[^a-z]/g, "")}"></i>`).join("")}</span></button>`; }));
+    const sel = calDay ? dayEvents(calDay) : [];
+    return `<div class="row between" style="margin:0 2px 10px"><button class="iconbtn" data-act="calm" data-v="-1" aria-label="Previous month">${ic("back")}</button><b style="font:600 18px var(--display)">${base.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button class="iconbtn" data-act="calm" data-v="1" aria-label="Next month">${ic("chev")}</button></div>
+      <div class="calgrid">${["M", "T", "W", "T", "F", "S", "S"].map(d => `<span class="wd">${d}</span>`).join("")}${cells.join("")}</div>
+      <div class="small muted" style="margin:10px 4px 0;display:flex;gap:12px;flex-wrap:wrap"><span><i class="lg d-scene"></i>Scene</span><span><i class="lg d-debrief"></i>Debrief</span><span><i class="lg d-checkin"></i>Check-in</span><span><i class="lg d-note"></i>Note</span><span><i class="lg d-rhythm"></i>Rhythm</span></div>
+      ${calDay ? `<div class="sec"><div class="eyebrow">${new Date(calDay + "T12:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div>${sel.length ? sel.map(([i, k, t, h]) => `<a class="item" href="${h}">${modIc(k === "Scene" ? "scenes" : k === "Rhythm" ? "care" : k === "Check-in" ? "foundations" : "self", 36)}<div class="grow"><div class="t">${esc(t)}</div><div class="m">${k}</div></div>${ic("chev")}</a>`).join("") : `<p class="muted small" style="margin:0 4px">Nothing recorded this day.</p>`}</div>` : ""}`;
+  }
   function viewDebriefs() {
     const D = [...db.debriefs].sort((a, b) => b.at - a.at);
     return `<div class="row between" style="margin:0 2px 12px"><p class="muted small" style="margin:0">After a scene, within a day or two.</p><a class="btn gold sm" href="#/debrief/free">${ic("plus")} Debrief</a></div>
@@ -580,7 +692,11 @@
       <div class="card"><div class="eyebrow">Privacy</div><p class="small muted" style="margin:6px 0 10px">Everything is stored on this phone only. The PIN is a curtain against a glance, not encryption.</p>
         <a class="btn block" href="#/pin">${db.pin ? "Change PIN" : "Set a PIN"}</a>${db.pin ? `<button class="btn ghost block" data-act="pinoff" style="margin-top:6px">Remove PIN</button>` : ""}
         ${db.pin ? `<div class="small muted" style="margin:14px 0 8px">Lock again after the app has been away for</div><div class="chips">${[[1, "1 min"], [5, "5 min"], [15, "15 min"], [0, "Only when closed"]].map(([m, l]) => `<button class="chip${(db.lockMin ?? 5) === m ? " on" : ""}" data-act="lockmin" data-v="${m}">${l}</button>`).join("")}</div><p class="small muted" style="margin:8px 0 0">A refresh does not lock it.</p>` : ""}</div>
-      <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="export" style="margin-top:10px">${ic("share")} Copy a backup</button>
+      <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="backupfile" style="margin-top:10px">${ic("download")} Download a backup file</button>
+        <label class="btn block" style="margin-top:8px">${ic("upload")} Restore from a backup file<input type="file" accept="application/json,.json" hidden data-import></label>
+        <button class="btn block" data-act="mdexport" style="margin-top:8px">${ic("share")} Export notes as Markdown</button>
+        <button class="btn ghost block" data-act="export" style="margin-top:4px">Copy a backup as text</button>
+        ${db.lastBackup ? `<p class="small muted" style="margin:8px 0 0">Last backup: ${dstr(db.lastBackup)}</p>` : `<p class="small muted" style="margin:8px 0 0">Back up now and then: if the phone is lost or the browser data is cleared, the file is the only copy.</p>`}
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
       <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
@@ -619,7 +735,7 @@
     else if (a === "ntag") { ntag = v; render(); }
     else if (a === "nsettag") { nedit.tag = nedit.tag === v ? "" : v; save(); el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === nedit.tag)); }
     else if (a === "npin") { nedit.pin = nedit.pin ? 0 : 1; save(); el.textContent = nedit.pin ? "Unpin" : "📌 Pin to top"; }
-    else if (a === "ndel") { if (!confirm("Delete this note?")) return; db.notes = db.notes.filter(n => n.id !== nedit.id); nedit = null; save(); location.hash = "#/journal"; }
+    else if (a === "ndel") { noteSave(); nedit.trashed = Date.now(); nedit = null; save(); toast("Moved to Trash (kept 30 days)"); location.hash = "#/journal"; }
     else if (a === "lockmin") { db.lockMin = +v; save(); stamp(); render(); }
     else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
     else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
@@ -632,6 +748,15 @@
     else if (a === "del") { const k = el.dataset.k; if (!confirm("Delete this?")) return; db[k] = db[k].filter(x => x.id !== v); save(); render(); }
     else if (a === "agree") { const c = db.conseq.find(x => x.id === v); if (c) c.agreed = true; save(); render(); }
     else if (a === "rdone") { const k = el.dataset.k, key = el.dataset.key; if (k === "monthly") { db.monthLog ||= {}; db.monthLog[key] ||= {}; db.monthLog[key][v] = !db.monthLog[key][v]; } else { db.ritualLog[key] ||= {}; db.ritualLog[key][v] = !db.ritualLog[key][v]; } save(); render(); }
+    else if (a === "calm") { calM += +v; calDay = null; render(); }
+    else if (a === "calday") { calDay = calDay === v ? null : v; render(); }
+    else if (a === "tplsheet") tplSheet();
+    else if (a === "newnote") newNote(v);
+    else if (a === "deltpl") { if (!confirm("Delete this template?")) return; db.tpls = userTpls().filter(t => t.id !== v); save(); $(".sheet-back")?.remove(); tplSheet(); }
+    else if (a === "savetpl") { noteSave(); db.tpls ||= []; db.tpls.push({ id: uid(), title: nedit.title || "My template", html: nedit.html, tag: nedit.tag }); save(); toast("Saved as a template. Find it under New note."); }
+    else if (a === "restore") { const n = db.notes.find(x => x.id === v); if (n) delete n.trashed; save(); toast("Restored"); render(); }
+    else if (a === "emptytrash") { if (!confirm("Delete the notes in Trash for good?")) return; db.notes = db.notes.filter(n => !n.trashed); save(); render(); }
+    else if (a === "cell") { const k = el.dataset.key; db.ritualLog[k] ||= {}; db.ritualLog[k][v] = !db.ritualLog[k][v]; save(); render(); }
     else if (a === "template") { const R = rh(); TEMPLATE.daily.forEach(([t, g]) => R.daily.push({ id: uid(), text: t, guide: g })); TEMPLATE.weekly.forEach(([t, d, g]) => R.weekly.push({ id: uid(), text: t, day: d, guide: g })); TEMPLATE.monthly.forEach(([t, g]) => R.monthly.push({ id: uid(), text: t, guide: g })); save(); toast("Template added. Agree the daily ones with her."); render(); }
     else if (a === "radd") { const k = el.dataset.k, inp = $(`#rh-${k}`), t = inp.value.trim(); if (!t) return toast("Write it first"); rh()[k].push({ id: uid(), text: t, ...(k === "weekly" ? { day: wday } : {}) }); save(); render(); }
     else if (a === "rwd") { wday = +v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
@@ -647,6 +772,12 @@
     else if (a === "savedeb") { const s = db.scenes.find(x => x.id === v); db.debriefs.push({ id: uid(), at: Date.now(), title: s?.title || "", good: $("#dgood").value.trim(), change: $("#dchange").value.trim(), hers: $("#dhers").value.trim(), me: $("#dme").value.trim() }); if (s) s.followed = true; save(); location.hash = "#/journal"; }
     else if (a === "deldeb") { if (!confirm("Delete this entry?")) return; db.debriefs = db.debriefs.filter(x => x.id !== v); save(); render(); }
     else if (a === "tog") { el.classList.toggle("on"); el.querySelector(".box").innerHTML = el.classList.contains("on") ? ic("check") : ""; }
+    else if (a === "backupfile") { db.lastBackup = Date.now(); save(); download(`anchor-backup-${dayKey()}.json`, JSON.stringify(db, null, 1), "application/json"); toast("Backup downloaded. Keep it somewhere private."); render(); }
+    else if (a === "mdexport") { const N = (db.notes || []).filter(n => !n.trashed).sort((x, y) => y.at - x.at); if (!N.length) return toast("No notes yet"); download(`anchor-notes-${dayKey()}.md`, N.map(n => `# ${n.title || "Untitled"}
+
+${n.tag ? `Tag: ${n.tag} · ` : ""}${dstr(n.at)}
+
+${toMd(n.html)}`).join("\n\n---\n\n"), "text/markdown"); toast("Notes exported"); }
     else if (a === "export") { const t = JSON.stringify(db); navigator.clipboard?.writeText(t).then(() => toast("Backup copied. Keep it private."), () => prompt("Copy:", t)); }
     else if (a === "wipe") { if (!confirm("Erase everything in Anchor on this phone?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "installsheet") showInstall();
@@ -677,11 +808,22 @@
       if (nli && x.isCollapsed && isNested(nli, ed)) { const r = x.getRangeAt(0).cloneRange(); r.setStart(nli, 0); if (!r.toString().length) { e.preventDefault(); outdentItem(nli, ed); saveSoon(); return; } }
       const blk = topBlock(ed, caretNode()); if (blk && /^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(blk.tagName) && x.isCollapsed) { const r = x.getRangeAt(0).cloneRange(); r.setStart(blk, 0); if (!r.toString().length) { e.preventDefault(); placeCaretIn(retag(blk, "p"), false); saveSoon(); } } }
   });
+  document.addEventListener("change", e => {
+    if (!e.target.matches("[data-import]")) return; const f = e.target.files[0]; if (!f) return;
+    f.text().then(t => { const d = JSON.parse(t); if (!d || typeof d !== "object" || !("lessons" in d || "limits" in d)) throw 0;
+      if (!confirm("Restore this backup? Notes, debriefs, scenes and check-ins are merged; settings and lists are replaced by the backup’s.")) return;
+      const merge = (k, key = "id") => { const have = new Set((db[k] || []).map(x => x[key])); db[k] = [...(db[k] || []), ...(d[k] || []).filter(x => !have.has(x[key]))]; };
+      merge("notes"); merge("debriefs"); merge("scenes"); merge("checkins", "at"); merge("tpls");
+      ["limits", "limitNote", "negotiated", "safe", "aftercare", "aftercareNote", "mine", "little", "rules", "rewards", "conseq", "rhythm", "ritualLog", "monthLog", "lessons", "guides", "lockMin"].forEach(k => { if (k in d) db[k] = d[k]; });
+      save(); toast("Backup restored"); render(); }).catch(() => toast("That file isn’t an Anchor backup"));
+    e.target.value = "";
+  });
   document.addEventListener("paste", e => { const ed = $("#ned"); if (!ed || !ed.contains(e.target)) return; const h = e.clipboardData.getData("text/html"), t = e.clipboardData.getData("text/plain"); e.preventDefault(); if (h) document.execCommand("insertHTML", false, sanitize(h)); else document.execCommand("insertText", false, t); });
   document.addEventListener("input", e => {
     const el = e.target;
     if (el.id === "ned") { if (e.inputType === "insertText" && e.data === " ") tryShortcut(el); saveSoon(); return; }
     if (el.id === "ntitle") { saveSoon(); return; }
+    if (el.id === "gsq") { gq = el.value; $("#gsr").innerHTML = resultsHTML(gq); return; }
     if (el.id === "nq") { nq = el.value; const L = $("#nlist"); const h = viewJournal(); const d = document.createElement("div"); d.innerHTML = h; L.innerHTML = d.querySelector("#nlist").innerHTML; return; }
     if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
     if (el.dataset.f) { db[el.dataset.f] = el.value; save(); }
