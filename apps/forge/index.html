@@ -158,7 +158,7 @@
   const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
 
   /* Everything stays on this device. */
-  const KEY = "forge";
+  const KEY = "forge", VER = "2";
   const db = Object.assign({ xp: 0, tier: 3, lessons: {}, quiz: {}, missions: {}, habits: {}, days: {}, reports: [], kegel: [], plan: {}, field: null },
     (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
@@ -250,7 +250,7 @@
     const done = [p.done.lesson, p.done.field, p.done.drill, hcount >= 3, reported].filter(Boolean).length;
     const r30 = db.reports.filter(x => x.at > Date.now() - 30 * DAY), sum = k => r30.reduce((s, x) => s + (+x[k] || 0), 0);
     const quest = (href, mod, title, desc, xp, isDone, act) => `<${act ? `button data-act="${act}"` : `a href="${href}"`} class="card quest${isDone ? " done" : ""}" style="margin-top:10px">${modIc(mod)}<div class="grow"><div class="t">${esc(title)}</div><div class="d">${esc(desc)}</div></div><div class="xp">${isDone ? ic("check") : `+${xp}`}</div></${act ? "button" : "a"}>`;
-    return `<div class="top"><div class="eyebrow">Forge</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+    return `<div class="top"><div class="eyebrow">Forge <span style="opacity:.6;letter-spacing:.06em;text-transform:none">· v${VER}</span></div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
       <div class="card rank"><div class="row" style="gap:14px"><div class="flame"><svg viewBox="0 0 24 24" fill="url(#fg)"><defs><linearGradient id="fg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7a3d"/><stop offset="1" stop-color="#f2c14e"/></linearGradient></defs>${P.flame.replace("<path", '<path stroke="none"')}</svg></div>
         <div class="grow"><div class="eyebrow" style="color:var(--ember2)">Rank ${r + 1} · ${streak()} day streak</div><h2 style="margin-top:4px">${RANKS[r][1]}</h2></div><div class="center"><b style="font:600 24px var(--display)">${db.xp}</b><div class="small muted">XP</div></div></div>
         <div class="xpbar"><i style="width:${pct.toFixed(1)}%"></i></div><div class="small muted" style="margin-top:6px">${next ? `${next[0] - db.xp} XP to ${next[1]}` : "Top rank. Keep the fire going."}</div>
@@ -417,7 +417,7 @@
         <button class="btn block" data-act="export">${ic("share")} Copy a backup</button>
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--rose)">Erase everything</button></div>
-      <p class="small muted center" style="margin-top:20px">Forge · v1 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+      <p class="small muted center" style="margin-top:20px">Forge · v${VER} · Fonts: Fraunces, Inter (SIL OFL)</p>`;
   }
 
   /* ---------- Install ---------- */
