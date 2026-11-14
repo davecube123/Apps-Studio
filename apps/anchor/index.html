@@ -174,7 +174,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "8";
+  const KEY = "anchor", VER = "9";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
