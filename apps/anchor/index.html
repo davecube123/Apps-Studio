@@ -198,9 +198,15 @@
 
   /* ---------- PIN lock: a privacy curtain, not encryption ---------- */
   const pinHash = pin => String([..."anchor:" + pin].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7));
-  let unlocked = false, pinBuf = "", pinFirst = "", hiddenAt = 0;
+  /* Unlock survives a refresh: the moment of last activity is kept for this browser tab only (sessionStorage),
+     and the app locks once it has been away longer than the chosen time (db.lockMin; 0 = only when closed). */
+  const SKEY = "anchor-unlocked";
+  const lockMs = () => (db.lockMin ?? 5) * 60000;
+  const stamp = () => { try { sessionStorage.setItem(SKEY, String(Date.now())); } catch (e) {} };
+  let unlocked = (() => { try { const t = +sessionStorage.getItem(SKEY); return !!t && (lockMs() === 0 || Date.now() - t < lockMs()); } catch (e) { return false; } })(), pinBuf = "", pinFirst = "", hiddenAt = 0;
   const locked = () => !!db.pin && !unlocked;
-  addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = Date.now(); else if (db.pin && unlocked && Date.now() - hiddenAt > 60000) { unlocked = false; pinBuf = ""; render(); } });
+  addEventListener("pagehide", () => { if (unlocked) stamp(); });
+  addEventListener("visibilitychange", () => { if (document.hidden) { hiddenAt = Date.now(); if (unlocked) stamp(); } else if (db.pin && unlocked && lockMs() > 0 && Date.now() - hiddenAt > lockMs()) { unlocked = false; pinBuf = ""; try { sessionStorage.removeItem(SKEY); } catch (e) {} render(); } });
   const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Anchor</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
     <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
     <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"].map(k => k === "" ? "<span></span>" : `<button data-act="pinkey" data-v="${k}" aria-label="${k === "del" ? "Delete" : k}">${k === "del" ? ic("back") : k}</button>`).join("")}</div></div>`;
@@ -214,10 +220,10 @@
     if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) pinBuf += k;
     if (pinBuf.length < 4) return render();
     const e = pinBuf; pinBuf = "";
-    if (locked()) { if (pinHash(e) === db.pin) unlocked = true; else toast("Wrong PIN"); return render(); }
+    if (locked()) { if (pinHash(e) === db.pin) { unlocked = true; stamp(); } else toast("Wrong PIN"); return render(); }
     if (!pinFirst) { pinFirst = e; return render(); }
     if (e !== pinFirst) { pinFirst = ""; toast("They didn’t match. Try again."); return render(); }
-    db.pin = pinHash(e); db.pinAsked = true; pinFirst = ""; unlocked = true; save(); toast("PIN set"); location.hash = "#/"; render();
+    db.pin = pinHash(e); db.pinAsked = true; pinFirst = ""; unlocked = true; stamp(); save(); toast("PIN set"); location.hash = "#/"; render();
   }
 
   /* ---------- Routing ---------- */
@@ -434,12 +440,13 @@
   function viewSettings() {
     return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 14px">Settings</h1>
       <div class="card"><div class="eyebrow">Privacy</div><p class="small muted" style="margin:6px 0 10px">Everything is stored on this phone only. The PIN is a curtain against a glance, not encryption.</p>
-        <a class="btn block" href="#/pin">${db.pin ? "Change PIN" : "Set a PIN"}</a>${db.pin ? `<button class="btn ghost block" data-act="pinoff" style="margin-top:6px">Remove PIN</button>` : ""}</div>
+        <a class="btn block" href="#/pin">${db.pin ? "Change PIN" : "Set a PIN"}</a>${db.pin ? `<button class="btn ghost block" data-act="pinoff" style="margin-top:6px">Remove PIN</button>` : ""}
+        ${db.pin ? `<div class="small muted" style="margin:14px 0 8px">Lock again after the app has been away for</div><div class="chips">${[[1, "1 min"], [5, "5 min"], [15, "15 min"], [0, "Only when closed"]].map(([m, l]) => `<button class="chip${(db.lockMin ?? 5) === m ? " on" : ""}" data-act="lockmin" data-v="${m}">${l}</button>`).join("")}</div><p class="small muted" style="margin:8px 0 0">A refresh does not lock it.</p>` : ""}</div>
       <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="export" style="margin-top:10px">${ic("share")} Copy a backup</button>
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
         <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
       <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
-      <p class="small muted center" style="margin-top:20px">Anchor · v3 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
+      <p class="small muted center" style="margin-top:20px">Anchor · v4 · Fonts: Fraunces, Inter (SIL OFL)</p>`;
   }
 
   /* ---------- Install ---------- */
@@ -471,6 +478,7 @@
     const a = el.dataset.act, v = el.dataset.v;
     if (a === "pinkey") pinKey(v);
     else if (a === "guidedone") { db.guides ||= {}; if (db.guides[v]) delete db.guides[v]; else db.guides[v] = Date.now(); save(); toast(db.guides[v] ? "Well done. On to the next." : "Unmarked"); location.hash = "#/start"; }
+    else if (a === "lockmin") { db.lockMin = +v; save(); stamp(); render(); }
     else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
     else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "pinoff") { if (!confirm("Remove the PIN?")) return; db.pin = null; save(); render(); }
