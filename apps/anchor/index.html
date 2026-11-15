@@ -178,7 +178,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "11";
+  const KEY = "anchor", VER = "12";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], profile: { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] }, modes: null, protHome: [], protPublic: [], protEx: "", stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -199,10 +199,18 @@
     blanket: '<path d="M4 8.5c2.5-2 5.5-2 8 0s5.5 2 8 0v9c-2.5 2-5.5 2-8 0s-5.5-2-8 0z"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
     chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', upload: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
-  const MODS = { foundations: ["Foundations", "anchor", "#d9b26f", "What a dominant is"], negotiation: ["Negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
-    care: ["Care & structure", "heart", "#ec9fb6", "Rules, rituals, praise, little space"], service: ["Service", "cup", "#c9a27e", "Her devotion, your duties as Master"], discipline: ["Discipline", "gavel", "#e0a46a", "Rewards, reinforcement, correction"], presence: ["Presence", "spark", "#a99bf2", "Voice, authority, protocol"],
-    scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"], pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"], aftercare: ["Aftercare", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"] };
-  const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
+  /* The core is dominance; Daddy and Master are its wings; adult time sits alongside. Names can be overridden by content.json "structure". */
+  const MODS = {
+    foundations: ["Foundations of dominance", "anchor", "#d9b26f", "What dominance is, and where authority comes from"], negotiation: ["Consent and negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
+    presence: ["Presence and authority", "spark", "#a99bf2", "Voice, decisiveness, reading her"], structure: ["Structure", "list", "#e8b27a", "Rules, rituals, praise, rewards"],
+    discipline: ["Discipline", "gavel", "#e0a46a", "Reinforcement and correction"], scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"],
+    aftercare: ["Aftercare and repair", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"],
+    daddy: ["The Daddy wing", "heart", "#ec9fb6", "Nurture, protection, little space"], master: ["The Master wing", "cup", "#c9a27e", "Service, protocol, standards"],
+    pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], anticipation: ["Anticipation", "spark", "#ff9a6a", "Adult time: the slow burn, tease, words"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"] };
+  const MODS_ALIAS = { care: MODS.structure, service: MODS.master };
+  const SECTIONS = [["core", "The core: dominance", ["foundations", "negotiation", "presence", "structure", "discipline", "scenes", "aftercare", "self"]], ["daddy", "Wing: Daddy", ["daddy"]], ["master", "Wing: Master", ["master"]], ["adult", "Adult time", ["pleasure", "anticipation", "adultplay"]]];
+  const INTROS = { core: "Everything starts here. Dominance is authority she gives you, held with consent, steadiness and care. Both wings stand on it.", daddy: "Nurture as dominance: protection, comfort, bedtime, little space. Always non-sexual.", master: "Service as dominance: standards, protocol, training and ownership, always between adults.", adult: "Her body and adult play, adult to adult only, never in or near little space." };
+  const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS_ALIAS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
 
   /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
   const ACTS = [
@@ -219,7 +227,7 @@
   const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
 
   /* A four-week beginner path through the guides, in a sensible order. */
-  const PATH = [
+  let PATH = [
     ["Week 1 · Talk and agree", ["first-talk", "the-list", "safewords", "tone"]],
     ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
     ["Week 3 · Rules and care", ["first-rules", "wellbeing-plan", "rewards", "consequences", "little-evening", "her-bad-day"]],
@@ -242,7 +250,7 @@
   const goalRow = r => { const W = weekDays(), today = dayKey(), n = goalCount(r);
     return `<div class="goalrow">${W.map((k, i) => `<button class="gd${(r.log || {})[k] ? " on" : ""}${k === today ? " today" : ""}" data-act="goalday" data-v="${r.id}" data-key="${k}" ${k > today ? "disabled" : ""} aria-label="${k}">${"MTWTFSS"[i]}</button>`).join("")}<span class="gc${n >= r.target ? " met" : ""}">${n}/${r.target}${n >= r.target ? " ✓" : ""}</span></div>`; };
   /* ---------- Examples (from data/content.json "examples") ---------- */
-  const EXT = { protocol: "Protocol", rules: "Rules", rhythm: "Rhythm", rewards: "Rewards", conseq: "Consequences", praise: "Praise", texts: "Check-in texts", little: "Little space" };
+  const EXT = { protocol: "Protocol", rules: "Rules", anticipation: "Anticipation (adult)", rhythm: "Rhythm", rewards: "Rewards", conseq: "Consequences", praise: "Praise", texts: "Check-in texts", little: "Little space" };
   const RCAT = { body: "Body and movement", mind: "Mind and calm", sleep: "Sleep", care: "Self-care", connection: "Connection", safety: "Safety", growth: "Growth", home: "Home and routine", little: "Little space", protocol: "Protocol", service: "Service" };
   let exTab = "rules";
   const exBtn = (k, label) => C.examples ? `<button class="btn sm" data-act="exsheet" data-v="${k}" style="margin:0 2px 14px">${ic("plus")} ${label}</button>` : "";
@@ -258,6 +266,10 @@
     if (k === "rhythm") { const R = E.rhythm || {}; return ["daily", "weekly", "monthly"].map(p => `<div class="eyebrow" style="margin:16px 4px 6px">${p[0].toUpperCase() + p.slice(1)}</div>` + (R[p] || []).map((x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x[0])}${p === "weekly" ? `<div class="m">${WD[x[1]]}</div>` : ""}</div>${exHave("rhythm", x[0]) ? `<span class="tag y" style="flex:none">Added</span>` : `<button class="btn sm gold" data-act="exadd" data-v="rhythm-${p}" data-i="${i}" style="flex:none">${ic("plus")}</button>`}</div>`).join("")).join(""); }
     if (k === "praise") { row = ([x]) => ""; return (E.praise || []).map(x => `<div class="item" style="padding:10px 14px"><div class="grow"><div class="m">${esc(x.when)}</div><div style="font:italic 500 16px/1.45 var(--display)">“${esc(x.say)}”</div></div>${copy(x.say)}</div>`).join(""); }
     if (k === "texts") { row = (x) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.say)}</div>${copy(x.say)}</div>`; const g = {}; (E.texts || []).forEach(x => (g[x.when] ||= []).push(x)); return Object.entries(g).map(([w, xs]) => `<div class="eyebrow" style="margin:16px 4px 6px">${esc(w)}</div>${xs.map(row).join("")}`).join(""); }
+    if (k === "anticipation") { const A = E.anticipation || {}, g = {}; (A.texts || []).forEach(x => (g[x.when] ||= []).push(x));
+      return `<div class="warnbox" style="margin-top:6px">Adult time only, never in little space. Keep the chat locked and previews off, and nothing she could not handle at work.</div>`
+        + Object.entries(g).map(([w, xs]) => `<div class="eyebrow" style="margin:16px 4px 6px">Messages · ${esc(w)}</div>${xs.map(x => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.say)}</div>${copy(x.say)}</div>`).join("")}`).join("")
+        + ((A.instructions || []).length ? `<div class="eyebrow" style="margin:16px 4px 6px">Small instructions for her day</div>` + A.instructions.map(x => { const t = typeof x === "string" ? x : x.text || x.say; return `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div>${copy(t)}</div>`; }).join("") : ""); }
     if (k === "protocol") { const PR = E.protocol || {}; return ["home", "public"].map(w => `<div class="eyebrow" style="margin:16px 4px 6px">${w === "home" ? "At home" : "In public (discreet)"}</div>` + (PR[w] || []).map((t, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div>${(db[w === "home" ? "protHome" : "protPublic"] || []).some(x => x.text === t) ? `<span class="tag y" style="flex:none">Added</span>` : `<button class="btn sm gold" data-act="exadd" data-v="prot-${w}" data-i="${i}" style="flex:none">${ic("plus")}</button>`}</div>`).join("")).join("") + ((PR.exceptions || []).length ? `<div class="eyebrow" style="margin:16px 4px 6px">Exceptions to agree</div>` + PR.exceptions.map(t => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div></div>`).join("") : ""); }
     if (k === "little") { row = (x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.text)}</div><button class="btn sm" data-act="exadd" data-v="little" data-i="${i}" style="flex:none">${ic("plus")}</button></div>`; return `<p class="small muted" style="margin:6px 4px">Tap + to add an idea to her Comforts list. All non-sexual.</p>` + group(E.little || [], x => x.kind, { comfort: "Comfort", play: "Play", bedtime: "Bedtime", outing: "Outings", care: "Being looked after" }); }
     return "";
@@ -458,8 +470,10 @@
     return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons. Short, practical, from someone who has made the mistakes so you don’t have to.</p>
       ${(C.guides || []).length ? `<div class="row" style="gap:10px;margin-bottom:14px"><a class="btn gold" href="#/start" style="flex:1">${ic("list")} Step-by-step guides</a><a class="btn" href="#/words">${ic("book")} Glossary</a></div>
       <div class="row" style="gap:10px;margin:-4px 0 14px"><a class="btn" href="#/examples" style="flex:1">${ic("plus")} Examples</a><a class="btn" href="#/stories" style="flex:1">${ic("chat")} Stories</a></div>` : ""}
-      <div class="mods">${Object.entries(MODS).map(([k, [n, i, col, sub]]) => { const ls = byMod(k), d = ls.filter(l => db.lessons[l.id]).length;
-        return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}24, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${d}/${ls.length}</small><span class="bar" style="width:${ls.length ? d / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div>`;
+      ${SECTIONS.map(([sid, title, mods]) => { const mine = sid === "daddy" ? prof().titles.includes("Daddy") : sid === "master" ? prof().titles.includes("Master") : false;
+        return `<div class="sec"><div class="row between" style="margin:0 4px 4px"><div class="eyebrow">${title}</div>${mine ? `<span class="tag y">your wing</span>` : ""}</div><p class="small muted" style="margin:0 4px 10px">${esc(INTROS[sid] || "")}</p>
+        <div class="mods">${mods.filter(k => MODS[k] && byMod(k).length).map(k => { const [n, i, col, sub] = MODS[k], ls = byMod(k), d = ls.filter(l => db.lessons[l.id]).length;
+          return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}24, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${d}/${ls.length}</small><span class="bar" style="width:${ls.length ? d / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div></div>`; }).join("")}`;
   }
   function viewModule(m) {
     const [n, , , sub] = MODS[m] || []; if (!n) { location.hash = "#/learn"; return ""; }
@@ -485,15 +499,14 @@
   function viewHer(sec) {
     const nav = (href, icn, mod, t, m) => `<a class="item" href="${href}">${modIc(mod)}<div class="grow"><div class="t">${t}</div><div class="m">${m}</div></div>${ic("chev")}</a>`;
     if (!sec) { const yes = Object.values(db.limits).filter(x => x === "y").length, no = Object.values(db.limits).filter(x => x === "n").length;
-      return `<h1 style="margin:8px 2px 6px">Her</h1><p class="muted" style="margin:0 2px 16px">What you have agreed together, in one place. Fill it in with her, not about her.</p>
-        ${nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`)}${nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`)}
-        ${nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set")}${nav("#/her/little", "heart", "care", "Her little space", "Comforts, bedtime, signs")}
-        ${nav("#/her/rules", "list", "care", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}`)}${nav("#/her/rhythm", "moon", "care", "Rhythm", `${rh().daily.length} daily · ${rh().weekly.length} weekly · ${rh().monthly.length} monthly`)}
-        ${nav("#/her/stars", "star", "discipline", "Star chart", `${(db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }).n} of ${db.stars.goal} stars${db.stars.reward ? " · " + esc(db.stars.reward) : ""}`)}
-        ${nav("#/her/rewards", "star", "care", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`)}
-        ${nav("#/her/modes", "cup", "service", "Modes and cues", modes().filter(m => m.cue).map(m => `${m.name}: ${m.cue}`).join(" · ") || "Little space, service, adult time")}
-        ${nav("#/her/protocol", "list", "presence", "Protocol", `${(db.protHome || []).length} at home · ${(db.protPublic || []).length} in public`)}
-        ${nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)}${nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes")}`; }
+      const g = (t, x) => `<div class="sec" style="margin-top:20px"><div class="eyebrow" style="margin:0 4px 2px">${t}</div>${x}</div>`, P = prof();
+      return `<h1 style="margin:8px 2px 6px">Her</h1><p class="muted" style="margin:0 2px 6px">What you have agreed together, in one place. Fill it in with her, not about her.</p>`
+        + g("Agreements", nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`) + nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`) + nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set") + nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes"))
+        + g("Structure", nav("#/her/rules", "list", "structure", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}${db.rules.some(r => r.target) ? " · weekly goals" : ""}`) + nav("#/her/rhythm", "moon", "structure", "Rhythm", `${rh().daily.length} daily · ${rh().weekly.length} weekly · ${rh().monthly.length} monthly`) + nav("#/her/stars", "star", "discipline", "Star chart", `${(db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }).n} of ${db.stars.goal} stars${db.stars.reward ? " · " + esc(db.stars.reward) : ""}`) + nav("#/her/rewards", "star", "discipline", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`))
+        + g("Authority in daily life", nav("#/her/modes", "cup", "presence", "Modes and cues", modes().filter(m => m.cue).map(m => `${m.name}: ${m.cue}`).join(" · ") || "Little space, service, adult time") + nav("#/her/protocol", "list", "presence", "Protocol", `${(db.protHome || []).length} at home · ${(db.protPublic || []).length} in public`))
+        + (P.titles.includes("Daddy") || P.roles.includes("little") ? g("Daddy wing", nav("#/her/little", "heart", "daddy", "Her little space", "Comforts, bedtime, signs")) : "")
+        + (P.titles.includes("Master") || P.roles.includes("servant") ? g("Master wing", nav("#/learn/master", "cup", "master", "Service and standards", "Her service rituals live in Rules and Protocol; the lessons are here")) : "")
+        + g("Scenes", nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)); }
     const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
     const gl = id => guide(id) ? `<a class="btn sm" href="#/g/${id}" style="margin:0 2px 14px">${ic("list")} How to do this: ${esc(guide(id).title)}</a>` : "";
     if (sec === "limits") return head("Yes / maybe / no", "Go through it together. Maybe means talk first, never “maybe in the moment”. Anything unmarked is a no until discussed.")
@@ -1001,7 +1014,8 @@ ${toMd(n.html)}`).join("\n\n---\n\n"), "text/markdown"); toast("Notes exported")
     if (el.dataset.s && sdraft) sdraft[el.dataset.s] = el.value;
   });
 
-  fetch("data/content.json").then(r => r.json()).then(d => { C = d; render(); })
+  fetch("data/content.json").then(r => r.json()).then(d => { C = d; const S = d.structure || {};
+      if (S.path) PATH = S.path; Object.entries(S.moduleNames || {}).forEach(([k, [n, sub]]) => { if (MODS[k]) { MODS[k][0] = n; MODS[k][3] = sub; } }); Object.assign(INTROS, S.intros || {}); render(); })
     .catch(() => { $("#main").innerHTML = `<div class="loading">Could not load. Check your connection and reload.</div>`; });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 })();

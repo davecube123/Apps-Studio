@@ -5,11 +5,12 @@ request: not in the studio index or README table; noindex; optional PIN lock off
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
-- **Learn:** 80 lessons in 11 modules (including Service) (foundations, negotiation, care and structure, discipline, presence, scenes,
-  her pleasure, adult play, aftercare, your own care), written in the voice of an experienced dominant. "Her pleasure" and "Adult
-  play" (rough sex, bondage during sex, role play, consensual non-consent explained as "not yet", a threesome as a
-  couple) are adult-to-adult only, never in or near little space, and grounded in community frameworks (RACK, the 4Cs)
-  and research (Lehmiller, Herbenick, Critelli & Bivona, Conley).
+- **Learn:** 95 lessons organised as a course in dominance with two wings. **The core: dominance** (foundations of
+  dominance, consent and negotiation, presence and authority, structure, discipline, scenes, aftercare and repair, your
+  own care), **Wing: Daddy** (nurture, protection, little space, always non-sexual), **Wing: Master** (service,
+  standards, protocol, ownership, always adult), and **Adult time** (her pleasure, anticipation, adult play), all
+  adult-to-adult only, never in or near little space. Written in the voice of an experienced dominant, grounded in
+  community frameworks (RACK, the 4Cs) and research. A “your wing” badge follows the profile.
 - **Her:** a yes / maybe / no list filled in together; safewords and a non-verbal signal; her aftercare needs and
   his; her little space (comforts, bedtime, signs); rules with reasons; daily rituals; rewards; consequences that
   stay "not yet agreed" until she agrees; a scene planner that only offers her yeses and flags maybes; a
