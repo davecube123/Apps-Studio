@@ -178,7 +178,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "11";
+  const KEY = "anchor", VER = "12";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], profile: { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] }, modes: null, protHome: [], protPublic: [], protEx: "", stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -206,9 +206,9 @@
     discipline: ["Discipline", "gavel", "#e0a46a", "Reinforcement and correction"], scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"],
     aftercare: ["Aftercare and repair", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"],
     daddy: ["The Daddy wing", "heart", "#ec9fb6", "Nurture, protection, little space"], master: ["The Master wing", "cup", "#c9a27e", "Service, protocol, standards"],
-    pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"] };
+    pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], anticipation: ["Anticipation", "spark", "#ff9a6a", "Adult time: the slow burn, tease, words"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"] };
   const MODS_ALIAS = { care: MODS.structure, service: MODS.master };
-  const SECTIONS = [["core", "The core: dominance", ["foundations", "negotiation", "presence", "structure", "discipline", "scenes", "aftercare", "self"]], ["daddy", "Wing: Daddy", ["daddy"]], ["master", "Wing: Master", ["master"]], ["adult", "Adult time", ["pleasure", "adultplay"]]];
+  const SECTIONS = [["core", "The core: dominance", ["foundations", "negotiation", "presence", "structure", "discipline", "scenes", "aftercare", "self"]], ["daddy", "Wing: Daddy", ["daddy"]], ["master", "Wing: Master", ["master"]], ["adult", "Adult time", ["pleasure", "anticipation", "adultplay"]]];
   const INTROS = { core: "Everything starts here. Dominance is authority she gives you, held with consent, steadiness and care. Both wings stand on it.", daddy: "Nurture as dominance: protection, comfort, bedtime, little space. Always non-sexual.", master: "Service as dominance: standards, protocol, training and ownership, always between adults.", adult: "Her body and adult play, adult to adult only, never in or near little space." };
   const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS_ALIAS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
 
