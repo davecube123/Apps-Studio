@@ -5,7 +5,7 @@ request: not in the studio index or README table; noindex; optional PIN lock off
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
-- **Learn:** 71 lessons in 10 modules (foundations, negotiation, care and structure, discipline, presence, scenes,
+- **Learn:** 80 lessons in 11 modules (including Service) (foundations, negotiation, care and structure, discipline, presence, scenes,
   her pleasure, adult play, aftercare, your own care), written in the voice of an experienced dominant. "Her pleasure" and "Adult
   play" (rough sex, bondage during sex, role play, consensual non-consent explained as "not yet", a threesome as a
   couple) are adult-to-adult only, never in or near little space, and grounded in community frameworks (RACK, the 4Cs)
@@ -34,6 +34,10 @@ request: not in the studio index or README table; noindex; optional PIN lock off
   on a Mon to Sun row and on Today. A lesson and guide on wellbeing goals (her goals, behaviour not body, WHO 2020,
   Balban et al. 2023, and whether to lead her workouts).
 - **Stories:** 40 composite stories (clearly labelled as composites, not real accounts), linked to their lessons.
+- **Hybrid dynamic:** a profile (Daddy and/or Master, her pet name, the discreet public name, little and/or servant),
+  a Service module (9 lessons, guides on service rituals and on modes and cues), Modes and cues (little space, service,
+  adult time: cue, words in and out, what is agreed inside), Protocol (home, public, exceptions), and “Send her the
+  rules”, which builds a WhatsApp-formatted message from the agreed rules (each rule editable, examples written to her).
 - **Journal:** debriefs, a calendar, and notes with the editor ported from Almanac (headings, lists, checklists,
   quotes, highlight, Markdown shortcuts), tags, pinning, search, nine templates with "Why it works" plus your own
   templates, and a Trash kept 30 days.
