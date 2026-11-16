@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ember</title>
+  <meta name="description" content="Track your cigarettes in one tap, and smoke a little less each week, gently, until you stop.">
+  <meta name="theme-color" content="#12151f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ember">
+  <style>
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { --bg: #12151f; --card: #1b2030; --card2: #232a3d; --ink: #f2ece3; --ink2: #c3bcb0; --muted: #8b8c99; --line: rgba(255,240,220,.08); --line2: rgba(255,240,220,.16);
+      --ember: #ff8a3d; --ember2: #ffb070; --glow: rgba(255,138,61,.18); --green: #6fd39a; --green2: rgba(111,211,154,.15); --red: #f27a6e; --blue: #8fb5ff;
+      --display: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, Roboto, sans-serif; --spring: cubic-bezier(.2,.9,.25,1.15); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+    body { min-height: 100vh; background: radial-gradient(120% 60% at 50% -10%, rgba(255,138,61,.10), transparent 60%), var(--bg); background-attachment: fixed; }
+    main { max-width: 600px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 110px); }
+    h1 { font: 600 30px/1.15 var(--display); margin: 6px 2px; } h2 { font: 600 22px/1.2 var(--display); margin: 0 0 6px; } h3 { font: 650 16px/1.3 var(--sans); margin: 0 0 4px; } p { margin: 0 0 10px; }
+    a { color: var(--ember2); } .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 13.5px; } .center { text-align: center; }
+    .eyebrow { font: 700 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); text-decoration: none; font-weight: 600; padding: 8px 6px 8px 0; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; margin-top: 12px; }
+    .row { display: flex; align-items: center; gap: 12px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 650 15px var(--sans); padding: 12px 18px; border-radius: 999px; cursor: pointer; text-decoration: none; min-height: 46px; transition: transform .15s; }
+    .btn:active { transform: scale(.97); } .btn.block { display: flex; width: 100%; } .btn.sm { padding: 7px 13px; min-height: 36px; font-size: 14px; }
+    .btn.ember { background: linear-gradient(180deg, var(--ember2), var(--ember)); color: #2a1306; border: 0; box-shadow: 0 10px 30px -12px rgba(255,138,61,.7); }
+    .btn.green { background: var(--green); color: #0d2318; border: 0; } .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
+    svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: inline-grid; place-items: center; cursor: pointer; text-decoration: none; }
+    .item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); margin-top: 8px; color: inherit; text-decoration: none; width: 100%; text-align: left; font: inherit; cursor: pointer; }
+    .item .t { font-weight: 650; } .item .m { color: var(--muted); font-size: 13.5px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .chip { border: 1px solid var(--line2); background: var(--card2); color: var(--ink2); padding: 8px 13px; border-radius: 999px; font: 600 14px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--ember); color: #2a1306; border-color: var(--ember); }
+    .ring { position: relative; width: 220px; height: 220px; margin: 8px auto 0; }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+    .ring .n { font: 600 64px/1 var(--display); } .ring .of { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 10px; text-align: center; }
+    .stat b { display: block; font: 600 22px/1.1 var(--display); } .stat span { color: var(--muted); font-size: 12px; }
+    .bars { display: flex; align-items: flex-end; gap: 5px; height: 120px; margin-top: 12px; position: relative; }
+    .bars div { flex: 1; background: var(--card2); border-radius: 6px 6px 3px 3px; position: relative; min-height: 3px; }
+    .bars div.over { background: rgba(242,122,110,.55); } .bars div.ok { background: rgba(255,138,61,.6); } .bars div.zero { background: var(--green); min-height: 6px; } .bars div.today { outline: 2px solid var(--ember2); outline-offset: 1px; }
+    .bars .bud { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed rgba(111,211,154,.7); }
+    .barl { display: flex; gap: 5px; font: 600 10px var(--sans); color: var(--muted); margin-top: 4px; } .barl span { flex: 1; text-align: center; }
+    .hours { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; align-items: end; height: 70px; margin-top: 10px; }
+    .hours div { background: var(--ember); border-radius: 3px 3px 1px 1px; min-height: 2px; opacity: .85; }
+    .hl { display: grid; grid-template-columns: repeat(24, 1fr); font: 600 9px var(--sans); color: var(--muted); margin-top: 3px; } .hl span { text-align: center; }
+    .bar { height: 8px; background: var(--card2); border-radius: 8px; overflow: hidden; } .bar > i { display: block; height: 100%; background: var(--ember); border-radius: 8px; }
+    .tip { background: linear-gradient(160deg, rgba(255,138,61,.12), var(--card) 60%); }
+    input[type=number], input[type=text], input[type=date], textarea, select { width: 100%; font: 17px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); outline: none; color-scheme: dark; }
+    label.f { display: block; margin-top: 12px; } label.f > span { display: block; font-size: 13.5px; color: var(--muted); margin: 0 2px 5px; }
+    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
+    .sheet { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); animation: up .4s var(--spring) both; }
+    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 16px; }
+    .breathe { width: 200px; height: 200px; margin: 18px auto; border-radius: 50%; background: radial-gradient(circle, rgba(255,176,112,.55), rgba(255,138,61,.12) 60%, transparent 70%); display: grid; place-items: center; font: 600 40px var(--display); transition: transform 1.6s ease-in-out; }
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; justify-content: center; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(18,21,31,.9); backdrop-filter: blur(14px); border-top: 1px solid var(--line); }
+    nav.tabs .in { display: flex; width: min(560px, 100%); justify-content: space-around; }
+    nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 14px; border-radius: 16px; color: var(--muted); text-decoration: none; font: 650 11.5px var(--sans); }
+    nav.tabs a svg { width: 23px; height: 23px; } nav.tabs a.on { color: var(--ember2); background: rgba(255,138,61,.12); }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 999px; font: 650 14px var(--sans); display: flex; gap: 12px; align-items: center; max-width: calc(100% - 32px); animation: up .3s var(--spring) both; }
+    .toast button { background: none; border: 0; color: #b84a10; font: 750 14px var(--sans); cursor: pointer; }
+    .tl { position: relative; padding-left: 22px; } .tl::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--line2); }
+    .tl .s { position: relative; margin-top: 14px; } .tl .s::before { content: ""; position: absolute; left: -20px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--card2); border: 2px solid var(--line2); }
+    .tl .s.done::before { background: var(--green); border-color: var(--green); }
+    .view { animation: fade .3s both; } @keyframes fade { from { opacity: 0; } } @keyframes up { from { transform: translateY(14px); opacity: 0; } }
+    .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+    ol.steps { padding-left: 20px; margin: 6px 0; } ol.steps li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="tabs" id="tabs"><div class="in">
+  <a href="#/" data-tab="today"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Today</a>
+  <a href="#/insights" data-tab="insights"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Insights</a>
+  <a href="#/tools" data-tab="tools"><svg class="i" viewBox="0 0 24 24"><path d="M4 12c3-5 6-5 8 0s5 5 8 0"/></svg>Cravings</a>
+  <a href="#/plan" data-tab="plan"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Plan</a>
+</div></nav>
+<script>
+(() => {
+  "use strict";
+  const KEY = "ember", VER = "1";
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = 864e5, now = () => Date.now(), pad = n => String(n).padStart(2, "0");
+  const dayKey = (t = now()) => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const keyToMs = k => { const [y, m, d] = k.split("-").map(Number); return +new Date(y, m - 1, d); };
+  const daysBetween = (a, b) => Math.round((keyToMs(b) - keyToMs(a)) / DAY);
+  const hm = t => { const d = new Date(t); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const ago = ms => { const m = Math.round(ms / 60000); if (m < 1) return "just now"; if (m < 60) return `${m} min`; const h = Math.floor(m / 60); if (h < 24) return `${h} h ${m % 60 ? (m % 60) + " min" : ""}`.trim(); const d = Math.floor(h / 24); return `${d} day${d > 1 ? "s" : ""}${h % 24 ? " " + (h % 24) + " h" : ""}`; };
+  const IC = { back: '<path d="M15 5l-7 7 7 7"/>', chev: '<path d="M9 5l7 7-7 7"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>', wind: '<path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"/>', plus: '<path d="M12 5v14M5 12h14"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', leaf: '<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19l7-7"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', upload: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>' };
+  const ic = n => `<svg class="i" viewBox="0 0 24 24">${IC[n] || ""}</svg>`;
+  let toastT = 0;
+  function toast(m, undo, ms = 3200) { $$(".toast").forEach(t => t.remove()); clearTimeout(toastT); const t = document.createElement("div"); t.className = "toast"; t.innerHTML = `<span>${esc(m)}</span>${undo ? `<button>Undo</button>` : ""}`; if (undo) t.querySelector("button").onclick = () => { undo(); t.remove(); }; document.body.appendChild(t); toastT = setTimeout(() => t.remove(), ms); }
+
+  /* ---------- Data ---------- */
+  const DEF = () => ({ logs: [], resisted: [], ifthen: {}, set: { currency: "₱", pack: 20, price: 180, perDay: 0 }, plan: { mode: "track", start: dayKey(), startBudget: 0, stepDays: 4, quitDate: "" }, quitAt: 0, best: 0, created: now(), onboarded: false, tipDay: "", tipI: 0 });
+  let db; try { db = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { db = DEF(); }
+  db.set = Object.assign(DEF().set, db.set); db.plan = Object.assign(DEF().plan, db.plan);
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {} };
+
+  const TRIG = [["coffee", "☕ Coffee"], ["meal", "🍽 After eating"], ["stress", "😮‍💨 Stress"], ["bored", "🥱 Bored"], ["social", "🍻 With others"], ["alcohol", "🍺 Drinking"], ["break", "⏸ Work break"], ["drive", "🚗 Driving / commute"], ["wake", "🌅 Waking up"], ["phone", "📱 On the phone"], ["habit", "🔁 Just habit"]];
+  const trigName = k => (TRIG.find(t => t[0] === k) || [k, k])[1];
+  const logsOn = k => db.logs.filter(l => dayKey(l.t) === k);
+  const countOn = k => logsOn(k).length;
+  const perCig = () => (+db.set.price || 0) / Math.max(1, +db.set.pack || 20);
+  const money = v => `${db.set.currency || ""}${Math.round(v).toLocaleString()}`;
+  function baseline() {
+    if (+db.set.perDay > 0) return +db.set.perDay;
+    const days = [...new Set(db.logs.map(l => dayKey(l.t)))].filter(k => k !== dayKey()).slice(-7);
+    if (!days.length) return 0; return Math.round(days.reduce((a, k) => a + countOn(k), 0) / days.length);
+  }
+  function budgetFor(k = dayKey()) {
+    const P = db.plan; if (P.mode === "track") return null; const b0 = +P.startBudget || baseline() || 10; const d = Math.max(0, daysBetween(P.start, k));
+    if (P.mode === "reduce") return Math.max(0, b0 - Math.floor(d / Math.max(1, +P.stepDays || 4)));
+    if (P.mode === "date" && P.quitDate) { const total = Math.max(1, daysBetween(P.start, P.quitDate)); if (d >= total) return 0; return Math.max(0, Math.ceil(b0 * (1 - d / total))); }
+    return null;
+  }
+  const quitMode = () => db.quitAt > 0;
+  const lastLog = () => db.logs.length ? db.logs[db.logs.length - 1].t : 0;
+  /* Pace: spread today's budget over ~16 waking hours */
+  function nextOnPace() { const b = budgetFor(); const last = lastLog(); if (!b || !last || dayKey(last) !== dayKey()) return 0; const gap = Math.max(30, Math.round(16 * 60 / b)); return last + gap * 60000; }
+
+  /* ---------- Tips: short, evidence-informed, never preachy ---------- */
+  const TIPS = [
+    "A craving usually peaks within a few minutes and then fades, whether you smoke or not. Waiting it out once teaches your brain it can.",
+    "Delay, don't deny: “not now, maybe in 15 minutes”. Often, in 15 minutes, you won't want it.",
+    "Your first cigarette of the day sets the pace. Pushing it 15 minutes later, then 30, is one of the easiest early wins.",
+    "Smoke only outside, standing, doing nothing else. Cigarettes stripped of coffee, phone and company lose some of their pull.",
+    "If-then plans work: “If I finish lunch, then I brush my teeth and walk for 5 minutes.” Decide the swap before the moment.",
+    "Water, a mint or chewing gum gives your mouth and hands something to do in the minutes a craving lasts.",
+    "Coffee and cigarettes are a strong pair. Try switching to tea or a different cup for a week to break the link.",
+    "Notice the one you'd skip easily. Most people have two or three cigarettes a day they barely enjoy. Those go first.",
+    "Alcohol weakens resolve. On nights out, decide your number before the first drink, and keep the pack at home.",
+    "Buy single packs, never cartons. The small hassle of buying is a speed bump that helps.",
+    "Keep cigarettes somewhere slightly inconvenient: another room, the car, a drawer with an elastic band round the pack.",
+    "Exercise, even a brisk 10-minute walk, reduces cravings and withdrawal for a while afterwards.",
+    "Slow breathing calms the craving's stress: two quick inhales through the nose, one long exhale through the mouth, for a minute.",
+    "Count the money: put what you didn't spend today in a jar or a savings app. It's real, and it grows.",
+    "You don't have to feel ready. Most people who quit didn't feel ready either; they just started.",
+    "Nicotine replacement (patches, gum, lozenges) or prescription medicines can roughly double your chances. A pharmacist or doctor can help you choose.",
+    "Combining a long-acting patch with a short-acting gum or lozenge works better than either alone.",
+    "Stress feels like a reason to smoke, but nicotine withdrawal itself causes much of the stress smokers feel. Many people report feeling calmer a few weeks after quitting.",
+    "A slip is not a relapse. One cigarette doesn't erase your progress, unless you decide it does. Log it and keep going.",
+    "Tell one person what you're doing. Being accountable to someone makes it more likely to last.",
+    "Change the routine around your strongest trigger for one week: a different route, a different break spot, a different first drink.",
+    "Withdrawal symptoms (irritability, restlessness, hunger) are strongest in the first week and usually fade within a month.",
+    "Your sense of taste and smell start improving within days of stopping. Notice your food.",
+    "Brush your teeth right after meals. A clean mouth makes the after-meal cigarette less appealing.",
+    "Some apps and people call it “urge surfing”: notice where you feel the craving in your body, watch it rise and fall like a wave, without obeying it.",
+    "Each time you don't smoke when you want to, the link between the trigger and the cigarette weakens a little.",
+    "Hands bored? A pen, a stress ball, a rubber band or your phone's notes app all work as stand-ins.",
+    "Write your three biggest reasons for stopping on the Plan page. Read them when a craving hits.",
+    "Plan your hardest moment of the day in advance. Knowing it's coming takes away half its power.",
+    "Every cigarette you don't smoke today counts. Small numbers add up faster than they feel."
+  ];
+  function todayTip() { const k = dayKey(); if (db.tipDay !== k) { db.tipDay = k; db.tipI = (db.tipI + 1) % TIPS.length; save(); } return TIPS[db.tipI]; }
+
+  /* Health recovery after stopping (common summaries, e.g. WHO) */
+  const HEALTH = [[20 * 60e3, "20 minutes", "Heart rate and blood pressure start to drop."], [12 * 36e5, "12 hours", "Carbon monoxide in the blood falls to normal."], [2 * 7 * DAY, "2 weeks", "Circulation and lung function begin to improve (2 to 12 weeks)."], [30 * DAY, "1 month", "Coughing and shortness of breath begin to ease (1 to 9 months)."], [365 * DAY, "1 year", "Risk of heart disease is about half that of a smoker."], [5 * 365 * DAY, "5 years", "Stroke risk falls toward that of a non-smoker (5 to 15 years)."], [10 * 365 * DAY, "10 years", "Lung cancer risk is about half that of a smoker."], [15 * 365 * DAY, "15 years", "Heart disease risk is close to a non-smoker's."]];
+
+  /* ---------- Views ---------- */
+  function route() { const h = location.hash.replace(/^#\/?/, ""); const [v = "", a = ""] = h.split("/"); return { v: v || "today", a }; }
+  function render() {
+    const { v } = route(); let html = "";
+    if (!db.onboarded) html = viewStart();
+    else html = ({ today: viewToday, insights: viewInsights, tools: viewTools, plan: viewPlan, settings: viewSettings }[v] || viewToday)();
+    $("#app").innerHTML = `<div class="view">${html}</div>`;
+    $$("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === (v === "settings" ? "plan" : v)));
+    $("#tabs").style.display = db.onboarded ? "" : "none"; window.scrollTo(0, 0);
+  }
+
+  function viewStart() {
+    return `<div style="text-align:center;margin-top:8vh"><div style="width:90px;height:90px;margin:0 auto;border-radius:50%;background:radial-gradient(circle,#fff5e1 0,#ffd696 18%,#ff9646 40%,rgba(255,138,61,.15) 70%,transparent 72%)"></div>
+      <h1 style="margin-top:18px">Ember</h1><p class="ink2" style="margin:0 10px">Log each cigarette in one tap. Ember learns your pattern, then helps you smoke a little less each week, gently, until you stop. No lectures.</p></div>
+      <div class="card"><label class="f" style="margin-top:0"><span>About how many do you smoke a day right now?</span><input type="number" id="o-per" min="0" max="80" placeholder="e.g. 12" inputmode="numeric"></label>
+        <div class="row" style="gap:10px"><label class="f grow"><span>Price of a pack</span><input type="number" id="o-price" value="${db.set.price}" inputmode="decimal"></label><label class="f" style="width:90px"><span>Currency</span><input type="text" id="o-cur" value="${esc(db.set.currency)}"></label><label class="f" style="width:90px"><span>In a pack</span><input type="number" id="o-pack" value="${db.set.pack}" inputmode="numeric"></label></div></div>
+      <div class="card"><h3>How do you want to start?</h3>
+        ${[["track", "Just track for now", "No targets. See your pattern for a week first. Recommended."], ["reduce", "Cut down gently", "A daily budget that drops by one every few days."], ["date", "Quit by a date", "The budget steps down to zero on the day you choose."]].map(([k, t, d], i) => `<label class="item" style="cursor:pointer"><input type="radio" name="o-mode" value="${k}" ${i ? "" : "checked"} style="accent-color:var(--ember);width:20px;height:20px"><div class="grow"><div class="t">${t}</div><div class="m">${d}</div></div></label>`).join("")}</div>
+      <button class="btn ember block" data-act="onboard" style="margin-top:16px">Start</button>
+      <p class="small muted center" style="margin-top:12px">Everything stays on this phone.</p>`;
+  }
+
+  function viewToday() {
+    const k = dayKey(), n = countOn(k), b = budgetFor(k), last = lastLog(), res = db.resisted.filter(t => dayKey(t) === k).length;
+    if (quitMode()) return viewSmokeFree();
+    const R = 96, Cc = 2 * Math.PI * R, frac = b ? Math.min(1, n / b) : b === 0 ? 1 : Math.min(1, n / Math.max(1, baseline() || 10));
+    const over = b != null && n > b, col = over ? "var(--red)" : "var(--ember)";
+    const pace = nextOnPace(), paceTxt = pace && pace > now() ? `Next on pace: <b>${hm(pace)}</b>` : b != null && n < b ? "You're on pace" : "";
+    return `<div class="top"><div class="eyebrow">Ember · ${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+      <div class="ring"><svg viewBox="0 0 220 220"><circle cx="110" cy="110" r="${R}" stroke="var(--card2)" stroke-width="14" fill="none"/><circle cx="110" cy="110" r="${R}" stroke="${col}" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="${Cc}" stroke-dashoffset="${Cc * (1 - frac)}" style="transition:stroke-dashoffset .6s var(--spring)"/></svg>
+        <div class="c"><div><div class="n">${n}</div><div class="of">${b == null ? "today" : b === 0 ? "today · target: none" : `of ${b} today`}</div></div></div></div>
+      <p class="center ink2" style="margin:8px 0 0;min-height:24px">${over ? "Over today's budget. That's information, not failure. Tomorrow is a fresh number." : paceTxt}</p>
+      <button class="btn ember block" data-act="want" style="margin-top:14px;min-height:56px;font-size:17px">I want a cigarette</button>
+      <button class="btn ghost block" data-act="log" style="margin-top:4px">${ic("plus")} I already had one</button>
+      <div class="stats"><div class="stat"><b>${last ? ago(now() - last) : "–"}</b><span>since the last</span></div><div class="stat"><b style="color:var(--green)">${res}</b><span>cravings beaten today</span></div><div class="stat"><b>${money(n * perCig())}</b><span>spent today</span></div></div>
+      <div class="card tip"><div class="eyebrow" style="color:var(--ember2)">Today's nudge</div><p style="margin:8px 0 0">${esc(todayTip())}</p></div>
+      ${weekCard()}
+      ${db.plan.mode === "track" && db.logs.length && daysBetween(db.plan.start, k) >= 6 ? `<a class="item" href="#/plan" style="margin-top:12px"><span style="font-size:22px">🌱</span><div class="grow"><div class="t">You've tracked a week</div><div class="m">Ready to start cutting down gently? Your average is ${baseline()} a day.</div></div>${ic("chev")}</a>` : ""}
+      ${installNudge()}`;
+  }
+  function weekCard() {
+    const days = [...Array(7)].map((_, i) => dayKey(now() - (6 - i) * DAY)), vals = days.map(countOn), buds = days.map(budgetFor), mx = Math.max(4, ...vals, ...buds.filter(x => x != null));
+    const bud = budgetFor(); const wk = vals.reduce((a, b) => a + b, 0), prev = [...Array(7)].map((_, i) => countOn(dayKey(now() - (13 - i) * DAY))).reduce((a, b) => a + b, 0);
+    const ch = prev ? Math.round((wk - prev) / prev * 100) : null;
+    return `<div class="card"><div class="row between"><div class="eyebrow">Last 7 days</div>${ch != null ? `<span class="small" style="color:${ch <= 0 ? "var(--green)" : "var(--red)"}">${ch <= 0 ? "▼" : "▲"} ${Math.abs(ch)}% vs the week before</span>` : ""}</div>
+      <div class="bars">${bud != null ? `<div class="bud" style="bottom:${bud / mx * 100}%;background:none"></div>` : ""}${days.map((d, i) => `<div class="${vals[i] === 0 && db.logs.some(l => l.t < keyToMs(d)) ? "zero" : buds[i] != null && vals[i] > buds[i] ? "over" : "ok"}${i === 6 ? " today" : ""}" style="height:${Math.max(2, vals[i] / mx * 100)}%" title="${vals[i]}"></div>`).join("")}</div>
+      <div class="barl">${days.map(d => `<span>${"SMTWTFS"[new Date(keyToMs(d)).getDay()]}<br>${countOn(d)}</span>`).join("")}</div>
+      ${bud != null ? `<p class="small muted" style="margin:10px 0 0">Dashed line: today's budget.</p>` : ""}</div>`;
+  }
+  function viewSmokeFree() {
+    const since = now() - Math.max(db.quitAt, lastLog()), res = db.resisted.filter(t => t > db.quitAt).length, base = baseline() || +db.set.perDay || 10;
+    const avoided = Math.floor(since / DAY * base), saved = avoided * perCig(); if (since > db.best) { db.best = since; save(); }
+    return `<div class="top"><div class="eyebrow">Ember · smoke-free</div><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div>
+      <div class="center" style="margin-top:20px"><div class="eyebrow" style="color:var(--green)">Smoke-free for</div><div style="font:600 46px/1.1 var(--display);margin-top:10px">${since < 60000 ? "Starting now" : ago(since)}</div></div>
+      <div class="stats"><div class="stat"><b style="color:var(--green)">${avoided}</b><span>not smoked</span></div><div class="stat"><b>${money(saved)}</b><span>saved</span></div><div class="stat"><b>${res}</b><span>cravings beaten</span></div></div>
+      <button class="btn ember block" data-act="want" style="margin-top:16px;min-height:56px;font-size:17px">I'm craving one</button>
+      <button class="btn ghost block" data-act="log">I slipped and had one</button>
+      <div class="card"><div class="eyebrow">Your body is recovering</div><div class="tl">${HEALTH.map(([ms, t, d]) => `<div class="s ${since >= ms ? "done" : ""}"><b>${t}</b> <span class="ink2">· ${d}</span>${since < ms ? `<div class="bar" style="margin-top:6px"><i style="width:${Math.min(100, since / ms * 100)}%"></i></div>` : ""}</div>`).join("")}</div><p class="small muted" style="margin:12px 0 0">Common summaries of public-health guidance (e.g. WHO). Bodies vary.</p></div>
+      <div class="card tip"><div class="eyebrow" style="color:var(--ember2)">Today's nudge</div><p style="margin:8px 0 0">${esc(todayTip())}</p></div>
+      ${db.best > since + DAY ? `<p class="small muted center">Your longest stretch: ${ago(db.best)}.</p>` : ""}`;
+  }
+
+  function viewInsights() {
+    const L = db.logs, days14 = [...Array(14)].map((_, i) => dayKey(now() - (13 - i) * DAY)), vals = days14.map(countOn), mx = Math.max(4, ...vals);
+    const recent = L.filter(l => l.t > now() - 28 * DAY), hours = Array(24).fill(0); recent.forEach(l => hours[new Date(l.t).getHours()]++); const hmx = Math.max(1, ...hours);
+    const tc = {}; recent.forEach(l => (l.trig || []).forEach(t => tc[t] = (tc[t] || 0) + 1)); const top = Object.entries(tc).sort((a, b) => b[1] - a[1]);
+    const tracked = Math.max(1, new Set(L.map(l => dayKey(l.t))).size), avg = L.length ? (L.length / tracked) : 0;
+    const base = baseline(), last7 = days14.slice(7).reduce((a, k) => a + countOn(k), 0), avoided7 = Math.max(0, (+db.set.perDay || base) * 7 - last7);
+    const firsts = days14.slice(7).map(k => logsOn(k)[0]).filter(Boolean).map(l => new Date(l.t)); const firstAvg = firsts.length ? Math.round(firsts.reduce((a, d) => a + d.getHours() * 60 + d.getMinutes(), 0) / firsts.length) : null;
+    const gaps = []; for (let i = 1; i < recent.length; i++) { const g = recent[i].t - recent[i - 1].t; if (dayKey(recent[i].t) === dayKey(recent[i - 1].t)) gaps.push(g); } const gapAvg = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+    return `<h1 style="margin-top:10px">Insights</h1><p class="ink2" style="margin:0 2px">Know your pattern, and the pattern loosens.</p>
+      <div class="card"><div class="eyebrow">Last 14 days</div><div class="bars">${days14.map((d, i) => `<div class="${vals[i] === 0 && L.some(l => l.t < keyToMs(d)) ? "zero" : "ok"}${i === 13 ? " today" : ""}" style="height:${Math.max(2, vals[i] / mx * 100)}%"></div>`).join("")}</div><div class="barl">${days14.map(d => `<span>${new Date(keyToMs(d)).getDate()}</span>`).join("")}</div></div>
+      <div class="stats"><div class="stat"><b>${avg.toFixed(1)}</b><span>a day on average</span></div><div class="stat"><b>${gapAvg ? ago(gapAvg) : "–"}</b><span>between them</span></div><div class="stat"><b>${firstAvg != null ? `${pad(Math.floor(firstAvg / 60))}:${pad(firstAvg % 60)}` : "–"}</b><span>first of the day</span></div></div>
+      <div class="stats"><div class="stat"><b style="color:var(--green)">${db.resisted.length}</b><span>cravings beaten</span></div><div class="stat"><b>${money(last7 * perCig())}</b><span>spent this week</span></div><div class="stat"><b style="color:var(--green)">${money(avoided7 * perCig())}</b><span>saved vs your start</span></div></div>
+      <div class="card"><div class="eyebrow">When you smoke (last 4 weeks)</div><div class="hours">${hours.map(h => `<div style="height:${h / hmx * 100}%"></div>`).join("")}</div><div class="hl">${hours.map((_, i) => `<span>${i % 3 ? "" : i}</span>`).join("")}</div>
+        ${hours.some(Boolean) ? `<p class="small ink2" style="margin:10px 0 0">Your peak hour is around <b>${hours.indexOf(hmx)}:00</b>. Plan something else for that hour this week.</p>` : ""}</div>
+      <div class="card"><div class="eyebrow">Your triggers (last 4 weeks)</div>${top.length ? top.slice(0, 6).map(([t, c]) => `<div style="margin-top:10px"><div class="row between small"><span>${trigName(t)}</span><span class="muted">${c}</span></div><div class="bar" style="margin-top:4px"><i style="width:${c / top[0][1] * 100}%"></i></div></div>`).join("") + `<a class="btn sm" href="#/tools" style="margin-top:14px">Make an if-then plan for ${trigName(top[0][0]).replace(/^\S+\s/, "").toLowerCase()}</a>` : `<p class="small muted" style="margin:8px 0 0">Tag what triggered a cigarette when you log it, and your top triggers appear here.</p>`}</div>`;
+  }
+
+  const IFTHEN = { coffee: "If I have coffee, then I hold the cup in my smoking hand and drink it somewhere I can't smoke.", meal: "If I finish eating, then I brush my teeth or chew gum and stand up for a 5-minute walk.", stress: "If I feel stressed, then I do one minute of slow breathing first and decide after.", bored: "If I'm bored, then I text someone or take a short walk instead.", social: "If others step out to smoke, then I go with a drink or stay inside and join them after.", alcohol: "If I'm drinking, then I leave the pack at home and decide my number before the first drink.", break: "If it's my break, then I take it somewhere new with water or a snack.", drive: "If I'm driving, then the pack stays in the boot and I chew gum.", wake: "If I wake up, then I drink a glass of water and shower before any cigarette.", phone: "If I'm on a call, then I hold a pen or a stress ball instead.", habit: "If I reach for one on autopilot, then I wait 3 minutes and ask if I really want it." };
+  let timer = null;
+  function viewTools() {
+    const tc = {}; db.logs.filter(l => l.t > now() - 28 * DAY).forEach(l => (l.trig || []).forEach(t => tc[t] = (tc[t] || 0) + 1));
+    const order = [...TRIG.map(t => t[0])].sort((a, b) => (tc[b] || 0) - (tc[a] || 0));
+    return `<h1 style="margin-top:10px">Cravings</h1><p class="ink2" style="margin:0 2px">A craving is a wave: it rises, peaks and passes, usually within a few minutes.</p>
+      <button class="btn ember block" data-act="want" style="margin-top:14px;min-height:54px">${ic("wind")} Ride one out now (3 minutes)</button>
+      <div class="card"><h3>While you wait</h3><ol class="steps ink2"><li><b>Breathe:</b> two quick inhales through the nose, then a long slow exhale through the mouth.</li><li><b>Move:</b> stand up, walk, take the stairs, even for two minutes.</li><li><b>Mouth and hands:</b> water, gum, a mint, a pen.</li><li><b>Surf it:</b> notice where you feel it, rate it 1 to 10, watch the number drop.</li><li><b>Delay:</b> “not now, maybe in 15 minutes”. Then decide again.</li></ol></div>
+      <div class="sec" style="margin-top:22px"><div class="eyebrow" style="margin:0 4px">Your if-then plans</div><p class="small muted" style="margin:4px 4px 0">Decide the swap before the moment comes. Your most frequent triggers are first.</p>
+        ${order.slice(0, 6).map(t => `<label class="f"><span>${trigName(t)}${tc[t] ? ` · ${tc[t]} in 4 weeks` : ""}</span><textarea data-ifthen="${t}" rows="2" placeholder="${esc(IFTHEN[t])}">${esc(db.ifthen[t] || "")}</textarea></label>`).join("")}</div>
+      <div class="card"><h3>Extra help works</h3><p class="small ink2" style="margin:6px 0 0">Nicotine replacement (patch plus gum or lozenge) or prescription medicines roughly double the chance of quitting for good. Ask a pharmacist or your doctor. In the Philippines, the DOH Quitline <b>1558</b> (toll-free) offers free coaching and help with quit medicines. <a href="tel:1558">Call 1558</a></p></div>`;
+  }
+
+  function viewPlan() {
+    const P = db.plan, b = budgetFor(), base = baseline();
+    return `<h1 style="margin-top:10px">Your plan</h1>
+      <div class="card"><div class="eyebrow">Mode</div><div class="chips">${[["track", "Just track"], ["reduce", "Cut down gently"], ["date", "Quit by a date"]].map(([k, t]) => `<button class="chip ${P.mode === k ? "on" : ""}" data-act="mode" data-v="${k}">${t}</button>`).join("")}</div>
+        ${P.mode === "track" ? `<p class="small ink2" style="margin:12px 0 0">No targets yet. After a week, your average (${base || "?"} a day) becomes the starting point.</p>` : ""}
+        ${P.mode !== "track" ? `<label class="f"><span>Starting budget (cigarettes a day)</span><input type="number" data-plan="startBudget" value="${+P.startBudget || base || ""}" inputmode="numeric"></label>` : ""}
+        ${P.mode === "reduce" ? `<label class="f"><span>Drop by one every</span><select data-plan="stepDays">${[2, 3, 4, 5, 7].map(d => `<option value="${d}" ${+P.stepDays === d ? "selected" : ""}>${d} days</option>`).join("")}</select></label>` : ""}
+        ${P.mode === "date" ? `<label class="f"><span>Quit date</span><input type="date" data-plan="quitDate" value="${esc(P.quitDate)}" min="${dayKey(now() + DAY)}"></label>` : ""}
+        ${P.mode !== "track" ? `<p class="small ink2" style="margin:12px 0 0">Today's budget: <b>${b ?? "–"}</b>${planEnd()}</p><button class="btn sm" data-act="restartplan" style="margin-top:10px">Restart the plan from today</button>` : ""}</div>
+      <div class="card"><h3>When you're ready to stop</h3><p class="small ink2" style="margin:6px 0 10px">Research finds cutting down first and then stopping works about as well as stopping in one go, as long as you do set a day to stop. Most people who succeed pick a date within a few weeks.</p>
+        ${quitMode() ? `<p class="small" style="color:var(--green)">You stopped on ${new Date(db.quitAt).toLocaleDateString()}.</p><button class="btn sm" data-act="unquit">Back to cutting down</button>` : `<button class="btn green block" data-act="quit">${ic("leaf")} I've stopped. Start my smoke-free counter</button>`}</div>
+      <div class="card"><h3>My reasons</h3><textarea data-reasons rows="3" placeholder="Three reasons, in your words. Read them during a craving.">${esc(db.reasons || "")}</textarea></div>`;
+  }
+  function planEnd() { const P = db.plan; if (P.mode === "reduce") { const b0 = +P.startBudget || baseline() || 10; const days = b0 * (+P.stepDays || 4); const end = new Date(keyToMs(P.start) + days * DAY); return ` · reaches zero around <b>${end.toLocaleDateString(undefined, { day: "numeric", month: "short" })}</b>`; } if (P.mode === "date" && P.quitDate) return ` · zero on <b>${new Date(keyToMs(P.quitDate)).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</b>`; return ""; }
+
+  function viewSettings() {
+    return `<div class="top"><a class="back" href="#/plan">${ic("back")}Plan</a></div><h1>Settings</h1>
+      <div class="card"><div class="row" style="gap:10px"><label class="f grow" style="margin-top:0"><span>Price of a pack</span><input type="number" data-set="price" value="${db.set.price}" inputmode="decimal"></label><label class="f" style="width:90px;margin-top:0"><span>Currency</span><input type="text" data-set="currency" value="${esc(db.set.currency)}"></label><label class="f" style="width:90px;margin-top:0"><span>In a pack</span><input type="number" data-set="pack" value="${db.set.pack}" inputmode="numeric"></label></div>
+        <label class="f"><span>How many a day when you started (for “saved”)</span><input type="number" data-set="perDay" value="${db.set.perDay || ""}" placeholder="${baseline() || ""}" inputmode="numeric"></label></div>
+      <div class="card"><h3>Recent log</h3>${db.logs.slice(-8).reverse().map(l => `<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span>${new Date(l.t).toLocaleDateString(undefined, { day: "numeric", month: "short" })} · ${hm(l.t)} <span class="muted small">${(l.trig || []).map(trigName).join(", ")}</span></span><button class="btn sm ghost" data-act="dellog" data-v="${l.t}">Remove</button></div>`).join("") || `<p class="small muted">Nothing logged yet.</p>`}</div>
+      <div class="card"><h3>Your data</h3><p class="small muted">Everything stays on this phone.</p><button class="btn block" data-act="backup">${ic("download")} Download a backup</button><label class="btn block" style="margin-top:8px">${ic("upload")} Restore a backup<input type="file" accept=".json,application/json" hidden data-import></label>
+        ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}<button class="btn ghost block" data-act="reset" style="margin-top:6px;color:var(--red)">Erase everything</button></div>
+      <div class="ver">Ember v${VER}</div>`;
+  }
+
+  /* ---------- Sheets ---------- */
+  function sheet(html) { $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back"; b.innerHTML = `<div class="sheet"><div class="grab"></div>${html}</div>`; b.addEventListener("click", e => { if (e.target === b) closeSheet(); }); document.body.appendChild(b); return b; }
+  function closeSheet() { clearInterval(timer); timer = null; $(".sheet-back")?.remove(); }
+  let pickTrig = [];
+  function logSheet(fromCraving) {
+    pickTrig = [];
+    sheet(`<h2>${quitMode() ? "Log the slip" : "Log a cigarette"}</h2><p class="small muted" style="margin:0">${quitMode() ? "A slip isn't a relapse. Logging it honestly is the strong move." : "What set this one off? Tap any that fit, or just save."}</p>
+      <div class="chips" id="trigs">${TRIG.map(([k, t]) => `<button class="chip" data-act="trig" data-v="${k}">${t}</button>`).join("")}</div>
+      <button class="btn ember block" data-act="savelog" style="margin-top:16px">Save</button><button class="btn ghost block" data-act="closesheet">Cancel</button>`);
+  }
+  function wantSheet() {
+    const reasons = (db.reasons || "").trim();
+    sheet(`<div class="center"><h2>Ride it out first?</h2><p class="ink2" style="margin:0">Three minutes. If you still want it after, it's your call.</p>
+      <div class="breathe" id="br">3:00</div><p id="brt" class="ink2" style="min-height:48px">Breathe in through your nose…</p>
+      ${reasons ? `<p class="small" style="color:var(--ember2);margin-top:6px">“${esc(reasons.split("\n")[0])}”</p>` : ""}</div>
+      <div id="wantbtns"><button class="btn green block" data-act="resist">It passed. I'm not smoking it</button><button class="btn ghost block" data-act="givein">I'm going to smoke it</button></div>`);
+    let left = 180, phase = 0; const br = $("#br"), t = $("#brt");
+    const step = () => { if (!$("#br")) return clearInterval(timer); left--; br.textContent = left > 0 ? `${Math.floor(left / 60)}:${pad(left % 60)}` : "✓";
+      const p = Math.floor((180 - left) / 2) % 4; if (p !== phase) { phase = p; const s = [["Breathe in through your nose…", 1.25], ["…and a second short sip of air", 1.35], ["Long, slow breath out through your mouth", .85], ["…all the way out", .85]][p]; t.textContent = s[0]; br.style.transform = `scale(${s[1]})`; }
+      if (left <= 0) { clearInterval(timer); t.textContent = "Three minutes. How strong is it now?"; br.style.transform = "scale(1)"; } };
+    br.style.transform = "scale(1.25)"; timer = setInterval(step, 1000);
+  }
+
+  /* ---------- Install ---------- */
+  let deferredInstall = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
+  const installBody = () => deferredInstall ? `<button class="btn ember block" data-act="install">Install Ember</button>` : inApp ? `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
+  const installNudge = () => isStandalone() ? "" : `<button class="item" data-act="installsheet" style="margin-top:14px"><span style="font-size:22px">📲</span><div class="grow"><div class="t">Install on your phone</div><div class="m">One tap from your home screen, so logging takes a second.</div></div></button>`;
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+
+  /* ---------- Actions ---------- */
+  function addLog(trig) { const l = { t: now(), trig }; db.logs.push(l); save(); return l; }
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
+    if (a === "onboard") { const per = +$("#o-per").value || 0; db.set.perDay = per; db.set.price = +$("#o-price").value || db.set.price; db.set.currency = $("#o-cur").value || db.set.currency; db.set.pack = +$("#o-pack").value || 20;
+      const mode = ($("input[name=o-mode]:checked") || {}).value || "track"; db.plan = { mode, start: dayKey(), startBudget: per || 0, stepDays: 4, quitDate: mode === "date" ? dayKey(now() + 28 * DAY) : "" }; db.onboarded = true; save(); location.hash = mode === "date" ? "#/plan" : "#/"; render(); }
+    else if (a === "want") wantSheet();
+    else if (a === "log") logSheet();
+    else if (a === "trig") { el.classList.toggle("on"); pickTrig = $$("#trigs .chip.on").map(c => c.dataset.v); }
+    else if (a === "savelog") { const l = addLog(pickTrig); closeSheet(); render(); const b = budgetFor(), n = countOn(dayKey());
+      toast(quitMode() ? "Logged. Back to it: your counter restarts, your progress doesn't." : b != null && n === b ? `That's ${n}, today's budget.` : b != null && n > b ? "Logged. Over budget, and that's okay: notice it, move on." : "Logged.", () => { db.logs = db.logs.filter(x => x !== l); save(); render(); }); }
+    else if (a === "resist") { db.resisted.push(now()); save(); closeSheet(); render(); const r = db.resisted.length; toast(r === 1 ? "Your first craving beaten. It gets easier every time." : `Craving beaten. That's ${r} so far.`); }
+    else if (a === "givein") { closeSheet(); logSheet(true); }
+    else if (a === "closesheet") closeSheet();
+    else if (a === "mode") { db.plan.mode = v; if (v !== "track" && !+db.plan.startBudget) db.plan.startBudget = baseline() || +db.set.perDay || 10; if (v === "date" && !db.plan.quitDate) db.plan.quitDate = dayKey(now() + 28 * DAY); db.plan.start = dayKey(); save(); render(); }
+    else if (a === "restartplan") { db.plan.start = dayKey(); save(); toast("Plan restarted from today."); render(); }
+    else if (a === "quit") { if (!confirm("Start your smoke-free counter now?")) return; db.quitAt = now(); save(); location.hash = "#/"; render(); toast("Here we go. You've got this."); }
+    else if (a === "unquit") { db.quitAt = 0; save(); render(); }
+    else if (a === "dellog") { db.logs = db.logs.filter(l => l.t !== +v); save(); render(); }
+    else if (a === "backup") { const b = new Blob([JSON.stringify(db)], { type: "application/json" }), u = URL.createObjectURL(b), x = document.createElement("a"); x.href = u; x.download = `ember-backup-${dayKey()}.json`; document.body.appendChild(x); x.click(); setTimeout(() => { URL.revokeObjectURL(u); x.remove(); }, 500); }
+    else if (a === "reset") { if (confirm("Erase all your data on this phone?") && confirm("Really? This can't be undone.")) { localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); } }
+    else if (a === "installsheet") { const b = sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · offline</div><h2>Install Ember</h2></div></div><p class="ink2" style="margin:12px 0">Logging should take one second. On your home screen, it does.</p><div id="ib">${installBody()}</div><button class="btn ghost block" data-act="closesheet">Not now</button>`); }
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(closeSheet); }
+  });
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el.dataset.ifthen) { db.ifthen[el.dataset.ifthen] = el.value; save(); }
+    else if (el.dataset.reasons !== undefined) { db.reasons = el.value; save(); }
+    else if (el.dataset.set) { db.set[el.dataset.set] = el.dataset.set === "currency" ? el.value : +el.value; save(); }
+  });
+  document.addEventListener("change", e => {
+    const el = e.target;
+    if (el.dataset.plan) { db.plan[el.dataset.plan] = el.type === "date" ? el.value : +el.value; save(); render(); }
+    if (el.matches("[data-import]")) { const f = el.files[0]; if (!f) return; f.text().then(t => { const d = JSON.parse(t); if (!d || !Array.isArray(d.logs)) throw 0; if (!confirm("Replace your data on this phone with this backup?")) return; db = Object.assign(DEF(), d); save(); toast("Backup restored"); render(); }).catch(() => toast("That file isn't an Ember backup")); el.value = ""; }
+  });
+  addEventListener("hashchange", () => { closeSheet(); render(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !$(".sheet-back")) render(); });
+  render();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  window.__ember = { db: () => db, budgetFor };
+})();
+</script>
+</body>
+</html>

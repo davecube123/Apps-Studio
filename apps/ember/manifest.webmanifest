@@ -1,0 +1,16 @@
+{
+  "name": "Ember: smoke less, then stop",
+  "short_name": "Ember",
+  "description": "Track your cigarettes in one tap, and smoke a little less each week, gently, until you stop.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12151f",
+  "theme_color": "#12151f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
