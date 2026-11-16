@@ -15,3 +15,5 @@ Zhou Yi text and its classical commentaries, keeps the traditional images, and e
 It is not a translation of any modern edition. The ancient text itself is in the public domain.
 
 Fonts: Newsreader (SIL Open Font License, see `fonts/OFL.txt`).
+
+- **Tales:** every hexagram page (and every reading) links to its tale in Sixty-Four Tales, with the tale's title, region and theme.

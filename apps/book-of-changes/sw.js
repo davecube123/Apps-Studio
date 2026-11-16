@@ -1,7 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "book-of-changes-v5";
+const VERSION = "book-of-changes-v6";
 // Every file the app needs offline. Add new files here.
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/hexagrams.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/hexagrams.json", "./data/tales.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

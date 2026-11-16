@@ -269,6 +269,9 @@
   const BY_BITS = Object.fromEntries(HEX.map(h => [h.bits, h.n]));
   const hx = n => HEX[n - 1];
   let TEXT = []; /* the rendition, data/hexagrams.json */
+  let TALES = []; /* one-line map of Sixty-Four Tales, data/tales.json */
+  const taleOf = n => TALES.find(t => t.n === n);
+  const taleCard = (n, compact) => { const t = taleOf(n); if (!t) return ""; return `<a class="card talelink" href="../sixty-four-tales/#/h/${n}" style="display:block;text-decoration:none;color:inherit;margin-top:${compact ? 12 : 22}px"><div class="eyebrow" style="color:var(--seal)">A tale for this hexagram · ${esc(t.region)}</div><div style="font-size:19px;font-weight:600;margin-top:6px">${esc(t.title)}</div>${compact ? "" : `<p class="small muted" style="margin:6px 0 0">${esc(t.theme)}</p>`}<div class="small" style="margin-top:8px;color:var(--seal)">Read and learn to tell it in Sixty-Four Tales →</div></a>`; };
   const tx = n => TEXT[n - 1] || { name: `Hexagram ${n}`, essence: "", keywords: [], judgment: {}, image: {}, lines: [{}, {}, {}, {}, {}, {}], life: {} };
   const isYang = v => v === 1 || v === 7 || v === 9;
   const moving = v => v === 6 || v === 9;
@@ -497,7 +500,7 @@
     if (!(n >= 1 && n <= 64)) { location.hash = "#/list"; return null; }
     const p = n > 1 ? n - 1 : 64, q = n < 64 ? n + 1 : 1;
     const mine = db.quotes.filter(x => x.n === n && x.kind === "note").sort((a, b) => PART_ORDER(a.part) - PART_ORDER(b.part) || a.at - b.at);
-    return `<a class="back" data-act="back">← Back</a>${hexHead(n)}${hexBody(n)}
+    return `<a class="back" data-act="back">← Back</a>${hexHead(n)}${hexBody(n)}${taleCard(n)}
       ${mine.length ? `<div class="sec"><div class="eyebrow">Your notes on this hexagram</div>${mine.map(x => entryCard(x, { here: true })).join("")}</div>` : ""}
       <div class="pager"><a href="#/h/${p}"><div class="eyebrow">← ${p}</div><div class="pname">${esc(tx(p).name)}</div></a><a href="#/h/${q}"><div class="eyebrow">${q} →</div><div class="pname">${esc(tx(q).name)}</div></a></div>`;
   }
@@ -513,7 +516,7 @@
       <h2 style="margin-top:6px">${r.q ? esc(r.q) : `<span class="muted">No question written</span>`}</h2>
       <div class="card" style="margin-top:16px">${figPair({ n, fig: hexSVG(r.lines, { w: 60, cls: "anim" }) }, m && { n: m, fig: hexSVG(linesOf(m), { w: 60, mark: false }) })}
         <div class="rule">${em.text}</div></div>
-      <div class="sec">${hexHead(n, "")}</div>
+      <div class="sec">${hexHead(n, "")}</div>${taleCard(n, true)}
       ${em.lines.length && !(em.all && n <= 2) ? `<div class="sec"><div class="eyebrow">Your moving line${em.lines.length > 1 ? "s" : ""}</div>${moved}</div>` : ""}
       ${hexBody(n, { compact: true, showAll: em.all && n <= 2 })}
       ${m ? `<hr><div class="eyebrow" style="color:var(--seal)">What it becomes</div>
@@ -780,7 +783,7 @@
 
   /* ---------- Start ---------- */
   applyTheme();
-  fetch("data/hexagrams.json").then(r => r.json()).then(j => { TEXT = j; render(); }).catch(() => { render(); toast("Couldn’t load the hexagram texts. Check your connection once, then it works offline."); });
+  fetch("data/hexagrams.json").then(r => r.json()).then(j => { TEXT = j; render(); fetch("data/tales.json").then(r => r.json()).then(t => { TALES = t; if (/^#\/(h|r)\//.test(location.hash)) render(); }).catch(() => {}); }).catch(() => { render(); toast("Couldn’t load the hexagram texts. Check your connection once, then it works offline."); });
   setTimeout(() => showInstall(false), 1800);
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});

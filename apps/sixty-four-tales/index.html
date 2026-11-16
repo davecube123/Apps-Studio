@@ -229,7 +229,8 @@
     share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' }[n] || ""}</svg>`;
 
   /* ---------- Data ---------- */
-  let T = null; /* the 64 entries */
+  let T = null;
+  let HX = []; /* Book of Changes essences, data/hex.json */ /* the 64 entries */
   const tale = n => T[n - 1];
   const culture = src => String(src).split(" · ")[0];
   const REGIONS = ["East Asia", "South Asia", "Middle East", "Bible & Talmud", "Greece & Rome", "Europe", "Africa", "Americas & Pacific"];
@@ -332,7 +333,8 @@
       <div class="sec"><div class="eyebrow">Another tale for this hexagram</div><div class="card also"><div class="src" style="margin-top:0">${esc(a.source)}</div><h3>${esc(a.title)}</h3>
         <p class="text" style="font-size:17.5px;margin-top:10px">${esc(a.gist)}</p><p class="small muted" style="margin:0">${esc(a.fits)}</p></div></div>
       <div class="sec"><button class="btn block" data-act="logsheet" data-v="${n}">${ic("pen")} I told this tale</button>
-        <a class="btn ghost block" href="../book-of-changes/#/h/${n}" style="margin-top:6px">${ic("link")} Study hexagram ${n} in Book of Changes</a></div>
+        </div>
+      ${(h => `<a class="card" href="../book-of-changes/#/h/${n}" style="display:block;text-decoration:none;color:inherit;margin-top:16px"><div class="eyebrow">In the Book of Changes · Hexagram ${n}</div><div style="font-size:19px;font-weight:600;margin-top:6px">${esc(h ? h.name : x.name)}</div>${h ? `<p class="small muted" style="margin:6px 0 0">${esc(h.essence)}</p>${h.keywords?.length ? `<div class="small" style="margin-top:6px;color:var(--muted)">${h.keywords.map(esc).join(" · ")}</div>` : ""}` : ""}<div class="small" style="margin-top:8px;color:var(--ember)">Study its Judgment, Image and six lines →</div></a>`)(HX.find(h => h.n === n))}
       <div class="pn">${prev ? `<a href="#/h/${prev.n}"><small>${ic("back").replace('class="i"', 'class="i" style="width:12px;height:12px"')} ${prev.n}</small>${esc(prev.tale.title)}</a>` : "<span></span>"}${nxt ? `<a href="#/h/${nxt.n}"><small>${nxt.n} ${ic("chev").replace('class="i"', 'class="i" style="width:12px;height:12px"')}</small>${esc(nxt.tale.title)}</a>` : "<span></span>"}</div>`;
   }
 
@@ -523,7 +525,7 @@
 
   /* ---------- Start ---------- */
   applyTheme();
-  fetch("data/tales.json").then(r => r.json()).then(d => { T = d; render(); setTimeout(() => showInstall(false), 4000); })
+  fetch("data/tales.json").then(r => r.json()).then(d => { T = d; render(); fetch("data/hex.json").then(r => r.json()).then(h => { HX = h; if (/^#\/h\//.test(location.hash)) render(); }).catch(() => {}); setTimeout(() => showInstall(false), 4000); })
     .catch(() => { $("#main").innerHTML = `<div class="loading">The tales could not be loaded. Check your connection and reload.</div>`; });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 })();
