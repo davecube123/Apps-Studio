@@ -88,7 +88,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "ember", VER = "1";
+  const KEY = "ember", VER = "2";
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, now = () => Date.now(), pad = n => String(n).padStart(2, "0");
@@ -313,6 +313,11 @@
   const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
   const installBody = () => deferredInstall ? `<button class="btn ember block" data-act="install">Install Ember</button>` : inApp ? `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
   const installNudge = () => isStandalone() ? "" : `<button class="item" data-act="installsheet" style="margin-top:14px"><span style="font-size:22px">📲</span><div class="grow"><div class="t">Install on your phone</div><div class="m">One tap from your home screen, so logging takes a second.</div></div></button>`;
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back")) return;
+    if (!force) { let sn = 0; try { sn = +localStorage.getItem("ember-install-snooze") || 0; } catch {} if (now() - sn < 5 * DAY) return; }
+    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · works offline</div><h2>Install Ember</h2></div></div><p class="ink2" style="margin:12px 0">Logging should take one second, right when the craving comes. On your home screen, it does.</p><div id="ib">${installBody()}</div><button class="btn ghost block" data-act="notnow">Not now</button>`);
+  }
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
 
   /* ---------- Actions ---------- */
@@ -320,7 +325,7 @@
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
     if (a === "onboard") { const per = +$("#o-per").value || 0; db.set.perDay = per; db.set.price = +$("#o-price").value || db.set.price; db.set.currency = $("#o-cur").value || db.set.currency; db.set.pack = +$("#o-pack").value || 20;
-      const mode = ($("input[name=o-mode]:checked") || {}).value || "track"; db.plan = { mode, start: dayKey(), startBudget: per || 0, stepDays: 4, quitDate: mode === "date" ? dayKey(now() + 28 * DAY) : "" }; db.onboarded = true; save(); location.hash = mode === "date" ? "#/plan" : "#/"; render(); }
+      const mode = ($("input[name=o-mode]:checked") || {}).value || "track"; db.plan = { mode, start: dayKey(), startBudget: per || 0, stepDays: 4, quitDate: mode === "date" ? dayKey(now() + 28 * DAY) : "" }; db.onboarded = true; save(); location.hash = mode === "date" ? "#/plan" : "#/"; render(); setTimeout(() => showInstall(true), 1800); }
     else if (a === "want") wantSheet();
     else if (a === "log") logSheet();
     else if (a === "trig") { el.classList.toggle("on"); pickTrig = $$("#trigs .chip.on").map(c => c.dataset.v); }
@@ -336,7 +341,8 @@
     else if (a === "dellog") { db.logs = db.logs.filter(l => l.t !== +v); save(); render(); }
     else if (a === "backup") { const b = new Blob([JSON.stringify(db)], { type: "application/json" }), u = URL.createObjectURL(b), x = document.createElement("a"); x.href = u; x.download = `ember-backup-${dayKey()}.json`; document.body.appendChild(x); x.click(); setTimeout(() => { URL.revokeObjectURL(u); x.remove(); }, 500); }
     else if (a === "reset") { if (confirm("Erase all your data on this phone?") && confirm("Really? This can't be undone.")) { localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); } }
-    else if (a === "installsheet") { const b = sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · offline</div><h2>Install Ember</h2></div></div><p class="ink2" style="margin:12px 0">Logging should take one second. On your home screen, it does.</p><div id="ib">${installBody()}</div><button class="btn ghost block" data-act="closesheet">Not now</button>`); }
+    else if (a === "installsheet") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("ember-install-snooze", now()); } catch {} closeSheet(); }
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(closeSheet); }
   });
   document.addEventListener("input", e => {
@@ -353,6 +359,7 @@
   addEventListener("hashchange", () => { closeSheet(); render(); });
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !$(".sheet-back")) render(); });
   render();
+  if (db.onboarded) setTimeout(() => showInstall(false), 3000);
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   window.__ember = { db: () => db, budgetFor };
 })();
