@@ -16,3 +16,5 @@ lesson can be passed on through a story rather than a sermon. An installable, of
 Content: `data/tales.json` (64 entries). Every tale is traditional or long in the public domain and is retold in new
 words written for this app; sources are named per tale. Hexagram names follow Book of Changes.
 Font: Newsreader (SIL OFL, `fonts/`).
+
+- **Book of Changes:** every tale links back to its hexagram in Book of Changes, showing the hexagram's essence and keywords.
