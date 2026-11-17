@@ -2,13 +2,14 @@
 
 A minimal travel companion, starting with Thailand: a map, a few great places, and your trip.
 
-- **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes and 77 province boundaries softly tinted by region, with English town and province
+- **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes and 77 province boundaries (geoBoundaries / OpenStreetMap, every island included) softly tinted by region, with English town and province
   labels that appear as you zoom in: no tiles, works offline) with each place as a round photo pin; tap for a preview
   card (with how busy it is now); filter by region; your trip is drawn as a dashed route. **⇄ A to B:** pick any two
-  towns and see the best-balance, fastest and cheapest way between them (up to three hops, door-to-door time incl.
+  towns and see the best-balance, fastest and cheapest way between them (up to four hops, stopovers spelled out, car fares split per person, door-to-door time incl.
   airport time, fares per person); also “Get here” on every place page.
-- **Places:** 31 hand-picked Thai places (Bangkok, Central, North, East coast incl. Koh Chang, Koh Kood, Koh Mak and
-  Koh Samet, Gulf islands, Andaman coast incl. Similan and Koh Lipe) as photo cards, each
+- **Places:** 48 hand-picked Thai places (Bangkok, Central, North, Northeast (Isaan), East coast incl. Koh Chang, Koh Kood,
+  Koh Mak and Koh Samet, Gulf islands, Andaman coast incl. Similan, the Trang islands and Koh Lipe); nearby pins merge into
+  a numbered bubble at low zoom as photo cards, each
   with a short original description, practical tips, best time, how long to stay, your own notes, “Been here”, and an
   Open in Google Maps link.
 - **Plan:** your places grouped into stops with nights per stop; choose how to travel each hop (direct, or routed via a
@@ -28,7 +29,7 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
 - **Basics:** baht to peso converter, 13 Thai phrases you can hear, a packing list, practical info and price sources.
 - **How busy:** each place shows a one-line crowd estimate for right now (season, weekday, Thai time of day and
   festivals), with a month strip, the quietest and busiest times, and a link to Google Maps' live busyness.
-- **Data (Nov 2026):** 28 cities, 63 routes, fees from official sources; transport fares are typical
+- **Data (Nov 2026):** 35 cities, 82 routes, fees from official sources; transport fares are typical
   ranges and hotel/food/local bands are estimates; exchange rate from the BSP reference.
 - **Basics:** money, getting around, weather by coast, temple etiquette, respect, phone and power, entry, emergencies.
 - Built to add more countries: one data file per country in `data/`.
