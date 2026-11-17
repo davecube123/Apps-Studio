@@ -1,0 +1,375 @@
+{
+"country": "Thailand",
+"flag": "🇹🇭",
+"center": [
+13.0,
+100.9
+],
+"zoom": 5,
+"regions": {
+"bangkok": "Bangkok",
+"central": "Central",
+"north": "North",
+"south": "Andaman coast",
+"gulf": "Gulf islands"
+},
+"places": [
+{
+"id": "grand-palace",
+"name": "Grand Palace & Wat Phra Kaew",
+"region": "bangkok",
+"type": "temple",
+"lat": 13.75,
+"lng": 100.4913,
+"line": "Gold spires, the Emerald Buddha and Bangkok's most famous sight.",
+"about": "The former royal residence and its temple of the Emerald Buddha form a walled city of glittering spires, murals and guardian giants. It is busy and hot, and worth it.",
+"tips": [
+"Go at opening time to beat the heat and the tour groups.",
+"Strict dress code: shoulders and knees covered, no see-through clothes. Wraps can be rented nearby.",
+"Ignore anyone outside who says it's closed today: it's a classic scam."
+],
+"best": "Nov to Feb",
+"days": "Half a day",
+"photo": "photos/grand-palace.jpg",
+"thumb": "photos/thumb/grand-palace.jpg"
+},
+{
+"id": "wat-arun",
+"name": "Wat Arun",
+"region": "bangkok",
+"type": "temple",
+"lat": 13.7437,
+"lng": 100.4889,
+"line": "The Temple of Dawn, its porcelain-studded tower on the river.",
+"about": "Wat Arun's central tower is covered in pieces of coloured porcelain and seashell. Cross by the cheap river ferry from Tha Tien pier, then come back at sunset to see it from the other bank.",
+"tips": [
+"Take the cross-river ferry from Tha Tien, near Wat Pho.",
+"Best photographed from the east bank at sunset.",
+"Shoulders and knees covered inside the grounds."
+],
+"best": "Nov to Feb",
+"days": "2 hours",
+"photo": "photos/wat-arun.jpg",
+"thumb": "photos/thumb/wat-arun.jpg"
+},
+{
+"id": "street-food",
+"name": "Yaowarat (Chinatown) street food",
+"region": "bangkok",
+"type": "food",
+"lat": 13.7398,
+"lng": 100.5101,
+"line": "Bangkok's night-time food street: noodles, seafood and smoke.",
+"about": "After dark Yaowarat Road fills with stalls, neon and queues. Graze from cart to cart: noodles, grilled seafood, toasted buns and mango sticky rice.",
+"tips": [
+"Arrive around 7 pm when most stalls are open.",
+"Follow the longest local queues.",
+"Closed on some Mondays; check before you go."
+],
+"best": "All year (evenings)",
+"days": "An evening",
+"photo": "photos/street-food.jpg",
+"thumb": "photos/thumb/street-food.jpg"
+},
+{
+"id": "ayutthaya",
+"name": "Ayutthaya",
+"region": "central",
+"type": "history",
+"lat": 14.356,
+"lng": 100.5583,
+"line": "Ruined capital of old Siam, an easy day trip from Bangkok.",
+"about": "Ayutthaya was the kingdom's capital for four centuries until it was sacked in 1767. Brick towers, headless Buddhas and the famous Buddha head in tree roots are spread across a riverside island.",
+"tips": [
+"Rent a bicycle or a tuk-tuk for the day: the sites are spread out.",
+"Trains from Bangkok take about 1.5 to 2 hours and cost very little.",
+"Never pose above the Buddha head in the roots: it's disrespectful."
+],
+"best": "Nov to Feb",
+"days": "1 day",
+"photo": "photos/ayutthaya.jpg",
+"thumb": "photos/thumb/ayutthaya.jpg"
+},
+{
+"id": "erawan",
+"name": "Erawan Falls, Kanchanaburi",
+"region": "central",
+"type": "nature",
+"lat": 14.3688,
+"lng": 99.1436,
+"line": "Seven tiers of turquoise pools in the forest.",
+"about": "In Erawan National Park, a stream drops through seven limestone tiers into milky turquoise pools you can swim in. Kanchanaburi town, with the Bridge on the River Kwai, makes a good base.",
+"tips": [
+"Start early and walk up to the top tiers before the crowds.",
+"Bring swimwear and water shoes; the small fish nibble.",
+"National park entry fee applies, higher for foreigners."
+],
+"best": "Nov to Apr (clearest water)",
+"days": "1 to 2 days",
+"photo": "photos/erawan.jpg",
+"thumb": "photos/thumb/erawan.jpg"
+},
+{
+"id": "sukhothai",
+"name": "Sukhothai Historical Park",
+"region": "north",
+"type": "history",
+"lat": 17.0175,
+"lng": 99.7036,
+"line": "Calm, green ruins of the first Thai kingdom.",
+"about": "Lotus ponds, seated Buddhas and lotus-bud towers from the 13th century, spread through a quiet park. Quieter and more serene than Ayutthaya.",
+"tips": [
+"Cycle the park at sunrise or late afternoon.",
+"Stay in New Sukhothai or near the park gate.",
+"Loy Krathong (November) is especially beautiful here."
+],
+"best": "Nov to Feb",
+"days": "1 to 2 days",
+"photo": "photos/sukhothai.jpg",
+"thumb": "photos/thumb/sukhothai.jpg"
+},
+{
+"id": "chiang-mai",
+"name": "Chiang Mai Old City",
+"region": "north",
+"type": "city",
+"lat": 18.7883,
+"lng": 98.9853,
+"line": "A walled, walkable old town full of temples and cafés.",
+"about": "Inside the moat of Chiang Mai sit dozens of temples, from the ruined great chedi of Wat Chedi Luang to teak halls, along with cafés, massage schools and the Sunday Walking Street market.",
+"tips": [
+"Sunday Walking Street market on Ratchadamnoen Road.",
+"Grab and Bolt work well; red songthaews are shared taxis.",
+"March and April can be smoky from seasonal burning."
+],
+"best": "Nov to Feb",
+"days": "3 to 4 days",
+"photo": "photos/chiang-mai.jpg",
+"thumb": "photos/thumb/chiang-mai.jpg"
+},
+{
+"id": "doi-suthep",
+"name": "Wat Phra That Doi Suthep",
+"region": "north",
+"type": "temple",
+"lat": 18.8048,
+"lng": 98.9216,
+"line": "Golden hilltop temple overlooking Chiang Mai.",
+"about": "Chiang Mai's most revered temple sits on the mountain above the city, reached by a long naga-lined staircase or a small funicular. On clear days the view stretches over the valley.",
+"tips": [
+"Go early morning for clear views and fewer people.",
+"Walk the stairs up and take the funicular down, or the reverse.",
+"Combine with the Monk's Trail hike for the adventurous."
+],
+"best": "Nov to Feb",
+"days": "Half a day",
+"photo": "photos/doi-suthep.jpg",
+"thumb": "photos/thumb/doi-suthep.jpg"
+},
+{
+"id": "pai",
+"name": "Pai",
+"region": "north",
+"type": "nature",
+"lat": 19.3592,
+"lng": 98.4403,
+"line": "A laid-back mountain valley town in Mae Hong Son.",
+"about": "Rice fields, hot springs, waterfalls and Pai Canyon at sunset, with a relaxed town of night markets and guesthouses. The winding road from Chiang Mai is famous for its many curves.",
+"tips": [
+"Take motion-sickness pills for the mountain road from Chiang Mai.",
+"Only ride a scooter if you're experienced; the roads are steep.",
+"Nights get cool from December to February: bring a layer."
+],
+"best": "Nov to Feb",
+"days": "2 to 4 days",
+"photo": "photos/pai.jpg",
+"thumb": "photos/thumb/pai.jpg"
+},
+{
+"id": "white-temple",
+"name": "Wat Rong Khun (White Temple)",
+"region": "north",
+"type": "temple",
+"lat": 19.8243,
+"lng": 99.7631,
+"line": "A dazzling white, mirror-studded modern temple in Chiang Rai.",
+"about": "Designed by the Thai artist Chalermchai Kositpipat, the White Temple is a work of art in progress: white plaster and mirror glass, a bridge over reaching hands, and surprising modern murals inside.",
+"tips": [
+"Arrive at opening time; it fills up fast.",
+"Pair it with the Blue Temple and Baan Dam (Black House) the same day.",
+"Photography isn't allowed inside the main hall."
+],
+"best": "Nov to Feb",
+"days": "Half a day",
+"photo": "photos/white-temple.jpg",
+"thumb": "photos/thumb/white-temple.jpg"
+},
+{
+"id": "khao-sok",
+"name": "Khao Sok & Cheow Lan Lake",
+"region": "south",
+"type": "nature",
+"lat": 8.975,
+"lng": 98.795,
+"line": "Rainforest, limestone cliffs and floating bungalows on a jade lake.",
+"about": "One of the oldest rainforests in the world surrounds a vast lake of emerald water and karst islands. Sleep in a floating raft house, kayak at dawn, and listen for gibbons.",
+"tips": [
+"Book a one or two-night lake tour with a floating bungalow.",
+"Bring a dry bag and leech socks in the rainy season.",
+"Halfway between Phuket, Krabi and Surat Thani: an easy add-on."
+],
+"best": "Dec to Apr",
+"days": "2 to 3 days",
+"photo": "photos/khao-sok.jpg",
+"thumb": "photos/thumb/khao-sok.jpg"
+},
+{
+"id": "railay",
+"name": "Railay",
+"region": "south",
+"type": "beach",
+"lat": 8.0115,
+"lng": 98.8382,
+"line": "Cliff-backed beaches reachable only by boat.",
+"about": "Towering limestone walls cut Railay off from the mainland, so you arrive by longtail boat from Ao Nang or Krabi. Climbing, lagoons, and some of Thailand's most dramatic beaches, including Phra Nang.",
+"tips": [
+"Longtail boats leave from Ao Nang beach when full.",
+"Phra Nang beach in the early morning, before the day boats.",
+"Rock climbing courses for complete beginners are easy to book."
+],
+"best": "Nov to Apr",
+"days": "2 to 3 days",
+"photo": "photos/railay.jpg",
+"thumb": "photos/thumb/railay.jpg"
+},
+{
+"id": "phi-phi",
+"name": "Koh Phi Phi",
+"region": "south",
+"type": "island",
+"lat": 7.7407,
+"lng": 98.7784,
+"line": "The famous twin bays and turquoise lagoons of the Andaman.",
+"about": "Phi Phi Don's viewpoint looks down on two curving bays; around it are snorkelling spots, Pileh Lagoon and Maya Bay on Phi Phi Leh. Busy and lively, best enjoyed outside the day-trip rush.",
+"tips": [
+"Stay overnight to see the bays without the day-trippers.",
+"Maya Bay closes for part of each year to recover: check before you go.",
+"Climb to the viewpoint at sunrise or sunset."
+],
+"best": "Nov to Apr",
+"days": "2 to 3 days",
+"photo": "photos/phi-phi.jpg",
+"thumb": "photos/thumb/phi-phi.jpg"
+},
+{
+"id": "phuket",
+"name": "Phuket Old Town",
+"region": "south",
+"type": "city",
+"lat": 7.8843,
+"lng": 98.388,
+"line": "Colourful Sino-Portuguese shophouses, cafés and street art.",
+"about": "Away from the beach resorts, Phuket Town has pastel shophouses, shrines, local food and a Sunday walking street on Thalang Road. A good base for day trips across the Andaman.",
+"tips": [
+"Sunday Walking Street market on Thalang Road.",
+"Try local Phuket dishes like mee hokkien.",
+"The island's beaches are a 20 to 40 minute ride away."
+],
+"best": "Nov to Apr",
+"days": "1 to 2 days",
+"photo": "photos/phuket.jpg",
+"thumb": "photos/thumb/phuket.jpg"
+},
+{
+"id": "lanta",
+"name": "Koh Lanta",
+"region": "south",
+"type": "island",
+"lat": 7.6,
+"lng": 99.04,
+"line": "A long, laid-back island of sunsets and quiet beaches.",
+"about": "Lanta has long sandy beaches on its west coast, an old wooden fishing town on the east, and a national park at the southern tip. Calmer than Phi Phi and good for a slower week.",
+"tips": [
+"Rent a scooter or tuk-tuk to explore the beaches southward.",
+"Day trip to Koh Rok or the Four Islands for snorkelling.",
+"Some places close in the rainy months (May to Oct)."
+],
+"best": "Nov to Apr",
+"days": "3 to 5 days",
+"photo": "photos/lanta.jpg",
+"thumb": "photos/thumb/lanta.jpg"
+},
+{
+"id": "samui",
+"name": "Koh Samui",
+"region": "gulf",
+"type": "island",
+"lat": 9.532,
+"lng": 100.061,
+"line": "A big, easy Gulf island with beaches for every mood.",
+"about": "Samui has busy Chaweng, quieter Lamai and Bophut's Fisherman's Village, plus waterfalls and the Big Buddha. Boat trips run to Ang Thong Marine Park's islands.",
+"tips": [
+"Ang Thong Marine Park day trip for kayaking and the viewpoint.",
+"Fisherman's Village night market on Fridays.",
+"Gulf weather differs: it's often good while the Andaman is rainy."
+],
+"best": "Jan to Aug",
+"days": "3 to 5 days",
+"photo": "photos/samui.jpg",
+"thumb": "photos/thumb/samui.jpg"
+},
+{
+"id": "koh-tao",
+"name": "Koh Tao",
+"region": "gulf",
+"type": "island",
+"lat": 10.0956,
+"lng": 99.8404,
+"line": "Small island, clear water, and one of the world's cheapest places to learn to dive.",
+"about": "Koh Tao is all coves, granite boulders and coral reefs, with a famous viewpoint over the three linked islets of Koh Nang Yuan. Many people come for a few days and stay to take a diving course.",
+"tips": [
+"Open Water diving courses take about 3 to 4 days.",
+"Snorkel straight from the beach at Shark Bay or Aow Leuk.",
+"Ferries connect with Koh Samui, Koh Phangan and Chumphon."
+],
+"best": "Mar to Sep",
+"days": "3 to 5 days",
+"photo": "photos/koh-tao.jpg",
+"thumb": "photos/thumb/koh-tao.jpg"
+}
+],
+"basics": [
+[
+"Money",
+"Thai baht (THB). Cards work in cities and malls; carry cash for markets, street food and islands. ATMs charge a fixed fee per withdrawal, so take out more at once."
+],
+[
+"Getting around",
+"Grab and Bolt for rides in cities; overnight trains and buses between regions; cheap domestic flights; ferries and longtail boats to the islands."
+],
+[
+"Weather",
+"Cool and dry Nov to Feb in most of the country. The Andaman coast (Phuket, Krabi, Phi Phi, Lanta) is best Nov to Apr; the Gulf islands (Samui, Tao) are often best Jan to Aug. The north can be smoky in March and April."
+],
+[
+"Temples",
+"Cover shoulders and knees, take shoes off where others do, never point your feet at a Buddha, and don't touch monks if you are a woman."
+],
+[
+"Respect",
+"The monarchy is deeply respected and protected by strict laws: never joke about or criticise the royal family. Stand for the royal anthem in cinemas."
+],
+[
+"Phone and power",
+"Buy a tourist SIM or eSIM at the airport. Plugs are mostly types A, B, C and O, at 230 V."
+],
+[
+"Entry",
+"Philippine passport holders can visit Thailand visa-free for a limited stay. Check the current allowed length of stay and the Thailand Digital Arrival Card requirement before you fly."
+],
+[
+"Emergencies",
+"Tourist Police: 1155 (English-speaking). Ambulance: 1669."
+]
+]
+}

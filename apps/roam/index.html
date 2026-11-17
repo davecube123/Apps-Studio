@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Roam</title>
+  <meta name="description" content="A minimal travel companion: a map, a few great places, and your trip. Starting with Thailand.">
+  <meta name="theme-color" content="#f6f2ea">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Roam">
+  <link rel="stylesheet" href="lib/leaflet.css">
+  <style>
+    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { --bg: #f6f2ea; --card: #fffdf9; --ink: #1f1d1a; --ink2: #5b564e; --muted: #8f897f; --line: rgba(31,29,26,.09); --accent: #e25e3e; --accent2: #fbe3da; --green: #2f8f6a;
+      --display: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, Roboto, sans-serif; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); height: 100%; }
+    main { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 100px); }
+    h1 { font: 600 32px/1.1 var(--display); margin: 4px 2px 6px; letter-spacing: -.01em; } h2 { font: 600 24px/1.15 var(--display); margin: 0 0 6px; } h3 { font: 650 15px var(--sans); margin: 0 0 4px; }
+    p { margin: 0 0 10px; } a { color: var(--accent); } .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 13.5px; }
+    .eyebrow { font: 700 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; } .chips::-webkit-scrollbar { display: none; }
+    .chip { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--ink2); padding: 7px 13px; border-radius: 999px; font: 600 13.5px var(--sans); cursor: pointer; }
+    .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .pcard { display: block; position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 4/5; background: #ddd; color: #fff; text-decoration: none; }
+    .pcard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pcard .cap { position: absolute; inset: auto 0 0 0; padding: 30px 12px 11px; background: linear-gradient(transparent, rgba(0,0,0,.65)); }
+    .pcard .cap b { display: block; font: 600 16px/1.2 var(--display); } .pcard .cap span { font-size: 12px; opacity: .85; }
+    .pcard .heart { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--accent); display: grid; place-items: center; font-size: 15px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: 650 15px var(--sans); padding: 12px 18px; border-radius: 999px; cursor: pointer; text-decoration: none; min-height: 46px; }
+    .btn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); } .btn.acc { background: var(--accent); color: #fff; border-color: var(--accent); } .btn.sm { min-height: 36px; padding: 7px 13px; font-size: 14px; } .btn.block { display: flex; width: 100%; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; margin-top: 12px; }
+    #map { position: fixed; inset: 0; z-index: 1; background: #e8e4dc; }
+    .mapbar { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; z-index: 500; display: flex; justify-content: center; pointer-events: none; }
+    .mapbar .in { pointer-events: auto; display: flex; gap: 6px; overflow-x: auto; max-width: 640px; scrollbar-width: none; } .mapbar .chip { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+    .pin { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); background-size: cover; background-position: center; transition: transform .2s; }
+    .pin.sel { transform: scale(1.35); border-color: var(--accent); } .pin.saved { border-color: var(--accent); }
+    .peek { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 600; max-width: 616px; margin: 0 auto; display: flex; gap: 12px; background: var(--card); border-radius: 20px; padding: 10px; box-shadow: 0 12px 34px rgba(0,0,0,.18); text-decoration: none; color: inherit; animation: up .3s cubic-bezier(.2,.9,.25,1.1) both; }
+    .peek img { width: 96px; height: 96px; object-fit: cover; border-radius: 14px; flex: none; } .peek b { font: 600 18px/1.2 var(--display); display: block; margin-top: 2px; }
+    .hero { margin: -14px -16px 0; position: relative; } .hero img { width: 100%; aspect-ratio: 3/2; object-fit: cover; display: block; }
+    .hero .back { position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; color: var(--ink); text-decoration: none; font-size: 20px; }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; } .fact { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; } .fact b { display: block; font-size: 15px; }
+    ul.tips { margin: 8px 0 0; padding-left: 18px; } ul.tips li { margin: 5px 0; }
+    textarea { width: 100%; font: 16px var(--sans); padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); resize: vertical; min-height: 70px; outline: none; }
+    .titem { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 8px; margin-top: 8px; }
+    .titem img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; } .titem .n { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 12px var(--sans); display: grid; place-items: center; flex: none; }
+    .iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; cursor: pointer; font-size: 15px; color: var(--ink2); }
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 700; display: flex; justify-content: center; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(246,242,234,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+    nav.tabs .in { display: flex; width: min(600px,100%); justify-content: space-around; } nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 14px; border-radius: 14px; color: var(--muted); text-decoration: none; font: 650 11.5px var(--sans); }
+    nav.tabs a svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } nav.tabs a.on { color: var(--ink); }
+    .leaflet-control-attribution { font-size: 10px !important; background: rgba(255,255,255,.7) !important; } .leaflet-bottom.leaflet-right { bottom: calc(env(safe-area-inset-bottom) + 72px); }
+    .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 56px); }
+    .view { animation: fade .25s both; } @keyframes fade { from { opacity: 0; } } @keyframes up { from { transform: translateY(16px); opacity: 0; } }
+    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 90px); transform: translateX(-50%); z-index: 900; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font: 650 14px var(--sans); animation: up .25s both; }
+    .sheet-back { position: fixed; inset: 0; z-index: 800; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; } .sheet { width: min(560px,100%); background: var(--card); border-radius: 24px 24px 0 0; padding: 18px 20px calc(env(safe-area-inset-bottom) + 18px); animation: up .3s both; }
+    ol.steps { padding-left: 20px; margin: 6px 0; } .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+<div id="map" hidden></div>
+<div class="mapbar" id="mapbar" hidden><div class="in" id="mapchips"></div></div>
+<main id="app"></main>
+<nav class="tabs" id="tabs"><div class="in">
+  <a href="#/" data-tab="map"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Map</a>
+  <a href="#/places" data-tab="places"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Places</a>
+  <a href="#/trip" data-tab="trip"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Trip</a>
+  <a href="#/basics" data-tab="basics"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Basics</a>
+</div></nav>
+<script src="lib/leaflet.js"></script>
+<script>
+(() => {
+  "use strict";
+  const KEY = "roam", VER = "1";
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
+  let db; try { db = Object.assign({ trip: [], been: [], notes: {}, country: "thailand" }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { db = { trip: [], been: [], notes: {}, country: "thailand" }; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {} };
+  let D = null; /* country data */
+  const TYPE = { temple: "🛕", history: "🏛", city: "🏙", nature: "🌿", beach: "🏖", island: "🏝", food: "🍜" };
+  const place = id => D.places.find(p => p.id === id);
+  const inTrip = id => db.trip.includes(id);
+  let region = "", sel = null;
+
+  /* ---------- Map ---------- */
+  let map = null, markers = {}, route = null;
+  function initMap() {
+    if (map || !window.L) return;
+    map = L.map("map", { zoomControl: false, attributionControl: true }).setView(D.center, D.zoom);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 18, subdomains: "abcd", attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
+    D.places.forEach(p => {
+      const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
+      m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
+      markers[p.id] = m;
+    });
+    map.on("click", () => { sel = null; refreshPins(); $(".peek")?.remove(); });
+  }
+  const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [40, 40], iconAnchor: [20, 20] });
+  function refreshPins() {
+    if (!map) return;
+    D.places.forEach(p => { const m = markers[p.id], show = !region || p.region === region; m.setIcon(pinIcon(p)); if (show && !map.hasLayer(m)) m.addTo(map); if (!show && map.hasLayer(m)) map.removeLayer(m); });
+    if (route) { map.removeLayer(route); route = null; }
+    const pts = db.trip.map(place).filter(Boolean).map(p => [p.lat, p.lng]);
+    if (pts.length > 1) route = L.polyline(pts, { color: "#e25e3e", weight: 3, opacity: .8, dashArray: "6 8" }).addTo(map);
+  }
+  function fitRegion() { if (!map) return; const ps = D.places.filter(p => !region || p.region === region); if (!ps.length) return; if (ps.length === 1) map.setView([ps[0].lat, ps[0].lng], 10); else map.fitBounds(ps.map(p => [p.lat, p.lng]), { padding: [60, 60], maxZoom: 11 }); }
+  function peek(p) {
+    $(".peek")?.remove(); const a = document.createElement("a"); a.className = "peek"; a.href = `#/p/${p.id}`;
+    a.innerHTML = `<img src="${p.thumb}" alt=""><div style="min-width:0"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}</div><b>${esc(p.name)}</b><div class="small ink2">${esc(p.line)}</div></div>`;
+    document.body.appendChild(a);
+  }
+  function mapChips() { $("#mapchips").innerHTML = [["", "All"], ...Object.entries(D.regions)].map(([k, n]) => `<button class="chip${region === k ? " on" : ""}" data-act="region" data-v="${k}">${esc(n)}</button>`).join(""); }
+
+  /* ---------- Views ---------- */
+  function route_() { const h = location.hash.replace(/^#\/?/, ""); const [v = "", a = ""] = h.split("/"); return { v: v || "map", a }; }
+  function render() {
+    const { v, a } = route_(), isMap = v === "map";
+    $("#map").hidden = !isMap; $("#mapbar").hidden = !isMap; $(".peek")?.remove();
+    if (isMap) { $("#app").innerHTML = ""; if (!window.L) { $("#app").innerHTML = `<div class="card" style="margin-top:40vh">The map needs a connection the first time. Your places are under Places.</div>`; } else { initMap(); setTimeout(() => map.invalidateSize(), 0); mapChips(); refreshPins(); if (sel && place(sel)) peek(place(sel)); } }
+    else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, basics: viewBasics }[v] || viewPlaces)()}</div>`;
+    $$("#tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "p" ? "places" : v)));
+    if (!isMap) window.scrollTo(0, 0);
+  }
+  function viewPlaces() {
+    const L_ = D.places.filter(p => !region || p.region === region);
+    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Places</h1>
+      <div class="chips">${[["", "All"], ...Object.entries(D.regions)].map(([k, n]) => `<button class="chip${region === k ? " on" : ""}" data-act="region" data-v="${k}">${esc(n)}</button>`).join("")}</div>
+      <div class="grid">${L_.map(p => `<a class="pcard" href="#/p/${p.id}"><img src="${p.thumb}" alt="" loading="lazy">${inTrip(p.id) ? `<span class="heart">♥</span>` : ""}<div class="cap"><span>${TYPE[p.type] || ""} ${esc(D.regions[p.region])}</span><b>${esc(p.name)}</b></div></a>`).join("")}</div>`;
+  }
+  function viewPlace(id) {
+    const p = place(id); if (!p) return viewPlaces(); const t = inTrip(p.id), been = db.been.includes(p.id);
+    return `<div class="hero"><img src="${p.photo}" alt="${esc(p.name)}"><a class="back" href="javascript:history.back()" aria-label="Back">‹</a></div>
+      <div style="margin-top:16px"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}</div><h1 style="font-size:28px">${esc(p.name)}</h1><p class="ink2" style="font-size:17px">${esc(p.line)}</p></div>
+      <div class="row" style="gap:8px"><button class="btn ${t ? "" : "acc"}" data-act="trip" data-v="${p.id}" style="flex:1">${t ? "♥ In your trip" : "♡ Add to trip"}</button><button class="btn" data-act="been" data-v="${p.id}">${been ? "✓ Been" : "Been here?"}</button></div>
+      <p style="margin-top:16px">${esc(p.about)}</p>
+      <div class="facts"><div class="fact"><span class="small muted">Best time</span><b>${esc(p.best)}</b></div><div class="fact"><span class="small muted">Give it</span><b>${esc(p.days)}</b></div></div>
+      <div class="card"><h3>Good to know</h3><ul class="tips">${p.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="card"><h3>My notes</h3><textarea data-note="${p.id}" placeholder="Where to stay, who recommended it, what to eat…">${esc(db.notes[p.id] || "")}</textarea></div>
+      <div class="row" style="gap:8px;margin-top:12px"><a class="btn sm" href="#/" data-act="showmap" data-v="${p.id}">Show on map</a><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Open in Google Maps ↗</a></div>
+      <p class="small muted" style="margin-top:14px">Photo: Unsplash.</p>`;
+  }
+  function viewTrip() {
+    const T = db.trip.map(place).filter(Boolean);
+    const days = T.reduce((a, p) => a + (parseInt(p.days) || .5), 0);
+    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Your trip</h1>
+      ${T.length ? `<p class="ink2">${T.length} place${T.length > 1 ? "s" : ""} · roughly ${Math.ceil(days)}+ days. Reorder them in the order you'll travel; the map draws your route.</p>
+        ${T.map((p, i) => `<div class="titem"><span class="n">${i + 1}</span><img src="${p.thumb}" alt=""><a href="#/p/${p.id}" style="flex:1;min-width:0;color:inherit;text-decoration:none"><b>${esc(p.name)}</b><div class="small muted">${esc(p.days)} · ${esc(D.regions[p.region])}</div></a>
+          <div style="display:flex;flex-direction:column;gap:4px"><button class="iconbtn" data-act="up" data-v="${i}" aria-label="Move up" ${i ? "" : "disabled"}>↑</button><button class="iconbtn" data-act="down" data-v="${i}" aria-label="Move down" ${i < T.length - 1 ? "" : "disabled"}>↓</button></div></div>`).join("")}
+        <a class="btn pri block" href="#/" style="margin-top:14px">See the route on the map</a>`
+      : `<div class="card"><p class="ink2" style="margin:0">Tap ♡ <b>Add to trip</b> on any place. They'll line up here in your order, with your route on the map.</p></div><a class="btn pri block" href="#/places" style="margin-top:12px">Browse places</a>`}`;
+  }
+  function viewBasics() {
+    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Basics</h1>${D.basics.map(([h, t]) => `<div class="card"><h3>${esc(h)}</h3><p class="ink2" style="margin:0">${esc(t)}</p></div>`).join("")}
+      <div class="card"><h3>Countries</h3><p class="small ink2" style="margin:0">Thailand for now. More are coming.</p></div>
+      ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:12px">Install on your phone</button>`}
+      <p class="small muted" style="margin-top:16px">Photos from Unsplash (Unsplash License). Map © OpenStreetMap contributors, © CARTO. Map library: Leaflet (BSD-2). Practical details change: check entry rules and opening times before you go.</p>
+      <div class="ver">Roam v${VER}</div>`;
+  }
+
+  /* ---------- Install ---------- */
+  let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA);
+  const installBody = () => deferred ? `<button class="btn acc block" data-act="doinstall">Install Roam</button>` : isIOS ? `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back")) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("roam-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
+    const b = document.createElement("div"); b.className = "sheet-back"; b.innerHTML = `<div class="sheet"><div class="row" style="gap:14px"><img src="icons/icon-192.png" width="54" height="54" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · your places offline</div><h2 style="margin:0">Install Roam</h2></div></div><p class="ink2" style="margin:12px 0">Your places, notes and trip, one tap from your home screen.</p><div id="ib">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;border:0;background:none">Not now</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+
+  /* ---------- Actions ---------- */
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
+    if (a === "region") { region = v; sel = null; if (route_().v === "map") { mapChips(); refreshPins(); fitRegion(); $(".peek")?.remove(); } else render(); }
+    else if (a === "trip") { db.trip = inTrip(v) ? db.trip.filter(x => x !== v) : [...db.trip, v]; save(); toast(inTrip(v) ? "Added to your trip" : "Removed from your trip"); render(); }
+    else if (a === "been") { db.been = db.been.includes(v) ? db.been.filter(x => x !== v) : [...db.been, v]; save(); render(); }
+    else if (a === "up" || a === "down") { const i = +v, j = a === "up" ? i - 1 : i + 1; [db.trip[i], db.trip[j]] = [db.trip[j], db.trip[i]]; save(); render(); }
+    else if (a === "showmap") { sel = v; region = ""; const p = place(v); setTimeout(() => { if (map) { map.setView([p.lat, p.lng], 11); refreshPins(); peek(p); } }, 50); }
+    else if (a === "install") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("roam-install-snooze", Date.now()); } catch {} $(".sheet-back")?.remove(); }
+    else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
+  });
+  document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
+  addEventListener("hashchange", render);
+  fetch(`data/${db.country}.json`).then(r => r.json()).then(d => { D = d; render(); setTimeout(() => showInstall(false), 4000); })
+    .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load. Check your connection and reload.</p>`; });
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
