@@ -230,7 +230,7 @@
   </nav>
   <script>
   "use strict";
-  const APP_VERSION = "4", APP_DATE = "8 Nov 2026";
+  const APP_VERSION = "5", APP_DATE = "17 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5;
@@ -667,6 +667,7 @@
     { id: "lock", name: "Lock in", goal: "Quarter notes, one strum on every click. Bury the click under your strum until you can’t hear it.", cfg: { bpm: 70, on: "all", sub: 1, gap: "0", swing: 50, ramp: null } },
     { id: "motion", name: "Constant motion", goal: "Eighth notes: down on the beat, up on the “and”. Keep the hand swinging even when you don’t hit the strings.", cfg: { bpm: 70, on: "all", sub: 2, gap: "0", swing: 50, ramp: null } },
     { id: "backbeat", name: "Backbeat", goal: "The click plays only 2 and 4, like a snare drum. You supply 1 and 3. Most popular music grooves from here.", cfg: { bpm: 80, on: "24", sub: 1, gap: "0", swing: 50, ramp: null } },
+    { id: "danny", name: "Danny’s Song", goal: "Backbeat with a folk strum: the click is your snare on 2 and 4, your hand keeps moving down-up on the eighths, accents on the backbeat. Starts easy and climbs 2 bpm every 4 bars; stop where it stays relaxed, and work toward the record’s feel. Add the song itself under Songs (your own lyrics and chords stay on this phone).", cfg: { bpm: 72, on: "24", sub: 2, gap: "0", swing: 50, ramp: { every: 4, step: 2, to: 116 } } },
     { id: "one", name: "Only the one", goal: "One click per bar. Hold beats 2, 3 and 4 yourself, and land the next 1 with it.", cfg: { bpm: 80, on: "1", sub: 1, gap: "0", swing: 50, ramp: null } },
     { id: "gap", name: "Gap click", goal: "Two bars of click, two bars of silence. Keep playing; when the click returns, are you still with it?", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/2", swing: 50, ramp: null } },
     { id: "gaplong", name: "Inner clock", goal: "Two bars on, six bars silent. The click becomes a check-in, not a crutch.", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/6", swing: 50, ramp: null } },
