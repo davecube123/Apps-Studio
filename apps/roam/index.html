@@ -294,7 +294,7 @@
       <details class="card more"><summary><b>Practical</b> <span class="small muted">fees, getting there, more spots, tips</span></summary>${placeExtras(p)}<div class="card"><h3>Good to know</h3><ul class="tips">${p.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></details>
       <div class="card"><h3>My notes</h3><textarea data-note="${p.id}" placeholder="Where to stay, who recommended it, what to eat…">${esc(db.notes[p.id] || "")}</textarea></div>
       <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="been" data-v="${p.id}">${been ? "✓ Been here" : "Been here?"}</button><button class="btn sm" data-act="ab" data-v="${p.city}">⇄ Get here</button><a class="btn sm" href="#/" data-act="showmap" data-v="${p.id}">Show on map</a><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Maps ↗</a></div>
-      <p class="small muted" style="margin-top:14px">Photo: Unsplash.</p>`;
+      <p class="small muted" style="margin-top:14px">${p.illus ? "Illustration: Roam." : "Photo: Unsplash."}</p>`;
   }
   function tileSheet(pid, k) {
     const p = place(pid), c = city(p.city), T = TILES.find(x => x[0] === k), b = document.createElement("div"); b.className = "sheet-back";
