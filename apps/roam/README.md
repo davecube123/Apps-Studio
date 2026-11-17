@@ -17,6 +17,9 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
 - **Vibe and four tiles per place:** 🍜 Eat, 🎒 Do, 🎉 Night, 💡 Know (insider tips), per city with prices and map links;
   everything else folds into “Practical”. **Wish I'd known:** 15 country-wide tips (7-Eleven beer prices, alcohol hours,
   ATM fees, SuperRich, Airport Rail Link, scams). Map limited to Thailand.
+- **Events:** 48 festivals, holidays, concerts, raves and recurring party nights (Nov 2026 to 2027) with dates, tips and
+  ticket links; estimated lunar dates are flagged. “What's on” by month and city, an Events tile per place with live
+  listing links, “Happening soon” on Today, and festivals that fall during your trip on Plan.
 - **Place pages (Practical):** when to go and time of day, entry fees, getting there and around with fares, popular spots, hidden
   gems and local favourites with prices and map links.
 - **Basics:** baht to peso converter, 13 Thai phrases you can hear, a packing list, practical info and price sources.
