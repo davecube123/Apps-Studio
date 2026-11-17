@@ -105,7 +105,7 @@
     body:has(.peek) .fab { display: none; }
     .abpick { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 8px; align-items: center; margin-top: 8px; }
     .route { padding: 14px; } .rtags { display: flex; gap: 6px; flex-wrap: wrap; } .rtags span { background: var(--accent2); color: #9a3a22; font: 650 12px var(--sans); padding: 3px 9px; border-radius: 999px; }
-    .rmain { margin: 8px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
+    .rchain { margin: 8px 0 2px; font: 600 14px var(--sans); color: var(--ink2); } .rchain span { font-size: 13px; } .rmain { margin: 2px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
     .sheet { max-height: 88vh; overflow-y: auto; }
     .center { text-align: center; } .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   </style>
@@ -145,12 +145,14 @@
   const mid = a => Array.isArray(a) ? (a[0] + a[1]) / 2 : (+a || 0);
   const directLegs = (a, b) => { const L = (D.legs || []).find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a)); return L ? L.options : null; };
   /* Direct options, or the cheapest two-hop routes through a hub when there's no direct one. */
+  /* Car and taxi fares in the data are per car: split them across the party (up to 4 per car) to get a per-person fare. */
+  const pp = o => o.mode === "car" ? o.thb.map(x => Math.round(x / Math.min(4, Math.max(1, +db.plan.travelers || 2)))) : o.thb;
   const legCache = {};
   function legsBetween(a, b) {
-    if (a === b) return null; const k = a + ">" + b; if (k in legCache) return legCache[k];
+    if (a === b) return null; const k = a + ">" + b + ":" + db.plan.travelers; if (k in legCache) return legCache[k];
     let o = directLegs(a, b);
     if (!o) { const combos = []; (D.cities || []).forEach(c => { if (c.id === a || c.id === b) return; const x = directLegs(a, c.id), y = directLegs(c.id, b); if (!x || !y) return;
-        x.forEach(o1 => y.forEach(o2 => combos.push({ mode: `${o1.mode} + ${o2.mode}`, duration: `${o1.duration} + ${o2.duration}`, thb: [o1.thb[0] + o2.thb[0], o1.thb[1] + o2.thb[1]], note: `Via ${c.name}: ${o1.mode} to ${c.name}, then ${o2.mode}.`, via: c.name }))); });
+        x.forEach(o1 => y.forEach(o2 => combos.push({ mode: `${o1.mode} + ${o2.mode}`, duration: `${o1.duration} + ${o2.duration}`, thb: [pp(o1)[0] + pp(o2)[0], pp(o1)[1] + pp(o2)[1]], note: `Via ${c.name}: ${o1.mode} to ${c.name}, then ${o2.mode}.`, via: c.name }))); });
       combos.sort((p, q) => (p.thb[0] + p.thb[1]) - (q.thb[0] + q.thb[1])); const seen = new Set(); o = combos.filter(c => { const key = c.mode + c.via; if (seen.has(key)) return false; seen.add(key); return true; }).slice(0, 4); if (!o.length) o = null; }
     return (legCache[k] = o);
   }
@@ -351,11 +353,11 @@
   function routes(a, b) {
     const adj = {}; (D.legs || []).forEach(l => { (adj[l.a] = adj[l.a] || []).push([l.b, l.options]); (adj[l.b] = adj[l.b] || []).push([l.a, l.options]); });
     const out = [], walk = (at, path, steps) => {
-      if (at === b) { out.push(steps); return; } if (steps.length >= 3) return;
+      if (at === b) { out.push(steps); return; } if (steps.length >= 4) return;
       (adj[at] || []).forEach(([to, opts]) => { if (path.includes(to)) return; opts.forEach(o => walk(to, [...path, to], [...steps, { from: at, to, o }])); }); };
     walk(a, [a], []);
     return out.map(steps => { const door = steps.reduce((t, s) => t + mins(s.o.duration) + (OVERHEAD[s.o.mode] || 0), 0) + (steps.length - 1) * 40;
-      return { steps, door, lo: steps.reduce((t, s) => t + s.o.thb[0], 0), hi: steps.reduce((t, s) => t + s.o.thb[1], 0) }; }).filter(r => r.door > 0);
+      return { steps, door, lo: steps.reduce((t, s) => t + pp(s.o)[0], 0), hi: steps.reduce((t, s) => t + pp(s.o)[1], 0) }; }).filter(r => r.door > 0);
   }
   function bestRoutes(a, b) {
     const R = routes(a, b); if (!R.length) return [];
@@ -369,8 +371,9 @@
   function routeCard({ r, tags }, i) {
     const single = r.steps.length === 1;
     return `<div class="card route"><div class="row between"><div class="rtags">${tags.map(([n, e]) => `<span>${e} ${n}</span>`).join("")}</div><b>${range([r.lo, r.hi], "THB")}</b></div>
-      <div class="rmain">${r.steps.map(s => MODE[s.o.mode] || "•").join(" → ")} <b>${hm(r.door)}</b> <span class="small muted">door to door${r.steps.some(s => s.o.mode === "flight") ? ", incl. airport time" : ""}</span></div>
-      ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
+      <div class="rchain">${esc(cname(r.steps[0].from))}${r.steps.map(s => ` <span>${MODE[s.o.mode] || "→"}</span> ${esc(cname(s.to))}`).join("")}</div>
+      <div class="rmain"><b>${hm(r.door)}</b> <span class="small muted">door to door${r.steps.some(s => s.o.mode === "flight") ? ", incl. airport time" : ""} · ${single ? "direct" : (r.steps.length - 1) + (r.steps.length === 2 ? " change" : " changes")}</span></div>
+      ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${s.o.mode === "car" ? `${range(s.o.thb, "THB")} per car` : range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
   }
   let ab = { a: "", b: "" };
   function abSheet(to) {
@@ -381,7 +384,7 @@
     $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back";
     b.innerHTML = `<div class="sheet ab"><h2>Get from A to B</h2>
       <div class="abpick"><select data-ab="a" aria-label="From">${opts(ab.a)}</select><button class="iconbtn" data-act="abswap" aria-label="Swap">⇅</button><select data-ab="b" aria-label="To">${opts(ab.b)}</select></div>
-      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person, typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
+      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person (car fares split across your party), typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
       <button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
   }
@@ -479,7 +482,7 @@
     let lo = 0, hi = 0; const add = (k, a, b, detail) => { rows.push({ k, a, b, detail }); lo += a; hi += b; };
     let legLo = 0, legHi = 0, legDetail = [];
     for (let i = 1; i < S.length; i++) { const a = S[i - 1].city, b = S[i].city, opts = legsBetween(a, b), key = `${a}>${b}`;
-      if (opts) { const o = opts[Math.min(opts.length - 1, +P.leg[key] || 0)]; legLo += o.thb[0] * n; legHi += o.thb[1] * n; legDetail.push(`${cityName(a)} → ${cityName(b)}: ${o.mode}`); } else legDetail.push(`${cityName(a)} → ${cityName(b)}: no fare data`); }
+      if (opts) { const o = opts[Math.min(opts.length - 1, +P.leg[key] || 0)]; legLo += pp(o)[0] * n; legHi += pp(o)[1] * n; legDetail.push(`${cityName(a)} → ${cityName(b)}: ${o.mode}`); } else legDetail.push(`${cityName(a)} → ${cityName(b)}: no fare data`); }
     if (S.length > 1) add("Transport between places", legLo, legHi, legDetail.join(" · "));
     let sLo = 0, sHi = 0, fLo = 0, fHi = 0, tLo = 0, tHi = 0, nights = 0;
     S.forEach(stp => { const c = city(stp.city), nn = +P.nights[stp.city + "@" + S.indexOf(stp)] || defNights(stp); nights += nn; if (!c) return;
