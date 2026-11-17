@@ -187,7 +187,9 @@
   /* ---------- Views ---------- */
   function route_() { const h = location.hash.replace(/^#\/?/, ""); const [v = "", a = ""] = h.split("/"); return { v: v || "map", a }; }
   function render() {
-    const { v, a } = route_(), isMap = v === "map";
+    const { v, a } = route_();
+    if (v === "import") { const code = a; history.replaceState(null, "", "#/trip"); setTimeout(() => importSheet(code), 50); return render(); }
+    const isMap = v === "map";
     $("#map").hidden = !isMap; $("#mapbar").hidden = !isMap; $(".peek")?.remove();
     if (isMap) { $("#app").innerHTML = ""; if (!window.L) { $("#app").innerHTML = `<div class="card" style="margin-top:40vh">The map needs a connection the first time. Your places are under Places.</div>`; } else { initMap(); setTimeout(() => map.invalidateSize(), 0); mapChips(); refreshPins(); if (sel && place(sel)) peek(place(sel)); } }
     else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, today: viewToday, moments: viewMoments, events: viewEvents, basics: viewBasics }[v] || viewPlaces)()}</div>`;
@@ -330,6 +332,27 @@
     b.innerHTML = `<div class="sheet center surprise"><div class="spark">✨</div><div class="eyebrow">${k}</div><h2 style="margin-top:6px">${esc(x.name)}</h2><p class="ink2">${esc(x.what)}</p><p class="small">${x.thb ? range(x.thb, "THB") : "Free"}</p><a class="btn acc block" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">Take me there ↗</a><button class="btn block" data-act="surprise" style="margin-top:8px;border:0;background:none">Another one</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); $(".sheet-back")?.remove(); document.body.appendChild(b);
   }
+  /* ---------- Sharing ---------- */
+  const APP_URL = () => location.href.split("#")[0];
+  const b64u = str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64u = str => decodeURIComponent(escape(atob(str.replace(/-/g, "+").replace(/_/g, "/"))));
+  async function shareLink(title, text, url) {
+    if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(url); toast("Link copied. Paste it in a chat."); } catch { prompt("Copy this link:", url); }
+  }
+  function tripCode() { const P = db.plan; return b64u(JSON.stringify({ v: 1, c: db.country, t: db.trip, n: P.nights, s: P.style, p: P.travelers, d: P.start || "", l: P.leg })); }
+  function importSheet(code) {
+    let T; try { T = JSON.parse(unb64u(code)); } catch { toast("That trip link looks broken"); location.hash = "#/"; return; }
+    const ids = (T.t || []).filter(id => place(id)); if (!ids.length) { toast("That trip has no places"); location.hash = "#/"; return; }
+    const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">A friend shared a trip</div><h2 style="margin-top:6px">${ids.length} place${ids.length > 1 ? "s" : ""}${T.d ? ` · from ${esc(dShort(T.d))}` : ""}</h2>
+      <div style="margin:10px 0">${ids.map((id, i) => `<div class="row small" style="margin-top:6px"><span class="n" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 11px var(--sans);flex:none">${i + 1}</span>${esc(place(id).name)}</div>`).join("")}</div>
+      ${db.trip.length ? `<p class="small muted">You already have ${db.trip.length} place${db.trip.length > 1 ? "s" : ""} in your trip.</p>` : ""}
+      <button class="btn acc block" data-act="importtrip" data-v="replace">${db.trip.length ? "Use this trip (replace mine)" : "Use this trip"}</button>
+      ${db.trip.length ? `<button class="btn block" data-act="importtrip" data-v="merge" style="margin-top:8px">Add these places to my trip</button>` : ""}
+      <button class="btn block" data-act="closesheet" style="margin-top:8px;border:0;background:none">Not now</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); window.__imp = { T, ids };
+  }
   /* ---------- Planner ---------- */
   function stops() { const S = []; db.trip.map(place).filter(Boolean).forEach(p => { const last = S[S.length - 1]; if (last && last.city === p.city) last.places.push(p); else S.push({ city: p.city, places: [p] }); }); return S; }
   const defNights = st => Math.max(1, Math.round(st.places.reduce((a, p) => a + (parseFloat(p.days) || .5), 0)));
@@ -378,7 +401,8 @@
       <div class="card"><h3>Trip start date</h3><input type="date" data-start value="${esc(P.start || "")}" style="margin-top:6px"></div>
       <div class="card"><h3>Flights to Thailand <span class="small muted">(optional)</span></h3><div class="row" style="gap:8px;margin-top:6px"><span class="small">Return fare per person, in baht</span><input type="number" data-flight value="${+P.flight || ""}" placeholder="e.g. 9000" inputmode="numeric" style="width:120px;margin-left:auto"></div>${fx() ? `<p class="small muted" style="margin:6px 0 0">₱1 ≈ ฿${(1 / fx()).toFixed(2)}</p>` : ""}</div>
       </details>
-      <a class="btn pri block" href="#/" style="margin-top:12px">See the route on the map</a>`;
+      <div class="row" style="gap:8px;margin-top:12px"><a class="btn pri" href="#/" style="flex:1">See the route on the map</a><button class="btn" data-act="sharetrip">↗ Share trip</button></div>
+      <p class="small muted" style="margin:8px 4px 0">Sharing sends your route, nights, budget style and dates. Never your notes, moments or photos.</p>`;
   }
   function viewBasics() {
     return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Basics</h1>
@@ -388,7 +412,8 @@
       <div class="card"><h3>Packing list</h3>${PACK.map(([g, items]) => `<div class="small muted" style="margin-top:10px">${g}</div>${items.map(it => `<label class="row small" style="gap:8px;margin-top:6px"><input type="checkbox" data-pack="${esc(it)}" ${db.packed[it] ? "checked" : ""}><span${db.packed[it] ? ' style="text-decoration:line-through;color:var(--muted)"' : ""}>${esc(it)}</span></label>`).join("")}`).join("")}</div>${D.basics.map(([h, t]) => `<div class="card"><h3>${esc(h)}</h3><p class="ink2" style="margin:0">${esc(t)}</p></div>`).join("")}
       ${(D.sources || []).length ? `<details class="card"><summary><b>Price sources</b></summary>${D.sources.map(x => `<p class="small" style="margin:6px 0 0"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a></p>`).join("")}</details>` : ""}
       <div class="card"><h3>Countries</h3><p class="small ink2" style="margin:0">Thailand for now. More are coming.</p></div>
-      ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:12px">Install on your phone</button>`}
+      <button class="btn acc block" data-act="shareapp" style="margin-top:12px">↗ Share Roam with friends</button>
+      ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:8px">Install on your phone</button>`}
       <p class="small muted" style="margin-top:16px">Photos from Unsplash (Unsplash License). Map: Natural Earth country shapes (public domain), drawn by Roam. Map library: Leaflet (BSD-2). Practical details change: check entry rules and opening times before you go.</p>
       <div class="ver">Roam v${VER}</div>`;
   }
@@ -417,6 +442,11 @@
     else if (a === "cur") { db.plan.cur = v; save(); render(); }
     else if (a === "nights") { const st = stops()[+v.split("@")[1]]; const cur = +db.plan.nights[v] || defNights(st); db.plan.nights[v] = Math.max(1, Math.min(60, cur + +el.dataset.d)); save(); render(); }
     else if (a === "surprise") surprise();
+    else if (a === "shareapp") shareLink("Roam", "A simple travel companion for Thailand: map, places, a cost planner, events and insider tips. Works offline.", APP_URL());
+    else if (a === "sharetrip") { const n = db.trip.length; shareLink("My Thailand trip", `My Thailand trip on Roam: ${n} place${n > 1 ? "s" : ""}. Open it to see the route and costs.`, `${APP_URL()}#/import/${tripCode()}`); }
+    else if (a === "importtrip") { const { T, ids } = window.__imp || {}; if (!ids) return; if (v === "merge") db.trip = [...db.trip, ...ids.filter(id => !db.trip.includes(id))];
+      else { db.trip = ids; Object.assign(db.plan, { nights: T.n || {}, style: T.s || db.plan.style, travelers: T.p || db.plan.travelers, start: T.d || "", leg: T.l || {} }); }
+      save(); $(".sheet-back")?.remove(); toast("Trip loaded"); render(); }
     else if (a === "evcity") { evCity = v; render(); }
     else if (a === "evgo") { evCity = v; $(".sheet-back")?.remove(); }
     else if (a === "tile") { const [pid, k] = v.split(":"); tileSheet(pid, k); }
