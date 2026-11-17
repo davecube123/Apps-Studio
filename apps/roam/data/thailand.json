@@ -1,375 +1,3325 @@
 {
-"country": "Thailand",
-"flag": "🇹🇭",
-"center": [
-13.0,
-100.9
-],
-"zoom": 5,
-"regions": {
-"bangkok": "Bangkok",
-"central": "Central",
-"north": "North",
-"south": "Andaman coast",
-"gulf": "Gulf islands"
-},
-"places": [
-{
-"id": "grand-palace",
-"name": "Grand Palace & Wat Phra Kaew",
-"region": "bangkok",
-"type": "temple",
-"lat": 13.75,
-"lng": 100.4913,
-"line": "Gold spires, the Emerald Buddha and Bangkok's most famous sight.",
-"about": "The former royal residence and its temple of the Emerald Buddha form a walled city of glittering spires, murals and guardian giants. It is busy and hot, and worth it.",
-"tips": [
-"Go at opening time to beat the heat and the tour groups.",
-"Strict dress code: shoulders and knees covered, no see-through clothes. Wraps can be rented nearby.",
-"Ignore anyone outside who says it's closed today: it's a classic scam."
-],
-"best": "Nov to Feb",
-"days": "Half a day",
-"photo": "photos/grand-palace.jpg",
-"thumb": "photos/thumb/grand-palace.jpg"
-},
-{
-"id": "wat-arun",
-"name": "Wat Arun",
-"region": "bangkok",
-"type": "temple",
-"lat": 13.7437,
-"lng": 100.4889,
-"line": "The Temple of Dawn, its porcelain-studded tower on the river.",
-"about": "Wat Arun's central tower is covered in pieces of coloured porcelain and seashell. Cross by the cheap river ferry from Tha Tien pier, then come back at sunset to see it from the other bank.",
-"tips": [
-"Take the cross-river ferry from Tha Tien, near Wat Pho.",
-"Best photographed from the east bank at sunset.",
-"Shoulders and knees covered inside the grounds."
-],
-"best": "Nov to Feb",
-"days": "2 hours",
-"photo": "photos/wat-arun.jpg",
-"thumb": "photos/thumb/wat-arun.jpg"
-},
-{
-"id": "street-food",
-"name": "Yaowarat (Chinatown) street food",
-"region": "bangkok",
-"type": "food",
-"lat": 13.7398,
-"lng": 100.5101,
-"line": "Bangkok's night-time food street: noodles, seafood and smoke.",
-"about": "After dark Yaowarat Road fills with stalls, neon and queues. Graze from cart to cart: noodles, grilled seafood, toasted buns and mango sticky rice.",
-"tips": [
-"Arrive around 7 pm when most stalls are open.",
-"Follow the longest local queues.",
-"Closed on some Mondays; check before you go."
-],
-"best": "All year (evenings)",
-"days": "An evening",
-"photo": "photos/street-food.jpg",
-"thumb": "photos/thumb/street-food.jpg"
-},
-{
-"id": "ayutthaya",
-"name": "Ayutthaya",
-"region": "central",
-"type": "history",
-"lat": 14.356,
-"lng": 100.5583,
-"line": "Ruined capital of old Siam, an easy day trip from Bangkok.",
-"about": "Ayutthaya was the kingdom's capital for four centuries until it was sacked in 1767. Brick towers, headless Buddhas and the famous Buddha head in tree roots are spread across a riverside island.",
-"tips": [
-"Rent a bicycle or a tuk-tuk for the day: the sites are spread out.",
-"Trains from Bangkok take about 1.5 to 2 hours and cost very little.",
-"Never pose above the Buddha head in the roots: it's disrespectful."
-],
-"best": "Nov to Feb",
-"days": "1 day",
-"photo": "photos/ayutthaya.jpg",
-"thumb": "photos/thumb/ayutthaya.jpg"
-},
-{
-"id": "erawan",
-"name": "Erawan Falls, Kanchanaburi",
-"region": "central",
-"type": "nature",
-"lat": 14.3688,
-"lng": 99.1436,
-"line": "Seven tiers of turquoise pools in the forest.",
-"about": "In Erawan National Park, a stream drops through seven limestone tiers into milky turquoise pools you can swim in. Kanchanaburi town, with the Bridge on the River Kwai, makes a good base.",
-"tips": [
-"Start early and walk up to the top tiers before the crowds.",
-"Bring swimwear and water shoes; the small fish nibble.",
-"National park entry fee applies, higher for foreigners."
-],
-"best": "Nov to Apr (clearest water)",
-"days": "1 to 2 days",
-"photo": "photos/erawan.jpg",
-"thumb": "photos/thumb/erawan.jpg"
-},
-{
-"id": "sukhothai",
-"name": "Sukhothai Historical Park",
-"region": "north",
-"type": "history",
-"lat": 17.0175,
-"lng": 99.7036,
-"line": "Calm, green ruins of the first Thai kingdom.",
-"about": "Lotus ponds, seated Buddhas and lotus-bud towers from the 13th century, spread through a quiet park. Quieter and more serene than Ayutthaya.",
-"tips": [
-"Cycle the park at sunrise or late afternoon.",
-"Stay in New Sukhothai or near the park gate.",
-"Loy Krathong (November) is especially beautiful here."
-],
-"best": "Nov to Feb",
-"days": "1 to 2 days",
-"photo": "photos/sukhothai.jpg",
-"thumb": "photos/thumb/sukhothai.jpg"
-},
-{
-"id": "chiang-mai",
-"name": "Chiang Mai Old City",
-"region": "north",
-"type": "city",
-"lat": 18.7883,
-"lng": 98.9853,
-"line": "A walled, walkable old town full of temples and cafés.",
-"about": "Inside the moat of Chiang Mai sit dozens of temples, from the ruined great chedi of Wat Chedi Luang to teak halls, along with cafés, massage schools and the Sunday Walking Street market.",
-"tips": [
-"Sunday Walking Street market on Ratchadamnoen Road.",
-"Grab and Bolt work well; red songthaews are shared taxis.",
-"March and April can be smoky from seasonal burning."
-],
-"best": "Nov to Feb",
-"days": "3 to 4 days",
-"photo": "photos/chiang-mai.jpg",
-"thumb": "photos/thumb/chiang-mai.jpg"
-},
-{
-"id": "doi-suthep",
-"name": "Wat Phra That Doi Suthep",
-"region": "north",
-"type": "temple",
-"lat": 18.8048,
-"lng": 98.9216,
-"line": "Golden hilltop temple overlooking Chiang Mai.",
-"about": "Chiang Mai's most revered temple sits on the mountain above the city, reached by a long naga-lined staircase or a small funicular. On clear days the view stretches over the valley.",
-"tips": [
-"Go early morning for clear views and fewer people.",
-"Walk the stairs up and take the funicular down, or the reverse.",
-"Combine with the Monk's Trail hike for the adventurous."
-],
-"best": "Nov to Feb",
-"days": "Half a day",
-"photo": "photos/doi-suthep.jpg",
-"thumb": "photos/thumb/doi-suthep.jpg"
-},
-{
-"id": "pai",
-"name": "Pai",
-"region": "north",
-"type": "nature",
-"lat": 19.3592,
-"lng": 98.4403,
-"line": "A laid-back mountain valley town in Mae Hong Son.",
-"about": "Rice fields, hot springs, waterfalls and Pai Canyon at sunset, with a relaxed town of night markets and guesthouses. The winding road from Chiang Mai is famous for its many curves.",
-"tips": [
-"Take motion-sickness pills for the mountain road from Chiang Mai.",
-"Only ride a scooter if you're experienced; the roads are steep.",
-"Nights get cool from December to February: bring a layer."
-],
-"best": "Nov to Feb",
-"days": "2 to 4 days",
-"photo": "photos/pai.jpg",
-"thumb": "photos/thumb/pai.jpg"
-},
-{
-"id": "white-temple",
-"name": "Wat Rong Khun (White Temple)",
-"region": "north",
-"type": "temple",
-"lat": 19.8243,
-"lng": 99.7631,
-"line": "A dazzling white, mirror-studded modern temple in Chiang Rai.",
-"about": "Designed by the Thai artist Chalermchai Kositpipat, the White Temple is a work of art in progress: white plaster and mirror glass, a bridge over reaching hands, and surprising modern murals inside.",
-"tips": [
-"Arrive at opening time; it fills up fast.",
-"Pair it with the Blue Temple and Baan Dam (Black House) the same day.",
-"Photography isn't allowed inside the main hall."
-],
-"best": "Nov to Feb",
-"days": "Half a day",
-"photo": "photos/white-temple.jpg",
-"thumb": "photos/thumb/white-temple.jpg"
-},
-{
-"id": "khao-sok",
-"name": "Khao Sok & Cheow Lan Lake",
-"region": "south",
-"type": "nature",
-"lat": 8.975,
-"lng": 98.795,
-"line": "Rainforest, limestone cliffs and floating bungalows on a jade lake.",
-"about": "One of the oldest rainforests in the world surrounds a vast lake of emerald water and karst islands. Sleep in a floating raft house, kayak at dawn, and listen for gibbons.",
-"tips": [
-"Book a one or two-night lake tour with a floating bungalow.",
-"Bring a dry bag and leech socks in the rainy season.",
-"Halfway between Phuket, Krabi and Surat Thani: an easy add-on."
-],
-"best": "Dec to Apr",
-"days": "2 to 3 days",
-"photo": "photos/khao-sok.jpg",
-"thumb": "photos/thumb/khao-sok.jpg"
-},
-{
-"id": "railay",
-"name": "Railay",
-"region": "south",
-"type": "beach",
-"lat": 8.0115,
-"lng": 98.8382,
-"line": "Cliff-backed beaches reachable only by boat.",
-"about": "Towering limestone walls cut Railay off from the mainland, so you arrive by longtail boat from Ao Nang or Krabi. Climbing, lagoons, and some of Thailand's most dramatic beaches, including Phra Nang.",
-"tips": [
-"Longtail boats leave from Ao Nang beach when full.",
-"Phra Nang beach in the early morning, before the day boats.",
-"Rock climbing courses for complete beginners are easy to book."
-],
-"best": "Nov to Apr",
-"days": "2 to 3 days",
-"photo": "photos/railay.jpg",
-"thumb": "photos/thumb/railay.jpg"
-},
-{
-"id": "phi-phi",
-"name": "Koh Phi Phi",
-"region": "south",
-"type": "island",
-"lat": 7.7407,
-"lng": 98.7784,
-"line": "The famous twin bays and turquoise lagoons of the Andaman.",
-"about": "Phi Phi Don's viewpoint looks down on two curving bays; around it are snorkelling spots, Pileh Lagoon and Maya Bay on Phi Phi Leh. Busy and lively, best enjoyed outside the day-trip rush.",
-"tips": [
-"Stay overnight to see the bays without the day-trippers.",
-"Maya Bay closes for part of each year to recover: check before you go.",
-"Climb to the viewpoint at sunrise or sunset."
-],
-"best": "Nov to Apr",
-"days": "2 to 3 days",
-"photo": "photos/phi-phi.jpg",
-"thumb": "photos/thumb/phi-phi.jpg"
-},
-{
-"id": "phuket",
-"name": "Phuket Old Town",
-"region": "south",
-"type": "city",
-"lat": 7.8843,
-"lng": 98.388,
-"line": "Colourful Sino-Portuguese shophouses, cafés and street art.",
-"about": "Away from the beach resorts, Phuket Town has pastel shophouses, shrines, local food and a Sunday walking street on Thalang Road. A good base for day trips across the Andaman.",
-"tips": [
-"Sunday Walking Street market on Thalang Road.",
-"Try local Phuket dishes like mee hokkien.",
-"The island's beaches are a 20 to 40 minute ride away."
-],
-"best": "Nov to Apr",
-"days": "1 to 2 days",
-"photo": "photos/phuket.jpg",
-"thumb": "photos/thumb/phuket.jpg"
-},
-{
-"id": "lanta",
-"name": "Koh Lanta",
-"region": "south",
-"type": "island",
-"lat": 7.6,
-"lng": 99.04,
-"line": "A long, laid-back island of sunsets and quiet beaches.",
-"about": "Lanta has long sandy beaches on its west coast, an old wooden fishing town on the east, and a national park at the southern tip. Calmer than Phi Phi and good for a slower week.",
-"tips": [
-"Rent a scooter or tuk-tuk to explore the beaches southward.",
-"Day trip to Koh Rok or the Four Islands for snorkelling.",
-"Some places close in the rainy months (May to Oct)."
-],
-"best": "Nov to Apr",
-"days": "3 to 5 days",
-"photo": "photos/lanta.jpg",
-"thumb": "photos/thumb/lanta.jpg"
-},
-{
-"id": "samui",
-"name": "Koh Samui",
-"region": "gulf",
-"type": "island",
-"lat": 9.532,
-"lng": 100.061,
-"line": "A big, easy Gulf island with beaches for every mood.",
-"about": "Samui has busy Chaweng, quieter Lamai and Bophut's Fisherman's Village, plus waterfalls and the Big Buddha. Boat trips run to Ang Thong Marine Park's islands.",
-"tips": [
-"Ang Thong Marine Park day trip for kayaking and the viewpoint.",
-"Fisherman's Village night market on Fridays.",
-"Gulf weather differs: it's often good while the Andaman is rainy."
-],
-"best": "Jan to Aug",
-"days": "3 to 5 days",
-"photo": "photos/samui.jpg",
-"thumb": "photos/thumb/samui.jpg"
-},
-{
-"id": "koh-tao",
-"name": "Koh Tao",
-"region": "gulf",
-"type": "island",
-"lat": 10.0956,
-"lng": 99.8404,
-"line": "Small island, clear water, and one of the world's cheapest places to learn to dive.",
-"about": "Koh Tao is all coves, granite boulders and coral reefs, with a famous viewpoint over the three linked islets of Koh Nang Yuan. Many people come for a few days and stay to take a diving course.",
-"tips": [
-"Open Water diving courses take about 3 to 4 days.",
-"Snorkel straight from the beach at Shark Bay or Aow Leuk.",
-"Ferries connect with Koh Samui, Koh Phangan and Chumphon."
-],
-"best": "Mar to Sep",
-"days": "3 to 5 days",
-"photo": "photos/koh-tao.jpg",
-"thumb": "photos/thumb/koh-tao.jpg"
-}
-],
-"basics": [
-[
-"Money",
-"Thai baht (THB). Cards work in cities and malls; carry cash for markets, street food and islands. ATMs charge a fixed fee per withdrawal, so take out more at once."
-],
-[
-"Getting around",
-"Grab and Bolt for rides in cities; overnight trains and buses between regions; cheap domestic flights; ferries and longtail boats to the islands."
-],
-[
-"Weather",
-"Cool and dry Nov to Feb in most of the country. The Andaman coast (Phuket, Krabi, Phi Phi, Lanta) is best Nov to Apr; the Gulf islands (Samui, Tao) are often best Jan to Aug. The north can be smoky in March and April."
-],
-[
-"Temples",
-"Cover shoulders and knees, take shoes off where others do, never point your feet at a Buddha, and don't touch monks if you are a woman."
-],
-[
-"Respect",
-"The monarchy is deeply respected and protected by strict laws: never joke about or criticise the royal family. Stand for the royal anthem in cinemas."
-],
-[
-"Phone and power",
-"Buy a tourist SIM or eSIM at the airport. Plugs are mostly types A, B, C and O, at 230 V."
-],
-[
-"Entry",
-"Philippine passport holders can visit Thailand visa-free for a limited stay. Check the current allowed length of stay and the Thailand Digital Arrival Card requirement before you fly."
-],
-[
-"Emergencies",
-"Tourist Police: 1155 (English-speaking). Ambulance: 1669."
-]
-]
+ "country": "Thailand",
+ "flag": "🇹🇭",
+ "center": [
+  13.0,
+  100.9
+ ],
+ "zoom": 5,
+ "regions": {
+  "bangkok": "Bangkok",
+  "central": "Central",
+  "north": "North",
+  "south": "Andaman coast",
+  "gulf": "Gulf islands"
+ },
+ "places": [
+  {
+   "id": "grand-palace",
+   "name": "Grand Palace & Wat Phra Kaew",
+   "region": "bangkok",
+   "type": "temple",
+   "lat": 13.75,
+   "lng": 100.4913,
+   "line": "Gold spires, the Emerald Buddha and Bangkok's most famous sight.",
+   "about": "The former royal residence and its temple of the Emerald Buddha form a walled city of glittering spires, murals and guardian giants. It is busy and hot, and worth it.",
+   "tips": [
+    "Go at opening time to beat the heat and the tour groups.",
+    "Strict dress code: shoulders and knees covered, no see-through clothes. Wraps can be rented nearby.",
+    "Ignore anyone outside who says it's closed today: it's a classic scam."
+   ],
+   "best": "Nov to Feb",
+   "days": "Half a day",
+   "photo": "photos/grand-palace.jpg",
+   "thumb": "photos/thumb/grand-palace.jpg",
+   "city": "bangkok",
+   "fees": [
+    {
+     "what": "Grand Palace, Wat Phra Kaew and Queen Sirikit Textile Museum (foreigners)",
+     "thb": 500
+    }
+   ],
+   "timeOfDay": "Be at the gate at 8:30 am opening: cooler, calmer, and ahead of the tour buses (last entry 3:30 pm).",
+   "popular": [
+    {
+     "name": "Wat Phra Kaew",
+     "what": "The Emerald Buddha's chapel inside the palace walls; included in your ticket.",
+     "thb": 0,
+     "lat": 13.7516,
+     "lng": 100.4927
+    },
+    {
+     "name": "Wat Pho",
+     "what": "The huge Reclining Buddha and a famous massage school, a 10 minute walk south.",
+     "thb": 300,
+     "lat": 13.7465,
+     "lng": 100.4927
+    },
+    {
+     "name": "Tha Maharaj",
+     "what": "Riverside pier with cafés and boat links, good for a cool drink after the palace.",
+     "thb": 0,
+     "lat": 13.7556,
+     "lng": 100.489
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Ratchabophit",
+     "what": "A quiet temple with a round cloister and tiled inner hall, rarely crowded.",
+     "thb": 0,
+     "lat": 13.7493,
+     "lng": 100.4977
+    },
+    {
+     "name": "Saranrom Park",
+     "what": "A shady old royal garden next to the palace, where locals jog and rest.",
+     "thb": 0,
+     "lat": 13.748,
+     "lng": 100.4945
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Khao man gai",
+     "what": "Poached chicken rice from shophouses around the old town.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Cha yen",
+     "what": "Sweet orange iced Thai tea from a street cart.",
+     "thb": [
+      25,
+      45
+     ]
+    },
+    {
+     "name": "Boat noodles",
+     "what": "Small, rich bowls you order by the stack.",
+     "thb": [
+      20,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wat-arun",
+   "name": "Wat Arun",
+   "region": "bangkok",
+   "type": "temple",
+   "lat": 13.7437,
+   "lng": 100.4889,
+   "line": "The Temple of Dawn, its porcelain-studded tower on the river.",
+   "about": "Wat Arun's central tower is covered in pieces of coloured porcelain and seashell. Cross by the cheap river ferry from Tha Tien pier, then come back at sunset to see it from the other bank.",
+   "tips": [
+    "Take the cross-river ferry from Tha Tien, near Wat Pho.",
+    "Best photographed from the east bank at sunset.",
+    "Shoulders and knees covered inside the grounds."
+   ],
+   "best": "Nov to Feb",
+   "days": "2 hours",
+   "photo": "photos/wat-arun.jpg",
+   "thumb": "photos/thumb/wat-arun.jpg",
+   "city": "bangkok",
+   "fees": [
+    {
+     "what": "Wat Arun (foreigners)",
+     "thb": 200
+    }
+   ],
+   "timeOfDay": "Late afternoon: climb in softer light, then cross back to the east bank for sunset behind the tower.",
+   "popular": [
+    {
+     "name": "Wat Arun central prang",
+     "what": "The porcelain-covered tower you can partly climb.",
+     "thb": 200,
+     "lat": 13.7437,
+     "lng": 100.4889
+    },
+    {
+     "name": "Tha Tien cross-river ferry",
+     "what": "The tiny boat linking Wat Pho and Wat Arun.",
+     "thb": 5,
+     "lat": 13.7466,
+     "lng": 100.4905
+    },
+    {
+     "name": "Chao Phraya Express Boat",
+     "what": "Orange-flag river boat between piers, the cheapest river view in town.",
+     "thb": 16,
+     "lat": 13.7189,
+     "lng": 100.5136
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Kalayanamit",
+     "what": "A huge seated Buddha in a towering hall, a short walk downriver.",
+     "thb": 0,
+     "lat": 13.74,
+     "lng": 100.4924
+    },
+    {
+     "name": "Kudi Chin",
+     "what": "An old Portuguese-Thai community with a church and family bakeries.",
+     "thb": 0,
+     "lat": 13.7395,
+     "lng": 100.494
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Khanom farang Kudi Chin",
+     "what": "Portuguese-style sponge cake baked in the old community.",
+     "thb": [
+      40,
+      100
+     ]
+    },
+    {
+     "name": "Khao gaeng",
+     "what": "Curries ladled over rice from a tray shop.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Sunset drink by the river",
+     "what": "Locals and visitors gather at Tha Tien rooftops to watch the temple light up.",
+     "thb": [
+      100,
+      300
+     ]
+    }
+   ]
+  },
+  {
+   "id": "street-food",
+   "name": "Yaowarat (Chinatown) street food",
+   "region": "bangkok",
+   "type": "food",
+   "lat": 13.7398,
+   "lng": 100.5101,
+   "line": "Bangkok's night-time food street: noodles, seafood and smoke.",
+   "about": "After dark Yaowarat Road fills with stalls, neon and queues. Graze from cart to cart: noodles, grilled seafood, toasted buns and mango sticky rice.",
+   "tips": [
+    "Arrive around 7 pm when most stalls are open.",
+    "Follow the longest local queues.",
+    "Closed on some Mondays; check before you go."
+   ],
+   "best": "All year (evenings)",
+   "days": "An evening",
+   "photo": "photos/street-food.jpg",
+   "thumb": "photos/thumb/street-food.jpg",
+   "city": "bangkok",
+   "fees": [],
+   "timeOfDay": "Go 6 to 10 pm when the stalls are fully open and the heat has eased.",
+   "popular": [
+    {
+     "name": "Yaowarat Road stalls",
+     "what": "The main strip of noodle, seafood and dessert stalls.",
+     "thb": 0,
+     "lat": 13.7398,
+     "lng": 100.5101
+    },
+    {
+     "name": "Wat Mangkon Kamalawat",
+     "what": "Busy Chinese temple full of incense, right in Chinatown.",
+     "thb": 0,
+     "lat": 13.7434,
+     "lng": 100.5098
+    },
+    {
+     "name": "Sampeng Lane",
+     "what": "A narrow wholesale market lane, best in the daytime.",
+     "thb": 0,
+     "lat": 13.7424,
+     "lng": 100.504
+    }
+   ],
+   "gems": [
+    {
+     "name": "Talat Noi",
+     "what": "An old riverside quarter of workshops, street art and shrines.",
+     "thb": 0,
+     "lat": 13.7325,
+     "lng": 100.5136
+    },
+    {
+     "name": "Song Wat Road",
+     "what": "A street of old warehouses now home to small cafés and shops.",
+     "thb": 0,
+     "lat": 13.737,
+     "lng": 100.507
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Kuay jab nam sai",
+     "what": "Peppery rolled rice noodle soup, a Chinatown classic.",
+     "thb": [
+      60,
+      100
+     ]
+    },
+    {
+     "name": "Toasted buns",
+     "what": "Charcoal-toasted buns with custard or pandan dip.",
+     "thb": [
+      30,
+      60
+     ]
+    },
+    {
+     "name": "Grilled seafood",
+     "what": "Prawns, squid and crab at the big corner stalls.",
+     "thb": [
+      200,
+      500
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayutthaya",
+   "name": "Ayutthaya",
+   "region": "central",
+   "type": "history",
+   "lat": 14.356,
+   "lng": 100.5583,
+   "line": "Ruined capital of old Siam, an easy day trip from Bangkok.",
+   "about": "Ayutthaya was the kingdom's capital for four centuries until it was sacked in 1767. Brick towers, headless Buddhas and the famous Buddha head in tree roots are spread across a riverside island.",
+   "tips": [
+    "Rent a bicycle or a tuk-tuk for the day: the sites are spread out.",
+    "Trains from Bangkok take about 1.5 to 2 hours and cost very little.",
+    "Never pose above the Buddha head in the roots: it's disrespectful."
+   ],
+   "best": "Nov to Feb",
+   "days": "1 day",
+   "photo": "photos/ayutthaya.jpg",
+   "thumb": "photos/thumb/ayutthaya.jpg",
+   "city": "ayutthaya",
+   "fees": [
+    {
+     "what": "Combined pass, six main temples (foreigners)",
+     "thb": 220
+    },
+    {
+     "what": "Single major temple, e.g. Wat Mahathat",
+     "thb": 50
+    },
+    {
+     "what": "Smaller temples, e.g. Wat Yai Chai Mongkhon",
+     "thb": 20
+    }
+   ],
+   "timeOfDay": "Start at 8 am or go after 3 pm: the ruins have little shade and midday is very hot.",
+   "popular": [
+    {
+     "name": "Wat Mahathat",
+     "what": "Home of the Buddha head wrapped in tree roots.",
+     "thb": 50,
+     "lat": 14.3567,
+     "lng": 100.5677
+    },
+    {
+     "name": "Wat Phra Si Sanphet",
+     "what": "Three bell-shaped chedis on the old royal grounds.",
+     "thb": 50,
+     "lat": 14.3559,
+     "lng": 100.5585
+    },
+    {
+     "name": "Wat Chaiwatthanaram",
+     "what": "Riverside Khmer-style temple, lovely at sunset.",
+     "thb": 50,
+     "lat": 14.3429,
+     "lng": 100.542
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Phu Khao Thong",
+     "what": "A tall white chedi in rice fields north of the island.",
+     "thb": 0,
+     "lat": 14.3733,
+     "lng": 100.548
+    },
+    {
+     "name": "Wat Na Phra Men",
+     "what": "A temple that survived the 1767 sack, with a crowned Buddha.",
+     "thb": 20,
+     "lat": 14.3622,
+     "lng": 100.56
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Boat noodles",
+     "what": "Small bowls at the riverside noodle shops.",
+     "thb": [
+      20,
+      60
+     ]
+    },
+    {
+     "name": "Roti sai mai",
+     "what": "Thin roti wrapped around strands of candy floss, an Ayutthaya speciality.",
+     "thb": [
+      50,
+      100
+     ]
+    },
+    {
+     "name": "Grilled river prawns",
+     "what": "Big freshwater prawns grilled at riverside restaurants.",
+     "thb": [
+      400,
+      1000
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erawan",
+   "name": "Erawan Falls, Kanchanaburi",
+   "region": "central",
+   "type": "nature",
+   "lat": 14.3688,
+   "lng": 99.1436,
+   "line": "Seven tiers of turquoise pools in the forest.",
+   "about": "In Erawan National Park, a stream drops through seven limestone tiers into milky turquoise pools you can swim in. Kanchanaburi town, with the Bridge on the River Kwai, makes a good base.",
+   "tips": [
+    "Start early and walk up to the top tiers before the crowds.",
+    "Bring swimwear and water shoes; the small fish nibble.",
+    "National park entry fee applies, higher for foreigners."
+   ],
+   "best": "Nov to Apr (clearest water)",
+   "days": "1 to 2 days",
+   "photo": "photos/erawan.jpg",
+   "thumb": "photos/thumb/erawan.jpg",
+   "city": "kanchanaburi",
+   "fees": [
+    {
+     "what": "Erawan National Park (foreign adult)",
+     "thb": 300
+    }
+   ],
+   "timeOfDay": "Arrive at 8 am opening and hike straight to the top tiers; upper levels close mid afternoon and the park shuts at 4:30 pm.",
+   "popular": [
+    {
+     "name": "Erawan tiers 2 and 5",
+     "what": "The best swimming pools, with friendly fish.",
+     "thb": 0,
+     "lat": 14.369,
+     "lng": 99.144
+    },
+    {
+     "name": "Bridge over the River Kwai",
+     "what": "The famous railway bridge in Kanchanaburi town.",
+     "thb": 0,
+     "lat": 14.0408,
+     "lng": 99.5036
+    },
+    {
+     "name": "Kanchanaburi War Cemetery",
+     "what": "A calm, well-kept memorial to the railway's prisoners of war.",
+     "thb": 0,
+     "lat": 14.033,
+     "lng": 99.526
+    }
+   ],
+   "gems": [
+    {
+     "name": "Hellfire Pass Memorial",
+     "what": "A moving walk along a cutting dug by prisoners; the museum is free.",
+     "thb": 0,
+     "lat": 14.3577,
+     "lng": 98.9537
+    },
+    {
+     "name": "Wat Tham Sua",
+     "what": "Hilltop temple with a giant golden Buddha and wide valley views.",
+     "thb": 0,
+     "lat": 13.9572,
+     "lng": 99.6129
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Riverside raft restaurant",
+     "what": "Jungle curry and fried fish by the river.",
+     "thb": [
+      150,
+      350
+     ]
+    },
+    {
+     "name": "Night market mango sticky rice",
+     "what": "A sweet end to the day at the town market.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Khao kha mu",
+     "what": "Braised pork leg over rice, a market staple.",
+     "thb": [
+      50,
+      70
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sukhothai",
+   "name": "Sukhothai Historical Park",
+   "region": "north",
+   "type": "history",
+   "lat": 17.0175,
+   "lng": 99.7036,
+   "line": "Calm, green ruins of the first Thai kingdom.",
+   "about": "Lotus ponds, seated Buddhas and lotus-bud towers from the 13th century, spread through a quiet park. Quieter and more serene than Ayutthaya.",
+   "tips": [
+    "Cycle the park at sunrise or late afternoon.",
+    "Stay in New Sukhothai or near the park gate.",
+    "Loy Krathong (November) is especially beautiful here."
+   ],
+   "best": "Nov to Feb",
+   "days": "1 to 2 days",
+   "photo": "photos/sukhothai.jpg",
+   "thumb": "photos/thumb/sukhothai.jpg",
+   "city": "sukhothai",
+   "fees": [
+    {
+     "what": "Central zone (foreigners)",
+     "thb": 200
+    },
+    {
+     "what": "Northern zone",
+     "thb": 120
+    },
+    {
+     "what": "Western zone",
+     "thb": 120
+    },
+    {
+     "what": "Bicycle, per zone",
+     "thb": 10
+    }
+   ],
+   "timeOfDay": "Cycle in at sunrise for reflections at Wat Mahathat, or after 4 pm for golden light.",
+   "popular": [
+    {
+     "name": "Wat Mahathat",
+     "what": "The main temple, with rows of columns and seated Buddhas.",
+     "thb": 0,
+     "lat": 17.0172,
+     "lng": 99.704
+    },
+    {
+     "name": "Wat Si Chum",
+     "what": "A giant seated Buddha peering through a narrow opening.",
+     "thb": 120,
+     "lat": 17.0262,
+     "lng": 99.6997
+    },
+    {
+     "name": "Wat Sa Si",
+     "what": "A chedi on a small island in a lotus pond.",
+     "thb": 0,
+     "lat": 17.0198,
+     "lng": 99.702
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Saphan Hin",
+     "what": "A standing Buddha on a hill, reached by an old slate path.",
+     "thb": 120,
+     "lat": 17.0256,
+     "lng": 99.6754
+    },
+    {
+     "name": "Wat Traphang Thong",
+     "what": "A small island temple outside the paid gates, used by locals.",
+     "thb": 0,
+     "lat": 17.0165,
+     "lng": 99.7085
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Kuay tiew Sukhothai",
+     "what": "Sweet and sour noodle soup with peanuts and green beans.",
+     "thb": [
+      40,
+      70
+     ]
+    },
+    {
+     "name": "New Sukhothai night market",
+     "what": "Grilled snacks and desserts by the river.",
+     "thb": [
+      40,
+      100
+     ]
+    }
+   ]
+  },
+  {
+   "id": "chiang-mai",
+   "name": "Chiang Mai Old City",
+   "region": "north",
+   "type": "city",
+   "lat": 18.7883,
+   "lng": 98.9853,
+   "line": "A walled, walkable old town full of temples and cafés.",
+   "about": "Inside the moat of Chiang Mai sit dozens of temples, from the ruined great chedi of Wat Chedi Luang to teak halls, along with cafés, massage schools and the Sunday Walking Street market.",
+   "tips": [
+    "Sunday Walking Street market on Ratchadamnoen Road.",
+    "Grab and Bolt work well; red songthaews are shared taxis.",
+    "March and April can be smoky from seasonal burning."
+   ],
+   "best": "Nov to Feb",
+   "days": "3 to 4 days",
+   "photo": "photos/chiang-mai.jpg",
+   "thumb": "photos/thumb/chiang-mai.jpg",
+   "city": "chiang-mai",
+   "fees": [
+    {
+     "what": "Wat Chedi Luang (foreigners)",
+     "thb": 50
+    }
+   ],
+   "timeOfDay": "Temples from 7 to 10 am, when monks chant and the air is cool; Sunday market from 5 pm.",
+   "popular": [
+    {
+     "name": "Wat Chedi Luang",
+     "what": "The great ruined chedi in the middle of the old city.",
+     "thb": 50,
+     "lat": 18.787,
+     "lng": 98.9866
+    },
+    {
+     "name": "Sunday Walking Street",
+     "what": "Ratchadamnoen Road becomes a long market of crafts and food.",
+     "thb": 0,
+     "lat": 18.788,
+     "lng": 98.993
+    },
+    {
+     "name": "Tha Phae Gate",
+     "what": "The rebuilt brick gate, the city's meeting point.",
+     "thb": 0,
+     "lat": 18.7877,
+     "lng": 98.9932
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Phan Tao",
+     "what": "A dark teak hall right next to Chedi Luang, peaceful and free.",
+     "thb": 0,
+     "lat": 18.7877,
+     "lng": 98.9878
+    },
+    {
+     "name": "Ton Lam Yai flower market",
+     "what": "Riverside flower stalls by Warorot Market, busiest at dawn.",
+     "thb": 0,
+     "lat": 18.79,
+     "lng": 99.001
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Khao soi",
+     "what": "Curry noodle soup with crispy noodles on top.",
+     "thb": [
+      50,
+      90
+     ]
+    },
+    {
+     "name": "Sai ua",
+     "what": "Herby northern sausage grilled over charcoal.",
+     "thb": [
+      40,
+      100
+     ]
+    },
+    {
+     "name": "Nam prik noom",
+     "what": "Roasted green chilli dip with pork crackling.",
+     "thb": [
+      50,
+      120
+     ]
+    }
+   ]
+  },
+  {
+   "id": "doi-suthep",
+   "name": "Wat Phra That Doi Suthep",
+   "region": "north",
+   "type": "temple",
+   "lat": 18.8048,
+   "lng": 98.9216,
+   "line": "Golden hilltop temple overlooking Chiang Mai.",
+   "about": "Chiang Mai's most revered temple sits on the mountain above the city, reached by a long naga-lined staircase or a small funicular. On clear days the view stretches over the valley.",
+   "tips": [
+    "Go early morning for clear views and fewer people.",
+    "Walk the stairs up and take the funicular down, or the reverse.",
+    "Combine with the Monk's Trail hike for the adventurous."
+   ],
+   "best": "Nov to Feb",
+   "days": "Half a day",
+   "photo": "photos/doi-suthep.jpg",
+   "thumb": "photos/thumb/doi-suthep.jpg",
+   "city": "chiang-mai",
+   "fees": [
+    {
+     "what": "Wat Phra That Doi Suthep (foreigners)",
+     "thb": 30
+    },
+    {
+     "what": "Funicular, optional",
+     "thb": 50
+    },
+    {
+     "what": "National park fee if hiking the Monk's Trail (foreign adult)",
+     "thb": 100
+    }
+   ],
+   "timeOfDay": "Go 6 to 8 am for clear views and calm before the tour vans; sunset is the other good slot.",
+   "popular": [
+    {
+     "name": "Naga staircase",
+     "what": "About 300 steps flanked by serpent railings.",
+     "thb": 0,
+     "lat": 18.8046,
+     "lng": 98.922
+    },
+    {
+     "name": "Wat Pha Lat",
+     "what": "A jungle temple halfway up, on the Monk's Trail.",
+     "thb": 0,
+     "lat": 18.7973,
+     "lng": 98.937
+    },
+    {
+     "name": "Bhubing Palace gardens",
+     "what": "The royal winter residence's flower gardens further up the road.",
+     "thb": 50,
+     "lat": 18.8058,
+     "lng": 98.898
+    }
+   ],
+   "gems": [
+    {
+     "name": "Doi Pui Hmong village",
+     "what": "A hill village with coffee, gardens and textiles.",
+     "thb": 0,
+     "lat": 18.824,
+     "lng": 98.885
+    },
+    {
+     "name": "Huay Kaew waterfall",
+     "what": "A small forest cascade at the foot of the mountain.",
+     "thb": 100,
+     "lat": 18.8133,
+     "lng": 98.946
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Shared red songthaew up",
+     "what": "Locals and visitors share a red truck from the zoo or university.",
+     "thb": [
+      60,
+      100
+     ]
+    },
+    {
+     "name": "Grilled pork and sticky rice",
+     "what": "From stalls at the bottom of the stairs.",
+     "thb": [
+      40,
+      80
+     ]
+    },
+    {
+     "name": "Doi Pui strawberries and coffee",
+     "what": "Hill-grown snacks sold in the Hmong village.",
+     "thb": [
+      40,
+      100
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pai",
+   "name": "Pai",
+   "region": "north",
+   "type": "nature",
+   "lat": 19.3592,
+   "lng": 98.4403,
+   "line": "A laid-back mountain valley town in Mae Hong Son.",
+   "about": "Rice fields, hot springs, waterfalls and Pai Canyon at sunset, with a relaxed town of night markets and guesthouses. The winding road from Chiang Mai is famous for its many curves.",
+   "tips": [
+    "Take motion-sickness pills for the mountain road from Chiang Mai.",
+    "Only ride a scooter if you're experienced; the roads are steep.",
+    "Nights get cool from December to February: bring a layer."
+   ],
+   "best": "Nov to Feb",
+   "days": "2 to 4 days",
+   "photo": "photos/pai.jpg",
+   "thumb": "photos/thumb/pai.jpg",
+   "city": "pai",
+   "fees": [],
+   "timeOfDay": "Yun Lai viewpoint at sunrise for the valley mist; Pai Canyon an hour before sunset.",
+   "popular": [
+    {
+     "name": "Pai Canyon",
+     "what": "Narrow ridges with long drops; spectacular at sunset.",
+     "thb": 0,
+     "lat": 19.3046,
+     "lng": 98.4568
+    },
+    {
+     "name": "Yun Lai Viewpoint",
+     "what": "Sunrise over a sea of mist, with tea included.",
+     "thb": 20,
+     "lat": 19.3433,
+     "lng": 98.4247
+    },
+    {
+     "name": "Pai Walking Street",
+     "what": "The nightly market on the main road.",
+     "thb": 0,
+     "lat": 19.3586,
+     "lng": 98.4413
+    }
+   ],
+   "gems": [
+    {
+     "name": "Pam Bok Waterfall",
+     "what": "A small fall in a narrow gorge, cool even at noon.",
+     "thb": 0,
+     "lat": 19.3335,
+     "lng": 98.3727
+    },
+    {
+     "name": "Land Split",
+     "what": "A farm built on a crack in the earth; snacks by donation.",
+     "thb": 0,
+     "lat": 19.3185,
+     "lng": 98.481
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Khao soi",
+     "what": "Bowls at the small shops off the walking street.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Yunnanese food at Santichon",
+     "what": "Chinese village dishes and tea.",
+     "thb": [
+      100,
+      250
+     ]
+    },
+    {
+     "name": "Walking street snacks",
+     "what": "Grazing the stalls every evening.",
+     "thb": [
+      30,
+      100
+     ]
+    }
+   ]
+  },
+  {
+   "id": "white-temple",
+   "name": "Wat Rong Khun (White Temple)",
+   "region": "north",
+   "type": "temple",
+   "lat": 19.8243,
+   "lng": 99.7631,
+   "line": "A dazzling white, mirror-studded modern temple in Chiang Rai.",
+   "about": "Designed by the Thai artist Chalermchai Kositpipat, the White Temple is a work of art in progress: white plaster and mirror glass, a bridge over reaching hands, and surprising modern murals inside.",
+   "tips": [
+    "Arrive at opening time; it fills up fast.",
+    "Pair it with the Blue Temple and Baan Dam (Black House) the same day.",
+    "Photography isn't allowed inside the main hall."
+   ],
+   "best": "Nov to Feb",
+   "days": "Half a day",
+   "photo": "photos/white-temple.jpg",
+   "thumb": "photos/thumb/white-temple.jpg",
+   "city": "chiang-rai",
+   "fees": [
+    {
+     "what": "Wat Rong Khun (foreigners, since Jan 2026)",
+     "thb": 200
+    }
+   ],
+   "timeOfDay": "Be there at 8 am opening; the white plaster glows in morning light and coaches arrive by 10 am.",
+   "popular": [
+    {
+     "name": "Wat Rong Khun",
+     "what": "The dazzling white temple and its golden hall.",
+     "thb": 200,
+     "lat": 19.8243,
+     "lng": 99.7631
+    },
+    {
+     "name": "Blue Temple (Wat Rong Suea Ten)",
+     "what": "A sapphire-blue hall with a white Buddha.",
+     "thb": 0,
+     "lat": 19.9233,
+     "lng": 99.8406
+    },
+    {
+     "name": "Baan Dam",
+     "what": "The Black House: dark teak halls full of horns and skins.",
+     "thb": 80,
+     "lat": 19.9922,
+     "lng": 99.8607
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Huay Pla Kang",
+     "what": "A giant white Guan Yin statue with a lift to the top.",
+     "thb": 0,
+     "lat": 19.9447,
+     "lng": 99.7977
+    },
+    {
+     "name": "Singha Park",
+     "what": "Tea fields and lakes south of town; good for cycling.",
+     "thb": 0,
+     "lat": 19.867,
+     "lng": 99.748
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Night bazaar hot pot",
+     "what": "Locals' favourite is jim jum clay pot at the night bazaar.",
+     "thb": [
+      150,
+      300
+     ]
+    },
+    {
+     "name": "Clock tower light show",
+     "what": "The golden clock tower lights up each evening at 7, 8 and 9 pm.",
+     "thb": [
+      0,
+      0
+     ]
+    },
+    {
+     "name": "Local hill coffee",
+     "what": "Beans from Doi Chaang and nearby hills.",
+     "thb": [
+      60,
+      120
+     ]
+    }
+   ]
+  },
+  {
+   "id": "khao-sok",
+   "name": "Khao Sok & Cheow Lan Lake",
+   "region": "south",
+   "type": "nature",
+   "lat": 8.975,
+   "lng": 98.795,
+   "line": "Rainforest, limestone cliffs and floating bungalows on a jade lake.",
+   "about": "One of the oldest rainforests in the world surrounds a vast lake of emerald water and karst islands. Sleep in a floating raft house, kayak at dawn, and listen for gibbons.",
+   "tips": [
+    "Book a one or two-night lake tour with a floating bungalow.",
+    "Bring a dry bag and leech socks in the rainy season.",
+    "Halfway between Phuket, Krabi and Surat Thani: an easy add-on."
+   ],
+   "best": "Dec to Apr",
+   "days": "2 to 3 days",
+   "photo": "photos/khao-sok.jpg",
+   "thumb": "photos/thumb/khao-sok.jpg",
+   "city": "khao-sok",
+   "fees": [
+    {
+     "what": "Khao Sok National Park, HQ and trails (foreign adult)",
+     "thb": 200
+    },
+    {
+     "what": "Cheow Lan Lake (foreign adult, separate ticket)",
+     "thb": 300
+    }
+   ],
+   "timeOfDay": "Be on the lake at dawn for mist on the cliffs and gibbon calls; hike before the midday heat.",
+   "popular": [
+    {
+     "name": "Cheow Lan Lake",
+     "what": "Longtail rides between limestone islands and floating raft houses.",
+     "thb": 300,
+     "lat": 8.97,
+     "lng": 98.806
+    },
+    {
+     "name": "Wing Hin and Bang Hua Rad falls",
+     "what": "Easy jungle trails from the park HQ.",
+     "thb": 200,
+     "lat": 8.9125,
+     "lng": 98.527
+    },
+    {
+     "name": "Ratchaprapha Dam",
+     "what": "The dam and pier where lake trips start.",
+     "thb": 0,
+     "lat": 8.9708,
+     "lng": 98.8
+    }
+   ],
+   "gems": [
+    {
+     "name": "Sok River tubing",
+     "what": "Float down the river past limestone walls; book at guesthouses.",
+     "thb": 400,
+     "lat": 8.9139,
+     "lng": 98.529
+    },
+    {
+     "name": "Khlong Sok village",
+     "what": "The small village road at dusk, with local food stalls.",
+     "thb": 0,
+     "lat": 8.913,
+     "lng": 98.53
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Southern curry and rice",
+     "what": "Spicy gaeng tai pla or massaman from village shops.",
+     "thb": [
+      60,
+      120
+     ]
+    },
+    {
+     "name": "Banana roti",
+     "what": "Fried roti with banana and condensed milk.",
+     "thb": [
+      40,
+      70
+     ]
+    },
+    {
+     "name": "Raft house fish",
+     "what": "Lake fish cooked at the floating bungalows.",
+     "thb": [
+      150,
+      300
+     ]
+    }
+   ]
+  },
+  {
+   "id": "railay",
+   "name": "Railay",
+   "region": "south",
+   "type": "beach",
+   "lat": 8.0115,
+   "lng": 98.8382,
+   "line": "Cliff-backed beaches reachable only by boat.",
+   "about": "Towering limestone walls cut Railay off from the mainland, so you arrive by longtail boat from Ao Nang or Krabi. Climbing, lagoons, and some of Thailand's most dramatic beaches, including Phra Nang.",
+   "tips": [
+    "Longtail boats leave from Ao Nang beach when full.",
+    "Phra Nang beach in the early morning, before the day boats.",
+    "Rock climbing courses for complete beginners are easy to book."
+   ],
+   "best": "Nov to Apr",
+   "days": "2 to 3 days",
+   "photo": "photos/railay.jpg",
+   "thumb": "photos/thumb/railay.jpg",
+   "city": "krabi",
+   "fees": [],
+   "timeOfDay": "Phra Nang beach before 10 am, before the day boats; West Railay for sunset; check tides for the lagoon.",
+   "popular": [
+    {
+     "name": "Phra Nang Cave Beach",
+     "what": "Cliff-backed sand with the famous shrine cave.",
+     "thb": 0,
+     "lat": 8.0063,
+     "lng": 98.8379
+    },
+    {
+     "name": "Railay viewpoint and lagoon",
+     "what": "A short but steep, muddy climb with ropes.",
+     "thb": 0,
+     "lat": 8.0094,
+     "lng": 98.8389
+    },
+    {
+     "name": "Ao Nang beach",
+     "what": "The busy mainland beach where longtails leave for Railay.",
+     "thb": 0,
+     "lat": 8.0322,
+     "lng": 98.8233
+    }
+   ],
+   "gems": [
+    {
+     "name": "Ton Sai Beach",
+     "what": "Railay's climber neighbour, scruffy and relaxed; walk over at low tide.",
+     "thb": 0,
+     "lat": 8.0157,
+     "lng": 98.8295
+    },
+    {
+     "name": "Diamond Cave",
+     "what": "A short boardwalk cave on East Railay.",
+     "thb": 200,
+     "lat": 8.0095,
+     "lng": 98.8414
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Massaman curry",
+     "what": "From small kitchens along the Railay walkway.",
+     "thb": [
+      120,
+      200
+     ]
+    },
+    {
+     "name": "Fruit shakes",
+     "what": "Blended on the beach, a daily habit.",
+     "thb": [
+      60,
+      100
+     ]
+    },
+    {
+     "name": "Khanom jeen in Krabi Town",
+     "what": "Rice noodles with curry, a local breakfast.",
+     "thb": [
+      40,
+      70
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phi-phi",
+   "name": "Koh Phi Phi",
+   "region": "south",
+   "type": "island",
+   "lat": 7.7407,
+   "lng": 98.7784,
+   "line": "The famous twin bays and turquoise lagoons of the Andaman.",
+   "about": "Phi Phi Don's viewpoint looks down on two curving bays; around it are snorkelling spots, Pileh Lagoon and Maya Bay on Phi Phi Leh. Busy and lively, best enjoyed outside the day-trip rush.",
+   "tips": [
+    "Stay overnight to see the bays without the day-trippers.",
+    "Maya Bay closes for part of each year to recover: check before you go.",
+    "Climb to the viewpoint at sunrise or sunset."
+   ],
+   "best": "Nov to Apr",
+   "days": "2 to 3 days",
+   "photo": "photos/phi-phi.jpg",
+   "thumb": "photos/thumb/phi-phi.jpg",
+   "city": "phi-phi",
+   "fees": [
+    {
+     "what": "Island arrival fee at Tonsai pier",
+     "thb": 20
+    },
+    {
+     "what": "Mu Ko Phi Phi National Park, incl. Maya Bay (foreign adult)",
+     "thb": 400
+    }
+   ],
+   "timeOfDay": "Maya Bay right at opening (about 7 am) or late afternoon; climb the viewpoint at sunrise.",
+   "popular": [
+    {
+     "name": "Phi Phi Viewpoint",
+     "what": "The classic view over the twin bays.",
+     "thb": 50,
+     "lat": 7.7345,
+     "lng": 98.7762
+    },
+    {
+     "name": "Maya Bay",
+     "what": "The famous cove on Phi Phi Leh; no swimming, and closed about Aug to Sep.",
+     "thb": 400,
+     "lat": 7.6779,
+     "lng": 98.7656
+    },
+    {
+     "name": "Pileh Lagoon",
+     "what": "Emerald water inside sheer cliffs, reached by boat.",
+     "thb": 0,
+     "lat": 7.693,
+     "lng": 98.765
+    }
+   ],
+   "gems": [
+    {
+     "name": "Long Beach",
+     "what": "A quieter stretch south of Tonsai with snorkelling off the rocks.",
+     "thb": 0,
+     "lat": 7.727,
+     "lng": 98.786
+    },
+    {
+     "name": "Bamboo Island",
+     "what": "A small, flat island with soft sand north of Phi Phi Don.",
+     "thb": 400,
+     "lat": 7.813,
+     "lng": 98.808
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Village pad thai and roti",
+     "what": "Stalls in Tonsai village lanes.",
+     "thb": [
+      60,
+      120
+     ]
+    },
+    {
+     "name": "Fresh coconut",
+     "what": "Cold from the cooler on any beach.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Sunset at Loh Dalum",
+     "what": "Locals and workers end the day with a beer on the sand.",
+     "thb": [
+      80,
+      150
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phuket",
+   "name": "Phuket Old Town",
+   "region": "south",
+   "type": "city",
+   "lat": 7.8843,
+   "lng": 98.388,
+   "line": "Colourful Sino-Portuguese shophouses, cafés and street art.",
+   "about": "Away from the beach resorts, Phuket Town has pastel shophouses, shrines, local food and a Sunday walking street on Thalang Road. A good base for day trips across the Andaman.",
+   "tips": [
+    "Sunday Walking Street market on Thalang Road.",
+    "Try local Phuket dishes like mee hokkien.",
+    "The island's beaches are a 20 to 40 minute ride away."
+   ],
+   "best": "Nov to Apr",
+   "days": "1 to 2 days",
+   "photo": "photos/phuket.jpg",
+   "thumb": "photos/thumb/phuket.jpg",
+   "city": "phuket",
+   "fees": [],
+   "timeOfDay": "Early morning (7 to 9 am) for dim sum and empty streets; Sunday evening for the walking street.",
+   "popular": [
+    {
+     "name": "Thalang Road",
+     "what": "The main shophouse street; Sunday Walking Street from late afternoon.",
+     "thb": 0,
+     "lat": 7.8857,
+     "lng": 98.3891
+    },
+    {
+     "name": "Soi Romanee",
+     "what": "A short, pastel lane of restored houses.",
+     "thb": 0,
+     "lat": 7.8865,
+     "lng": 98.388
+    },
+    {
+     "name": "Khao Rang viewpoint",
+     "what": "A hill over the town with cafés.",
+     "thb": 0,
+     "lat": 7.8899,
+     "lng": 98.379
+    }
+   ],
+   "gems": [
+    {
+     "name": "Shrine of the Serene Light",
+     "what": "A hidden Chinese shrine down a narrow lane.",
+     "thb": 0,
+     "lat": 7.8853,
+     "lng": 98.388
+    },
+    {
+     "name": "Saphan Hin park",
+     "what": "A seaside park where locals jog and eat at sunset.",
+     "thb": 0,
+     "lat": 7.865,
+     "lng": 98.402
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Mee hokkien",
+     "what": "Phuket-style yellow noodles with seafood.",
+     "thb": [
+      60,
+      120
+     ]
+    },
+    {
+     "name": "Dim sum breakfast",
+     "what": "Steamed baskets with strong coffee.",
+     "thb": [
+      100,
+      250
+     ]
+    },
+    {
+     "name": "O-tao",
+     "what": "Oyster and taro fried omelette.",
+     "thb": [
+      60,
+      100
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lanta",
+   "name": "Koh Lanta",
+   "region": "south",
+   "type": "island",
+   "lat": 7.6,
+   "lng": 99.04,
+   "line": "A long, laid-back island of sunsets and quiet beaches.",
+   "about": "Lanta has long sandy beaches on its west coast, an old wooden fishing town on the east, and a national park at the southern tip. Calmer than Phi Phi and good for a slower week.",
+   "tips": [
+    "Rent a scooter or tuk-tuk to explore the beaches southward.",
+    "Day trip to Koh Rok or the Four Islands for snorkelling.",
+    "Some places close in the rainy months (May to Oct)."
+   ],
+   "best": "Nov to Apr",
+   "days": "3 to 5 days",
+   "photo": "photos/lanta.jpg",
+   "thumb": "photos/thumb/lanta.jpg",
+   "city": "lanta",
+   "fees": [
+    {
+     "what": "Mu Ko Lanta National Park (foreign adult)",
+     "thb": 200
+    }
+   ],
+   "timeOfDay": "National park in the morning; west coast beaches from late afternoon for the sunset.",
+   "popular": [
+    {
+     "name": "Lanta Old Town",
+     "what": "Wooden stilt houses and sea views on the east coast.",
+     "thb": 0,
+     "lat": 7.5345,
+     "lng": 99.087
+    },
+    {
+     "name": "Mu Ko Lanta lighthouse",
+     "what": "The park's headland and lighthouse at the southern tip.",
+     "thb": 200,
+     "lat": 7.481,
+     "lng": 99.0937
+    },
+    {
+     "name": "Long Beach (Phra Ae)",
+     "what": "A long, easy beach with bars and sunsets.",
+     "thb": 0,
+     "lat": 7.584,
+     "lng": 99.037
+    }
+   ],
+   "gems": [
+    {
+     "name": "Tung Yee Peng mangroves",
+     "what": "A community boardwalk and kayaks through the mangroves.",
+     "thb": 100,
+     "lat": 7.552,
+     "lng": 99.079
+    },
+    {
+     "name": "Bamboo Bay",
+     "what": "A small, quiet bay near the southern tip.",
+     "thb": 0,
+     "lat": 7.487,
+     "lng": 99.088
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Grilled fish in Old Town",
+     "what": "Fresh catch cooked by the seafront.",
+     "thb": [
+      150,
+      350
+     ]
+    },
+    {
+     "name": "Khao mok gai",
+     "what": "Muslim-style chicken biryani from village shops.",
+     "thb": [
+      50,
+      80
+     ]
+    },
+    {
+     "name": "Banana roti",
+     "what": "Late evening roti from the carts.",
+     "thb": [
+      40,
+      70
+     ]
+    }
+   ]
+  },
+  {
+   "id": "samui",
+   "name": "Koh Samui",
+   "region": "gulf",
+   "type": "island",
+   "lat": 9.532,
+   "lng": 100.061,
+   "line": "A big, easy Gulf island with beaches for every mood.",
+   "about": "Samui has busy Chaweng, quieter Lamai and Bophut's Fisherman's Village, plus waterfalls and the Big Buddha. Boat trips run to Ang Thong Marine Park's islands.",
+   "tips": [
+    "Ang Thong Marine Park day trip for kayaking and the viewpoint.",
+    "Fisherman's Village night market on Fridays.",
+    "Gulf weather differs: it's often good while the Andaman is rainy."
+   ],
+   "best": "Jan to Aug",
+   "days": "3 to 5 days",
+   "photo": "photos/samui.jpg",
+   "thumb": "photos/thumb/samui.jpg",
+   "city": "samui",
+   "fees": [],
+   "timeOfDay": "Big Buddha at sunrise or sunset; beaches in the morning; Fisherman's Village on Friday evening.",
+   "popular": [
+    {
+     "name": "Big Buddha (Wat Phra Yai)",
+     "what": "A 12 m golden Buddha on a small causeway island.",
+     "thb": 0,
+     "lat": 9.5714,
+     "lng": 100.0602
+    },
+    {
+     "name": "Fisherman's Village",
+     "what": "Bophut's old wooden shophouses, cafés and the Friday market.",
+     "thb": 0,
+     "lat": 9.56,
+     "lng": 100.027
+    },
+    {
+     "name": "Ang Thong Marine Park",
+     "what": "Day trip for kayaking and the viewpoint; park fee paid in cash.",
+     "thb": 300,
+     "lat": 9.63,
+     "lng": 99.68
+    }
+   ],
+   "gems": [
+    {
+     "name": "Wat Khunaram",
+     "what": "A small temple keeping a revered monk's mummified body.",
+     "thb": 0,
+     "lat": 9.462,
+     "lng": 100.035
+    },
+    {
+     "name": "Secret Buddha Garden",
+     "what": "A hilltop garden of statues built by a local farmer.",
+     "thb": 80,
+     "lat": 9.486,
+     "lng": 100.009
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Lamai night market",
+     "what": "Grilled snacks, curries and desserts.",
+     "thb": [
+      50,
+      150
+     ]
+    },
+    {
+     "name": "Khanom jeen",
+     "what": "Rice noodles with southern curry for breakfast.",
+     "thb": [
+      40,
+      80
+     ]
+    },
+    {
+     "name": "Coconut ice cream",
+     "what": "Served in a coconut shell on the beach.",
+     "thb": [
+      40,
+      80
+     ]
+    }
+   ]
+  },
+  {
+   "id": "koh-tao",
+   "name": "Koh Tao",
+   "region": "gulf",
+   "type": "island",
+   "lat": 10.0956,
+   "lng": 99.8404,
+   "line": "Small island, clear water, and one of the world's cheapest places to learn to dive.",
+   "about": "Koh Tao is all coves, granite boulders and coral reefs, with a famous viewpoint over the three linked islets of Koh Nang Yuan. Many people come for a few days and stay to take a diving course.",
+   "tips": [
+    "Open Water diving courses take about 3 to 4 days.",
+    "Snorkel straight from the beach at Shark Bay or Aow Leuk.",
+    "Ferries connect with Koh Samui, Koh Phangan and Chumphon."
+   ],
+   "best": "Mar to Sep",
+   "days": "3 to 5 days",
+   "photo": "photos/koh-tao.jpg",
+   "thumb": "photos/thumb/koh-tao.jpg",
+   "city": "koh-tao",
+   "fees": [],
+   "timeOfDay": "Dive and snorkel in the morning when seas are calmest; viewpoints at sunset.",
+   "popular": [
+    {
+     "name": "Koh Nang Yuan",
+     "what": "Three islets joined by sandbars, with a famous viewpoint.",
+     "thb": 100,
+     "lat": 10.117,
+     "lng": 99.813
+    },
+    {
+     "name": "Shark Bay",
+     "what": "Snorkel from the beach for turtles and reef sharks.",
+     "thb": 0,
+     "lat": 10.048,
+     "lng": 99.824
+    },
+    {
+     "name": "John-Suwan Viewpoint",
+     "what": "A rocky lookout over two bays.",
+     "thb": 50,
+     "lat": 10.0573,
+     "lng": 99.8188
+    }
+   ],
+   "gems": [
+    {
+     "name": "Freedom Beach",
+     "what": "A small cove at the southern tip with clear water.",
+     "thb": 0,
+     "lat": 10.057,
+     "lng": 99.822
+    },
+    {
+     "name": "Tanote Bay",
+     "what": "An east coast bay with boulders and good snorkelling.",
+     "thb": 0,
+     "lat": 10.0825,
+     "lng": 99.851
+    }
+   ],
+   "localFavs": [
+    {
+     "name": "Pad kra pao",
+     "what": "Basil stir-fry over rice at Mae Haad local shops.",
+     "thb": [
+      60,
+      100
+     ]
+    },
+    {
+     "name": "Sairee sunset",
+     "what": "A beer on the sand is the island's evening ritual.",
+     "thb": [
+      60,
+      120
+     ]
+    },
+    {
+     "name": "Late-night roti",
+     "what": "Banana pancakes from street carts.",
+     "thb": [
+      40,
+      80
+     ]
+    }
+   ]
+  }
+ ],
+ "basics": [
+  [
+   "Money",
+   "Thai baht (THB). Cards work in cities and malls; carry cash for markets, street food and islands. ATMs charge a fixed fee per withdrawal, so take out more at once."
+  ],
+  [
+   "Getting around",
+   "Grab and Bolt for rides in cities; overnight trains and buses between regions; cheap domestic flights; ferries and longtail boats to the islands."
+  ],
+  [
+   "Weather",
+   "Cool and dry Nov to Feb in most of the country. The Andaman coast (Phuket, Krabi, Phi Phi, Lanta) is best Nov to Apr; the Gulf islands (Samui, Tao) are often best Jan to Aug. The north can be smoky in March and April."
+  ],
+  [
+   "Temples",
+   "Cover shoulders and knees, take shoes off where others do, never point your feet at a Buddha, and don't touch monks if you are a woman."
+  ],
+  [
+   "Respect",
+   "The monarchy is deeply respected and protected by strict laws: never joke about or criticise the royal family. Stand for the royal anthem in cinemas."
+  ],
+  [
+   "Phone and power",
+   "Buy a tourist SIM or eSIM at the airport. Plugs are mostly types A, B, C and O, at 230 V."
+  ],
+  [
+   "Entry",
+   "Philippine passport holders can visit Thailand visa-free for a limited stay. Check the current allowed length of stay and the Thailand Digital Arrival Card requirement before you fly."
+  ],
+  [
+   "Emergencies",
+   "Tourist Police: 1155 (English-speaking). Ambulance: 1669."
+  ]
+ ],
+ "asOf": "2026-11",
+ "currency": "THB",
+ "fx": {
+  "PHP": 1.883,
+  "USD": 0.0295,
+  "asOf": "2026-11-16 (USD/THB about 33.88, USD/PHP about 63.81 BSP reference)",
+  "source": "https://taxcalculator.com.ph/exchange-rates/usd-to-php"
+ },
+ "cities": [
+  {
+   "id": "bangkok",
+   "name": "Bangkok",
+   "lat": 13.7563,
+   "lng": 100.5018,
+   "getAround": "BTS and MRT rides cost about 17 to 65 baht, river boats 16 to 30 baht and the Tha Tien cross-river ferry about 5 baht. Grab or Bolt across the centre is usually 80 to 250 baht; agree tuk-tuk prices first (100 to 200 baht for short hops).",
+   "stay": {
+    "budget": [
+     500,
+     900
+    ],
+    "mid": [
+     1200,
+     2200
+    ],
+    "comfort": [
+     2500,
+     4500
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     500
+    ],
+    "mid": [
+     600,
+     1100
+    ],
+    "comfort": [
+     1300,
+     2500
+    ]
+   },
+   "local": {
+    "budget": [
+     60,
+     150
+    ],
+    "mid": [
+     150,
+     350
+    ],
+    "comfort": [
+     350,
+     800
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Apr to May: hottest weeks, often above 35 C. Sep to Oct: heaviest rain and some street flooding.",
+    "note": "Songkran water fights in mid April; Loy Krathong lanterns on the river in November."
+   }
+  },
+  {
+   "id": "ayutthaya",
+   "name": "Ayutthaya",
+   "lat": 14.3532,
+   "lng": 100.5689,
+   "getAround": "Bicycles rent for about 50 to 100 baht a day and scooters 200 to 300. A tuk-tuk for a few hours around the ruins is roughly 300 to 500 baht per vehicle (agree the route first).",
+   "stay": {
+    "budget": [
+     400,
+     700
+    ],
+    "mid": [
+     900,
+     1600
+    ],
+    "comfort": [
+     1800,
+     3200
+    ]
+   },
+   "food": {
+    "budget": [
+     250,
+     400
+    ],
+    "mid": [
+     500,
+     900
+    ],
+    "comfort": [
+     1000,
+     2000
+    ]
+   },
+   "local": {
+    "budget": [
+     50,
+     100
+    ],
+    "mid": [
+     150,
+     300
+    ],
+    "comfort": [
+     300,
+     600
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to May: very hot with little shade at the ruins. Sep to Oct: river flooding is possible.",
+    "note": "Day-trippers peak 10 am to 2 pm; stay overnight to see the ruins lit up in the evening."
+   }
+  },
+  {
+   "id": "kanchanaburi",
+   "name": "Kanchanaburi",
+   "lat": 14.0228,
+   "lng": 99.5328,
+   "getAround": "Bus 8170 runs from town to Erawan for about 50 to 60 baht each way, about 1.5 hours. Scooters rent for 200 to 300 baht a day; songthaews and motorbike taxis cover short hops for 30 to 60 baht.",
+   "stay": {
+    "budget": [
+     350,
+     700
+    ],
+    "mid": [
+     800,
+     1500
+    ],
+    "comfort": [
+     1800,
+     3500
+    ]
+   },
+   "food": {
+    "budget": [
+     250,
+     400
+    ],
+    "mid": [
+     500,
+     900
+    ],
+    "comfort": [
+     1000,
+     2000
+    ]
+   },
+   "local": {
+    "budget": [
+     60,
+     150
+    ],
+    "mid": [
+     200,
+     350
+    ],
+    "comfort": [
+     400,
+     1200
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to May: hot, and the falls run lower. Sep to Oct: muddy trails and murkier pools.",
+    "note": "River Kwai Bridge Week in late Nov to early Dec brings a light and sound show and big crowds."
+   }
+  },
+  {
+   "id": "sukhothai",
+   "name": "Sukhothai",
+   "lat": 17.0078,
+   "lng": 99.823,
+   "getAround": "Blue songthaews run between New Sukhothai and the old city for about 30 to 40 baht, 30 minutes. Bicycles at the park gates rent for about 30 to 50 baht a day.",
+   "stay": {
+    "budget": [
+     350,
+     600
+    ],
+    "mid": [
+     700,
+     1300
+    ],
+    "comfort": [
+     1500,
+     3000
+    ]
+   },
+   "food": {
+    "budget": [
+     200,
+     350
+    ],
+    "mid": [
+     400,
+     800
+    ],
+    "comfort": [
+     900,
+     1800
+    ]
+   },
+   "local": {
+    "budget": [
+     60,
+     120
+    ],
+    "mid": [
+     120,
+     250
+    ],
+    "comfort": [
+     300,
+     800
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to May: very hot for cycling the ruins. Aug to Oct: heavy rain.",
+    "note": "Loy Krathong (November) is celebrated here with a week of lights and lanterns: book rooms early."
+   }
+  },
+  {
+   "id": "chiang-mai",
+   "name": "Chiang Mai",
+   "lat": 18.7883,
+   "lng": 98.9853,
+   "getAround": "Red songthaews are shared taxis: about 30 to 50 baht within town if you share, more to go further. Grab or Bolt is 60 to 200 baht across town; scooters rent for 200 to 350 baht a day.",
+   "stay": {
+    "budget": [
+     400,
+     800
+    ],
+    "mid": [
+     900,
+     1700
+    ],
+    "comfort": [
+     2000,
+     3800
+    ]
+   },
+   "food": {
+    "budget": [
+     250,
+     450
+    ],
+    "mid": [
+     500,
+     900
+    ],
+    "comfort": [
+     1100,
+     2200
+    ]
+   },
+   "local": {
+    "budget": [
+     60,
+     150
+    ],
+    "mid": [
+     150,
+     350
+    ],
+    "comfort": [
+     400,
+     900
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to Apr: burning season smoke and haze, poor air quality. Jun to Sep: rainy.",
+    "note": "Yi Peng lanterns and Loy Krathong in November draw huge crowds; Songkran in April is the wettest party in the country."
+   }
+  },
+  {
+   "id": "pai",
+   "name": "Pai",
+   "lat": 19.3592,
+   "lng": 98.4403,
+   "getAround": "Pai is small: walk the town, then rent a scooter (150 to 250 baht a day) for canyon, falls and hot springs. Without a licence and experience, hire a local driver or join a sightseeing tour (about 300 to 500 baht).",
+   "stay": {
+    "budget": [
+     350,
+     700
+    ],
+    "mid": [
+     800,
+     1600
+    ],
+    "comfort": [
+     1800,
+     3500
+    ]
+   },
+   "food": {
+    "budget": [
+     200,
+     400
+    ],
+    "mid": [
+     400,
+     800
+    ],
+    "comfort": [
+     900,
+     1800
+    ]
+   },
+   "local": {
+    "budget": [
+     0,
+     150
+    ],
+    "mid": [
+     150,
+     300
+    ],
+    "comfort": [
+     300,
+     800
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to Apr: smoky and hazy. Jul to Sep: slippery mountain road and landslide risk.",
+    "note": "Dec to Jan weekends fill with Thai holidaymakers; book ahead and pack a warm layer for nights near 10 C."
+   }
+  },
+  {
+   "id": "chiang-rai",
+   "name": "Chiang Rai",
+   "lat": 19.9105,
+   "lng": 99.8406,
+   "getAround": "Local buses run from the old bus terminal to the White Temple for about 20 to 30 baht. Grab works in town; a driver for a full temples day is roughly 1,200 to 1,800 baht per car.",
+   "stay": {
+    "budget": [
+     350,
+     650
+    ],
+    "mid": [
+     800,
+     1500
+    ],
+    "comfort": [
+     1600,
+     3000
+    ]
+   },
+   "food": {
+    "budget": [
+     200,
+     400
+    ],
+    "mid": [
+     400,
+     800
+    ],
+    "comfort": [
+     900,
+     1800
+    ]
+   },
+   "local": {
+    "budget": [
+     50,
+     150
+    ],
+    "mid": [
+     150,
+     350
+    ],
+    "comfort": [
+     400,
+     900
+    ]
+   },
+   "timing": {
+    "best": "Nov to Feb",
+    "avoid": "Mar to Apr: smoke and haze across the north. Jul to Sep: rainy season.",
+    "note": "Flower festival season runs Dec to Jan; the night bazaar is busiest at weekends."
+   }
+  },
+  {
+   "id": "khao-sok",
+   "name": "Khao Sok",
+   "lat": 8.9139,
+   "lng": 98.529,
+   "getAround": "Khlong Sok village is walkable to the park gate. Cheow Lan Lake is about an hour away: join a tour (day trip around 1,500 to 2,500 baht) or hire a longtail at the dam for a few thousand baht per boat.",
+   "stay": {
+    "budget": [
+     400,
+     800
+    ],
+    "mid": [
+     900,
+     1800
+    ],
+    "comfort": [
+     2000,
+     4000
+    ]
+   },
+   "food": {
+    "budget": [
+     250,
+     450
+    ],
+    "mid": [
+     500,
+     900
+    ],
+    "comfort": [
+     1000,
+     2000
+    ]
+   },
+   "local": {
+    "budget": [
+     0,
+     100
+    ],
+    "mid": [
+     100,
+     300
+    ],
+    "comfort": [
+     300,
+     800
+    ]
+   },
+   "timing": {
+    "best": "Dec to Apr",
+    "avoid": "May to Oct: rainy, leeches on trails and some trails close. Oct to Nov is the wettest.",
+    "note": "Floating raft houses on the lake book out on Thai holidays; one to two nights is the sweet spot."
+   }
+  },
+  {
+   "id": "krabi",
+   "name": "Krabi (Ao Nang and Railay)",
+   "lat": 8.032,
+   "lng": 98.8226,
+   "getAround": "Longtails from Ao Nang to Railay cost about 100 to 150 baht one way and leave when full. Songthaews link Ao Nang and Krabi Town for about 60 to 80 baht; scooters rent for 200 to 300 baht a day.",
+   "stay": {
+    "budget": [
+     500,
+     1000
+    ],
+    "mid": [
+     1200,
+     2500
+    ],
+    "comfort": [
+     2500,
+     5000
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     500
+    ],
+    "mid": [
+     600,
+     1100
+    ],
+    "comfort": [
+     1300,
+     2500
+    ]
+   },
+   "local": {
+    "budget": [
+     100,
+     200
+    ],
+    "mid": [
+     200,
+     400
+    ],
+    "comfort": [
+     400,
+     1000
+    ]
+   },
+   "timing": {
+    "best": "Nov to Apr",
+    "avoid": "May to Oct: southwest monsoon, rough seas, fewer boats and some island trips cancelled.",
+    "note": "Christmas to mid January is the priciest stretch; book Railay rooms early."
+   }
+  },
+  {
+   "id": "phi-phi",
+   "name": "Koh Phi Phi",
+   "lat": 7.7407,
+   "lng": 98.7684,
+   "getAround": "No roads: you walk. Longtails to beaches and viewpoints cost about 100 to 300 baht per person; a half-day longtail charter is roughly 1,500 to 3,000 baht per boat.",
+   "stay": {
+    "budget": [
+     800,
+     1500
+    ],
+    "mid": [
+     1800,
+     3500
+    ],
+    "comfort": [
+     3500,
+     7000
+    ]
+   },
+   "food": {
+    "budget": [
+     350,
+     600
+    ],
+    "mid": [
+     700,
+     1300
+    ],
+    "comfort": [
+     1500,
+     3000
+    ]
+   },
+   "local": {
+    "budget": [
+     0,
+     200
+    ],
+    "mid": [
+     200,
+     500
+    ],
+    "comfort": [
+     500,
+     1500
+    ]
+   },
+   "timing": {
+    "best": "Nov to Apr",
+    "avoid": "May to Oct: rough seas, and Maya Bay closes every year for about two months (Aug to Sep).",
+    "note": "The island is loud at night near Tonsai and Loh Dalum; pick Long Beach or the north for quiet."
+   }
+  },
+  {
+   "id": "phuket",
+   "name": "Phuket",
+   "lat": 7.8804,
+   "lng": 98.3923,
+   "getAround": "Smart Bus and pink songthaews run between Phuket Town and the main beaches for about 50 to 100 baht. Grab is often 300 to 600 baht to a beach; scooters rent for 200 to 350 baht a day.",
+   "stay": {
+    "budget": [
+     500,
+     1000
+    ],
+    "mid": [
+     1200,
+     2500
+    ],
+    "comfort": [
+     2500,
+     5500
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     500
+    ],
+    "mid": [
+     600,
+     1100
+    ],
+    "comfort": [
+     1300,
+     2500
+    ]
+   },
+   "local": {
+    "budget": [
+     100,
+     250
+    ],
+    "mid": [
+     250,
+     600
+    ],
+    "comfort": [
+     600,
+     1500
+    ]
+   },
+   "timing": {
+    "best": "Nov to Apr",
+    "avoid": "May to Oct: monsoon seas, red flags on west beaches and strong rip currents.",
+    "note": "The Vegetarian Festival (around Sep to Oct) fills Phuket Town with processions and meat-free street food."
+   }
+  },
+  {
+   "id": "lanta",
+   "name": "Koh Lanta",
+   "lat": 7.629,
+   "lng": 99.041,
+   "getAround": "Sidecar tuk-tuks cost about 100 to 400 baht depending on distance. Most visitors rent a scooter (200 to 300 baht a day) to roam the long west coast.",
+   "stay": {
+    "budget": [
+     500,
+     1000
+    ],
+    "mid": [
+     1100,
+     2200
+    ],
+    "comfort": [
+     2500,
+     5000
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     500
+    ],
+    "mid": [
+     600,
+     1000
+    ],
+    "comfort": [
+     1200,
+     2500
+    ]
+   },
+   "local": {
+    "budget": [
+     100,
+     250
+    ],
+    "mid": [
+     200,
+     400
+    ],
+    "comfort": [
+     400,
+     1000
+    ]
+   },
+   "timing": {
+    "best": "Nov to Apr",
+    "avoid": "May to Oct: many resorts and restaurants close, ferries are reduced and seas are rough.",
+    "note": "Lanta Lanta Festival in the Old Town in March celebrates the island's mix of cultures."
+   }
+  },
+  {
+   "id": "samui",
+   "name": "Koh Samui",
+   "lat": 9.512,
+   "lng": 100.0136,
+   "getAround": "Shared songthaews run round the ring road for about 50 to 150 baht. Taxis and Grab are pricey (300 to 700 baht across the island); scooters rent for 200 to 350 baht a day.",
+   "stay": {
+    "budget": [
+     600,
+     1100
+    ],
+    "mid": [
+     1300,
+     2600
+    ],
+    "comfort": [
+     2800,
+     6000
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     550
+    ],
+    "mid": [
+     600,
+     1200
+    ],
+    "comfort": [
+     1300,
+     2800
+    ]
+   },
+   "local": {
+    "budget": [
+     100,
+     250
+    ],
+    "mid": [
+     250,
+     600
+    ],
+    "comfort": [
+     600,
+     1500
+    ]
+   },
+   "timing": {
+    "best": "Jan to Aug",
+    "avoid": "Oct to Dec: the Gulf monsoon brings the heaviest rain and choppy ferry crossings.",
+    "note": "Fisherman's Village Walking Street runs Friday evenings; Full Moon parties on Koh Phangan fill Samui ferries."
+   }
+  },
+  {
+   "id": "koh-tao",
+   "name": "Koh Tao",
+   "lat": 10.088,
+   "lng": 99.827,
+   "getAround": "Shared taxi pickups cost about 100 to 300 baht per person depending on the bay. Scooters rent for 200 to 300 baht a day, but the dirt roads are steep, so walk or take taxis if unsure.",
+   "stay": {
+    "budget": [
+     500,
+     1000
+    ],
+    "mid": [
+     1200,
+     2200
+    ],
+    "comfort": [
+     2500,
+     5000
+    ]
+   },
+   "food": {
+    "budget": [
+     300,
+     500
+    ],
+    "mid": [
+     600,
+     1000
+    ],
+    "comfort": [
+     1200,
+     2500
+    ]
+   },
+   "local": {
+    "budget": [
+     50,
+     200
+    ],
+    "mid": [
+     200,
+     400
+    ],
+    "comfort": [
+     400,
+     900
+    ]
+   },
+   "timing": {
+    "best": "Mar to Sep",
+    "avoid": "Oct to Dec: monsoon swell, ferry cancellations and poor visibility for diving.",
+    "note": "Whale shark sightings peak around Mar to May and Sep; diving is good most of the year outside the monsoon."
+   }
+  }
+ ],
+ "legs": [
+  {
+   "a": "bangkok",
+   "b": "ayutthaya",
+   "options": [
+    {
+     "mode": "train",
+     "duration": "1 h 30 min to 2 h",
+     "thb": [
+      15,
+      350
+     ],
+     "note": "Ordinary third class costs about 15 to 20 baht; reserved seats on faster trains cost more. Trains leave from Krung Thep Aphiwat or Hua Lamphong."
+    },
+    {
+     "mode": "minivan",
+     "duration": "1 h 30 min",
+     "thb": [
+      70,
+      120
+     ],
+     "note": "Vans leave from Mo Chit area when full."
+    },
+    {
+     "mode": "car",
+     "duration": "1 h 15 min",
+     "thb": [
+      1000,
+      1600
+     ],
+     "note": "Taxi or Grab price per car, split it between up to 3 or 4 people."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "kanchanaburi",
+   "options": [
+    {
+     "mode": "train",
+     "duration": "2 h 45 min to 3 h",
+     "thb": [
+      100,
+      100
+     ],
+     "note": "Flat 100 baht for foreigners from Thonburi station; 7:45 am and 1:55 pm departures, buy at the station."
+    },
+    {
+     "mode": "minivan",
+     "duration": "2 h to 2 h 30 min",
+     "thb": [
+      120,
+      180
+     ],
+     "note": "From Mo Chit or the Southern Bus Terminal, frequent through the day."
+    },
+    {
+     "mode": "bus",
+     "duration": "2 h 30 min to 3 h",
+     "thb": [
+      100,
+      150
+     ],
+     "note": "Government buses from the Southern Bus Terminal."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "sukhothai",
+   "options": [
+    {
+     "mode": "bus",
+     "duration": "7 to 8 h",
+     "thb": [
+      390,
+      700
+     ],
+     "note": "Win Tour and others from Mo Chit; first class about 430, VIP about 500 baht."
+    },
+    {
+     "mode": "train",
+     "duration": "6 to 7 h plus 1 h bus",
+     "thb": [
+      120,
+      1100
+     ],
+     "note": "Train to Phitsanulok, then a local bus to Sukhothai for about 50 to 70 baht."
+    },
+    {
+     "mode": "flight",
+     "duration": "1 h 15 min",
+     "thb": [
+      2500,
+      5000
+     ],
+     "note": "Bangkok Airways flies to Sukhothai airport, about 30 km from town."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "chiang-mai",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 15 min",
+     "thb": [
+      900,
+      3000
+     ],
+     "note": "Many daily flights from Don Mueang and Suvarnabhumi; book a few weeks ahead for the low end."
+    },
+    {
+     "mode": "sleeper train",
+     "duration": "11 to 13 h",
+     "thb": [
+      880,
+      1100
+     ],
+     "note": "Second class berth (lower costs more) from Krung Thep Aphiwat; sells out weeks ahead in high season."
+    },
+    {
+     "mode": "sleeper train",
+     "duration": "11 to 13 h",
+     "thb": [
+      1450,
+      2100
+     ],
+     "note": "First class two-berth cabin on the special express."
+    },
+    {
+     "mode": "bus",
+     "duration": "9 to 10 h",
+     "thb": [
+      550,
+      950
+     ],
+     "note": "Overnight VIP buses from Mo Chit."
+    }
+   ]
+  },
+  {
+   "a": "ayutthaya",
+   "b": "sukhothai",
+   "options": [
+    {
+     "mode": "bus",
+     "duration": "5 to 6 h",
+     "thb": [
+      300,
+      500
+     ],
+     "note": "Buses heading north stop on the Asian Highway outside Ayutthaya."
+    },
+    {
+     "mode": "train",
+     "duration": "5 to 6 h plus 1 h bus",
+     "thb": [
+      100,
+      900
+     ],
+     "note": "Train to Phitsanulok, then a local bus to Sukhothai."
+    }
+   ]
+  },
+  {
+   "a": "ayutthaya",
+   "b": "chiang-mai",
+   "options": [
+    {
+     "mode": "sleeper train",
+     "duration": "10 to 12 h",
+     "thb": [
+      850,
+      1100
+     ],
+     "note": "Northern trains stop at Ayutthaya; book the same way as from Bangkok."
+    },
+    {
+     "mode": "bus",
+     "duration": "8 to 9 h",
+     "thb": [
+      500,
+      800
+     ],
+     "note": "Overnight buses pass Ayutthaya; booking from Bangkok is easier."
+    }
+   ]
+  },
+  {
+   "a": "sukhothai",
+   "b": "chiang-mai",
+   "options": [
+    {
+     "mode": "bus",
+     "duration": "5 to 6 h",
+     "thb": [
+      250,
+      520
+     ],
+     "note": "Several daily buses to Chiang Mai Arcade terminal."
+    }
+   ]
+  },
+  {
+   "a": "chiang-mai",
+   "b": "pai",
+   "options": [
+    {
+     "mode": "minivan",
+     "duration": "3 h",
+     "thb": [
+      150,
+      360
+     ],
+     "note": "About 220 baht at the Arcade terminal counter, more online with hotel pickup. Hundreds of bends: take a pill."
+    },
+    {
+     "mode": "car",
+     "duration": "3 h",
+     "thb": [
+      2100,
+      4000
+     ],
+     "note": "Private car or van per vehicle, with stops on the way."
+    }
+   ]
+  },
+  {
+   "a": "chiang-mai",
+   "b": "chiang-rai",
+   "options": [
+    {
+     "mode": "bus",
+     "duration": "3 to 4 h",
+     "thb": [
+      150,
+      300
+     ],
+     "note": "Green Bus from Arcade terminal about 15 times a day; VIP class is worth it."
+    },
+    {
+     "mode": "car",
+     "duration": "3 h",
+     "thb": [
+      2500,
+      3500
+     ],
+     "note": "Private driver per car, can stop at the White Temple on the way."
+    }
+   ]
+  },
+  {
+   "a": "pai",
+   "b": "chiang-rai",
+   "options": [
+    {
+     "mode": "minivan",
+     "duration": "7 to 8 h",
+     "thb": [
+      350,
+      700
+     ],
+     "note": "Usually via Chiang Mai: van to Arcade terminal, then a Green Bus to Chiang Rai."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "krabi",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 20 min",
+     "thb": [
+      900,
+      3000
+     ],
+     "note": "Several low-cost flights daily to Krabi airport, 30 to 40 min from Ao Nang."
+    },
+    {
+     "mode": "bus",
+     "duration": "12 h",
+     "thb": [
+      675,
+      950
+     ],
+     "note": "Overnight government bus from the Southern Bus Terminal or Mo Chit."
+    },
+    {
+     "mode": "train",
+     "duration": "12 h plus 3 h bus",
+     "thb": [
+      600,
+      1500
+     ],
+     "note": "Overnight train to Surat Thani, then a bus or van to Krabi."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "phuket",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 25 min",
+     "thb": [
+      900,
+      3000
+     ],
+     "note": "Many daily flights; the cheapest are early morning and late night."
+    },
+    {
+     "mode": "bus",
+     "duration": "12 to 13 h",
+     "thb": [
+      700,
+      1100
+     ],
+     "note": "Overnight buses from the Southern Bus Terminal."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "samui",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 5 min",
+     "thb": [
+      2500,
+      6600
+     ],
+     "note": "Bangkok Airways is the only direct airline, so fares stay high."
+    },
+    {
+     "mode": "boat+bus",
+     "duration": "12 to 14 h",
+     "thb": [
+      1100,
+      1500
+     ],
+     "note": "Lomprayah or similar joint ticket: overnight coach then catamaran."
+    },
+    {
+     "mode": "flight",
+     "duration": "1 h 10 min plus 3 h bus and ferry",
+     "thb": [
+      1200,
+      2800
+     ],
+     "note": "Cheaper: fly to Surat Thani, then a joint bus and ferry ticket to Samui."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "koh-tao",
+   "options": [
+    {
+     "mode": "boat+bus",
+     "duration": "10 to 12 h",
+     "thb": [
+      1100,
+      1500
+     ],
+     "note": "Lomprayah joint ticket via Chumphon, coach plus high-speed catamaran."
+    },
+    {
+     "mode": "train",
+     "duration": "8 to 9 h plus 2 h boat",
+     "thb": [
+      1000,
+      2100
+     ],
+     "note": "Overnight train to Chumphon, then a morning ferry to Mae Haad."
+    },
+    {
+     "mode": "flight",
+     "duration": "1 h plus 2 h boat",
+     "thb": [
+      1800,
+      3500
+     ],
+     "note": "Fly to Chumphon or Surat Thani, then a joint boat ticket."
+    }
+   ]
+  },
+  {
+   "a": "bangkok",
+   "b": "khao-sok",
+   "options": [
+    {
+     "mode": "train",
+     "duration": "11 to 12 h plus 2 h van",
+     "thb": [
+      700,
+      1500
+     ],
+     "note": "Overnight train to Surat Thani, then a van to Khlong Sok."
+    },
+    {
+     "mode": "bus",
+     "duration": "10 to 12 h",
+     "thb": [
+      800,
+      1100
+     ],
+     "note": "Overnight bus to Surat Thani or direct joint tickets to Khao Sok."
+    },
+    {
+     "mode": "flight",
+     "duration": "1 h 10 min plus 2 h van",
+     "thb": [
+      1300,
+      3000
+     ],
+     "note": "Fly to Surat Thani, then a shared van (about 150 to 300 baht)."
+    }
+   ]
+  },
+  {
+   "a": "chiang-mai",
+   "b": "krabi",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "2 h 5 min",
+     "thb": [
+      1500,
+      4000
+     ],
+     "note": "Direct flights are limited and seasonal; otherwise connect in Bangkok."
+    }
+   ]
+  },
+  {
+   "a": "chiang-mai",
+   "b": "phuket",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "2 h 10 min",
+     "thb": [
+      1300,
+      3500
+     ],
+     "note": "Daily direct low-cost flights."
+    }
+   ]
+  },
+  {
+   "a": "chiang-mai",
+   "b": "samui",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 45 min",
+     "thb": [
+      2900,
+      6000
+     ],
+     "note": "Bangkok Airways direct when scheduled; otherwise via Bangkok."
+    }
+   ]
+  },
+  {
+   "a": "phuket",
+   "b": "phi-phi",
+   "options": [
+    {
+     "mode": "ferry",
+     "duration": "1 h 45 min to 2 h",
+     "thb": [
+      450,
+      800
+     ],
+     "note": "Big boats from Rassada pier; fares rose by up to 200 baht in April 2026 with fuel costs."
+    },
+    {
+     "mode": "speedboat",
+     "duration": "1 h",
+     "thb": [
+      900,
+      1500
+     ],
+     "note": "Faster, bumpier, often with hotel pickup included."
+    }
+   ]
+  },
+  {
+   "a": "krabi",
+   "b": "phi-phi",
+   "options": [
+    {
+     "mode": "ferry",
+     "duration": "1 h 30 min to 2 h",
+     "thb": [
+      430,
+      650
+     ],
+     "note": "From Klong Jilad pier in Krabi Town or Nopparat Thara near Ao Nang."
+    },
+    {
+     "mode": "speedboat",
+     "duration": "45 to 50 min",
+     "thb": [
+      800,
+      1300
+     ],
+     "note": "From Ao Nang; book a day ahead in high season."
+    }
+   ]
+  },
+  {
+   "a": "krabi",
+   "b": "lanta",
+   "options": [
+    {
+     "mode": "minivan",
+     "duration": "2 h 30 min to 3 h",
+     "thb": [
+      350,
+      600
+     ],
+     "note": "Shared van with two short car ferries, hotel pickup."
+    },
+    {
+     "mode": "ferry",
+     "duration": "2 h to 2 h 30 min",
+     "thb": [
+      450,
+      750
+     ],
+     "note": "From Ao Nang, high season only (about Nov to Apr)."
+    }
+   ]
+  },
+  {
+   "a": "phi-phi",
+   "b": "lanta",
+   "options": [
+    {
+     "mode": "ferry",
+     "duration": "1 h 30 min",
+     "thb": [
+      400,
+      700
+     ],
+     "note": "Daily big boat from Tonsai pier to Saladan."
+    },
+    {
+     "mode": "speedboat",
+     "duration": "1 h",
+     "thb": [
+      800,
+      1300
+     ],
+     "note": "Some include drop at your beach."
+    }
+   ]
+  },
+  {
+   "a": "phuket",
+   "b": "krabi",
+   "options": [
+    {
+     "mode": "minivan",
+     "duration": "2 h 30 min to 3 h",
+     "thb": [
+      250,
+      450
+     ],
+     "note": "Door to door vans to Ao Nang or Krabi Town."
+    },
+    {
+     "mode": "bus",
+     "duration": "3 to 4 h",
+     "thb": [
+      150,
+      250
+     ],
+     "note": "Government buses from Phuket Bus Terminal 2."
+    },
+    {
+     "mode": "ferry",
+     "duration": "2 h 30 min",
+     "thb": [
+      600,
+      1100
+     ],
+     "note": "Rassada pier to Ao Nang, high season; some go via Phi Phi."
+    }
+   ]
+  },
+  {
+   "a": "phuket",
+   "b": "khao-sok",
+   "options": [
+    {
+     "mode": "bus",
+     "duration": "3 h 30 min to 4 h",
+     "thb": [
+      250,
+      400
+     ],
+     "note": "Surat Thani buses from Phuket Terminal 2, ask to stop at Khao Sok."
+    },
+    {
+     "mode": "minivan",
+     "duration": "3 h",
+     "thb": [
+      600,
+      1000
+     ],
+     "note": "Shared van with hotel pickup."
+    }
+   ]
+  },
+  {
+   "a": "krabi",
+   "b": "khao-sok",
+   "options": [
+    {
+     "mode": "minivan",
+     "duration": "3 to 3 h 30 min",
+     "thb": [
+      320,
+      450
+     ],
+     "note": "Shared vans from Ao Nang and Krabi Town, usually morning departures."
+    }
+   ]
+  },
+  {
+   "a": "khao-sok",
+   "b": "samui",
+   "options": [
+    {
+     "mode": "boat+bus",
+     "duration": "5 to 6 h",
+     "thb": [
+      700,
+      950
+     ],
+     "note": "Van to Donsak pier, then ferry; guesthouses sell joint tickets."
+    }
+   ]
+  },
+  {
+   "a": "samui",
+   "b": "koh-tao",
+   "options": [
+    {
+     "mode": "ferry",
+     "duration": "1 h 45 min",
+     "thb": [
+      650,
+      850
+     ],
+     "note": "Lomprayah high-speed catamaran (about 700 baht) from Maenam, Nathon or Bangrak; via Koh Phangan."
+    },
+    {
+     "mode": "ferry",
+     "duration": "2 h 30 min to 3 h",
+     "thb": [
+      550,
+      700
+     ],
+     "note": "Slower Seatran or Songserm boats, steadier in swell."
+    }
+   ]
+  },
+  {
+   "a": "krabi",
+   "b": "samui",
+   "options": [
+    {
+     "mode": "boat+bus",
+     "duration": "6 to 7 h",
+     "thb": [
+      700,
+      1100
+     ],
+     "note": "Van to Donsak pier, then a car ferry; joint tickets from Ao Nang."
+    }
+   ]
+  },
+  {
+   "a": "phuket",
+   "b": "samui",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h",
+     "thb": [
+      2500,
+      5500
+     ],
+     "note": "Bangkok Airways direct."
+    },
+    {
+     "mode": "boat+bus",
+     "duration": "7 to 9 h",
+     "thb": [
+      800,
+      1200
+     ],
+     "note": "Bus or van to Donsak pier, then a ferry."
+    }
+   ]
+  },
+  {
+   "a": "lanta",
+   "b": "phuket",
+   "options": [
+    {
+     "mode": "ferry",
+     "duration": "4 to 5 h",
+     "thb": [
+      800,
+      1300
+     ],
+     "note": "High season boats via Phi Phi."
+    },
+    {
+     "mode": "minivan",
+     "duration": "4 to 5 h",
+     "thb": [
+      600,
+      900
+     ],
+     "note": "Shared van with car ferries, all year."
+    }
+   ]
+  },
+  {
+   "a": "chiang-rai",
+   "b": "bangkok",
+   "options": [
+    {
+     "mode": "flight",
+     "duration": "1 h 20 min",
+     "thb": [
+      900,
+      2800
+     ],
+     "note": "Several daily low-cost flights from Chiang Rai airport."
+    },
+    {
+     "mode": "bus",
+     "duration": "11 to 12 h",
+     "thb": [
+      650,
+      1000
+     ],
+     "note": "Overnight VIP buses to Mo Chit."
+    }
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "title": "Royal Grand Palace: practical information",
+   "url": "http://www.royalgrandpalace.th/en/visit/practical-information"
+  },
+  {
+   "title": "Royal Grand Palace: buy tickets",
+   "url": "http://www.royalgrandpalace.th/en/buy-ticket"
+  },
+  {
+   "title": "TAT: Wat Arun",
+   "url": "https://www.tourismthailand.org/Attraction/wat-arun-ratchawararam-ratchawaramahawihan"
+  },
+  {
+   "title": "TAT: Erawan National Park",
+   "url": "https://www.tourismthailand.org/Attraction/erawan-national-park"
+  },
+  {
+   "title": "Thai National Parks: Erawan",
+   "url": "https://www.thainationalparks.com/erawan-national-park"
+  },
+  {
+   "title": "Thai National Parks: Khao Sok",
+   "url": "https://www.thainationalparks.com/khao-sok-national-park"
+  },
+  {
+   "title": "Updated entrance fees at Cheow Lan Lake",
+   "url": "https://mythailandtours.com/updated-entrance-fees-at-khao-soks-cheow-lan-lake-and-ratchaprapha-dam/"
+  },
+  {
+   "title": "Railay Eco Tour: Maya Bay opening guide 2026",
+   "url": "https://www.railayecotour.com/en/blog/maya-bay-phi-phi-le-opening"
+  },
+  {
+   "title": "Maya Bay reopens 1 October 2026",
+   "url": "https://www.tisland.travel/en/blog/maya-bay-otkryvaetsya-1-oktyabrya-2026"
+  },
+  {
+   "title": "White Temple fee 200 baht from January 2026",
+   "url": "https://passportandstamps.com/white-temple-chiang-rai-wat-rong-khun/"
+  },
+  {
+   "title": "Chiang Mai City Life: Doi Suthep Pui fees from October 2025",
+   "url": "https://www.chiangmaicitylife.com/citynews/general/entrance-fees-required-at-doi-suthep-pui-starting-october-2025/"
+  },
+  {
+   "title": "Doi Suthep entrance and funicular fees",
+   "url": "https://beliholiday.com/blogs/181/wat-phra-that-doi-suthep-opening-hours-entrance-fee-visitor-guide"
+  },
+  {
+   "title": "Ayutthaya temple entrance fees 2026",
+   "url": "https://ayutthayatemple-guide.com/tickets/ayutthaya-temple-entrance-fees/"
+  },
+  {
+   "title": "Sukhothai Historical Park planning guide (2026)",
+   "url": "https://therestlessbeans.com/sukhothai-historical-park-planning-guide/"
+  },
+  {
+   "title": "Thaizer: Sukhothai Historical Park",
+   "url": "https://www.thaizer.com/sukhothai-historical-park/"
+  },
+  {
+   "title": "Bangkok to Kanchanaburi 2026",
+   "url": "https://www.visitthailandtoday.com/guides/bangkok-to-kanchanaburi"
+  },
+  {
+   "title": "Bangkok to Ayutthaya 2026",
+   "url": "https://www.visitthailandtoday.com/guides/bangkok-to-ayutthaya"
+  },
+  {
+   "title": "Bangkok to Chiang Mai guide",
+   "url": "https://www.visitthailandtoday.com/guides/bangkok-to-chiang-mai"
+  },
+  {
+   "title": "12Go: trains Bangkok to Chiang Mai",
+   "url": "https://12go.asia/en/train/bangkok/chiang-mai"
+  },
+  {
+   "title": "Bangkok to Sukhothai bus 2026",
+   "url": "https://shathailand.com/bangkok-to-sukhothai-bus/"
+  },
+  {
+   "title": "How to get to Sukhothai (2026)",
+   "url": "https://www.thelongestwayhome.com/travel-guides/thailand/sukhothai/how-to-get-to-sukhothai.html"
+  },
+  {
+   "title": "Chiang Mai to Pai minivan",
+   "url": "https://www.thailandtraveler.org/chiang-mai-to-pai-minivan-tickets-schedules-fares-luggage-tips/"
+  },
+  {
+   "title": "Around Chiang Mai 2026: Pai, Chiang Rai",
+   "url": "https://thailandtravelnotes.com/en/thailand/chiangmai-pai-chiangrai-transport-guide-2026/"
+  },
+  {
+   "title": "Bangkok to Krabi",
+   "url": "https://goasia.cc/en/thailand/bangkok-to-krabi"
+  },
+  {
+   "title": "Bangkok to Koh Samui 2026",
+   "url": "https://www.visitthailandtoday.com/guides/bangkok-to-koh-samui"
+  },
+  {
+   "title": "Bangkok Airways blog: Bangkok to Samui, Phangan, Tao",
+   "url": "https://blog.bangkokair.com/en/how-to-go-koh-samui-phangan-tao-from-bangkok/"
+  },
+  {
+   "title": "Koh Tao ferry prices 2026",
+   "url": "https://digitao-nomads.com/blog/koh-tao-ferry-price/"
+  },
+  {
+   "title": "Inside Samui: Koh Samui to Koh Tao 2026",
+   "url": "https://www.insidesamui.com/getting-here/koh-samui-to-koh-tao/"
+  },
+  {
+   "title": "SiamTickets: Lomprayah Samui to Tao",
+   "url": "https://siamtickets.com/lomprayah-ferry-koh-samui-to-koh-tao/"
+  },
+  {
+   "title": "The Thaiger: Phuket to Phi Phi fares rise from April 5",
+   "url": "https://thethaiger.com/news/phuket/phuket-boat-fares-and-boat-tour-prices-set-to-increase-from-april-5"
+  },
+  {
+   "title": "Koh Phi Phi ferries 2026",
+   "url": "https://mybestplacestovisit.com/asia/thailand/krabi-koh-phi-phi-koh-lanta/get-to-koh-phi-phi/"
+  },
+  {
+   "title": "How to get to Railay Beach (2026)",
+   "url": "https://www.weseektravel.com/how-to-get-to-railay-beach/"
+  },
+  {
+   "title": "Krabi to Koh Lanta, all options (2026)",
+   "url": "https://www.southeastasiasimplified.com/blog/transfer-guides-5/krabi-to-koh-lanta-all-transfer-options-2026-176"
+  },
+  {
+   "title": "Departing Khao Sok",
+   "url": "https://www.khao-sok-riverside-cottages.com/departing-from-khao-sok/"
+  },
+  {
+   "title": "Travelfish: getting to Khao Sok",
+   "url": "https://www.travelfish.org/transport/thailand/southern_thailand/surat_thani/khao_sok_national_park/all"
+  },
+  {
+   "title": "Crystal Dive: Open Water course",
+   "url": "https://www.crystaldive.com/ssi-open-water-course/"
+  },
+  {
+   "title": "Ang Thong Marine Park guide",
+   "url": "https://www.visitthailandtoday.com/guides/ang-thong-marine-park"
+  },
+  {
+   "title": "USD to PHP 16 Nov 2026 (BSP reference)",
+   "url": "https://taxcalculator.com.ph/exchange-rates/usd-to-php"
+  },
+  {
+   "title": "Exchange-rates.org: USD to THB",
+   "url": "https://www.exchange-rates.org/converter/usd-thb"
+  },
+  {
+   "title": "Trading Economics: Thai baht",
+   "url": "https://tradingeconomics.com/thailand/currency"
+  }
+ ],
+ "verify": [
+  "Wat Pho fee (300 baht) not re-checked this session.",
+  "Sukhothai central zone: 2026 guides say 200 baht, older ones 100; north and west zones 120.",
+  "Ayutthaya single temple fee: most 2026 sources say 50 baht, one social post mentions 80.",
+  "Wat Chedi Luang (50), Baan Dam (80), Bhubing Palace (50), Secret Buddha Garden (80): from memory, not confirmed.",
+  "Doi Suthep funicular (sources say 20 to 50 baht) and the 100 baht park fee on the Monk's Trail.",
+  "Phi Phi viewpoint (about 50 baht) and Tonsai arrival fee (20 baht).",
+  "Mu Ko Lanta National Park fee (200 baht) and Tung Yee Peng boardwalk fee.",
+  "Koh Nang Yuan landing fee (100 baht) and John-Suwan viewpoint fee (50 baht).",
+  "Yun Lai viewpoint (20 baht) and Huay Kaew falls now inside the Doi Suthep Pui fee zone (100 baht).",
+  "Diamond Cave Railay (200 baht) and Sok River tubing price (about 400 baht).",
+  "All domestic flight ranges (no live fare page could be opened; Firecrawl credits ran out and booking sites were blocked).",
+  "First class sleeper Bangkok to Chiang Mai (1,450 to 2,100 baht).",
+  "Bangkok to Koh Tao and Bangkok to Samui joint ticket prices; Chiang Mai to Samui direct flight availability.",
+  "Pai to Chiang Rai, Lanta to Phuket, Phuket to Samui, Krabi to Samui and Khao Sok to Samui fares.",
+  "Hotel, food and local transport bands per city are estimates from 2026 budget guides plus judgement, not listing data.",
+  "Reports of a new 300 baht tourist entry fee in 2026 were seen in budget blogs only; not included in the data.",
+  "Ang Thong Marine Park may be partly closed around Nov 1 to Dec 15: check before booking."
+ ]
 }
