@@ -76,6 +76,8 @@
     .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 90px); transform: translateX(-50%); z-index: 900; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font: 650 14px var(--sans); animation: up .25s both; }
     .sheet-back { position: fixed; inset: 0; z-index: 800; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; } .sheet { width: min(560px,100%); background: var(--card); border-radius: 24px 24px 0 0; padding: 18px 20px calc(env(safe-area-inset-bottom) + 18px); animation: up .3s both; }
     ol.steps { padding-left: 20px; margin: 6px 0; }
+    ol.steps li { margin: 7px 0; } .ic { display: inline-block; width: 20px; height: 20px; vertical-align: -5px; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; } .ic.dots3 { width: auto; padding: 0 6px; border-radius: 999px; background: var(--line); color: var(--ink); font-size: 11px; line-height: 20px; vertical-align: 1px; letter-spacing: 1px; }
+
     .spot { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); } .spot:first-of-type { border-top: 0; } .spot b { font-size: 15px; }
     .leg { margin: 4px 0 4px 34px; padding: 6px 0 6px 14px; border-left: 2px dashed var(--accent); }
     select, input[type=number] { font: 15px var(--sans); padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); width: 100%; }
@@ -126,7 +128,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "8";
+  const KEY = "roam", VER = "9";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -542,7 +544,17 @@
   /* ---------- Install ---------- */
   let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA);
-  const installBody = () => deferred ? `<button class="btn acc block" data-act="doinstall">Install Roam</button>` : isIOS ? `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
+  /* Install help: native prompt where the browser offers one, otherwise clear steps for the browser the person is actually in. */
+  const inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA);
+  const iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
+  const IC = { share: `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="ic dots3">•••</span>` };
+  const copyBtn = `<button class="btn block" data-act="copylink" style="margin-top:10px">Copy the link</button>`;
+  const installBody = () => deferred ? `<button class="btn acc block" data-act="doinstall">Install Roam</button>`
+    : inApp ? `<p class="small ink2" style="margin:0 0 6px">You're inside another app's browser, which can't install apps. Open Roam in ${isIOS ? "Safari" : "Chrome"} first:</p><ol class="steps"><li>Tap ${IC.more} or the menu at the ${isIOS ? "bottom or top right" : "top right"}.</li><li>Choose <b>Open in ${isIOS ? "Safari" : "browser"}</b> (or <b>Open in external browser</b>).</li><li>Then tap <b>Install</b> in Roam's Basics tab.</li></ol>${copyBtn}<p class="small muted" style="margin:6px 0 0">No such option? Copy the link and paste it into ${isIOS ? "Safari" : "Chrome"}.</p>`
+    : isIOS && iosBrowser ? `<ol class="steps"><li>Tap the <b>Share</b> button ${IC.share} in ${iosBrowser}'s address bar${iosBrowser === "Firefox" ? " (or the ☰ menu, then Share)" : ""}.</li><li>Tap <b>Add to Home Screen</b> ${IC.add}. You may need to tap <b>More</b> to find it.</li><li>Tap <b>Add</b>.</li></ol><p class="small muted" style="margin:6px 0 0">Don't see it? Open this page in Safari and do the same there.</p>${copyBtn}`
+    : isIOS ? `<ol class="steps"><li>Tap the <b>Share</b> button ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol><p class="small muted" style="margin:6px 0 0">Roam then opens full screen from your home screen and works offline.</p>`
+    : isAndroid ? `<ol class="steps"><li>Tap the <b>⋮</b> menu at the top right of Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Tap <b>Install</b>.</li></ol><p class="small muted" style="margin:6px 0 0">Using Samsung Internet? Tap ☰, then <b>Add page to</b>, then <b>Home screen</b>.</p>`
+    : `<ol class="steps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b> option.</li></ol><p class="small muted" style="margin:6px 0 0">On a phone, open this page there to add Roam to your home screen.</p>`;
   function showInstall(force) {
     if (isStandalone() || $(".sheet-back")) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("roam-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
     const b = document.createElement("div"); b.className = "sheet-back"; b.innerHTML = `<div class="sheet"><div class="row" style="gap:14px"><img src="icons/icon-192.png" width="54" height="54" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · your places offline</div><h2 style="margin:0">Install Roam</h2></div></div><p class="ink2" style="margin:12px 0">Your places, notes and trip, one tap from your home screen.</p><div id="ib">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;border:0;background:none">Not now</button></div>`;
@@ -583,6 +595,7 @@
         if ($("#mloc").checked && navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { m.lat = pos.coords.latitude; m.lng = pos.coords.longitude; fin(); }, () => fin(), { timeout: 8000 }); else fin(); })(); }
     else if (a === "say") speakThai(v);
     else if (a === "install") showInstall(true);
+    else if (a === "copylink") { const u = APP_URL(); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast("Link copied: paste it into your browser"), () => prompt("Copy this link:", u)); }
     else if (a === "notnow") { try { localStorage.setItem("roam-install-snooze", Date.now()); } catch {} $(".sheet-back")?.remove(); }
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
