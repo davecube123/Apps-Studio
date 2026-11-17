@@ -8,9 +8,11 @@ written top to bottom in brush-style characters.
 
 | Tab | What it is | Where it comes from |
 |---|---|---|
-| Wilhelm | An English rendering of Richard Wilhelm's German, made for this app | Original work, based on the 1911 German (public domain) |
+| Wilhelm · English | Slot for **your own copy** of the official English of Wilhelm: H. G. Ostwald, *Tao Te Ching: The Book of Meaning and Life* (1985) | Under copyright, never bundled |
+| Leyris · Français | Slot for **your own copy** of Pierre Leyris's French | Under copyright, never bundled |
+| Wilhelm · our English | An English rendering of Richard Wilhelm's German, made for this app | Original work, based on the 1911 German (public domain) |
 | Wilhelm · Deutsch | Richard Wilhelm, *Laotse: Tao te king* (Jena, 1911) | Public domain; OCR text proofread |
-| Feng & English, Ch'u Ta-Kao, Le Guin, Heider, Bynner | Slots for **your own copies** | Still under copyright, so never bundled. Settings → Library → Add: an EPUB, text or HTML file, or pasted text. The app finds the 81 chapters by their numbers (1, I, One, Chapter One…), skipping tables of contents and trailing notes, and stores them only on that device (IndexedDB). |
+| Feng & English, Ch'u Ta-Kao, Le Guin, Heider, Bynner | Slots for **your own copies** | Still under copyright, so never bundled. Settings → Library → Add: an EPUB, text or HTML file, or pasted text. The app finds the 81 chapters by their numbers (1, I, One, Chapter One, Chapitre premier, quatre-vingt-un…), skipping tables of contents and trailing notes, and stores them only on that device (IndexedDB). |
 
 A book imported in the previous version (e.g. *The Tao of Leadership*) is carried over to the Heider
 slot automatically, or can be assigned to any slot from Settings → Library.
