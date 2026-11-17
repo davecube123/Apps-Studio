@@ -74,7 +74,7 @@ Live at **https://davecube123.github.io/Apps-Studio/**
 | App | What it does |
 | --- | --- |
 | [Excuse Generator](apps/excuse-generator/) | Produces a fresh, highly specific excuse for whatever you didn't do. |
-| [Tao Reader](apps/tao-reader/) | The Tao Te Ching in English and French, offline: chapters, random verses, read-aloud. Installable PWA. |
+| [Tao Reader](apps/tao-reader/) | The Tao Te Ching chapter by chapter with an old-paper look: Roman-numeral chapters, the Chinese original in vertical brush script, Richard Wilhelm (German and an English rendering), and slots for your own copies of Feng & English, Ch'u Ta-Kao, Le Guin, Heider and Bynner (kept on-device). Compare view, draw a verse, read-aloud. Installable PWA. |
 | [Little Pages](apps/little-pages/) | Read your own EPUB/PDF/TXT books, with habit-building features grounded in behaviour science. Installable PWA. |
 | [My I Ching](apps/i-ching-book/) ([open](https://davecube123.github.io/Apps-Studio/apps/i-ching-book/)) | Learn the 64 hexagrams by writing your own Book of Changes: readings, reflections, spaced practice, printable book. Installable PWA. |
 | [Daily Way](apps/daily-way/) ([open](https://davecube123.github.io/Apps-Studio/apps/daily-way/)) | A 20-minute daily practice with the Tao Te Ching, I Ching, Golden Flower and Chuang Tzu: recall, read, capture, connect, sit, carry. Installable PWA. |

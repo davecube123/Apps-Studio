@@ -1,17 +1,23 @@
 // Offline support. Bump VERSION whenever app files change so phones pick up the update.
-const VERSION = "tao-reader-v4";
+const VERSION = "tao-reader-v5";
 const SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./data/tao-te-ching.json",
+  "./data/tao.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/maskable-512.png",
   "./icons/apple-touch-icon.png",
+  "./fonts/cinzel-latin-500-normal.woff2",
+  "./fonts/cinzel-latin-700-normal.woff2",
+  "./fonts/cormorant-garamond-latin-400-italic.woff2",
+  "./fonts/cormorant-garamond-latin-400-normal.woff2",
+  "./fonts/cormorant-garamond-latin-600-normal.woff2",
+  "./fonts/wenkai-tao.woff2",
 ];
 // Third-party files worth keeping offline once fetched (fonts, the EPUB parser).
-const RUNTIME_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com"];
+const RUNTIME_HOSTS = ["cdnjs.cloudflare.com"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -1,51 +1,32 @@
-# Tao Reader ☯️
+# Tao Reader 道德經
 
-An installable, offline reader for the **Tao Te Ching** in English and French.
+An installable, offline reader for the **Tao Te Ching**, chapter by chapter, with an old-paper look:
+Roman-numeral chapters, a cinnabar seal with the Chinese chapter number, and the original text
+written top to bottom in brush-style characters.
 
-## What's inside
+## Translations
 
-- **English:** James Legge's 1891 translation (public domain), parsed from Project Gutenberg.
-- **French:** a new translation of Legge's text made for this app, aligned passage by passage
-  with the English. Chapter titles are the app's own.
-- Both live in `data/tao-te-ching.json`, so nothing needs downloading or uploading.
+| Tab | What it is | Where it comes from |
+|---|---|---|
+| Wilhelm | An English rendering of Richard Wilhelm's German, made for this app | Original work, based on the 1911 German (public domain) |
+| Wilhelm · Deutsch | Richard Wilhelm, *Laotse: Tao te king* (Jena, 1911) | Public domain; OCR text proofread |
+| Feng & English, Ch'u Ta-Kao, Le Guin, Heider, Bynner | Slots for **your own copies** | Still under copyright, so never bundled. Settings → Library → Add: an EPUB, text or HTML file, or pasted text. The app finds the 81 chapters by their numbers (1, I, One, Chapter One…), skipping tables of contents and trailing notes, and stores them only on that device (IndexedDB). |
+
+A book imported in the previous version (e.g. *The Tao of Leadership*) is carried over to the Heider
+slot automatically, or can be assigned to any slot from Settings → Library.
 
 ## Features
 
-- **Chapters:** Previous/Next buttons, a progress bar and a searchable contents sheet with read
-  ticks. Arrow keys and swipe also work, and your place is remembered.
-- **Languages:** EN, EN · FR (passage by passage) or FR.
-- **Random verse ✨:** a quote card with Another, Listen, Copy, Share and Read.
-- **Audio:** reads the chapter aloud with your device's voices and highlights each passage. Pause,
-  stop and speed (0.8×–1.5×) are on the now-playing bar, and it carries on into the next chapter.
-  In EN · FR mode it alternates English and French.
-- **Themes:** light, sepia and dark, plus a text-size slider.
-- **Your own books (optional, private):** Settings → Library → *Import an EPUB or book file*.
-  The book is stored only on that device and never goes into this repo or onto the website.
+- **Chapters I–LXXXI:** swipe, arrow keys or the ‹ › buttons; a contents grid of numerals with read marks.
+- **原文:** the received Chinese text (public domain), in vertical columns.
+- **對照 Compare:** every translation you have for the chapter, stacked.
+- **Draw a verse:** a random passage on a sealed card, with Another, Read chapter and Share.
+- **Read aloud** with the device's voices (English or German).
+- **Themes:** Paper and Ink night, plus text size.
+- Install prompt (Android, iPhone Safari/Chrome, in-app browsers) and a manual Install in Settings.
 
-Keyboard: `←` `→` navigate · `R` random verse · `C` contents · `Space` play/pause · `Esc` close.
+## Files
 
-## Reading your own book (e.g. *The Tao of Leadership*) in English and French on your phone
-
-GitHub Pages sites are public, so copyrighted books are never bundled. The app handles them privately instead:
-
-1. On a **computer with Chrome or Edge**, open the app, then Settings → Library → *Import an EPUB…*.
-2. Say **yes** to "Translate this book to French now". Chrome and Edge translate on the device, quickly and for free.
-3. Settings → Library → **Export book + French to another device**. This saves a private `.taobook.json` file.
-4. Send that file to your phone (AirDrop, Files, Drive, email to yourself).
-5. On the phone, in the installed app: Settings → Library → *Import an EPUB or book file…* and pick the file.
-
-Both languages are now on the phone and work offline. Keep the `.taobook.json` file private.
-(Phones can import an EPUB directly too, but they usually lack an on-device translator, and the free
-online fallback only allows about 5,000 to 50,000 characters a day.)
-
-Keyboard: `←` `→` navigate · `R` random verse · `C` contents · `Space` play/pause · `Esc` close.
-
-## PWA files
-
-| File | Purpose |
-| --- | --- |
-| `manifest.webmanifest` | Name, colours and icons for "Install" / "Add to Home Screen" |
-| `sw.js` | Service worker that caches the app, the book data, fonts and the EPUB parser for offline use |
-| `icons/` | App icons (standard, maskable, Apple touch) |
-
-**When you change any app file, bump `VERSION` in `sw.js`** so installed copies pick up the update.
+- `data/tao.json`: the Chinese, Wilhelm's German and its English rendering, 81 chapters.
+- `fonts/`: Cinzel, Cormorant Garamond and LXGW WenKai TC (subset to the characters of the text), all SIL OFL 1.1.
+- Bump `VERSION` in `sw.js` and `VER` in `index.html` together.
