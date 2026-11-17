@@ -3,6 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff4d6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Excuses">
+  <meta name="description" content="Press the button. Accept no responsibility. A generator of gloriously implausible excuses.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>Excuse Generator</title>
   <style>
     :root { --bg: #fff4d6; --fg: #2b2118; --accent: #ff5e5b; }
@@ -21,6 +30,26 @@
     button:active { transform: scale(.96); }
     a { color: inherit; font-family: system-ui, sans-serif; font-size: .85rem; }
     #believability { font-family: system-ui, sans-serif; font-size: .85rem; opacity: .7; }
+    footer { margin-top: 1.5rem; font: .75rem system-ui, sans-serif; opacity: .55; display: flex;
+             gap: .75rem; justify-content: center; align-items: center; flex-wrap: wrap; }
+    footer button { font-size: .75rem; padding: .35rem .9rem; margin: 0; }
+    /* Install sheet */
+    .sheet-back { position: fixed; inset: 0; z-index: 50; background: rgba(43,33,24,.45);
+                  display: flex; align-items: flex-end; justify-content: center; animation: fade .2s both; }
+    .sheet { width: 100%; max-width: 520px; background: var(--bg); color: var(--fg); text-align: left;
+             border-radius: 22px 22px 0 0; padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
+             box-shadow: 0 -8px 30px rgba(43,33,24,.18); animation: up .25s ease-out both; }
+    .sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--fg); opacity: .2; margin: 0 auto 14px; }
+    .sheet .head { display: flex; gap: 14px; align-items: center; }
+    .sheet .eyebrow { font: 600 .7rem system-ui, sans-serif; letter-spacing: .15em; text-transform: uppercase; opacity: .55; }
+    .sheet h2 { margin: .15rem 0 0; font-size: 1.4rem; }
+    .sheet p { margin: 12px 0; line-height: 1.4; }
+    .sheet .small { font: .9rem system-ui, sans-serif; opacity: .8; }
+    .sheet ol { font: .95rem system-ui, sans-serif; padding-left: 20px; margin: 6px 0 10px; }
+    .sheet ol li { margin: 5px 0; }
+    .sheet button { display: block; width: 100%; margin: 8px 0 0; }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes up { from { transform: translateY(100%); } }
   </style>
 </head>
 <body>
@@ -31,6 +60,7 @@
     <button id="go">Give me an excuse</button>
     <button id="copy" class="secondary">Copy</button>
     <p><a href="../../">← back to the studio</a></p>
+    <footer><span id="ver">Excuse Generator v1</span><button id="installBtn" class="secondary" data-act="installsheet" hidden>Install</button></footer>
   </main>
   <script>
     const openers = [
@@ -74,6 +104,43 @@
     document.getElementById("copy").addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(excuseEl.textContent); } catch {}
     });
+
+    /* ---------- Version ---------- */
+    const APP_VERSION = "1";
+    document.getElementById("ver").textContent = `Excuse Generator v${APP_VERSION}`;
+
+    /* ---------- Install ---------- */
+    const $ = s => document.querySelector(s);
+    const DAY = 864e5, SNOOZE_KEY = "excuse-generator-install-snooze";
+    let deferredInstall = null;
+    const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
+    const installBody = () => deferredInstall ? `<button data-act="install">Install Excuse Generator</button>` : inApp ? `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol><li>Use the install icon in the address bar.</li></ol>`;
+    function closeSheet() { $(".sheet-back")?.remove(); }
+    function sheet(html) {
+      closeSheet();
+      const b = document.createElement("div"); b.className = "sheet-back";
+      b.innerHTML = `<div class="sheet" role="dialog" aria-label="Install"><div class="grab"></div>${html}</div>`;
+      b.addEventListener("click", e => { if (e.target === b) closeSheet(); });
+      document.body.appendChild(b);
+    }
+    function showInstall(force) {
+      if (isStandalone() || $(".sheet-back")) return;
+      if (!force) { let sn = 0; try { sn = +localStorage.getItem(SNOOZE_KEY) || 0; } catch {} if (Date.now() - sn < 5 * DAY) return; }
+      sheet(`<div class="head"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · works offline</div><h2>Install Excuse Generator</h2></div></div><p>The next time you're late, an alibi is one tap away on your home screen.</p><div id="ib">${installBody()}</div><button class="secondary" data-act="notnow">Not now</button>`);
+    }
+    addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+    addEventListener("appinstalled", () => { closeSheet(); $("#installBtn").hidden = true; });
+    $("#installBtn").hidden = isStandalone();
+    document.addEventListener("click", e => {
+      const a = e.target.closest("[data-act]")?.dataset.act;
+      if (a === "installsheet") showInstall(true);
+      else if (a === "notnow") { try { localStorage.setItem(SNOOZE_KEY, Date.now()); } catch {} closeSheet(); }
+      else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(closeSheet); }
+    });
+    setTimeout(() => showInstall(false), 3000);
+
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   </script>
 </body>
 </html>

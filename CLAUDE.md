@@ -8,3 +8,4 @@ Collection of unrelated, experimental/quirky apps. See README.md for layout.
 - Every app is a PWA published via GitHub Pages: it keeps its own `manifest.webmanifest`, `sw.js` (scope = its folder) and `icons/`. Use relative paths only (the site lives under `/<repo>/`).
 - Bump `VERSION` in an app's `sw.js` whenever its files change, and list new files in `SHELL`.
 - Never commit copyrighted books or other third-party content; bundle only public-domain or original text. Users can import their own files at runtime (stored on-device).
+- Every app shows its version number somewhere visible (e.g. Settings/About footer: “<App> v<N>”, bumped with the sw `VERSION`), and has an install prompt: a sheet that opens on its own (after setup or a few seconds in, snoozed for some days on “Not now”, never when already installed) using `beforeinstallprompt` where available and iOS/Android/in-app-browser instructions otherwise, plus a manual “Install” button.
