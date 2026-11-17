@@ -4,8 +4,8 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
 
 - **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes and 77 province boundaries (geoBoundaries / OpenStreetMap, every island included) softly tinted by region, with English town and province
   labels that appear as you zoom in: no tiles, works offline) with each place as a round photo pin; tap for a preview
-  card (with how busy it is now); filter by region; your trip is drawn as a dashed route. **⇄ A to B:** pick any two
-  towns and see the best-balance, fastest and cheapest way between them (up to four hops, stopovers spelled out, car fares split per person, door-to-door time incl.
+  card (with how busy it is now); filter by region; your trip is drawn as a dashed route. **⇄ A to B:** search any two
+  towns, islands or sights (e.g. “Railay”, “Doi Inthanon”) and see the best-balance, fastest and cheapest way between them (up to four hops, stopovers spelled out, car fares split per person, door-to-door time incl.
   airport time, fares per person); also “Get here” on every place page.
 - **Places:** 48 hand-picked Thai places (Bangkok, Central, North, Northeast (Isaan), East coast incl. Koh Chang, Koh Kood,
   Koh Mak and Koh Samet, Gulf islands, Andaman coast incl. Similan, the Trang islands and Koh Lipe); nearby pins merge into
