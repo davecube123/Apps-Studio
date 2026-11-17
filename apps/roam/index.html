@@ -78,8 +78,12 @@
     .fav { position: absolute; top: calc(env(safe-area-inset-top) + 12px); right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: var(--accent); font-size: 22px; cursor: pointer; }
     .fav.on { background: var(--accent); color: #fff; }
     .vibes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; } .vibes span { background: var(--accent2); color: #9a3a22; font: 650 12.5px var(--sans); padding: 4px 10px; border-radius: 999px; }
-    .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
-    .tile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 4px; font: 650 13.5px var(--sans); color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; } .tile span { font-size: 24px; }
+    .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 16px; }
+    .ev { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); } .ev:first-child { border-top: 0; }
+    .ev .date { width: 46px; flex: none; text-align: center; background: var(--accent2); color: #9a3a22; border-radius: 12px; padding: 6px 0; line-height: 1.1; align-self: flex-start; } .ev .date b { display: block; font: 700 18px var(--display); } .ev .date span { font: 700 10.5px var(--sans); text-transform: uppercase; }
+    .ev .date.rec { background: #e6eef6; color: #3d6386; font: 700 11px var(--sans); padding: 10px 0; }
+    .tag { font: 650 10.5px var(--sans); background: var(--line); color: var(--ink2); padding: 2px 7px; border-radius: 999px; vertical-align: 2px; } .tag.est { background: #fff1cc; color: #8a6400; }
+    .tile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 2px; font: 650 12.5px var(--sans); color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; } .tile span { font-size: 24px; }
     details.more > summary { list-style: none; } details.more > summary::-webkit-details-marker { display: none; } details.more[open] > summary { margin-bottom: 4px; }
     .wish { background: linear-gradient(160deg, #fff6df, var(--card) 70%); } .wi { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); } .wi:first-of-type { border-top: 0; } .wi > span { font-size: 22px; flex: none; }
     .phrase { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 10px 0; font: inherit; color: inherit; cursor: pointer; } .phrase .th { flex: none; font-size: 15px; color: var(--ink2); }
@@ -105,7 +109,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "5";
+  const KEY = "roam", VER = "6";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -186,22 +190,53 @@
     const { v, a } = route_(), isMap = v === "map";
     $("#map").hidden = !isMap; $("#mapbar").hidden = !isMap; $(".peek")?.remove();
     if (isMap) { $("#app").innerHTML = ""; if (!window.L) { $("#app").innerHTML = `<div class="card" style="margin-top:40vh">The map needs a connection the first time. Your places are under Places.</div>`; } else { initMap(); setTimeout(() => map.invalidateSize(), 0); mapChips(); refreshPins(); if (sel && place(sel)) peek(place(sel)); } }
-    else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, today: viewToday, moments: viewMoments, basics: viewBasics }[v] || viewPlaces)()}</div>`;
-    $$("#tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "p" ? "places" : v === "moments" ? "today" : v)));
+    else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, today: viewToday, moments: viewMoments, events: viewEvents, basics: viewBasics }[v] || viewPlaces)()}</div>`;
+    $$("#tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "p" || v === "events" ? "places" : v === "moments" ? "today" : v)));
     if (v === "today" || v === "moments") hydratePhotos();
     if (!isMap) window.scrollTo(0, 0);
   }
   function viewPlaces() {
     const L_ = D.places.filter(p => !region || p.region === region);
-    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Places</h1>
+    return `<div class="row between"><div><div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Places</h1></div>${(D.events || []).length ? `<a class="btn sm" href="#/events">📅 What's on</a>` : ""}</div>
       <div class="chips">${[["", "All"], ...Object.entries(D.regions)].map(([k, n]) => `<button class="chip${region === k ? " on" : ""}" data-act="region" data-v="${k}">${esc(n)}</button>`).join("")}</div>
       <div class="grid">${L_.map(p => `<a class="pcard" href="#/p/${p.id}"><img src="${p.thumb}" alt="" loading="lazy">${inTrip(p.id) ? `<span class="heart">♥</span>` : ""}<div class="cap"><span>${vibeOf(p) ? esc(vibeOf(p).tags.slice(0, 2).join(" · ")) : `${TYPE[p.type] || ""} ${esc(D.regions[p.region])}`}</span><b>${esc(p.name)}</b></div></a>`).join("")}</div>`;
   }
-  const TILES = [["eat", "🍜", "Eat"], ["do", "🎒", "Do"], ["night", "🎉", "Night"], ["know", "💡", "Know"]];
+  const TILES = [["eat", "🍜", "Eat"], ["do", "🎒", "Do"], ["night", "🎉", "Night"], ["events", "📅", "Events"], ["know", "💡", "Know"]];
+  /* ---------- Events ---------- */
+  const KIND = { festival: "🏮", party: "🎉", concert: "🎤", rave: "🔊", "music-festival": "🎶", sport: "🥊", market: "🛍", holiday: "📅" };
+  const WDN = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const todayISO = () => iso(new Date());
+  const evOf = cid => (D.events || []).filter(e => e.city === cid || e.city === "all");
+  const evDated = e => !!e.start && !e.recurring;
+  const evUpcoming = e => evDated(e) && (e.end || e.start) >= todayISO();
+  const dShort = d => new Date(d + "T12:00").toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  const evWhen = e => e.recurring ? (e.recurring === "nightly" ? "Every night" : e.recurring.startsWith("weekly:") ? `Every ${e.recurring.slice(7)}` : e.recurring === "monthly:full-moon" ? "Each full moon" : e.recurring) : e.end && e.end !== e.start ? `${dShort(e.start)} to ${dShort(e.end)}` : dShort(e.start);
+  const evBadge = e => { if (e.recurring) return `<div class="date rec">${e.recurring === "nightly" ? "Daily" : e.recurring.startsWith("weekly:") ? e.recurring.slice(7) : "🌕"}</div>`; const d = new Date(e.start + "T12:00"); return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(undefined, { month: "short" })}</span></div>`; };
+  const evRow = e => `<div class="ev">${evBadge(e)}<div style="flex:1;min-width:0"><b>${KIND[e.kind] || "📅"} ${esc(e.name)}</b>${e.city === "all" ? ` <span class="tag">nationwide</span>` : ""}${e.confirmed === false ? ` <span class="tag est">date estimated</span>` : ""}
+    <div class="small muted">${esc(evWhen(e))}${e.city !== "all" && city(e.city) ? " · " + esc(cityName(e.city).split(" (")[0]) : ""}${e.thb && (Array.isArray(e.thb) ? e.thb[1] : e.thb) ? " · " + range(e.thb, "THB") : ""}</div><div class="small ink2">${esc(e.what)}</div>${e.tip ? `<div class="small" style="margin-top:2px">💡 ${esc(e.tip)}</div>` : ""}${e.url ? `<a class="small" href="${esc(e.url)}" target="_blank" rel="noopener">Info and tickets ↗</a>` : ""}</div></div>`;
+  const evSort = (a, b) => (a.recurring ? 1 : 0) - (b.recurring ? 1 : 0) || String(a.start).localeCompare(String(b.start));
+  const liveLinks = cid => ((D.live || {})[cid] || []).map(l => `<a class="btn sm" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title)} ↗</a>`).join(" ");
+  let evCity = "";
+  function viewEvents() {
+    const all = (D.events || []).filter(e => !evDated(e) || evUpcoming(e)), cids = [...new Set(all.map(e => e.city).filter(c => c !== "all"))];
+    const tripC = new Set(stops().map(s => s.city)), L_ = all.filter(e => !evCity || (evCity === "trip" ? tripC.has(e.city) || e.city === "all" : e.city === evCity || e.city === "all")).sort(evSort);
+    const months = {}; L_.filter(evDated).forEach(e => { const k = e.start.slice(0, 7); (months[k] ||= []).push(e); });
+    const rec = L_.filter(e => e.recurring);
+    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>What's on</h1><p class="ink2" style="margin:0 2px">Festivals the places celebrate, plus raves, concerts and party nights.</p>
+      <div class="chips" style="margin-top:10px">${[["", "All"], ...(tripC.size ? [["trip", "My trip"]] : []), ...cids.map(c => [c, cityName(c).split(" (")[0]])].map(([k, n]) => `<button class="chip${evCity === k ? " on" : ""}" data-act="evcity" data-v="${k}">${esc(n)}</button>`).join("")}</div>
+      ${Object.entries(months).map(([m, es]) => `<div class="sec" style="margin-top:16px"><div class="eyebrow" style="margin:0 4px">${new Date(m + "-15").toLocaleDateString(undefined, { month: "long", year: "numeric" })}</div><div class="card" style="padding:4px 14px">${es.map(evRow).join("")}</div></div>`).join("")}
+      ${rec.length ? `<div class="sec" style="margin-top:16px"><div class="eyebrow" style="margin:0 4px">Every week or month</div><div class="card" style="padding:4px 14px">${rec.map(evRow).join("")}</div></div>` : ""}
+      ${evCity && evCity !== "trip" && liveLinks(evCity) ? `<div class="card"><h3>Live listings</h3><p class="small muted" style="margin:0 0 8px">New concerts and parties are announced all the time.</p>${liveLinks(evCity)}</div>` : ""}
+      ${!evCity && D.live ? `<p class="small muted" style="margin:14px 4px 0">Pick a city to see live listings for new concerts and parties.</p>` : ""}
+      ${(D.events || []).some(e => e.confirmed === false) ? `<p class="small muted" style="margin:10px 4px 0">“Date estimated”: the festival follows the lunar calendar or isn't officially announced yet. Check closer to the time.</p>` : ""}`;
+  }
+  function tripWindows() { const P = db.plan; if (!P.start) return null; const S = stops(); let t = new Date(P.start + "T12:00"); return S.map((st, i) => { const nn = +P.nights[st.city + "@" + i] || defNights(st), a = new Date(t); t = new Date(t.getTime() + nn * 864e5); return { city: st.city, from: iso(a), to: iso(t) }; }); }
+  function tripEvents() { const W = tripWindows(); if (!W) return null; const out = []; W.forEach(w => evOf(w.city).forEach(e => { if (evDated(e) && e.start <= w.to && (e.end || e.start) >= w.from && !out.some(o => o.e === e)) out.push({ e, w }); })); return out; }
   function vibeOf(p) { const c = city(p.city); return c && c.vibe ? c.vibe : null; }
   function viewPlace(id) {
     const p = place(id); if (!p) return viewPlaces(); const t = inTrip(p.id), been = db.been.includes(p.id), c = city(p.city), v = vibeOf(p);
-    const has = k => c && (k === "know" ? (c.know || []).length : (c[k] || []).length);
+    const has = k => c && (k === "events" ? evOf(p.city).length || (D.live || {})[p.city] : k === "know" ? (c.know || []).length : (c[k] || []).length);
     return `<div class="hero"><img src="${p.photo}" alt="${esc(p.name)}"><a class="back" href="javascript:history.back()" aria-label="Back">‹</a><button class="fav${t ? " on" : ""}" data-act="trip" data-v="${p.id}" aria-label="${t ? "Remove from trip" : "Add to trip"}">${t ? "♥" : "♡"}</button></div>
       <div style="margin-top:16px"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}${c ? ` · ${esc(c.name)}` : ""}</div><h1 style="font-size:28px">${esc(p.name)}</h1>
         ${v ? `<div class="vibes">${v.tags.map(x => `<span>${esc(x)}</span>`).join("")}</div><p class="ink2" style="font-size:17px;margin-top:8px">${esc(v.line)}</p>` : `<p class="ink2" style="font-size:17px">${esc(p.line)}</p>`}</div>
@@ -215,8 +250,8 @@
   }
   function tileSheet(pid, k) {
     const p = place(pid), c = city(p.city), T = TILES.find(x => x[0] === k), b = document.createElement("div"); b.className = "sheet-back";
-    const items = k === "know" ? `<ul class="tips">${(c.know || []).map(x => `<li style="margin:10px 0">${esc(x)}</li>`).join("")}</ul>` : (c[k] || []).map(x => `<div class="spot"><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="small ink2">${esc(x.what)}</div></div><div style="text-align:right;flex:none"><div class="small">${x.thb && (Array.isArray(x.thb) ? x.thb[1] : x.thb) ? range(x.thb, "THB") : `<span class="muted">free</span>`}</div><a class="small" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">map ↗</a></div></div>`).join("");
-    b.innerHTML = `<div class="sheet"><div class="eyebrow">${esc(c.name)}</div><h2>${T[1]} ${T[2]}</h2>${items}${k !== "know" ? `<p class="small muted" style="margin:10px 0 0">Places change: check it's open (Google Maps) before you go. Prices are typical, per person.</p>` : ""}<button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
+    const items = k === "events" ? (evOf(p.city).filter(e => !evDated(e) || evUpcoming(e)).sort(evSort).slice(0, 8).map(evRow).join("") || `<p class="small muted">No festivals listed here yet.</p>`) + (liveLinks(p.city) ? `<div style="margin-top:12px"><div class="small muted" style="margin-bottom:6px">Live listings for concerts and parties</div>${liveLinks(p.city)}</div>` : "") + `<a class="btn sm" href="#/events" style="margin-top:10px" data-act="evgo" data-v="${p.city}">All events</a>` : k === "know" ? `<ul class="tips">${(c.know || []).map(x => `<li style="margin:10px 0">${esc(x)}</li>`).join("")}</ul>` : (c[k] || []).map(x => `<div class="spot"><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="small ink2">${esc(x.what)}</div></div><div style="text-align:right;flex:none"><div class="small">${x.thb && (Array.isArray(x.thb) ? x.thb[1] : x.thb) ? range(x.thb, "THB") : `<span class="muted">free</span>`}</div><a class="small" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">map ↗</a></div></div>`).join("");
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">${esc(c.name)}</div><h2>${T[1]} ${T[2]}</h2>${items}${k !== "know" && k !== "events" ? `<p class="small muted" style="margin:10px 0 0">Places change: check it's open (Google Maps) before you go. Prices are typical, per person.</p>` : ""}<button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
   }
   function placeExtras(p) {
@@ -257,6 +292,9 @@
       <div class="row between"><h1 style="margin-bottom:0">${esc(c ? c.name : st.city)}</h1><select data-here style="width:auto">${W.S.map((x, i) => `<option value="${i}" ${i === W.i ? "selected" : ""}>${esc(cityName(x.city))}</option>`).join("")}</select></div>
       ${!db.plan.start ? `<label class="small muted" style="display:block;margin-top:8px">Trip start date (for day-by-day): <input type="date" data-start style="width:auto;margin-left:6px"></label>` : ""}
       ${next ? `<div class="card"><div class="eyebrow">Next</div><div class="row between" style="margin-top:6px"><div><b>${esc(cityName(next.city))}</b>${W.left !== undefined && !W.manual ? `<div class="small muted">${W.left <= 1 ? "Tomorrow" : `In ${W.left} days`}</div>` : ""}</div>${o ? `<div class="small" style="text-align:right">${MODE[o.mode] || ""} ${esc(o.mode)} · ${esc(o.duration)}<br><b>${range(o.thb, "THB")}</b> per person</div>` : ""}</div>${o && o.note ? `<p class="small ink2" style="margin:8px 0 0">${esc(o.note)}</p>` : ""}</div>` : `<div class="card"><b>Last stop.</b> <span class="ink2">Savour it.</span></div>`}
+      ${(() => { const now = todayISO(), soon = iso(new Date(Date.now() + 14 * 864e5)), wd = Object.keys(WDN).find(k => WDN[k] === new Date().getDay());
+          const E = evOf(st.city).filter(e => (evDated(e) && e.start <= soon && (e.end || e.start) >= now) || e.recurring === "nightly" || e.recurring === "weekly:" + wd).sort(evSort).slice(0, 3);
+          return E.length ? `<div class="sec" style="margin-top:14px"><div class="row between" style="margin:0 4px"><div class="eyebrow">Happening soon</div><a class="small" href="#/events">What's on ›</a></div><div class="card" style="padding:4px 14px;margin-top:6px">${E.map(evRow).join("")}</div></div>` : ""; })()}
       ${tip ? `<div class="card wish" style="padding:12px 14px"><div class="wi" style="border:0;padding:0"><span>${tip.icon}</span><div><b>${esc(tip.title)}</b><div class="small ink2">${esc(tip.tip)}</div></div></div></div>` : ""}
       ${ideas.length ? `<div class="sec" style="margin-top:18px"><div class="eyebrow" style="margin:0 4px">Ideas for today</div>${ideas.map(([k, x]) => `<div class="card" style="padding:12px 14px;margin-top:8px"><div class="small muted">${k}</div><div class="row between"><b>${esc(x.name)}</b><span class="small">${x.thb ? range(x.thb, "THB") : "free"}</span></div><div class="small ink2">${esc(x.what)}</div>${x.lat || x.name ? `<a class="small" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">Directions ↗</a>` : ""}</div>`).join("")}</div>` : ""}
       <button class="btn acc block" data-act="surprise" style="margin-top:14px;min-height:54px">✨ Surprise me</button>
@@ -327,6 +365,8 @@
         <div class="small muted" style="margin-top:2px">Total for ${R.n} · about ${money((R.lo + R.hi) / 2 / R.n, cur === "both" ? "THB" : cur)} per person</div>
         <table class="bd">${R.rows.map(r => `<tr><td>${esc(r.k)}${r.detail ? `<div class="small muted">${esc(r.detail)}</div>` : ""}</td><td>${r.a === r.b ? money(r.a, cur === "both" ? "THB" : cur) : `${money(r.a, cur === "both" ? "THB" : cur)}<br><span class="small muted">to ${money(r.b, cur === "both" ? "THB" : cur)}</span>`}</td></tr>`).join("")}</table>
         <p class="small muted" style="margin:10px 0 0">Prices researched ${esc(D.asOf || "")}${D.fx && D.fx.asOf ? `, exchange rate ${esc(D.fx.asOf)}` : ""}. Entry fees come from official sources; transport fares are typical ranges; hotel, food and local transport are estimates by style. Prices move with season and booking time, so check fares when you book.</p></div>
+      ${(() => { const TE = tripEvents(); if (!TE) return (D.events || []).length ? `<p class="small muted" style="margin:12px 4px 0">📅 Set your start date on the Today tab to see festivals and events during your trip.</p>` : ""; if (!TE.length) return "";
+          return `<div class="card wish"><h3>🎉 During your trip</h3>${TE.map(({ e }) => evRow(e)).join("")}</div>`; })()}
       <div class="sec" style="margin-top:18px"><div class="eyebrow" style="margin:0 4px">Your route · ${R.nights} nights</div>
         ${S.map((st, si) => { const c = city(st.city), key = st.city + "@" + si, nn = +P.nights[key] || defNights(st), next = S[si + 1], opts = next ? legsBetween(st.city, next.city) : null, lk = next ? `${st.city}>${next.city}` : "";
           return `<div class="titem" style="align-items:flex-start"><span class="n">${si + 1}</span><img src="${st.places[0].thumb}" alt=""><div style="flex:1;min-width:0"><b>${esc(c ? c.name : st.city)}</b><div class="small muted">${st.places.map(p => esc(p.name)).join(" · ")}</div>
@@ -335,6 +375,7 @@
       <details class="card more"><summary><b>More options</b> <span class="small muted">order, optional spots, flights</span></summary>
       <div class="card"><h3>Order</h3>${T.map((p, i) => `<div class="row between small" style="margin-top:6px"><span>${i + 1}. ${esc(p.name)}</span><span style="display:flex;gap:6px;flex:none"><button class="iconbtn" data-act="up" data-v="${i}" ${i ? "" : "disabled"}>↑</button><button class="iconbtn" data-act="down" data-v="${i}" ${i < T.length - 1 ? "" : "disabled"}>↓</button></span></div>`).join("")}</div>
       <div class="card"><h3>Optional spots</h3><p class="small muted" style="margin:0 0 6px">Tick what you plan to do; paid ones are added to the total.</p>${T.map(p => [...(p.popular || []), ...(p.gems || [])].map(x => `<label class="row small" style="margin-top:6px;gap:8px"><input type="checkbox" data-extra="${esc(p.id + ":" + x.name)}" ${P.extras[p.id + ":" + x.name] ? "checked" : ""}><span style="flex:1">${esc(x.name)} <span class="muted">· ${esc(p.name)}</span></span><span>${x.thb ? range(x.thb, "THB") : "free"}</span></label>`).join("")).join("")}</div>
+      <div class="card"><h3>Trip start date</h3><input type="date" data-start value="${esc(P.start || "")}" style="margin-top:6px"></div>
       <div class="card"><h3>Flights to Thailand <span class="small muted">(optional)</span></h3><div class="row" style="gap:8px;margin-top:6px"><span class="small">Return fare per person, in baht</span><input type="number" data-flight value="${+P.flight || ""}" placeholder="e.g. 9000" inputmode="numeric" style="width:120px;margin-left:auto"></div>${fx() ? `<p class="small muted" style="margin:6px 0 0">₱1 ≈ ฿${(1 / fx()).toFixed(2)}</p>` : ""}</div>
       </details>
       <a class="btn pri block" href="#/" style="margin-top:12px">See the route on the map</a>`;
@@ -376,6 +417,8 @@
     else if (a === "cur") { db.plan.cur = v; save(); render(); }
     else if (a === "nights") { const st = stops()[+v.split("@")[1]]; const cur = +db.plan.nights[v] || defNights(st); db.plan.nights[v] = Math.max(1, Math.min(60, cur + +el.dataset.d)); save(); render(); }
     else if (a === "surprise") surprise();
+    else if (a === "evcity") { evCity = v; render(); }
+    else if (a === "evgo") { evCity = v; $(".sheet-back")?.remove(); }
     else if (a === "tile") { const [pid, k] = v.split(":"); tileSheet(pid, k); }
     else if (a === "closesheet") $(".sheet-back")?.remove();
     else if (a === "moment") momentSheet(false); else if (a === "three") momentSheet(true);
