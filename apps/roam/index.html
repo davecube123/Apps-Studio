@@ -105,6 +105,11 @@
     .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; } .months div { display: flex; flex-direction: column; align-items: center; gap: 3px; } .months i { width: 100%; border-radius: 5px; opacity: .55; } .months span { font: 650 10.5px var(--sans); color: var(--muted); } .months .now i { opacity: 1; } .months .now span { color: var(--ink); }
     .fab { position: fixed; left: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 550; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); font: 650 14px var(--sans); padding: 11px 16px; box-shadow: 0 6px 18px rgba(0,0,0,.2); cursor: pointer; }
     body:has(.peek) .fab { display: none; }
+    .heads { background: linear-gradient(160deg, #fff4e3, var(--card) 70%); } .hu { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); } .hu:first-of-type { border-top: 0; } .hu > span { font-size: 18px; line-height: 1.3; }
+    .linkbtn { border: 0; background: none; color: var(--accent); font: 700 13.5px var(--sans); padding: 0; cursor: pointer; }
+    .addstop input { width: 100%; font: 16px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); outline: none; } .addstop input:focus { border-color: var(--ink); }
+    .addrow { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 8px 2px; font: 15px var(--sans); color: var(--ink); cursor: pointer; } .addrow:first-child { margin-top: 6px; border-top: 0; } .addrow img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; } .addrow > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; min-width: 0; } .addrow .plus { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+    .chip.idea { font-weight: 600; } .routeline { margin: 2px 4px 0; font-size: 14.5px; color: var(--ink2); line-height: 1.6; } .routeline b { color: var(--accent); font-weight: 700; }
     .abpick2 { display: flex; gap: 8px; align-items: center; margin-top: 8px; } .abcol { flex: 1; display: grid; gap: 6px; min-width: 0; }
     .abfield { display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 7px 12px; font: 16px var(--sans); color: var(--ink); cursor: pointer; min-height: 52px; }
     .abfield.on { border-color: var(--ink); background: var(--card); } .abfield input { width: 100%; border: 0; outline: none; background: none; font: 600 16px var(--sans); color: var(--ink); padding: 2px 0; } .abfield input::-webkit-search-cancel-button { display: none; }
@@ -133,7 +138,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "10";
+  const KEY = "roam", VER = "11";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -421,6 +426,131 @@
   }
 
 
+  /* ---------- Smart planning: plan it for me, add stops in place, gentle heads-ups ---------- */
+  const MON = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const bestCache = {};
+  function bestMonths(p) {
+    if (p.id in bestCache) return bestCache[p.id]; const s = String(p.best || "").toLowerCase(); let out = null;
+    if (/all year/.test(s)) out = new Set([...Array(12).keys()]);
+    else { const m = s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+to\s+(?:mid\s+)?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/); if (m) { out = new Set(); for (let i = MON.indexOf(m[1]); ; i = (i + 1) % 12) { out.add(i); if (i === MON.indexOf(m[2])) break; } } }
+    return (bestCache[p.id] = out);
+  }
+  /* 1 = great month, .5 = shoulder, 0 = off season, -1 = likely closed */
+  function seasonFit(p, m) {
+    const B = bestMonths(p); if (!B) return .7;
+    if (B.has(m)) return 1;
+    if (p.crowd && p.crowd.months && p.crowd.months[m] === 1 && /clos|shut|season/i.test((p.crowd.note || "") + " " + (p.best || ""))) return -1;
+    const f = B.has((m + 1) % 12) || B.has((m + 11) % 12) ? .5 : 0;
+    return ["temple", "history", "city", "food"].includes(p.type) ? Math.max(f, .65) : p.type === "nature" ? Math.max(f, .35) : f;
+  }
+  const popular = p => p.crowd && p.crowd.months ? p.crowd.months.reduce((a, b) => a + b, 0) / 60 : .5;
+  const VIBES = [["beach", "🏝 Beaches & islands"], ["party", "🎉 Parties"], ["culture", "🛕 Culture"], ["nature", "🌿 Nature"], ["food", "🍜 Food"]];
+  function vibeScore(p, vs) {
+    const t = (vibeOf(p) || {}).tags || []; let s = 0;
+    if (vs.includes("beach") && (p.type === "island" || p.type === "beach")) s++;
+    if (vs.includes("party") && t.includes("party")) s++;
+    if (vs.includes("culture") && (["temple", "history", "city"].includes(p.type) || t.includes("cultural") || t.includes("spiritual"))) s++;
+    if (vs.includes("nature") && (p.type === "nature" || t.includes("adventurous"))) s++;
+    if (vs.includes("food") && (p.type === "food" || t.includes("foodie"))) s++;
+    const beachy = vs.includes("beach") && (p.type === "island" || p.type === "beach");
+    return s ? (beachy ? 1.25 : 1) + .3 * (s - 1) : 0;
+  }
+  /* Fastest door-to-door minutes from one town to every other (Dijkstra over the legs). */
+  const tfCache = {};
+  function travelFrom(a) {
+    if (tfCache[a]) return tfCache[a];
+    const adj = {}; (D.legs || []).forEach(l => { const best = l.options.reduce((x, o) => { const t = (mins(o.duration) || 240) + (OVERHEAD[o.mode] || 0); return !x || t < x.t ? { t, o } : x; }, null); [[l.a, l.b], [l.b, l.a]].forEach(([u, v]) => (adj[u] = adj[u] || []).push([v, best.t, best.o])); });
+    const dist = { [a]: 0 }, first = {}, hops = { [a]: 0 }, done = new Set();
+    for (;;) { let u = null; for (const k in dist) if (!done.has(k) && (u === null || dist[k] < dist[u])) u = k; if (u === null) break; done.add(u);
+      (adj[u] || []).forEach(([v, w, o]) => { const nd = dist[u] + w + (u === a ? 0 : 40); if (!(v in dist) || nd < dist[v]) { dist[v] = nd; first[v] = u === a ? o : first[u]; hops[v] = hops[u] + 1; } }); }
+    return (tfCache[a] = { dist, first, hops });
+  }
+  const tt = (a, b) => a === b ? 0 : (travelFrom(a).dist[b] ?? 9999);
+  /* Order stops to minimise travel, keeping the first one fixed (2-opt). */
+  function bestOrder(ids) {
+    let r = ids.slice(); const cost = x => x.reduce((t, c, i) => i ? t + tt(x[i - 1], c) : 0, 0); let best = cost(r), better = true;
+    while (better) { better = false; for (let i = 1; i < r.length - 1; i++) for (let j = i + 1; j < r.length; j++) { const n = [...r.slice(0, i), ...r.slice(i, j + 1).reverse(), ...r.slice(j + 1)], c = cost(n); if (c + 1 < best) { r = n; best = c; better = true; } } }
+    return { order: r, cost: best, before: cost(ids) };
+  }
+  /* Pick the leg option that fits the budget style: cheapest, fastest or a balance. */
+  function pickLeg(opts, style) {
+    if (!opts || !opts.length) return 0; const T = o => (mins(o.duration) || 240) + (OVERHEAD[String(o.mode).split(" ")[0]] || 0), C = o => mid(pp(o)) || 1;
+    const tMin = Math.min(...opts.map(T)), cMin = Math.min(...opts.map(C)), f = style === "budget" ? o => C(o) + T(o) / 6 : style === "comfort" ? o => T(o) + C(o) / 200 : o => T(o) / tMin + C(o) / cMin;
+    return opts.reduce((bi, o, i) => f(o) < f(opts[bi]) ? i : bi, 0);
+  }
+  function autoPlan(w) {
+    const m = w.start ? new Date(w.start + "T12:00").getMonth() : new Date().getMonth(), nights = Math.max(1, w.days - 1);
+    const per = { slow: 4, balanced: 3, packed: 2 }[w.pace] || 3, want = Math.max(1, Math.min(9, Math.round(nights / per)));
+    const C = {}; D.places.forEach(p => { const f = seasonFit(p, m); if (f < 0) return; const v = vibeScore(p, w.vibes), sc = (v ? v : .2) * (.35 + f) + popular(p) * .3;
+      (C[p.city] = C[p.city] || { score: 0, places: [] }).places.push({ p, sc }); });
+    Object.values(C).forEach(c => { c.places.sort((a, b) => b.sc - a.sc); c.score = c.places[0].sc + .15 * c.places.slice(1).filter(x => x.sc > .8).length; });
+    /* Grow the route: each time add the town with the best score after paying for the extra travel it adds. */
+    const route = [w.from], budget = w.days * 4 * 60, tourLen = r => r.reduce((t, c, i) => i ? t + tt(r[i - 1], c) : 0, 0);
+    while (route.length < want) { let best = null, bs = -1e9, bestR = null;
+      for (const id in C) { if (route.includes(id)) continue;
+        let ins = null; for (let i = 1; i <= route.length; i++) { const r = [...route.slice(0, i), id, ...route.slice(i)], L = tourLen(r); if (!ins || L < ins.L) ins = { r, L }; }
+        if (ins.L > budget || ins.L >= 9999) continue; const add = (ins.L - tourLen(route)) / 60, sc = C[id].score - add * .03;
+        if (sc > bs) { bs = sc; best = id; bestR = ins.r; } }
+      if (!best || bs < .45) break; route.splice(0, route.length, ...bestR); }
+    const order = bestOrder(route).order;
+    const fromWeak = !C[w.from] || C[w.from].score < .9;
+    const wts = order.map((id, i) => i === 0 && fromWeak ? 0 : Math.max(1, ...((C[id] || { places: [] }).places.slice(0, 2).map(x => parseFloat(x.p.days) || 1))));
+    let left = nights - (fromWeak ? 1 : 0); const sum = wts.reduce((a, b) => a + b, 0) || 1;
+    const nn = order.map((id, i) => i === 0 && fromWeak ? 1 : Math.max(1, Math.round(wts[i] / sum * left)));
+    let diff = nights - nn.reduce((a, b) => a + b, 0); for (let i = nn.length - 1; diff !== 0 && i >= 0; i = (i - 1 + nn.length) % nn.length) { if (diff > 0) { nn[i]++; diff--; } else if (nn[i] > 1) { nn[i]--; diff++; } else if (nn.every(x => x <= 1)) break; }
+    const trip = [], nightsKeys = {}, legs = {};
+    order.forEach((id, i) => { const ps = (C[id] || { places: [] }).places, take = ps.filter((x, k) => k === 0 || (x.sc > .9 && k < 3)); (take.length ? take : [{ p: D.places.find(p => p.city === id) }]).forEach(x => x.p && trip.push(x.p.id)); nightsKeys[`${id}@${i}`] = nn[i];
+      if (i) { const a = order[i - 1], o = legsBetween(a, id); legs[`${a}>${id}`] = pickLeg(o, db.plan.style); } });
+    return { trip, nights: nightsKeys, legs, month: m };
+  }
+  function planSheet() {
+    const P = db.plan, W = P.wiz = Object.assign({ days: 10, vibes: ["beach", "food"], pace: "balanced", from: "bangkok" }, P.wiz || {}); W.start = W.start || P.start || "";
+    const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">Plan it for me</div><h2>Your trip in three taps</h2>
+      <div class="row between" style="margin-top:12px"><b>How many days?</b><div class="row" style="gap:6px"><button class="iconbtn" data-act="wiz" data-v="days:-1">−</button><b style="min-width:26px;text-align:center" id="wdays">${W.days}</b><button class="iconbtn" data-act="wiz" data-v="days:1">+</button></div></div>
+      <div class="row between" style="margin-top:12px;gap:10px"><b style="flex:none">When?</b><input type="date" id="wstart" value="${esc(W.start)}" style="max-width:190px"></div>
+      <div style="margin-top:12px"><b>What do you love?</b> <span class="small muted">pick any</span><div class="chips" style="flex-wrap:wrap;margin-top:6px">${VIBES.map(([k, t]) => `<button class="chip${W.vibes.includes(k) ? " on" : ""}" data-act="wiz" data-v="vibe:${k}">${t}</button>`).join("")}</div></div>
+      <div style="margin-top:8px"><b>Pace</b><div class="chips" style="margin-top:6px">${[["slow", "Slow"], ["balanced", "Balanced"], ["packed", "See a lot"]].map(([k, t]) => `<button class="chip${W.pace === k ? " on" : ""}" data-act="wiz" data-v="pace:${k}">${t}</button>`).join("")}</div></div>
+      <div style="margin-top:8px"><b>Flying into</b><div class="chips" style="margin-top:6px">${[["bangkok", "Bangkok"], ["phuket", "Phuket"], ["chiang-mai", "Chiang Mai"], ["samui", "Koh Samui"]].map(([k, t]) => `<button class="chip${W.from === k ? " on" : ""}" data-act="wiz" data-v="from:${k}">${t}</button>`).join("")}</div></div>
+      ${db.trip.length ? `<p class="small muted" style="margin:10px 0 0">This replaces your current route (${db.trip.length} place${db.trip.length > 1 ? "s" : ""}). Your notes stay.</p>` : ""}
+      <button class="btn acc block" data-act="makeplan" style="margin-top:12px">✨ Make my plan</button><button class="btn block" data-act="closesheet" style="margin-top:6px;border:0;background:none">Not now</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+  }
+  /* Add stops from the Plan page */
+  function addRows(q) {
+    const f = fold(q); if (!f) return "";
+    const hits = D.places.map(p => { const k = fold(p.name + " " + cname(p.city)), at = k.indexOf(f); return { p, s: at === 0 ? 0 : at > 0 ? 1 : f.split(" ").every(x => k.includes(x)) ? 2 : 9 }; }).filter(x => x.s < 9 && !inTrip(x.p.id)).sort((a, b) => a.s - b.s).slice(0, 6);
+    return hits.length ? hits.map(({ p }) => `<button class="addrow" data-act="addplace" data-v="${p.id}"><img src="${p.thumb}" alt=""><span><b>${esc(p.name)}</b><span class="small muted">${esc(D.regions[p.region])}</span></span><span class="plus">+</span></button>`).join("") : `<p class="small muted" style="padding:8px 2px;margin:0">No match. Try Koh Tao, Pai or Chatuchak.</p>`;
+  }
+  function nextIdeas() {
+    const S = stops(); if (!S.length) return []; const last = S[S.length - 1].city, have = new Set(S.map(s => s.city)), m = (db.plan.start ? new Date(db.plan.start + "T12:00") : new Date()).getMonth(), TF = travelFrom(last);
+    const best = {}; D.places.forEach(p => { if (inTrip(p.id) || seasonFit(p, m) < 0) return; const sc = seasonFit(p, m) + popular(p); if (!best[p.city] || sc > best[p.city].sc) best[p.city] = { p, sc }; });
+    return Object.entries(best).filter(([c]) => c !== last).map(([c, x]) => ({ ...x, c, t: c === last ? 0 : TF.dist[c] ?? 9999, o: TF.first[c], h: TF.hops[c] }))
+      .filter(x => x.t < 9999).sort((a, b) => (a.t + (have.has(a.c) ? 9999 : 0) - a.sc * 60) - (b.t + (have.has(b.c) ? 9999 : 0) - b.sc * 60)).slice(0, 4);
+  }
+  /* Heads-ups: only what matters, at most three */
+  function headsUps() {
+    const S = stops(), P = db.plan, out = []; if (!S.length) return out;
+    const W = tripWindows();
+    S.forEach((st, i) => { const mo = W ? new Date(W[i].from + "T12:00").getMonth() : null; if (mo === null) return;
+      st.places.forEach(p => { const f = seasonFit(p, mo); if (f < 0) out.push({ w: 3, i: "⛔", t: `${p.name} is usually closed in ${MONTH[mo]} (best ${p.best}).`, a: "trip", v: p.id, l: "Remove" });
+        else if (f === 0) { const c = city(p.city); out.push({ w: 2, i: "🌧", t: `${p.name} is off season in ${MONTH[mo]}${c && c.timing && c.timing.avoid ? `: ${c.timing.avoid.split(".")[0]}` : ""}. Best ${p.best}.` }); } }); });
+    for (let i = 1; i < S.length; i++) { const a = S[i - 1].city, b = S[i].city, lk = `${a}>${b}`, o = legsBetween(a, b); if (!o) continue; const ci = Math.min(o.length - 1, +P.leg[lk] || 0), cur = o[ci], T = x => (mins(x.duration) || 240) + (/flight/.test(x.mode) ? 150 : 0);
+      if (T(cur) >= 540) { const fast = o.map((x, k) => ({ x, k })).filter(z => z.k !== ci && T(z.x) <= T(cur) - 240).sort((p, q) => T(p.x) - T(q.x))[0];
+        if (fast) { const extra = Math.max(0, mid(pp(fast.x)) - mid(pp(cur))); const nm = x => x.replace(/\+/g, " and ").replace(/\s+/g, " "); out.push({ w: 2, i: "⏱", t: `${cname(a)} → ${cname(b)} takes about ${hm(T(cur))} by ${nm(cur.mode)}. By ${nm(fast.x.mode)} it's about ${hm(T(fast.x))}${extra ? `, for about ${fmtTHB(extra)} more per person` : ""}.`, a: "setleg", v: `${lk}|${fast.k}`, l: "Switch" }); } } }
+    if (S.length >= 3) { const ids = S.map(s => s.city), B = bestOrder(ids); if (B.before - B.cost >= 180 && new Set(ids).size === ids.length) out.push({ w: 2, i: "🔀", t: `A different order saves about ${Math.round((B.before - B.cost) / 60)} h of travel.`, a: "tidy", l: "Tidy order" }); }
+    if (W) { const inTripCities = new Set(S.map(s => s.city)), seen = new Set();
+      W.forEach((w, i) => (D.events || []).forEach(e => { if (!evDated(e) || !/party|festival|rave|music/.test(e.kind || "") || inTripCities.has(e.city) || seen.has(e.city)) return; const end = e.end || e.start; if (e.start > w.to || end < w.from) return; const t = tt(w.city, e.city); if (t > 200) return; const p = D.places.find(x => x.city === e.city); if (!p) return; seen.add(e.city);
+        const dd = x => new Date(x + "T12:00").toLocaleDateString(undefined, { day: "numeric", month: "short" }); out.push({ w: 1, i: "🎉", t: `${e.name} ${e.start < w.from ? `runs until ${dd(end)}` : `is on ${dd(e.start)}`}, ${hm(t)} from ${cname(w.city)} while you're there.`, a: "addat", v: `${p.id}|${i}`, l: `Add ${cname(e.city)}` }); })); }
+    const ones = S.filter((st, si) => (+P.nights[st.city + "@" + si] || defNights(st)) === 1).length; if (ones >= 3) out.push({ w: 1, i: "😮‍💨", t: `${ones} one-night stops: lots of packing. Dropping one makes the trip calmer.` });
+    return out.sort((a, b) => b.w - a.w).slice(0, 3);
+  }
+  function tidyOrder() {
+    const S = stops(), B = bestOrder(S.map(s => s.city)), P = db.plan, nn = {}, used = new Set();
+    const ordered = B.order.map(c => { const k = S.findIndex((s, i) => s.city === c && !used.has(i)); used.add(k); return { st: S[k], k }; });
+    db.trip = ordered.flatMap(x => x.st.places.map(p => p.id)); ordered.forEach((x, i) => { const v = P.nights[x.st.city + "@" + x.k]; if (v) nn[x.st.city + "@" + i] = v; }); P.nights = nn; save();
+  }
+
   /* ---------- Ease, comfort, surprise, happiness ---------- */
   const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet.", "koh-chang": "White Sand Beach for easy food and nightlife; Klong Prao or Kai Bae for calmer beaches; Lonely Beach for backpacker parties.", "koh-kood": "The west coast beaches (Klong Chao, Ao Tapao, Bang Bao) for calm water and sunsets; most resorts include the pier pickup.", "koh-mak": "Ao Kao on the south-west for sunsets and walkable cafés, or Ao Suan Yai for a long, quiet beach.", "koh-samet": "Ao Wong Deuan or Ao Phai for easy food and evening fire shows; Ao Prao on the west side for sunsets and quiet.", pattaya: "Naklua or Wong Amat for calm and cleaner sea; Jomtien for a relaxed local feel. Avoid Walking Street if you want sleep.", "hua-hin": "Near the night market and old town for food on foot, or south towards Khao Takiab for a quieter beach.", "khao-yai": "Along Thanarat Road near the park's northern gate, so early wildlife drives are easy. You'll want a car or a driver.", amphawa: "A canal-side homestay in Amphawa itself, so you can stay for the evening market and the firefly boats.", lopburi: "Near the train station in the new town for easy trains; the monkey temples are best as a day visit.", "phang-nga": "Koh Yao Noi for calm island life between Phuket and Krabi; Phang Nga town for a cheap base for bay tours.", similan: "Khao Lak (Bang Niang or Nang Thong beach); Similan boats pick up from hotels there.", "koh-lipe": "Sunrise Beach for swimming and space; Pattaya Beach for restaurants and boats; Walking Street sits in between.", "mae-hong-son": "Around Jong Kham Lake in town: walkable, prettily lit at night, with the temples reflected in the water." };
   const PHRASES = [["Hello", "Sawasdee khrap", "สวัสดีครับ"], ["Thank you", "Khop khun khrap", "ขอบคุณครับ"], ["Sorry / excuse me", "Kho thot khrap", "ขอโทษครับ"], ["How much?", "Tao rai khrap?", "เท่าไหร่ครับ"], ["Can you lower the price?", "Lot dai mai khrap?", "ลดได้ไหมครับ"], ["Not spicy, please", "Mai phet khrap", "ไม่เผ็ดครับ"], ["A little spicy", "Phet nit noi", "เผ็ดนิดหน่อย"], ["Delicious!", "Aroi!", "อร่อย"], ["The bill, please", "Check bin khrap", "เช็คบิลครับ"], ["Where is the toilet?", "Hong nam yoo tee nai khrap?", "ห้องน้ำอยู่ที่ไหนครับ"], ["Water, please", "Nam plao khrap", "น้ำเปล่าครับ"], ["No problem / never mind", "Mai pen rai", "ไม่เป็นไร"], ["Help!", "Chuay duay!", "ช่วยด้วย"]];
@@ -530,10 +660,18 @@
   const cityName = id => (city(id) || {}).name || id;
   function viewTrip() {
     const T = db.trip.map(place).filter(Boolean), P = db.plan;
-    if (!T.length) return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Plan</h1><div class="card"><p class="ink2" style="margin:0">Tap ♡ <b>Add to trip</b> on any place. They line up here in your order, the map draws your route, and the planner works out what it costs.</p></div><a class="btn pri block" href="#/places" style="margin-top:12px">Browse places</a>`;
+    const addCard = (ideas) => `<div class="card addstop"><input id="addq" type="search" autocomplete="off" enterkeyhint="search" placeholder="＋ Add a place: Koh Tao, Pai, Chatuchak…" aria-label="Add a place"><div id="addres"></div>
+      ${ideas && ideas.length ? `<div class="small muted" style="margin:12px 2px 6px">Easy next from ${esc(cname(stops().slice(-1)[0].city))}</div><div class="chips" style="flex-wrap:wrap">${ideas.map(x => `<button class="chip idea" data-act="addplace" data-v="${x.p.id}">${esc(x.p.name.split(" (")[0])} <span class="muted">· ${x.h > 1 ? "↪" : MODE[x.o && x.o.mode] || ""} ${hm(x.t)}</span></button>`).join("")}</div>` : ""}</div>`;
+    if (!T.length) return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Plan</h1>
+      <div class="card comfort"><h3>✨ Let Roam plan it</h3><p class="small ink2" style="margin:2px 0 10px">Tell it how many days, when, and what you love. You get a full route with nights, transport and costs, ready to tweak.</p><button class="btn acc block" data-act="planme">Plan it for me</button></div>
+      <div class="eyebrow" style="margin:18px 4px 0">Or build it yourself</div>${addCard()}
+      <a class="btn block" href="#/places" style="margin-top:12px">Browse all places</a>`;
     if (!D.cities) return `<h1>Plan</h1><p class="ink2">Prices are loading.</p>`;
     const R = computePlan(), S = R.S, cur = P.cur;
-    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Plan</h1>
+    const HU = headsUps();
+    return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><div class="row between"><h1>Plan</h1><button class="btn sm" data-act="planme">✨ Plan for me</button></div>
+      ${HU.length ? `<div class="card heads"><h3>Heads-up</h3>${HU.map(h => `<div class="hu"><span>${h.i}</span><div style="flex:1;min-width:0"><span class="small">${esc(h.t)}</span>${h.a ? ` <button class="linkbtn" data-act="${h.a}" data-v="${esc(h.v || "")}">${esc(h.l)}</button>` : ""}</div></div>`).join("")}</div>` : ""}
+      <p class="routeline">${S.map((st, si) => `<span>${esc(cname(st.city))} <b>${+P.nights[st.city + "@" + si] || defNights(st)}n</b></span>`).join(" → ")} <span class="muted">· ${R.nights + 1} days${P.start ? ` from ${new Date(P.start + "T12:00").toLocaleDateString(undefined, { day: "numeric", month: "short" })}` : ""}</span></p>
       <div class="card"><div class="row between"><span class="small muted">Travellers</span><div class="row" style="gap:6px"><button class="iconbtn" data-act="trav" data-v="-1">−</button><b style="min-width:20px;text-align:center">${R.n}</b><button class="iconbtn" data-act="trav" data-v="1">+</button></div></div>
         <div class="chips" style="margin-top:10px">${[["budget", "Budget"], ["mid", "Mid-range"], ["comfort", "Comfort"]].map(([k, t]) => `<button class="chip${P.style === k ? " on" : ""}" data-act="style" data-v="${k}">${t}</button>`).join("")}</div><div class="chips">${[["THB", "Baht ฿"], ["PHP", "Pesos ₱"], ["both", "Both"]].map(([k, t]) => `<button class="chip${cur === k ? " on" : ""}" data-act="cur" data-v="${k}">${t}</button>`).join("")}</div></div>
       <div class="card total"><div class="eyebrow">Estimated cost · ${esc({ budget: "budget", mid: "mid-range", comfort: "comfort" }[P.style])}</div>
@@ -548,6 +686,7 @@
           return `<div class="titem" style="align-items:flex-start"><span class="n">${si + 1}</span><img src="${st.places[0].thumb}" alt=""><div style="flex:1;min-width:0"><b>${esc(c ? c.name : st.city)}</b><div class="small muted">${st.places.map(p => esc(p.name)).join(" · ")}</div>
             <div class="row" style="gap:6px;margin-top:6px"><button class="iconbtn" data-act="nights" data-v="${key}" data-d="-1">−</button><span class="small"><b>${nn}</b> night${nn > 1 ? "s" : ""}</span><button class="iconbtn" data-act="nights" data-v="${key}" data-d="1">+</button></div></div></div>
             ${next ? `<div class="leg">${opts ? `<select data-leg="${lk}">${opts.map((o, oi) => `<option value="${oi}" ${(+P.leg[lk] || 0) === oi ? "selected" : ""}>${o.via ? "↪ " : (MODE[o.mode] || "")} ${esc(o.mode)} · ${esc(o.duration)} · ${fmtTHB(o.thb[0])}${o.thb[1] !== o.thb[0] ? " to " + fmtTHB(o.thb[1]) : ""}</option>`).join("")}</select>${opts[+P.leg[lk] || 0]?.note ? `<div class="small muted" style="margin-top:4px">${esc(opts[+P.leg[lk] || 0].note)}</div>` : ""}` : `<span class="small muted">No direct route data. Usually via a hub; add the fare to your notes.</span>`}</div>` : ""}`; }).join("")}</div>
+      ${addCard(nextIdeas())}
       <details class="card more"><summary><b>More options</b> <span class="small muted">order, optional spots, flights</span></summary>
       <div class="card"><h3>Order</h3>${T.map((p, i) => `<div class="row between small" style="margin-top:6px"><span>${i + 1}. ${esc(p.name)}</span><span style="display:flex;gap:6px;flex:none"><button class="iconbtn" data-act="up" data-v="${i}" ${i ? "" : "disabled"}>↑</button><button class="iconbtn" data-act="down" data-v="${i}" ${i < T.length - 1 ? "" : "disabled"}>↓</button></span></div>`).join("")}</div>
       <div class="card"><h3>Optional spots</h3><p class="small muted" style="margin:0 0 6px">Tick what you plan to do; paid ones are added to the total.</p>${T.map(p => [...(p.popular || []), ...(p.gems || [])].map(x => `<label class="row small" style="margin-top:6px;gap:8px"><input type="checkbox" data-extra="${esc(p.id + ":" + x.name)}" ${P.extras[p.id + ":" + x.name] ? "checked" : ""}><span style="flex:1">${esc(x.name)} <span class="muted">· ${esc(p.name)}</span></span><span>${x.thb ? range(x.thb, "THB") : "free"}</span></label>`).join("")).join("")}</div>
@@ -614,6 +753,14 @@
     else if (a === "evgo") { evCity = v; $(".sheet-back")?.remove(); }
     else if (a === "tile") { const [pid, k] = v.split(":"); tileSheet(pid, k); }
     else if (a === "closesheet") $(".sheet-back")?.remove();
+    else if (a === "planme") planSheet();
+    else if (a === "wiz") { const W = db.plan.wiz, [k, x] = v.split(":"); if (k === "days") { W.days = Math.max(3, Math.min(30, W.days + +x)); $("#wdays").textContent = W.days; } else if (k === "vibe") { W.vibes = W.vibes.includes(x) ? W.vibes.filter(y => y !== x) : [...W.vibes, x]; el.classList.toggle("on"); } else { W[k] = x; [...el.parentNode.children].forEach(c => c.classList.toggle("on", c === el)); } save(); }
+    else if (a === "makeplan") { const W = db.plan.wiz; W.start = $("#wstart").value; if (!W.vibes.length) W.vibes = ["beach", "culture", "food"]; const r = autoPlan(W);
+      db.trip = r.trip; db.plan.nights = r.nights; db.plan.leg = r.legs; if (W.start) db.plan.start = W.start; save(); $(".sheet-back")?.remove(); if (location.hash !== "#/trip") location.hash = "#/trip"; else render(); toast("Your plan is ready ✨ Change anything you like"); }
+    else if (a === "addplace") { if (!inTrip(v)) { db.trip = [...db.trip, v]; save(); toast(`Added ${place(v).name.split(" (")[0]}`); render(); } }
+    else if (a === "setleg") { const [lk, k] = v.split("|"); db.plan.leg[lk] = +k; save(); render(); toast("Switched"); }
+    else if (a === "tidy") { tidyOrder(); render(); toast("Reordered to cut travel time"); }
+    else if (a === "addat") { const [pid, i] = v.split("|"), S = stops(), last = S[+i].places.slice(-1)[0].id, at = db.trip.indexOf(last) + 1; db.trip = [...db.trip.slice(0, at), pid, ...db.trip.slice(at)]; save(); render(); toast(`Added ${cname(place(pid).city)}`); }
     else if (a === "crowd") crowdSheet(v);
     else if (a === "ab") { $(".peek")?.remove(); abSheet(v || ""); }
     else if (a === "abswap") { [ab.a, ab.b] = [ab.b, ab.a]; [abLab.a, abLab.b] = [abLab.b, abLab.a]; abSheet(); }
@@ -633,8 +780,9 @@
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
   document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
+  document.addEventListener("input", e => { if (e.target.id === "addq") { const r = $("#addres"); if (r) r.innerHTML = addRows(e.target.value); } });
   document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.abq; if (k) { const r = $("#abres"); if (r) r.innerHTML = abRows(k, e.target.value); } });
-  document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "abq") { e.preventDefault(); $("#abres .abrow")?.click(); } });
+  document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "abq") { e.preventDefault(); $("#abres .abrow")?.click(); } if (e.key === "Enter" && e.target.id === "addq") { e.preventDefault(); $("#addres .addrow")?.click(); } });
   document.addEventListener("change", e => { const el = e.target;
     if (el.dataset.leg) { db.plan.leg[el.dataset.leg] = +el.value; save(); render(); }
     else if (el.dataset.extra) { db.plan.extras[el.dataset.extra] = el.checked; save(); render(); }

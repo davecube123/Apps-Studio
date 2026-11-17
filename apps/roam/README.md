@@ -12,6 +12,11 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
   a numbered bubble at low zoom as photo cards, each
   with a short original description, practical tips, best time, how long to stay, your own notes, “Been here”, and an
   Open in Google Maps link.
+- **Plan it for me:** answer days, dates, what you love (beaches, parties, culture, nature, food), pace and arrival
+  city; Roam picks in-season places, orders them for the least travel, splits the nights and chooses each hop to suit
+  your budget style. Add stops right on the Plan page (search, or “Easy next” chips with travel times), and get up to
+  three heads-ups: off-season or closed places, very long hops with a faster option, a better order (one-tap “Tidy
+  order”), festivals near your route, too many one-night stops.
 - **Plan:** your places grouped into stops with nights per stop; choose how to travel each hop (direct, or routed via a
   hub city); travellers, budget / mid-range / comfort, baht, pesos or both; optional spots and your flight fare; a
   costed range in total and per person (transport, accommodation, food, local transport, fees, 10% buffer).
