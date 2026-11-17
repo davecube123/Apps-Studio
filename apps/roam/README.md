@@ -14,7 +14,10 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
 - **Today:** where you are (by start date or chosen stop), the next hop with fare, three ideas for the day, ✨ Surprise
   me (a hidden gem or local favourite), comfort notes (where to stay, beat the crowds, heat), a slow-morning nudge,
   and Moments (mood, text, optional photo in IndexedDB, pinned on the map) with an evening “three good things”.
-- **Place pages:** when to go and time of day, entry fees, getting there and around with fares, popular spots, hidden
+- **Vibe and four tiles per place:** 🍜 Eat, 🎒 Do, 🎉 Night, 💡 Know (insider tips), per city with prices and map links;
+  everything else folds into “Practical”. **Wish I'd known:** 15 country-wide tips (7-Eleven beer prices, alcohol hours,
+  ATM fees, SuperRich, Airport Rail Link, scams). Map limited to Thailand.
+- **Place pages (Practical):** when to go and time of day, entry fees, getting there and around with fares, popular spots, hidden
   gems and local favourites with prices and map links.
 - **Basics:** baht to peso converter, 13 Thai phrases you can hear, a packing list, practical info and price sources.
 - **Data (Nov 2026):** 14 cities, 31 routes with 64 options, fees from official sources; transport fares are typical

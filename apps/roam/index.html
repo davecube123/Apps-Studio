@@ -198,7 +198,7 @@
   function tileSheet(pid, k) {
     const p = place(pid), c = city(p.city), T = TILES.find(x => x[0] === k), b = document.createElement("div"); b.className = "sheet-back";
     const items = k === "know" ? `<ul class="tips">${(c.know || []).map(x => `<li style="margin:10px 0">${esc(x)}</li>`).join("")}</ul>` : (c[k] || []).map(x => `<div class="spot"><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="small ink2">${esc(x.what)}</div></div><div style="text-align:right;flex:none"><div class="small">${x.thb && (Array.isArray(x.thb) ? x.thb[1] : x.thb) ? range(x.thb, "THB") : `<span class="muted">free</span>`}</div><a class="small" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">map ↗</a></div></div>`).join("");
-    b.innerHTML = `<div class="sheet"><div class="eyebrow">${esc(c.name)}</div><h2>${T[1]} ${T[2]}</h2>${items}<button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">${esc(c.name)}</div><h2>${T[1]} ${T[2]}</h2>${items}${k !== "know" ? `<p class="small muted" style="margin:10px 0 0">Places change: check it's open (Google Maps) before you go. Prices are typical, per person.</p>` : ""}<button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
   }
   function placeExtras(p) {
