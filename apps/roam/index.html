@@ -62,6 +62,12 @@
     .lbl.sea { font: italic 500 13px var(--display); color: #6f97a6; transform: translate(-50%, -50%); }
     .lbl.city { display: flex; align-items: center; gap: 5px; transform: translate(-4px, -50%); font: 650 12px var(--sans); color: #4a453d; text-shadow: 0 0 3px #fbf6ec, 0 0 3px #fbf6ec, 0 0 6px #fbf6ec; }
     .lbl.city span { margin-left: 18px; } .lbl.capital { font-size: 13.5px; font-weight: 800; }
+    .lbl.prov { font: 650 9.5px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: #b7a98f; transform: translate(-50%, -50%); }
+    .lbl.town { display: flex; align-items: center; gap: 4px; transform: translate(-3px, -50%); font: 500 11px var(--sans); color: #6b6458; text-shadow: 0 0 3px #fbf6ec, 0 0 3px #fbf6ec; }
+    .lbl.town::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #9a9283; flex: none; }
+    .lbl.town.t1, .lbl.town.t2 { font-weight: 650; font-size: 11.5px; } .lbl.town.t0 { color: #8f897f; font-style: italic; }
+    #map[data-z="5"] .lbl.prov, #map[data-z="6"] .lbl.prov, #map[data-z="7"] .lbl.prov, #map[data-z="5"] .t2, #map[data-z="5"] .t3, #map[data-z="6"] .t3, #map[data-z="5"] .t4, #map[data-z="6"] .t4, #map[data-z="7"] .t4 { display: none; }
+    #map[data-z="9"] .lbl.prov, #map[data-z="10"] .lbl.prov, #map[data-z="11"] .lbl.prov { font-size: 11px; }
     #map.far .lbl.minor { display: none; } #map.far .lbl.country { opacity: .7; }
     .leaflet-control-attribution { font-size: 10px !important; background: rgba(255,255,255,.7) !important; } .leaflet-bottom.leaflet-right { bottom: calc(env(safe-area-inset-bottom) + 72px); }
     .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 56px); }
@@ -160,16 +166,27 @@
     map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 11, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
     /* Our own simple map: country shapes (Natural Earth) + English labels. No tiles, works offline. */
     map.attributionControl.addAttribution("Map data: Natural Earth");
-    fetch("data/geo.json").then(r => r.json()).then(g => {
-      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(map).bringToBack();
+    const base = L.featureGroup().addTo(map);
+    Promise.all([fetch("data/geo.json").then(r => r.json()), fetch("data/provinces.json").then(r => r.json()).catch(() => null)]).then(([g, P]) => {
+      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
+      if (!P) return;
+      /* Provinces, softly tinted by region, with English names; towns appear as you zoom in. */
+      const TINT = { n: "#e4eed6", ne: "#f8ead0", c: "#fcf4e6", e: "#f7e3d6", w: "#ebecd8", s: "#dff0e5" };
+      L.geoJSON(P.provinces, { interactive: false, style: f => ({ color: "#cdbb9c", weight: .8, fillColor: TINT[f.properties.r] || "#fbf6ec", fillOpacity: 1 }) }).addTo(base);
+      const tn = P.towns.map(t => t[0].toLowerCase().replace(/ /g, ""));
+      P.provinces.features.forEach(f => { const q = f.properties, k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
+      const taken = cityLabels.map(c => [c.la, c.lo, c.n.toLowerCase()]);
+      P.towns.forEach(([n, la, lo, t]) => { if (taken.some(([a, b, nm]) => Math.abs(a - la) < .12 && Math.abs(b - lo) < .12 || nm === n.toLowerCase())) return;
+        lab(la, lo, `<span>${esc(n)}</span>`, `town t${t}`, -1000); });
     }).catch(() => {});
-    const lab = (lat, lng, html, cls) => L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "lbl " + cls, html, iconSize: null }) }).addTo(map);
+    const lab = (lat, lng, html, cls, z = 0) => L.marker([lat, lng], { interactive: false, keyboard: false, zIndexOffset: z, icon: L.divIcon({ className: "lbl " + cls, html, iconSize: null }) }).addTo(map);
+    const cityLabels = [];
     [["MYANMAR", 19.2, 96.6], ["LAOS", 19.6, 102.6], ["CAMBODIA", 12.9, 104.8], ["VIETNAM", 15.8, 107.6], ["MALAYSIA", 5.0, 101.6]].forEach(([n, la, lo]) => lab(la, lo, n, "country"));
     [["Andaman Sea", 9.6, 96.9], ["Gulf of Thailand", 10.6, 101.7]].forEach(([n, la, lo]) => lab(la, lo, n, "sea"));
-    const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui"];
+    const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui", "pattaya"];
     (D.cities || []).forEach(c => { const ps = D.places.filter(p => p.city === c.id); if (!ps.length) return; const la = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lo = ps.reduce((a, p) => a + p.lng, 0) / ps.length;
-      lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
-    const zc = () => map.getContainer().classList.toggle("far", map.getZoom() < 7); map.on("zoomend", zc); zc();
+      cityLabels.push({ la, lo, n: c.name.split(" (")[0] }); lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
+    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; }; map.on("zoomend", zc); zc();
     D.places.forEach(p => {
       const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
@@ -287,10 +304,11 @@
   function crowdAt(p, t = thNow()) {
     const C = p.crowd; if (!C || !C.months) return 0;
     let v = C.months[t.m]; const [a, b] = PEAK[C.day] || PEAK["all-day"], h = t.h < 6 && b > 24 ? t.h + 24 : t.h;
-    if (h >= a && h < b) v += .6; else if (h >= a - 2 && h < b + 2) v += 0; else v -= C.day === "night-peak" ? 1.2 : 1.5;
-    if (t.dow === 0 || t.dow === 6) v *= C.weekend || 1;
+    /* months[] is the month's typical level; weekdays sit below it and weekends above, by the place's weekend factor */
+    if (h >= a && h < b) v += .4; else if (h >= a - 2 && h < b + 2) v -= .3; else v -= 1.5;
+    const w = ((C.weekend || 1) - 1) * 1.5; v += t.dow === 0 || t.dow === 6 ? w : -w * .5;
     if ((D.events || []).some(e => e.city === p.city && evDated(e) && e.start <= t.iso && (e.end || e.start) >= t.iso)) v += 1;
-    return Math.max(1, Math.min(5, Math.round(v)));
+    return Math.max(1, Math.min(5, Math.round(v - .2)));
   }
   const dots = n => `<span class="dots" aria-hidden="true">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on c" + n : ""}"></i>`).join("")}</span>`;
   const crowdLine = p => { const n = crowdAt(p); return n ? `<button class="crowd" data-act="crowd" data-v="${p.id}">${dots(n)}<span><b>${CROWD[n]}</b> right now</span><span class="muted">›</span></button>` : ""; };
@@ -338,9 +356,8 @@
       ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
   }
   let ab = { a: "", b: "" };
-  function abSheet(to, from) {
-    if (to) ab.b = to; if (from) ab.a = from;
-    if (!ab.a) { const W = whereNow(); ab.a = W ? W.S[W.i].city : "bangkok"; } if (ab.a === ab.b) ab.a = ab.b === "bangkok" ? "" : "bangkok";
+  function abSheet(to) {
+    if (to) { ab.b = to; if (!ab.a || ab.a === to) { const W = whereNow(), h = W ? W.S[W.i].city : "bangkok"; ab.a = h !== to ? h : to !== "bangkok" ? "bangkok" : ""; } }
     const groups = {}; (D.cities || []).forEach(c => { const p = D.places.find(x => x.city === c.id); const g = p ? D.regions[p.region] : "Other"; (groups[g] = groups[g] || []).push(c); });
     const opts = sel_ => `<option value="">Choose…</option>` + Object.entries(groups).map(([g, cs]) => `<optgroup label="${esc(g)}">${cs.map(c => `<option value="${c.id}"${c.id === sel_ ? " selected" : ""}>${esc(cname(c.id))}</option>`).join("")}</optgroup>`).join("");
     const res = ab.a && ab.b && ab.a !== ab.b ? bestRoutes(ab.a, ab.b) : null;
@@ -353,7 +370,7 @@
   }
 
   /* ---------- Ease, comfort, surprise, happiness ---------- */
-  const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet." };
+  const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet.", "koh-chang": "White Sand Beach for easy food and nightlife; Klong Prao or Kai Bae for calmer beaches; Lonely Beach for backpacker parties.", "koh-kood": "The west coast beaches (Klong Chao, Ao Tapao, Bang Bao) for calm water and sunsets; most resorts include the pier pickup.", "koh-mak": "Ao Kao on the south-west for sunsets and walkable cafés, or Ao Suan Yai for a long, quiet beach.", "koh-samet": "Ao Wong Deuan or Ao Phai for easy food and evening fire shows; Ao Prao on the west side for sunsets and quiet.", pattaya: "Naklua or Wong Amat for calm and cleaner sea; Jomtien for a relaxed local feel. Avoid Walking Street if you want sleep.", "hua-hin": "Near the night market and old town for food on foot, or south towards Khao Takiab for a quieter beach.", "khao-yai": "Along Thanarat Road near the park's northern gate, so early wildlife drives are easy. You'll want a car or a driver.", amphawa: "A canal-side homestay in Amphawa itself, so you can stay for the evening market and the firefly boats.", lopburi: "Near the train station in the new town for easy trains; the monkey temples are best as a day visit.", "phang-nga": "Koh Yao Noi for calm island life between Phuket and Krabi; Phang Nga town for a cheap base for bay tours.", similan: "Khao Lak (Bang Niang or Nang Thong beach); Similan boats pick up from hotels there.", "koh-lipe": "Sunrise Beach for swimming and space; Pattaya Beach for restaurants and boats; Walking Street sits in between.", "mae-hong-son": "Around Jong Kham Lake in town: walkable, prettily lit at night, with the temples reflected in the water." };
   const PHRASES = [["Hello", "Sawasdee khrap", "สวัสดีครับ"], ["Thank you", "Khop khun khrap", "ขอบคุณครับ"], ["Sorry / excuse me", "Kho thot khrap", "ขอโทษครับ"], ["How much?", "Tao rai khrap?", "เท่าไหร่ครับ"], ["Can you lower the price?", "Lot dai mai khrap?", "ลดได้ไหมครับ"], ["Not spicy, please", "Mai phet khrap", "ไม่เผ็ดครับ"], ["A little spicy", "Phet nit noi", "เผ็ดนิดหน่อย"], ["Delicious!", "Aroi!", "อร่อย"], ["The bill, please", "Check bin khrap", "เช็คบิลครับ"], ["Where is the toilet?", "Hong nam yoo tee nai khrap?", "ห้องน้ำอยู่ที่ไหนครับ"], ["Water, please", "Nam plao khrap", "น้ำเปล่าครับ"], ["No problem / never mind", "Mai pen rai", "ไม่เป็นไร"], ["Help!", "Chuay duay!", "ช่วยด้วย"]];
   const PACK = [["Documents", ["Passport (6+ months valid) and a photo of it", "Thailand Digital Arrival Card done online before you fly", "Travel insurance details", "Some baht in cash for arrival"]], ["Comfort", ["Light, breathable clothes", "One temple outfit: shoulders and knees covered", "A light jumper for cold buses, planes and northern nights", "Comfortable walking sandals", "Sunglasses and a hat", "Reusable water bottle"]], ["Health", ["Sunscreen (reef-safe for the islands)", "Insect repellent", "Motion-sickness tablets (boats, the Pai road)", "Rehydration salts and your usual medicines", "Small first-aid kit"]], ["Gear", ["Power bank and charging cables", "Universal plug adapter", "Dry bag for boats and beaches", "Small day pack", "Rain poncho (May to October)"]]];
   const MOODS = ["😊", "😍", "🤩", "😌", "😂", "🥹", "😮‍💨"];
@@ -551,7 +568,7 @@
   });
   document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
   document.addEventListener("change", e => { const el = e.target;
-    if (el.dataset.ab) { ab[el.dataset.ab] = el.value; abSheet(); return; }
+    if (el.dataset.ab) { const k = el.dataset.ab, o = k === "a" ? "b" : "a"; ab[k] = el.value; if (ab[o] === el.value) ab[o] = ""; abSheet(); return; }
     if (el.dataset.leg) { db.plan.leg[el.dataset.leg] = +el.value; save(); render(); }
     else if (el.dataset.extra) { db.plan.extras[el.dataset.extra] = el.checked; save(); render(); }
     else if (el.hasAttribute("data-flight")) { db.plan.flight = +el.value || 0; save(); render(); }
