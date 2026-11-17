@@ -229,6 +229,12 @@
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip { padding: 9px 14px; border-radius: 999px; background: var(--fill); font-size: .85rem; font-weight: 500; transition: background .15s; }
     .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+    .inst-head { display: flex; align-items: center; gap: 14px; padding: 16px 20px 0; }
+    .inst-head img { border-radius: 14px; flex: none; }
+    .inst-head .eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .inst-head h3 { margin: 2px 0 0; font-family: var(--display); font-weight: 400; font-size: 1.8rem; line-height: 1.05; }
+    .inst-steps { padding-left: 20px; margin: 6px 0 10px; font-size: .92rem; } .inst-steps li { margin: 5px 0; }
+    .ver-line { text-align: center; font-size: .75rem; color: var(--muted); margin: 18px 0 6px; }
     .list-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 4px; text-align: left; font-weight: 500; }
     .list-btn + .list-btn { border-top: 1px solid var(--hairline); }
     .list-btn .grow { flex: 1; }
@@ -690,7 +696,8 @@ function renderToday() {
       <div class="row" style="justify-content:space-between"><span class="big">Day ${Math.min(read, 66)}<span class="muted" style="font-size:1rem"> of 66</span></span><span class="small muted">${read >= 66 ? "It's part of you now 🎉" : `${66 - read} reading days to go`}</span></div>
       <div class="bar"><div style="width:${Math.min(100, read / 66 * 100)}%"></div></div>
       <div class="small muted">On average, a new daily habit takes about 66 days to feel automatic. Missed days slow it down only a little.</div></div>
-    ${note ? `<div class="card"><div class="card-label">From your notes</div><p class="echo">“${esc(note.text)}”</p><div class="small muted" style="margin-top:8px">${esc(note.title)} · ${esc(note.chapter)}</div></div>` : ""}`;
+    ${note ? `<div class="card"><div class="card-label">From your notes</div><p class="echo">“${esc(note.text)}”</p><div class="small muted" style="margin-top:8px">${esc(note.title)} · ${esc(note.chapter)}</div></div>` : ""}
+    <p class="ver-line">Little Pages v${APP_VERSION}</p>`;
 }
 
 /* ============================================================
@@ -1081,15 +1088,15 @@ function settingsSheet() {
       <button class="list-btn" data-s="science">${svg("spark")} The science behind Little Pages</button>
       <button class="list-btn" data-s="export">Back up reading history</button>
       <button class="list-btn" data-s="import">Restore a backup</button>
-      ${installEvent ? `<button class="list-btn" data-s="install">Install app</button>` : ""}
-      ${isIOS && !standalone ? `<p class="hint">To install on iPhone: tap Share, then “Add to Home Screen”.</p>` : ""}
-      <p class="hint">Everything (books, notes, history) stays on this device. Backups include history, notes and settings, not the books themselves.</p>`;
+      ${isStandalone() ? "" : `<button class="list-btn" data-s="install">${svg("plus")} Install on this device</button>`}
+      <p class="hint">Everything (books, notes, history) stays on this device. Backups include history, notes and settings, not the books themselves.</p>
+      <p class="ver-line">Little Pages v${APP_VERSION}</p>`;
     bindLook(body);
     body.onclick = async e => {
       const s = e.target.closest("[data-s]")?.dataset.s; if (!s) return;
       if (s === "plan") planSheet();
       if (s === "science") scienceSheet();
-      if (s === "install") { installEvent.prompt(); await installEvent.userChoice; installEvent = null; closeSheet(); }
+      if (s === "install") { closeSheet(); showInstall(true); }
       if (s === "export") {
         const data = JSON.stringify({ format: "little-pages-backup", version: 1, settings, days, notes, library: library.map(({ cover, ...b }) => b) });
         const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
@@ -1161,7 +1168,7 @@ function onboarding(step = 0) {
       <div class="ob-foot" style="flex-direction:column"><button class="btn accent" id="ob-import">${svg("plus")} Choose books</button>
       <button class="btn soft" id="ob-skip">I'll add one later</button></div>
       <p class="hint" style="margin-top:22px;text-align:center">Tip: add a daily reminder from your plan on the Today screen.</p></div>`;
-    const finish = () => { settings.onboarded = true; settings.freshSeen = todayKey(); saveSettings(); ob.classList.add("hidden"); renderAll(); };
+    const finish = () => { settings.onboarded = true; settings.freshSeen = todayKey(); saveSettings(); ob.classList.add("hidden"); renderAll(); setTimeout(() => showInstall(false), 2500); };
     ob.querySelector("#ob-import").onclick = () => { finish(); pickFiles(); };
     ob.querySelector("#ob-skip").onclick = finish;
   }
@@ -1206,6 +1213,8 @@ document.addEventListener("click", e => {
   if (act === "science") scienceSheet();
   if (act === "ics") downloadIcs();
   if (act === "fresh-x") { settings.freshSeen = todayKey(); saveSettings(); renderToday(); }
+  if (act === "notnow") { try { localStorage.setItem(SNOOZE_KEY, Date.now()); } catch {} closeSheet(); }
+  if (act === "install" && installEvent) { const ev = installEvent; installEvent = null; ev.prompt(); ev.userChoice.finally(closeSheet); }
 });
 document.addEventListener("dragover", e => e.preventDefault());
 document.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.files.length) importFiles(e.dataTransfer.files); });
@@ -1213,10 +1222,22 @@ document.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.
 /* ============================================================
    PWA: install + offline
    ============================================================ */
+const APP_VERSION = "2"; // keep in step with VERSION in sw.js
 let installEvent = null;
-const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; });
+const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
+const DAY_MS = 864e5, SNOOZE_KEY = "little-pages-install-snooze";
+const installBody = () => installEvent ? `<button class="btn accent block" data-act="install">Install Little Pages</button>` : inApp ? `<p class="hint" style="font-size:.9rem">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol class="inst-steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="inst-steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="inst-steps"><li>Use the install icon in the address bar.</li></ol>`;
+function showInstall(force) {
+  if (isStandalone() || $("#sheet-root").innerHTML) return;
+  if (!force) { if (R || !settings.onboarded || !$("#onboard").classList.contains("hidden")) return; let sn = 0; try { sn = +localStorage.getItem(SNOOZE_KEY) || 0; } catch {} if (Date.now() - sn < 5 * DAY_MS) return; }
+  $("#sheet-root").innerHTML = `<div class="scrim" data-close></div><div class="sheet" role="dialog" aria-label="Install Little Pages"><div class="grab"></div>
+    <div class="inst-head"><img src="icons/icon-192.png" width="56" height="56" alt=""><div><div class="eyebrow">Free · works offline</div><h3>Install Little Pages</h3></div></div>
+    <div class="sheet-body"><p style="margin:10px 0 12px;color:var(--ink-2);line-height:1.5">A daily habit needs a door you see every day. On your home screen, your book is one tap away.</p>
+    <div id="ib">${installBody()}</div><button class="btn soft block" style="margin-top:10px" data-act="notnow">Not now</button></div></div>`;
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+window.addEventListener("appinstalled", () => { if ($("#ib")) closeSheet(); });
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 // Ask the browser not to evict books under storage pressure.
 navigator.storage?.persist?.().catch(() => {});
@@ -1231,6 +1252,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden && !R
   applyLook();
   renderAll();
   if (!settings.onboarded) onboarding(0);
+  else setTimeout(() => showInstall(false), 3000);
 })();
 </script>
 </body>

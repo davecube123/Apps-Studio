@@ -42,6 +42,20 @@
     #home { position: fixed; top: calc(env(safe-area-inset-top) + 12px); left: 14px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.18);
             color: rgba(239,230,214,.7); cursor: pointer; display: grid; place-items: center; font: 20px var(--serif); }
     .update { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; top: calc(env(safe-area-inset-top) + 14px); z-index: 20; border: 0; background: #e6b65c; color: #16130f; padding: 11px 20px; border-radius: 999px; font: 600 14px var(--sans); cursor: pointer; }
+    .inst { margin-top: 22px; border: 0; background: none; color: var(--muted); font: 12px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; padding: 8px 12px; }
+    .inst[hidden] { display: none; }
+    .sheet-back { position: fixed; inset: 0; z-index: 30; background: rgba(8,6,4,.62); display: flex; align-items: flex-end; justify-content: center; animation: agfade .3s both; touch-action: auto; }
+    .sheet { width: 100%; max-width: 480px; background: #1f1a14; color: var(--ink); border-radius: 22px 22px 0 0; padding: 10px 22px calc(env(safe-area-inset-bottom) + 22px); border-top: 1px solid rgba(230,182,92,.25); box-shadow: 0 -10px 40px rgba(0,0,0,.5); animation: agup .35s ease-out both; text-align: left; user-select: text; -webkit-user-select: text; }
+    .sheet .grab { width: 38px; height: 4px; border-radius: 4px; background: rgba(239,230,214,.2); margin: 0 auto 16px; }
+    .sheet .row { display: flex; align-items: center; gap: 14px; }
+    .sheet .eyebrow { font: 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+    .sheet h2 { font: 400 26px/1.15 var(--serif); margin: 4px 0 0; }
+    .sheet p { font: italic 15px/1.5 var(--serif); color: var(--muted); margin: 14px 0; }
+    .sheet ol { font: 14px/1.5 var(--sans); padding-left: 20px; margin: 4px 0 8px; } .sheet ol li { margin: 5px 0; }
+    .sheet .small { font: 14px/1.5 var(--sans); color: var(--muted); font-style: normal; margin: 4px 0 8px; }
+    .sheet .sbtn { display: block; width: 100%; margin-top: 10px; border-radius: 999px; padding: 13px 20px; font: 500 14px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; border: 1px solid rgba(239,230,214,.35); background: none; color: var(--ink); }
+    .sheet .sbtn.gold { background: var(--gold); border-color: var(--gold); color: #16130f; font-weight: 600; }
+    @keyframes agfade { from { opacity: 0; } } @keyframes agup { from { transform: translateY(100%); } }
     .ver { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 8px); font: 11px var(--sans); color: rgba(239,230,214,.3); }
   </style>
 </head>
@@ -54,6 +68,7 @@
     <p>A man’s journey, from boyhood to elderhood, told without words.</p>
     <button class="begin" id="begin">Begin</button>
     <div class="chapters" id="chapters"></div>
+    <button class="inst" id="installBtn" data-act="installsheet" hidden>Install</button>
     <div class="hp">Best with sound · about 30 minutes</div>
     <div class="ver" id="ver"></div>
   </div>
@@ -68,7 +83,7 @@
   /* Ashes and Gold. An original wordless story. Its spine is the Grimms' public-domain tale of the
      Wild Man in the cage (Iron John): a boy takes the key from under his mother's pillow and frees
      the wild man, who becomes his guide. All characters, scenes, images and sounds here are original. */
-  const APP_VERSION = "8";
+  const APP_VERSION = "9";
   const $ = s => document.querySelector(s);
   const cv = $("#c"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -956,7 +971,7 @@
   let scene = null, ci = -1, fadeA = 0, fadeDir = 0, onFaded = null;
   const roman = n => ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n];
   function play(i) {
-    ci = i; audio(); $("#title").classList.add("hide"); $("#end").classList.add("hide"); $("#home").style.display = "grid";
+    closeSheet(); ci = i; audio(); $("#title").classList.add("hide"); $("#end").classList.add("hide"); $("#home").style.display = "grid";
     $("#cardn").textContent = roman(i); $("#cardt").textContent = CHAPTERS[i].name; $("#card").classList.remove("hide"); scene = null;
     scene?.onExit?.(); note([N.D4, N.F4, N.A4, N.C5, N.D5, N.A4, N.F4, N.G4, N.D4][i] || N.D4, { vol: .06, dur: 4 });
     setTimeout(() => { $("#card").classList.add("hide"); scene = CHAPTERS[i]; scene.start(); fadeA = 1; fadeDir = -1; }, 2600);
@@ -995,6 +1010,29 @@
     if (fadeA > 0) { ctx.fillStyle = `rgba(22,19,15,${fadeA})`; ctx.fillRect(0, 0, W, H); }
     requestAnimationFrame(frame);
   }
+  /* ---------- Install ---------- */
+  let deferredInstall = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
+  const DAY = 864e5, SNOOZE_KEY = "ashes-and-gold-install-snooze";
+  const installBody = () => deferredInstall ? `<button class="sbtn gold" data-act="install">Install Ashes and Gold</button>` : inApp ? `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol><li>Use the install icon in the address bar.</li></ol>`;
+  function closeSheet() { $(".sheet-back")?.remove(); }
+  function sheet(html) { closeSheet(); const b = document.createElement("div"); b.className = "sheet-back"; b.innerHTML = `<div class="sheet" role="dialog" aria-label="Install"><div class="grab"></div>${html}</div>`; b.addEventListener("click", e => { if (e.target === b) closeSheet(); }); document.body.appendChild(b); return b; }
+  function showInstall(force) {
+    if (isStandalone() || $(".sheet-back")) return;
+    if (!force) { if (scene) return; let sn = 0; try { sn = +localStorage.getItem(SNOOZE_KEY) || 0; } catch (e) {} if (Date.now() - sn < 5 * DAY) return; }
+    sheet(`<div class="row"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><div class="eyebrow">Free · works offline</div><h2>Install Ashes and Gold</h2></div></div><p>Full screen, no browser bars, and it remembers where you left off: the story plays best from your home screen.</p><div id="ib">${installBody()}</div><button class="sbtn" data-act="notnow">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+  addEventListener("appinstalled", () => { closeSheet(); $("#installBtn").hidden = true; });
+  $("#installBtn").hidden = isStandalone();
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-act]")?.dataset.act;
+    if (a === "installsheet") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem(SNOOZE_KEY, Date.now()); } catch (e2) {} closeSheet(); }
+    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(closeSheet); }
+  });
+  setTimeout(() => showInstall(false), 4000);
+
   resize(); setMuteIcon(); renderTitle(); requestAnimationFrame(frame);
   window.__ag = { get scene() { return scene; }, play, next, CHAPTERS };
   /* updates: the page is fetched fresh when online; if a newer version arrives while playing, offer a reload */

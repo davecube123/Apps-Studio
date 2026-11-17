@@ -257,6 +257,14 @@
     .lib.on .tick { opacity: 1; }
     .lib .act { color: var(--accent); font-weight: 600; font-size: .9rem; }
     .lib .act.del { color: #d2463a; }
+    .inst-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px 4px; }
+    .inst-head img { border-radius: 14px; flex: none; }
+    .inst-head h3 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; line-height: 1.05; margin: 2px 0 0; }
+    .inst-why { margin: 10px 8px 12px; color: var(--ink-2); line-height: 1.5; font-size: .95rem; }
+    .inst-steps { margin: 4px 8px 10px; padding-left: 20px; font-size: .92rem; } .inst-steps li { margin: 5px 0; }
+    .inst-btn { display: flex; align-items: center; justify-content: center; width: calc(100% - 16px); margin: 10px 8px 0; height: 48px; border-radius: 999px; font-weight: 600; font-size: .95rem; background: var(--hairline); color: var(--ink); }
+    .inst-btn.primary { background: var(--accent); color: var(--accent-ink); }
+    .ver-line { font-size: .78rem; color: var(--muted); margin: 10px 4px 0; }
     .pill { height: 34px; padding: 0 14px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: .85rem; flex: none; }
     .danger { width: 100%; height: 52px; border-radius: 18px; background: var(--hairline); color: #d2463a; font-weight: 600; }
 
@@ -389,12 +397,27 @@
       </div>
       <div class="group hidden" id="install-group">
         <div class="group-label">App</div>
-        <div class="card"><div class="row"><span id="install-text">Install Tao Reader on this device</span><button class="pill" id="install-btn">Install</button></div></div>
+        <div class="card"><div class="row"><span id="install-text">Install Tao Reader on this device</span><button class="pill" id="install-btn" data-act="installsheet">Install</button></div></div>
       </div>
       <div class="group">
         <div class="group-label">About</div>
         <p class="hint" style="margin-top:0">English: James Legge's 1891 translation of the Tao Te Ching (public domain). French: a new translation of Legge's text made for this app. Chapter titles are this app's own. Works offline once installed.</p>
+        <p class="ver-line" id="app-ver">Tao Reader v4</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Install sheet (filled by showInstall) -->
+<div id="install-wrap" class="hidden">
+  <div class="scrim" data-close></div>
+  <div class="sheet" role="dialog" aria-label="Install Tao Reader">
+    <div class="grabber"></div>
+    <div class="inst-head"><img src="icons/icon-192.png" width="56" height="56" alt=""><div><div class="eyebrow">Free · works offline</div><h3>Install Tao Reader</h3></div></div>
+    <div class="sheet-body">
+      <p class="inst-why">Eighty-one short chapters, one tap from your home screen, readable offline wherever you are.</p>
+      <div id="ib"></div>
+      <button class="inst-btn" data-act="notnow">Not now</button>
     </div>
   </div>
 </div>
@@ -779,7 +802,7 @@ $("#toc-search").addEventListener("input", e => {
 });
 
 /* ---------- Overlays ---------- */
-const OVERLAYS = ["#drawer-wrap", "#verse-wrap", "#settings-wrap"];
+const OVERLAYS = ["#drawer-wrap", "#verse-wrap", "#settings-wrap", "#install-wrap"];
 function openOverlay(id) { closeAll(); $(id).classList.remove("hidden"); }
 function closeAll() { for (const id of OVERLAYS) $(id).classList.add("hidden"); }
 document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeAll(); });
@@ -1118,25 +1141,30 @@ function renderLibrary() {
   }
 }
 
-// Install prompt (Android/desktop Chrome) and Add-to-Home-Screen hint (iOS Safari).
+/* ---------- Version + install ---------- */
+const APP_VERSION = "4"; // keep in step with VERSION in sw.js
+$("#app-ver").textContent = `Tao Reader v${APP_VERSION}`;
 let installEvent = null;
-const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault(); installEvent = e;
-  $("#install-group").classList.remove("hidden");
-});
-$("#install-btn").onclick = async () => {
-  if (!installEvent) return;
-  installEvent.prompt();
-  await installEvent.userChoice;
-  installEvent = null; $("#install-group").classList.add("hidden");
-};
-if (!standalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) {
-  $("#install-group").classList.remove("hidden");
-  $("#install-text").textContent = "To install: tap Share, then “Add to Home Screen”.";
-  $("#install-btn").classList.add("hidden");
+const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
+const DAY_MS = 864e5, SNOOZE_KEY = "tao-reader-install-snooze";
+const installBody = () => installEvent ? `<button class="inst-btn primary" data-act="install">Install Tao Reader</button>` : inApp ? `<p class="inst-why">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu.</p>` : isIOS ? `<ol class="inst-steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>` : isAndroid ? `<ol class="inst-steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b>.</li></ol>` : `<ol class="inst-steps"><li>Use the install icon in the address bar.</li></ol>`;
+function showInstall(force) {
+  if (isStandalone()) return;
+  if (!force) { if (anyOverlay()) return; let sn = 0; try { sn = +localStorage.getItem(SNOOZE_KEY) || 0; } catch {} if (Date.now() - sn < 5 * DAY_MS) return; }
+  $("#ib").innerHTML = installBody(); openOverlay("#install-wrap");
 }
-window.addEventListener("appinstalled", () => $("#install-group").classList.add("hidden"));
+// Manual entry point: Settings → App → Install (hidden once installed).
+if (!isStandalone()) $("#install-group").classList.remove("hidden");
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; $("#ib").innerHTML = installBody(); });
+window.addEventListener("appinstalled", () => { $("#install-group").classList.add("hidden"); if (!$("#install-wrap").classList.contains("hidden")) closeAll(); });
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]")?.dataset.act;
+  if (a === "installsheet") showInstall(true);
+  else if (a === "notnow") { try { localStorage.setItem(SNOOZE_KEY, Date.now()); } catch {} closeAll(); }
+  else if (a === "install" && installEvent) { const ev = installEvent; installEvent = null; ev.prompt(); ev.userChoice.finally(closeAll); }
+});
+setTimeout(() => showInstall(false), 3500);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
