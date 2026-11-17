@@ -105,6 +105,11 @@
     .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; } .months div { display: flex; flex-direction: column; align-items: center; gap: 3px; } .months i { width: 100%; border-radius: 5px; opacity: .55; } .months span { font: 650 10.5px var(--sans); color: var(--muted); } .months .now i { opacity: 1; } .months .now span { color: var(--ink); }
     .fab { position: fixed; left: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 550; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); font: 650 14px var(--sans); padding: 11px 16px; box-shadow: 0 6px 18px rgba(0,0,0,.2); cursor: pointer; }
     body:has(.peek) .fab { display: none; }
+    .abpick2 { display: flex; gap: 8px; align-items: center; margin-top: 8px; } .abcol { flex: 1; display: grid; gap: 6px; min-width: 0; }
+    .abfield { display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 7px 12px; font: 16px var(--sans); color: var(--ink); cursor: pointer; min-height: 52px; }
+    .abfield.on { border-color: var(--ink); background: var(--card); } .abfield input { width: 100%; border: 0; outline: none; background: none; font: 600 16px var(--sans); color: var(--ink); padding: 2px 0; } .abfield input::-webkit-search-cancel-button { display: none; }
+    .abres { margin-top: 8px; max-height: 46vh; overflow-y: auto; } .abrow { display: flex; flex-direction: column; align-items: flex-start; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 10px 4px; font: 15px var(--sans); color: var(--ink); cursor: pointer; } .abrow:first-child { border-top: 0; }
+    .sheet.ab.searching { min-height: 70vh; }
     .abpick { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 8px; align-items: center; margin-top: 8px; }
     .route { padding: 14px; } .rtags { display: flex; gap: 6px; flex-wrap: wrap; } .rtags span { background: var(--accent2); color: #9a3a22; font: 650 12px var(--sans); padding: 3px 9px; border-radius: 999px; }
     .rchain { margin: 8px 0 2px; font: 600 14px var(--sans); color: var(--ink2); } .rchain span { font-size: 13px; } .rmain { margin: 2px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
@@ -128,7 +133,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "9";
+  const KEY = "roam", VER = "10";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -378,18 +383,43 @@
       ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${s.o.mode === "car" ? `${range(s.o.thb, "THB")} per car` : range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
   }
   let ab = { a: "", b: "" };
-  function abSheet(to) {
-    if (to) { ab.b = to; if (!ab.a || ab.a === to) { const W = whereNow(), h = W ? W.S[W.i].city : "bangkok"; ab.a = h !== to ? h : to !== "bangkok" ? "bangkok" : ""; } }
-    const groups = {}; (D.cities || []).forEach(c => { const p = D.places.find(x => x.city === c.id); const g = p ? D.regions[p.region] : "Other"; (groups[g] = groups[g] || []).push(c); });
-    const opts = sel_ => `<option value="">Choose…</option>` + Object.entries(groups).map(([g, cs]) => `<optgroup label="${esc(g)}">${cs.map(c => `<option value="${c.id}"${c.id === sel_ ? " selected" : ""}>${esc(cname(c.id))}</option>`).join("")}</optgroup>`).join("");
-    const res = ab.a && ab.b && ab.a !== ab.b ? bestRoutes(ab.a, ab.b) : null;
-    $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back";
-    b.innerHTML = `<div class="sheet ab"><h2>Get from A to B</h2>
-      <div class="abpick"><select data-ab="a" aria-label="From">${opts(ab.a)}</select><button class="iconbtn" data-act="abswap" aria-label="Swap">⇅</button><select data-ab="b" aria-label="To">${opts(ab.b)}</select></div>
-      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person (car fares split across your party), typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
-      <button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
-    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+  /* Searchable From/To: any town, island or sight maps to the town you'd travel from or to. */
+  const fold = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\bko\b/g, "koh").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  let abIndex = null;
+  function abIdx() {
+    if (abIndex) return abIndex; const out = [], regionOf = id => { const p = D.places.find(x => x.city === id); return p ? D.regions[p.region] : ""; };
+    (D.cities || []).forEach(c => out.push({ city: c.id, label: c.name, sub: regionOf(c.id), k: fold(c.name), town: 1 }));
+    D.places.forEach(p => { const c = city(p.city); if (!c || fold(p.name).startsWith(fold(cname(p.city)))) return; out.push({ city: p.city, label: p.name, sub: `${TYPE[p.type] || ""} via ${cname(p.city)}`, k: fold(p.name) }); });
+    D.places.forEach(p => [...(p.popular || []), ...(p.gems || [])].forEach(x => { if (x.name && !out.some(o => o.k === fold(x.name))) out.push({ city: p.city, label: x.name, sub: `via ${cname(p.city)}`, k: fold(x.name), minor: 1 }); }));
+    return (abIndex = out);
   }
+  function abSearch(q) {
+    const f = fold(q); if (!f) return [];
+    return abIdx().map(o => { const at = o.k.indexOf(f); const score = at === 0 ? 0 : at > 0 && o.k[at - 1] === " " ? 1 : at > 0 ? 2 : f.split(" ").every(w => o.k.includes(w)) ? 3 : 9; return { o, score: score + (o.town ? 0 : .3) + (o.minor ? .4 : 0) }; })
+      .filter(x => x.score < 9).sort((a, b) => a.score - b.score || a.o.label.length - b.o.label.length).slice(0, 8).map(x => x.o);
+  }
+  const abRows = (k, q) => {
+    const W = whereNow(), here = W ? W.S[W.i].city : "", trip = stops().map(s => s.city);
+    const list = q.trim() ? abSearch(q) : [...new Set([here, ...trip, "bangkok", "chiang-mai", "phuket", "samui", "krabi"].filter(Boolean))].slice(0, 7)
+      .map(id => ({ city: id, label: cname(id), sub: id === here ? "Where you are" : trip.includes(id) ? "On your trip" : "Popular" }));
+    if (!list.length) return `<p class="small muted" style="padding:10px 4px">No match. Try a town or island name, like Krabi or Koh Tao.</p>`;
+    return list.map(o => `<button class="abrow" data-act="abset" data-v="${k}:${o.city}" data-l="${esc(o.label)}"><b>${esc(o.label)}</b><span class="small muted">${esc(o.sub)}</span></button>`).join(""); };
+  let abEditing = "", abLab = {};
+  function abSheet(to, editing) {
+    if (to) { ab.b = to; abLab.b = ""; if (!ab.a || ab.a === to) { abLab.a = ""; const W = whereNow(), h = W ? W.S[W.i].city : "bangkok"; ab.a = h !== to ? h : to !== "bangkok" ? "bangkok" : ""; } }
+    abEditing = editing || "";
+    const field = (k, lab) => abEditing === k ? `<div class="abfield on"><span class="small muted">${lab}</span><input id="abq" data-abq="${k}" type="search" autocomplete="off" enterkeyhint="go" placeholder="Search a town, island or sight" aria-label="${lab}"></div>`
+      : `<button class="abfield" data-act="abedit" data-v="${k}"><span class="small muted">${lab}</span><b>${ab[k] ? esc(abLab[k] && abLab[k] !== cname(ab[k]) ? abLab[k] : cname(ab[k])) : `<span class="muted">Choose…</span>`}${ab[k] && abLab[k] && abLab[k] !== cname(ab[k]) ? ` <span class="small muted">via ${esc(cname(ab[k]))}</span>` : ""}</b></button>`;
+    const res = !abEditing && ab.a && ab.b && ab.a !== ab.b ? bestRoutes(ab.a, ab.b) : null;
+    $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet ab${abEditing ? " searching" : ""}"><h2>Get from A to B</h2>
+      <div class="abpick2"><div class="abcol">${field("a", "From")}${field("b", "To")}</div><button class="iconbtn" data-act="abswap" aria-label="Swap">⇅</button></div>
+      ${abEditing ? `<div id="abres" class="abres">${abRows(abEditing, "")}</div>` : res === null ? `<p class="small muted" style="margin-top:12px">Tap From or To and type a town, island or sight.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person (car fares split across your party), typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
+      <button class="btn block" data-act="${abEditing ? "abcancel" : "closesheet"}" style="margin-top:12px">${abEditing ? "Cancel" : "Close"}</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+    if (abEditing) setTimeout(() => $("#abq")?.focus(), 30);
+  }
+
 
   /* ---------- Ease, comfort, surprise, happiness ---------- */
   const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet.", "koh-chang": "White Sand Beach for easy food and nightlife; Klong Prao or Kai Bae for calmer beaches; Lonely Beach for backpacker parties.", "koh-kood": "The west coast beaches (Klong Chao, Ao Tapao, Bang Bao) for calm water and sunsets; most resorts include the pier pickup.", "koh-mak": "Ao Kao on the south-west for sunsets and walkable cafés, or Ao Suan Yai for a long, quiet beach.", "koh-samet": "Ao Wong Deuan or Ao Phai for easy food and evening fire shows; Ao Prao on the west side for sunsets and quiet.", pattaya: "Naklua or Wong Amat for calm and cleaner sea; Jomtien for a relaxed local feel. Avoid Walking Street if you want sleep.", "hua-hin": "Near the night market and old town for food on foot, or south towards Khao Takiab for a quieter beach.", "khao-yai": "Along Thanarat Road near the park's northern gate, so early wildlife drives are easy. You'll want a car or a driver.", amphawa: "A canal-side homestay in Amphawa itself, so you can stay for the evening market and the firefly boats.", lopburi: "Near the train station in the new town for easy trains; the monkey temples are best as a day visit.", "phang-nga": "Koh Yao Noi for calm island life between Phuket and Krabi; Phang Nga town for a cheap base for bay tours.", similan: "Khao Lak (Bang Niang or Nang Thong beach); Similan boats pick up from hotels there.", "koh-lipe": "Sunrise Beach for swimming and space; Pattaya Beach for restaurants and boats; Walking Street sits in between.", "mae-hong-son": "Around Jong Kham Lake in town: walkable, prettily lit at night, with the temples reflected in the water." };
@@ -586,7 +616,10 @@
     else if (a === "closesheet") $(".sheet-back")?.remove();
     else if (a === "crowd") crowdSheet(v);
     else if (a === "ab") { $(".peek")?.remove(); abSheet(v || ""); }
-    else if (a === "abswap") { [ab.a, ab.b] = [ab.b, ab.a]; abSheet(); }
+    else if (a === "abswap") { [ab.a, ab.b] = [ab.b, ab.a]; [abLab.a, abLab.b] = [abLab.b, abLab.a]; abSheet(); }
+    else if (a === "abedit") abSheet("", v);
+    else if (a === "abcancel") abSheet();
+    else if (a === "abset") { const [k, id] = v.split(":"), o = k === "a" ? "b" : "a"; ab[k] = id; abLab[k] = el.dataset.l || ""; if (ab[o] === id) { ab[o] = ""; abLab[o] = ""; } abSheet("", !ab[o] ? o : ""); }
     else if (a === "moment") momentSheet(false); else if (a === "three") momentSheet(true);
     else if (a === "mood") { $$("#moods .chip").forEach(c => c.classList.toggle("on", c === el)); }
     else if (a === "savemoment") { (async () => { const text = $("#mtext").value.trim(); if (!text) return toast("Write a few words first"); const W = whereNow(), m = { id: Date.now().toString(36), at: Date.now(), text, mood: ($("#moods .chip.on") || {}).dataset?.v || "😊", kind: v || "", city: W ? W.S[W.i].city : "" };
@@ -600,8 +633,9 @@
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
   document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
+  document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.abq; if (k) { const r = $("#abres"); if (r) r.innerHTML = abRows(k, e.target.value); } });
+  document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "abq") { e.preventDefault(); $("#abres .abrow")?.click(); } });
   document.addEventListener("change", e => { const el = e.target;
-    if (el.dataset.ab) { const k = el.dataset.ab, o = k === "a" ? "b" : "a"; ab[k] = el.value; if (ab[o] === el.value) ab[o] = ""; abSheet(); return; }
     if (el.dataset.leg) { db.plan.leg[el.dataset.leg] = +el.value; save(); render(); }
     else if (el.dataset.extra) { db.plan.extras[el.dataset.extra] = el.checked; save(); render(); }
     else if (el.hasAttribute("data-flight")) { db.plan.flight = +el.value || 0; save(); render(); }
