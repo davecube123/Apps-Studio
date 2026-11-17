@@ -158,7 +158,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "5";
+  const VER = "6";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2400) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -179,8 +179,10 @@
 
   /* ---------- translations ---------- */
   const TR = [
-    { id: "wilhelm", name: "Wilhelm", full: "Richard Wilhelm, 1911", note: "An English rendering of Wilhelm's German, made for this app.", lang: "en", builtin: "en" },
+    { id: "ostwald", name: "Wilhelm · English", full: "Richard Wilhelm, translated by H. G. Ostwald: Tao Te Ching, The Book of Meaning and Life, 1985", lang: "en" },
+    { id: "wilhelm", name: "Wilhelm · our English", full: "Richard Wilhelm, 1911", note: "An English rendering of Wilhelm's German, made for this app. Add the official English by H. G. Ostwald in the Wilhelm · English tab.", lang: "en", builtin: "en" },
     { id: "wilhelm-de", name: "Wilhelm · Deutsch", full: "Richard Wilhelm, Laotse: Tao te king, 1911", lang: "de", builtin: "de" },
+    { id: "leyris", name: "Leyris · Français", full: "Pierre Leyris, Tao-tö king", lang: "fr" },
     { id: "feng", name: "Feng & English", full: "Gia-Fu Feng & Jane English, 1972", lang: "en" },
     { id: "chu", name: "Ch'u Ta-Kao", full: "Ch'u Ta-Kao, 1937", lang: "en" },
     { id: "leguin", name: "Le Guin", full: "Ursula K. Le Guin, 1997, a rendition", lang: "en" },
@@ -260,7 +262,7 @@
     if (!synth) return toast("Read-aloud isn't available in this browser");
     if (saying) return stopSay();
     const id = compare ? TR.find(t => has(t.id)).id : cur, x = has(id) && textOf(id, n); if (!x) return toast("Nothing to read in this translation yet");
-    const t = trOf(id), u = new SpeechSynthesisUtterance(x.text.replace(/\n+/g, " ")); u.lang = t.lang === "de" ? "de-DE" : "en-GB"; u.rate = .9;
+    const t = trOf(id), u = new SpeechSynthesisUtterance(x.text.replace(/\n+/g, " ")); u.lang = { de: "de-DE", fr: "fr-FR" }[t.lang] || "en-GB"; u.rate = .9;
     const v = synth.getVoices().find(v => v.lang.startsWith(t.lang)); if (v) u.voice = v;
     u.onend = u.onerror = () => { saying = false; $("#sayBtn").classList.remove("on"); };
     synth.cancel(); synth.speak(u); saying = true; $("#sayBtn").classList.add("on");
@@ -269,15 +271,20 @@
 
   /* ---------- importing your own copy ---------- */
   const NUMW = (() => { const u = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], teen = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"], tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty"], m = {};
-    for (let k = 1; k <= 81; k++) { const w = k < 10 ? u[k] : k < 20 ? teen[k - 10] : tens[Math.floor(k / 10)] + (k % 10 ? "-" + u[k % 10] : ""); m[w] = k; m[w.replace("-", " ")] = k; m[w.replace("-", "")] = k; } return m; })();
+    for (let k = 1; k <= 81; k++) { const w = k < 10 ? u[k] : k < 20 ? teen[k - 10] : tens[Math.floor(k / 10)] + (k % 10 ? "-" + u[k % 10] : ""); m[w] = k; m[w.replace("-", " ")] = k; m[w.replace("-", "")] = k; }
+    /* French: un … dix-neuf, vingt et un, soixante-dix, quatre-vingt-un (and "premier") */
+    const fu = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"], ft = { 2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante" };
+    const fr = k => k < 20 ? fu[k] : k < 70 ? ft[Math.floor(k / 10)] + (k % 10 === 1 ? " et un" : k % 10 ? "-" + fu[k % 10] : "") : k < 80 ? "soixante" + (k === 71 ? " et onze" : "-" + fu[k - 60]) : k === 80 ? "quatre-vingts" : "quatre-vingt-" + fu[k - 80];
+    for (let k = 1; k <= 81; k++) { const w = fr(k); m[w] = k; m[w.replace(/-/g, " ")] = k; } m.premier = 1; m["quatre-vingt"] = 80;
+    return m; })();
   function headNum(line) {
     let s = line.trim(); if (!s || s.length > 80) return null;
-    s = s.replace(/^(chapter|chap\.|kapitel|verse|poem|section)\s+/i, "").replace(/^[#*\s]+/, "");
+    s = s.replace(/^(chapter|chap\.|kapitel|chapitre|verse|poem|section)\s+/i, "").replace(/^[#*\s]+/, "");
     let m = s.match(/^(\d{1,2})\s*[.):\]]?\s*$/); if (m) return { k: +m[1], t: "" };
     m = s.match(/^(\d{1,2})\s*[.):\]]\s*(.{1,60})$/); if (m) return { k: +m[1], t: m[2] };
     m = s.match(/^(\d{1,2})\s+([A-Z][^.!?]{0,40})$/); if (m) return { k: +m[1], t: m[2] };
     m = s.match(/^([IVXLC]{1,7})\s*(?:[.:)]\s*(.{0,60}))?$/); if (m && fromRoman(m[1]) && roman(fromRoman(m[1])) === m[1]) return { k: fromRoman(m[1]), t: m[2] || "" };
-    m = s.toLowerCase().match(/^([a-z]+(?:[- ][a-z]+)?)\s*[.:]?$/); if (m && NUMW[m[1]]) return { k: NUMW[m[1]], t: "" };
+    m = s.toLowerCase().match(/^([a-zéè]+(?:[- ][a-zéè]+){0,3})\s*[.:]?$/); if (m && NUMW[m[1]]) return { k: NUMW[m[1]], t: "" };
     return null;
   }
   /* Find the 81 chapter headings: the longest chain 1 → 81 whose chapters actually hold text (skips tables of contents). */
@@ -341,7 +348,7 @@
       <h3>Look</h3><div class="seg"><button class="${th === "paper" ? "on" : ""}" data-act="theme" data-v="paper">Paper</button><button class="${th === "night" ? "on" : ""}" data-act="theme" data-v="night">Ink night</button></div>
       <div class="row" style="margin-top:12px;flex-wrap:nowrap"><span class="small" style="font-size:15px">A</span><input type="range" id="size" min="17" max="28" value="${parseInt(getComputedStyle(document.documentElement).getPropertyValue("--size"))}"><span style="font-size:24px">A</span></div>
       <h3>Library</h3>${TR.map(t => `<div class="slot"><span class="dot${has(t.id) ? " on" : ""}"></span><div class="t"><b>${esc(t.name)}</b><span>${t.builtin ? "Included" : OWN[t.id] ? `Your copy · ${Object.keys(OWN[t.id].chapters).length} chapters` : "Add your own copy"}</span></div>${t.builtin ? "" : `<button class="btn sm" data-act="import" data-v="${t.id}">${OWN[t.id] ? "Change" : "Add"}</button>`}</div>`).join("")}
-      <p class="small muted" style="margin:8px 0 0">Feng & English, Ch'u Ta-Kao, Le Guin, Heider and Bynner are still under copyright, so they can't ship with the app. Add copies you own; they're kept only on this phone.</p>
+      <p class="small muted" style="margin:8px 0 0">Ostwald's English Wilhelm, Leyris, Feng & English, Ch'u Ta-Kao, Le Guin, Heider and Bynner are still under copyright, so they can't ship with the app. Add copies you own; they're kept only on this phone.</p>
       ${legacy ? `<div class="found"><b>Your earlier import:</b> ${esc(legacy.title)} (${legacy.chapters.length} chapters)<div class="row" style="margin-top:8px">${TR.filter(t => !t.builtin).map(t => `<button class="btn sm" data-act="uselegacy" data-v="${t.id}">Use as ${esc(t.name)}</button>`).join("")}</div></div>` : ""}
       <h3>App</h3>${isStandalone() ? "" : `<button class="btn block" data-act="install">Install Tao Reader</button>`}
       <p class="small muted" style="margin:12px 0 0">Chinese text: the received text (public domain). Richard Wilhelm's German (1911) is public domain; the English rendering of it was made for this app. Fonts: Cinzel, Cormorant Garamond and LXGW WenKai TC (SIL Open Font License).</p>

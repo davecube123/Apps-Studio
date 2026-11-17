@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so phones pick up the update.
-const VERSION = "tao-reader-v5";
+const VERSION = "tao-reader-v6";
 const SHELL = [
   "./",
   "./index.html",
