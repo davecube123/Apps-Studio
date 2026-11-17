@@ -42,6 +42,7 @@
     .mapbar .in { pointer-events: auto; display: flex; gap: 6px; overflow-x: auto; max-width: 640px; scrollbar-width: none; } .mapbar .chip { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
     .pin { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); background-size: cover; background-position: center; transition: transform .2s; }
     .pin.sm { width: 34px; height: 34px; border-width: 2.5px; }
+    .pin.clus { position: relative; } .pin.clus b { position: absolute; top: -6px; right: -8px; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px; background: var(--ink); color: #fff; font: 700 11.5px/21px var(--sans); text-align: center; border: 2px solid #fff; }
     .pin.sel { transform: scale(1.35); border-color: var(--accent); } .pin.saved { border-color: var(--accent); }
     .peek { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 600; max-width: 616px; margin: 0 auto; display: flex; gap: 12px; background: var(--card); border-radius: 20px; padding: 10px; box-shadow: 0 12px 34px rgba(0,0,0,.18); text-decoration: none; color: inherit; animation: up .3s cubic-bezier(.2,.9,.25,1.1) both; }
     .peek img { width: 96px; height: 96px; object-fit: cover; border-radius: 14px; flex: none; } .peek b { font: 600 18px/1.2 var(--display); display: block; margin-top: 2px; }
@@ -104,7 +105,7 @@
     body:has(.peek) .fab { display: none; }
     .abpick { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 8px; align-items: center; margin-top: 8px; }
     .route { padding: 14px; } .rtags { display: flex; gap: 6px; flex-wrap: wrap; } .rtags span { background: var(--accent2); color: #9a3a22; font: 650 12px var(--sans); padding: 3px 9px; border-radius: 999px; }
-    .rmain { margin: 8px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
+    .rchain { margin: 8px 0 2px; font: 600 14px var(--sans); color: var(--ink2); } .rchain span { font-size: 13px; } .rmain { margin: 2px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
     .sheet { max-height: 88vh; overflow-y: auto; }
     .center { text-align: center; } .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   </style>
@@ -125,7 +126,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "7";
+  const KEY = "roam", VER = "8";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -144,12 +145,14 @@
   const mid = a => Array.isArray(a) ? (a[0] + a[1]) / 2 : (+a || 0);
   const directLegs = (a, b) => { const L = (D.legs || []).find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a)); return L ? L.options : null; };
   /* Direct options, or the cheapest two-hop routes through a hub when there's no direct one. */
+  /* Car and taxi fares in the data are per car: split them across the party (up to 4 per car) to get a per-person fare. */
+  const pp = o => o.mode === "car" ? o.thb.map(x => Math.round(x / Math.min(4, Math.max(1, +db.plan.travelers || 2)))) : o.thb;
   const legCache = {};
   function legsBetween(a, b) {
-    if (a === b) return null; const k = a + ">" + b; if (k in legCache) return legCache[k];
+    if (a === b) return null; const k = a + ">" + b + ":" + db.plan.travelers; if (k in legCache) return legCache[k];
     let o = directLegs(a, b);
     if (!o) { const combos = []; (D.cities || []).forEach(c => { if (c.id === a || c.id === b) return; const x = directLegs(a, c.id), y = directLegs(c.id, b); if (!x || !y) return;
-        x.forEach(o1 => y.forEach(o2 => combos.push({ mode: `${o1.mode} + ${o2.mode}`, duration: `${o1.duration} + ${o2.duration}`, thb: [o1.thb[0] + o2.thb[0], o1.thb[1] + o2.thb[1]], note: `Via ${c.name}: ${o1.mode} to ${c.name}, then ${o2.mode}.`, via: c.name }))); });
+        x.forEach(o1 => y.forEach(o2 => combos.push({ mode: `${o1.mode} + ${o2.mode}`, duration: `${o1.duration} + ${o2.duration}`, thb: [pp(o1)[0] + pp(o2)[0], pp(o1)[1] + pp(o2)[1]], note: `Via ${c.name}: ${o1.mode} to ${c.name}, then ${o2.mode}.`, via: c.name }))); });
       combos.sort((p, q) => (p.thb[0] + p.thb[1]) - (q.thb[0] + q.thb[1])); const seen = new Set(); o = combos.filter(c => { const key = c.mode + c.via; if (seen.has(key)) return false; seen.add(key); return true; }).slice(0, 4); if (!o.length) o = null; }
     return (legCache[k] = o);
   }
@@ -165,16 +168,18 @@
     const B = D.bounds || [[4.8, 96.0], [21.2, 106.6]];
     map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 11, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
     /* Our own simple map: country shapes (Natural Earth) + English labels. No tiles, works offline. */
-    map.attributionControl.addAttribution("Map data: Natural Earth");
+    map.attributionControl.addAttribution("Map: Natural Earth, © OpenStreetMap contributors");
     const base = L.featureGroup().addTo(map);
     Promise.all([fetch("data/geo.json").then(r => r.json()), fetch("data/provinces.json").then(r => r.json()).catch(() => null)]).then(([g, P]) => {
-      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
+      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? (P ? { stroke: false, fillOpacity: 0 } : { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 }) : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
       if (!P) return;
+      /* provinces.json stores each outline as delta-encoded integers (degrees x 1000) to stay small */
+      const ring = a => { const out = []; let x = 0, y = 0; for (let i = 0; i < a.length; i += 2) { x += a[i]; y += a[i + 1]; out.push([y / 1000, x / 1000]); } return out; };
       /* Provinces, softly tinted by region, with English names; towns appear as you zoom in. */
       const TINT = { n: "#e4eed6", ne: "#f8ead0", c: "#fcf4e6", e: "#f7e3d6", w: "#ebecd8", s: "#dff0e5" };
-      L.geoJSON(P.provinces, { interactive: false, style: f => ({ color: "#cdbb9c", weight: .8, fillColor: TINT[f.properties.r] || "#fbf6ec", fillOpacity: 1 }) }).addTo(base);
+      P.provinces.forEach(q => L.polygon(q.g.map(ring), { interactive: false, color: "#cdbb9c", weight: .8, fillColor: TINT[q.r] || "#fbf6ec", fillOpacity: 1 }).addTo(base));
       const tn = P.towns.map(t => t[0].toLowerCase().replace(/ /g, ""));
-      P.provinces.features.forEach(f => { const q = f.properties, k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
+      P.provinces.forEach(q => { const k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
       const taken = cityLabels.map(c => [c.la, c.lo, c.n.toLowerCase()]);
       P.towns.forEach(([n, la, lo, t]) => { if (taken.some(([a, b, nm]) => Math.abs(a - la) < .12 && Math.abs(b - lo) < .12 || nm === n.toLowerCase())) return;
         lab(la, lo, `<span>${esc(n)}</span>`, `town t${t}`, -1000); });
@@ -186,7 +191,7 @@
     const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui", "pattaya"];
     (D.cities || []).forEach(c => { const ps = D.places.filter(p => p.city === c.id); if (!ps.length) return; const la = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lo = ps.reduce((a, p) => a + p.lng, 0) / ps.length;
       cityLabels.push({ la, lo, n: c.name.split(" (")[0] }); lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
-    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; }; map.on("zoomend", zc); zc();
+    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; cluster(); }; map.on("zoomend", zc); zc();
     D.places.forEach(p => {
       const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
@@ -197,11 +202,25 @@
   const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin sm${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
   function refreshPins() {
     if (!map) return;
-    D.places.forEach(p => { const m = markers[p.id], show = !region || p.region === region; m.setIcon(pinIcon(p)); if (show && !map.hasLayer(m)) m.addTo(map); if (!show && map.hasLayer(m)) map.removeLayer(m); });
+    D.places.forEach(p => markers[p.id].setIcon(pinIcon(p))); cluster();
     if (route) { map.removeLayer(route); route = null; }
     const pts = db.trip.map(place).filter(Boolean).map(p => [p.lat, p.lng]);
     if (pts.length > 1) route = L.polyline(pts, { color: "#e25e3e", weight: 3, opacity: .8, dashArray: "6 8" }).addTo(map);
     (window.__mm || []).forEach(m => map.removeLayer(m)); window.__mm = (db.moments || []).filter(m => m.lat).map(m => L.marker([m.lat, m.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${m.mood || "♥"}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).bindPopup(esc(m.text).slice(0, 140)).addTo(map));
+  }
+  /* Pins that would overlap at this zoom merge into one bubble with a count; tap it to zoom in. */
+  let clusters = [];
+  function cluster() {
+    if (!map || !markers[D.places[0].id]) return; clusters.forEach(c => map.removeLayer(c)); clusters = [];
+    const z = map.getZoom(), groups = [];
+    D.places.filter(p => !region || p.region === region).sort((a, b) => (b.id === sel) - (a.id === sel) || inTrip(b.id) - inTrip(a.id))
+      .forEach(p => { const pt = map.project([p.lat, p.lng], z), g = p.id !== sel && groups.find(g => g.pt.distanceTo(pt) < 38 && g.ps[0].id !== sel); if (g) g.ps.push(p); else groups.push({ pt, ps: [p] }); });
+    const shown = new Set(groups.filter(g => g.ps.length === 1).map(g => g.ps[0].id));
+    D.places.forEach(p => { const m = markers[p.id], on = shown.has(p.id); if (on && !map.hasLayer(m)) m.addTo(map); if (!on && map.hasLayer(m)) map.removeLayer(m); });
+    groups.filter(g => g.ps.length > 1).forEach(g => { const lead = g.ps[0], la = g.ps.reduce((a, p) => a + p.lat, 0) / g.ps.length, lo = g.ps.reduce((a, p) => a + p.lng, 0) / g.ps.length;
+      const cm = L.marker([la, lo], { zIndexOffset: 400, icon: L.divIcon({ className: "", html: `<div class="pin clus${g.ps.some(p => inTrip(p.id)) ? " saved" : ""}" style="background-image:url('${lead.thumb}')"><b>${g.ps.length}</b></div>`, iconSize: [40, 40], iconAnchor: [20, 20] }) }).addTo(map);
+      cm.on("click", e => { L.DomEvent.stop(e); $(".peek")?.remove(); map.fitBounds(g.ps.map(p => [p.lat, p.lng]), { padding: [90, 90], maxZoom: Math.min(11, z + 3) }); });
+      clusters.push(cm); });
   }
   function fitRegion() { if (!map) return; const ps = D.places.filter(p => !region || p.region === region); if (!ps.length) return; if (ps.length === 1) map.setView([ps[0].lat, ps[0].lng], 10); else map.fitBounds(ps.map(p => [p.lat, p.lng]), { padding: [60, 60], maxZoom: 11 }); }
   function peek(p) {
@@ -277,7 +296,7 @@
       <details class="card more"><summary><b>Practical</b> <span class="small muted">fees, getting there, more spots, tips</span></summary>${placeExtras(p)}<div class="card"><h3>Good to know</h3><ul class="tips">${p.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></details>
       <div class="card"><h3>My notes</h3><textarea data-note="${p.id}" placeholder="Where to stay, who recommended it, what to eat…">${esc(db.notes[p.id] || "")}</textarea></div>
       <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="been" data-v="${p.id}">${been ? "✓ Been here" : "Been here?"}</button><button class="btn sm" data-act="ab" data-v="${p.city}">⇄ Get here</button><a class="btn sm" href="#/" data-act="showmap" data-v="${p.id}">Show on map</a><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Maps ↗</a></div>
-      <p class="small muted" style="margin-top:14px">Photo: Unsplash.</p>`;
+      <p class="small muted" style="margin-top:14px">${p.illus ? "Illustration: Roam." : "Photo: Unsplash."}</p>`;
   }
   function tileSheet(pid, k) {
     const p = place(pid), c = city(p.city), T = TILES.find(x => x[0] === k), b = document.createElement("div"); b.className = "sheet-back";
@@ -334,11 +353,11 @@
   function routes(a, b) {
     const adj = {}; (D.legs || []).forEach(l => { (adj[l.a] = adj[l.a] || []).push([l.b, l.options]); (adj[l.b] = adj[l.b] || []).push([l.a, l.options]); });
     const out = [], walk = (at, path, steps) => {
-      if (at === b) { out.push(steps); return; } if (steps.length >= 3) return;
+      if (at === b) { out.push(steps); return; } if (steps.length >= 4) return;
       (adj[at] || []).forEach(([to, opts]) => { if (path.includes(to)) return; opts.forEach(o => walk(to, [...path, to], [...steps, { from: at, to, o }])); }); };
     walk(a, [a], []);
     return out.map(steps => { const door = steps.reduce((t, s) => t + mins(s.o.duration) + (OVERHEAD[s.o.mode] || 0), 0) + (steps.length - 1) * 40;
-      return { steps, door, lo: steps.reduce((t, s) => t + s.o.thb[0], 0), hi: steps.reduce((t, s) => t + s.o.thb[1], 0) }; }).filter(r => r.door > 0);
+      return { steps, door, lo: steps.reduce((t, s) => t + pp(s.o)[0], 0), hi: steps.reduce((t, s) => t + pp(s.o)[1], 0) }; }).filter(r => r.door > 0);
   }
   function bestRoutes(a, b) {
     const R = routes(a, b); if (!R.length) return [];
@@ -352,8 +371,9 @@
   function routeCard({ r, tags }, i) {
     const single = r.steps.length === 1;
     return `<div class="card route"><div class="row between"><div class="rtags">${tags.map(([n, e]) => `<span>${e} ${n}</span>`).join("")}</div><b>${range([r.lo, r.hi], "THB")}</b></div>
-      <div class="rmain">${r.steps.map(s => MODE[s.o.mode] || "•").join(" → ")} <b>${hm(r.door)}</b> <span class="small muted">door to door${r.steps.some(s => s.o.mode === "flight") ? ", incl. airport time" : ""}</span></div>
-      ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
+      <div class="rchain">${esc(cname(r.steps[0].from))}${r.steps.map(s => ` <span>${MODE[s.o.mode] || "→"}</span> ${esc(cname(s.to))}`).join("")}</div>
+      <div class="rmain"><b>${hm(r.door)}</b> <span class="small muted">door to door${r.steps.some(s => s.o.mode === "flight") ? ", incl. airport time" : ""} · ${single ? "direct" : (r.steps.length - 1) + (r.steps.length === 2 ? " change" : " changes")}</span></div>
+      ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${s.o.mode === "car" ? `${range(s.o.thb, "THB")} per car` : range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
   }
   let ab = { a: "", b: "" };
   function abSheet(to) {
@@ -364,7 +384,7 @@
     $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back";
     b.innerHTML = `<div class="sheet ab"><h2>Get from A to B</h2>
       <div class="abpick"><select data-ab="a" aria-label="From">${opts(ab.a)}</select><button class="iconbtn" data-act="abswap" aria-label="Swap">⇅</button><select data-ab="b" aria-label="To">${opts(ab.b)}</select></div>
-      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person, typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
+      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person (car fares split across your party), typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
       <button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
   }
@@ -401,7 +421,7 @@
       ${tip ? `<div class="card wish" style="padding:12px 14px"><div class="wi" style="border:0;padding:0"><span>${tip.icon}</span><div><b>${esc(tip.title)}</b><div class="small ink2">${esc(tip.tip)}</div></div></div></div>` : ""}
       ${ideas.length ? `<div class="sec" style="margin-top:18px"><div class="eyebrow" style="margin:0 4px">Ideas for today</div>${ideas.map(([k, x]) => `<div class="card" style="padding:12px 14px;margin-top:8px"><div class="small muted">${k}</div><div class="row between"><b>${esc(x.name)}</b><span class="small">${x.thb ? range(x.thb, "THB") : "free"}</span></div><div class="small ink2">${esc(x.what)}</div>${x.lat || x.name ? `<a class="small" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">Directions ↗</a>` : ""}</div>`).join("")}</div>` : ""}
       <button class="btn acc block" data-act="surprise" style="margin-top:14px;min-height:54px">✨ Surprise me</button>
-      <div class="card comfort"><div class="eyebrow">For your comfort</div>${STAY_AREA[st.city] ? `<p class="small ink2" style="margin:8px 0 0"><b>Best area to stay:</b> ${esc(STAY_AREA[st.city])}</p>` : ""}${st.places[0].timeOfDay ? `<p class="small ink2" style="margin:6px 0 0"><b>Beat the crowds:</b> ${esc(st.places[0].timeOfDay)}</p>` : ""}<p class="small ink2" style="margin:6px 0 0"><b>Heat:</b> sightsee early and late, rest or swim from 12 to 3, and drink more water than you think.</p>${moved ? `<p class="small" style="margin:8px 0 0;color:var(--accent)"><b>You've been moving a lot.</b> Give yourself a slow morning: no alarm, a long breakfast, nothing planned until noon.</p>` : ""}</div>
+      <div class="card comfort"><div class="eyebrow">For your comfort</div>${STAY_AREA[st.city] || (city(st.city) || {}).stayArea ? `<p class="small ink2" style="margin:8px 0 0"><b>Best area to stay:</b> ${esc(STAY_AREA[st.city] || city(st.city).stayArea)}</p>` : ""}${st.places[0].timeOfDay ? `<p class="small ink2" style="margin:6px 0 0"><b>Beat the crowds:</b> ${esc(st.places[0].timeOfDay)}</p>` : ""}<p class="small ink2" style="margin:6px 0 0"><b>Heat:</b> sightsee early and late, rest or swim from 12 to 3, and drink more water than you think.</p>${moved ? `<p class="small" style="margin:8px 0 0;color:var(--accent)"><b>You've been moving a lot.</b> Give yourself a slow morning: no alarm, a long breakfast, nothing planned until noon.</p>` : ""}</div>
       <div class="sec" style="margin-top:18px"><div class="row between" style="margin:0 4px"><div class="eyebrow">Moments</div><button class="btn sm" data-act="moment">+ Add a moment</button></div>
         ${evening && !todayMoments.some(m => m.kind === "three") ? `<button class="card" data-act="three" style="display:block;width:100%;text-align:left;font:inherit;cursor:pointer;border-color:var(--accent)"><b>Three good things today?</b><div class="small ink2">Before sleep, write three small things that went well. It's a simple habit that research links to lasting happiness.</div></button>` : ""}
         ${(db.moments || []).slice(-3).reverse().map(momentCard).join("") || `<p class="small muted" style="margin:8px 4px">Little things you want to remember: a taste, a view, a laugh.</p>`}
@@ -462,7 +482,7 @@
     let lo = 0, hi = 0; const add = (k, a, b, detail) => { rows.push({ k, a, b, detail }); lo += a; hi += b; };
     let legLo = 0, legHi = 0, legDetail = [];
     for (let i = 1; i < S.length; i++) { const a = S[i - 1].city, b = S[i].city, opts = legsBetween(a, b), key = `${a}>${b}`;
-      if (opts) { const o = opts[Math.min(opts.length - 1, +P.leg[key] || 0)]; legLo += o.thb[0] * n; legHi += o.thb[1] * n; legDetail.push(`${cityName(a)} → ${cityName(b)}: ${o.mode}`); } else legDetail.push(`${cityName(a)} → ${cityName(b)}: no fare data`); }
+      if (opts) { const o = opts[Math.min(opts.length - 1, +P.leg[key] || 0)]; legLo += pp(o)[0] * n; legHi += pp(o)[1] * n; legDetail.push(`${cityName(a)} → ${cityName(b)}: ${o.mode}`); } else legDetail.push(`${cityName(a)} → ${cityName(b)}: no fare data`); }
     if (S.length > 1) add("Transport between places", legLo, legHi, legDetail.join(" · "));
     let sLo = 0, sHi = 0, fLo = 0, fHi = 0, tLo = 0, tHi = 0, nights = 0;
     S.forEach(stp => { const c = city(stp.city), nn = +P.nights[stp.city + "@" + S.indexOf(stp)] || defNights(stp); nights += nn; if (!c) return;
