@@ -41,6 +41,7 @@
     .mapbar { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; z-index: 500; display: flex; justify-content: center; pointer-events: none; }
     .mapbar .in { pointer-events: auto; display: flex; gap: 6px; overflow-x: auto; max-width: 640px; scrollbar-width: none; } .mapbar .chip { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
     .pin { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); background-size: cover; background-position: center; transition: transform .2s; }
+    .pin.sm { width: 34px; height: 34px; border-width: 2.5px; }
     .pin.sel { transform: scale(1.35); border-color: var(--accent); } .pin.saved { border-color: var(--accent); }
     .peek { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 600; max-width: 616px; margin: 0 auto; display: flex; gap: 12px; background: var(--card); border-radius: 20px; padding: 10px; box-shadow: 0 12px 34px rgba(0,0,0,.18); text-decoration: none; color: inherit; animation: up .3s cubic-bezier(.2,.9,.25,1.1) both; }
     .peek img { width: 96px; height: 96px; object-fit: cover; border-radius: 14px; flex: none; } .peek b { font: 600 18px/1.2 var(--display); display: block; margin-top: 2px; }
@@ -55,7 +56,13 @@
     nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 700; display: flex; justify-content: center; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(246,242,234,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
     nav.tabs .in { display: flex; width: min(600px,100%); justify-content: space-around; } nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 14px; border-radius: 14px; color: var(--muted); text-decoration: none; font: 650 11.5px var(--sans); }
     nav.tabs a svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } nav.tabs a.on { color: var(--ink); }
-    .soft-tiles { filter: saturate(.55) contrast(.95) brightness(1.04); }
+    #map { background: #cfe3ea !important; }
+    .lbl { pointer-events: none; white-space: nowrap; }
+    .lbl.country { font: 700 11px var(--sans); letter-spacing: .22em; color: #b3aa9c; transform: translate(-50%, -50%); }
+    .lbl.sea { font: italic 500 13px var(--display); color: #6f97a6; transform: translate(-50%, -50%); }
+    .lbl.city { display: flex; align-items: center; gap: 5px; transform: translate(-4px, -50%); font: 650 12px var(--sans); color: #4a453d; text-shadow: 0 0 3px #fbf6ec, 0 0 3px #fbf6ec, 0 0 6px #fbf6ec; }
+    .lbl.city span { margin-left: 18px; } .lbl.capital { font-size: 13.5px; font-weight: 800; }
+    #map.far .lbl.minor { display: none; } #map.far .lbl.country { opacity: .7; }
     .leaflet-control-attribution { font-size: 10px !important; background: rgba(255,255,255,.7) !important; } .leaflet-bottom.leaflet-right { bottom: calc(env(safe-area-inset-bottom) + 72px); }
     .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 56px); }
     .view { animation: fade .25s both; } @keyframes fade { from { opacity: 0; } } @keyframes up { from { transform: translateY(16px); opacity: 0; } }
@@ -98,7 +105,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "4";
+  const KEY = "roam", VER = "5";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -136,8 +143,19 @@
   function initMap() {
     if (map || !window.L) return;
     const B = D.bounds || [[4.8, 96.0], [21.2, 106.6]];
-    map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 18, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, minZoom: 5, noWrap: true, bounds: B, className: "soft-tiles", attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+    map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 11, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
+    /* Our own simple map: country shapes (Natural Earth) + English labels. No tiles, works offline. */
+    map.attributionControl.addAttribution("Map data: Natural Earth");
+    fetch("data/geo.json").then(r => r.json()).then(g => {
+      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(map).bringToBack();
+    }).catch(() => {});
+    const lab = (lat, lng, html, cls) => L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "lbl " + cls, html, iconSize: null }) }).addTo(map);
+    [["MYANMAR", 19.2, 96.6], ["LAOS", 19.6, 102.6], ["CAMBODIA", 12.9, 104.8], ["VIETNAM", 15.8, 107.6], ["MALAYSIA", 5.0, 101.6]].forEach(([n, la, lo]) => lab(la, lo, n, "country"));
+    [["Andaman Sea", 9.6, 96.9], ["Gulf of Thailand", 10.6, 101.7]].forEach(([n, la, lo]) => lab(la, lo, n, "sea"));
+    const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui"];
+    (D.cities || []).forEach(c => { const ps = D.places.filter(p => p.city === c.id); if (!ps.length) return; const la = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lo = ps.reduce((a, p) => a + p.lng, 0) / ps.length;
+      lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
+    const zc = () => map.getContainer().classList.toggle("far", map.getZoom() < 7); map.on("zoomend", zc); zc();
     D.places.forEach(p => {
       const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
@@ -145,7 +163,7 @@
     });
     map.on("click", () => { sel = null; refreshPins(); $(".peek")?.remove(); });
   }
-  const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [40, 40], iconAnchor: [20, 20] });
+  const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin sm${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
   function refreshPins() {
     if (!map) return;
     D.places.forEach(p => { const m = markers[p.id], show = !region || p.region === region; m.setIcon(pinIcon(p)); if (show && !map.hasLayer(m)) m.addTo(map); if (!show && map.hasLayer(m)) map.removeLayer(m); });
@@ -330,7 +348,7 @@
       ${(D.sources || []).length ? `<details class="card"><summary><b>Price sources</b></summary>${D.sources.map(x => `<p class="small" style="margin:6px 0 0"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a></p>`).join("")}</details>` : ""}
       <div class="card"><h3>Countries</h3><p class="small ink2" style="margin:0">Thailand for now. More are coming.</p></div>
       ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:12px">Install on your phone</button>`}
-      <p class="small muted" style="margin-top:16px">Photos from Unsplash (Unsplash License). Map © OpenStreetMap contributors. Map library: Leaflet (BSD-2). Practical details change: check entry rules and opening times before you go.</p>
+      <p class="small muted" style="margin-top:16px">Photos from Unsplash (Unsplash License). Map: Natural Earth country shapes (public domain), drawn by Roam. Map library: Leaflet (BSD-2). Practical details change: check entry rules and opening times before you go.</p>
       <div class="ver">Roam v${VER}</div>`;
   }
 
