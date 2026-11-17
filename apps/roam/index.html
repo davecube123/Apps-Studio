@@ -42,6 +42,7 @@
     .mapbar .in { pointer-events: auto; display: flex; gap: 6px; overflow-x: auto; max-width: 640px; scrollbar-width: none; } .mapbar .chip { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
     .pin { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); background-size: cover; background-position: center; transition: transform .2s; }
     .pin.sm { width: 34px; height: 34px; border-width: 2.5px; }
+    .pin.clus { position: relative; } .pin.clus b { position: absolute; top: -6px; right: -8px; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px; background: var(--ink); color: #fff; font: 700 11.5px/21px var(--sans); text-align: center; border: 2px solid #fff; }
     .pin.sel { transform: scale(1.35); border-color: var(--accent); } .pin.saved { border-color: var(--accent); }
     .peek { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 600; max-width: 616px; margin: 0 auto; display: flex; gap: 12px; background: var(--card); border-radius: 20px; padding: 10px; box-shadow: 0 12px 34px rgba(0,0,0,.18); text-decoration: none; color: inherit; animation: up .3s cubic-bezier(.2,.9,.25,1.1) both; }
     .peek img { width: 96px; height: 96px; object-fit: cover; border-radius: 14px; flex: none; } .peek b { font: 600 18px/1.2 var(--display); display: block; margin-top: 2px; }
@@ -165,16 +166,18 @@
     const B = D.bounds || [[4.8, 96.0], [21.2, 106.6]];
     map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 11, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
     /* Our own simple map: country shapes (Natural Earth) + English labels. No tiles, works offline. */
-    map.attributionControl.addAttribution("Map data: Natural Earth");
+    map.attributionControl.addAttribution("Map: Natural Earth, © OpenStreetMap contributors");
     const base = L.featureGroup().addTo(map);
     Promise.all([fetch("data/geo.json").then(r => r.json()), fetch("data/provinces.json").then(r => r.json()).catch(() => null)]).then(([g, P]) => {
-      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
+      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? (P ? { stroke: false, fillOpacity: 0 } : { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 }) : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
       if (!P) return;
+      /* provinces.json stores each outline as delta-encoded integers (degrees x 1000) to stay small */
+      const ring = a => { const out = []; let x = 0, y = 0; for (let i = 0; i < a.length; i += 2) { x += a[i]; y += a[i + 1]; out.push([y / 1000, x / 1000]); } return out; };
       /* Provinces, softly tinted by region, with English names; towns appear as you zoom in. */
       const TINT = { n: "#e4eed6", ne: "#f8ead0", c: "#fcf4e6", e: "#f7e3d6", w: "#ebecd8", s: "#dff0e5" };
-      L.geoJSON(P.provinces, { interactive: false, style: f => ({ color: "#cdbb9c", weight: .8, fillColor: TINT[f.properties.r] || "#fbf6ec", fillOpacity: 1 }) }).addTo(base);
+      P.provinces.forEach(q => L.polygon(q.g.map(ring), { interactive: false, color: "#cdbb9c", weight: .8, fillColor: TINT[q.r] || "#fbf6ec", fillOpacity: 1 }).addTo(base));
       const tn = P.towns.map(t => t[0].toLowerCase().replace(/ /g, ""));
-      P.provinces.features.forEach(f => { const q = f.properties, k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
+      P.provinces.forEach(q => { const k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
       const taken = cityLabels.map(c => [c.la, c.lo, c.n.toLowerCase()]);
       P.towns.forEach(([n, la, lo, t]) => { if (taken.some(([a, b, nm]) => Math.abs(a - la) < .12 && Math.abs(b - lo) < .12 || nm === n.toLowerCase())) return;
         lab(la, lo, `<span>${esc(n)}</span>`, `town t${t}`, -1000); });
@@ -186,7 +189,7 @@
     const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui", "pattaya"];
     (D.cities || []).forEach(c => { const ps = D.places.filter(p => p.city === c.id); if (!ps.length) return; const la = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lo = ps.reduce((a, p) => a + p.lng, 0) / ps.length;
       cityLabels.push({ la, lo, n: c.name.split(" (")[0] }); lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
-    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; }; map.on("zoomend", zc); zc();
+    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; cluster(); }; map.on("zoomend", zc); zc();
     D.places.forEach(p => {
       const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
@@ -197,11 +200,25 @@
   const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin sm${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
   function refreshPins() {
     if (!map) return;
-    D.places.forEach(p => { const m = markers[p.id], show = !region || p.region === region; m.setIcon(pinIcon(p)); if (show && !map.hasLayer(m)) m.addTo(map); if (!show && map.hasLayer(m)) map.removeLayer(m); });
+    D.places.forEach(p => markers[p.id].setIcon(pinIcon(p))); cluster();
     if (route) { map.removeLayer(route); route = null; }
     const pts = db.trip.map(place).filter(Boolean).map(p => [p.lat, p.lng]);
     if (pts.length > 1) route = L.polyline(pts, { color: "#e25e3e", weight: 3, opacity: .8, dashArray: "6 8" }).addTo(map);
     (window.__mm || []).forEach(m => map.removeLayer(m)); window.__mm = (db.moments || []).filter(m => m.lat).map(m => L.marker([m.lat, m.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${m.mood || "♥"}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).bindPopup(esc(m.text).slice(0, 140)).addTo(map));
+  }
+  /* Pins that would overlap at this zoom merge into one bubble with a count; tap it to zoom in. */
+  let clusters = [];
+  function cluster() {
+    if (!map || !markers[D.places[0].id]) return; clusters.forEach(c => map.removeLayer(c)); clusters = [];
+    const z = map.getZoom(), groups = [];
+    D.places.filter(p => !region || p.region === region).sort((a, b) => (b.id === sel) - (a.id === sel) || inTrip(b.id) - inTrip(a.id))
+      .forEach(p => { const pt = map.project([p.lat, p.lng], z), g = p.id !== sel && groups.find(g => g.pt.distanceTo(pt) < 38 && g.ps[0].id !== sel); if (g) g.ps.push(p); else groups.push({ pt, ps: [p] }); });
+    const shown = new Set(groups.filter(g => g.ps.length === 1).map(g => g.ps[0].id));
+    D.places.forEach(p => { const m = markers[p.id], on = shown.has(p.id); if (on && !map.hasLayer(m)) m.addTo(map); if (!on && map.hasLayer(m)) map.removeLayer(m); });
+    groups.filter(g => g.ps.length > 1).forEach(g => { const lead = g.ps[0], la = g.ps.reduce((a, p) => a + p.lat, 0) / g.ps.length, lo = g.ps.reduce((a, p) => a + p.lng, 0) / g.ps.length;
+      const cm = L.marker([la, lo], { zIndexOffset: 400, icon: L.divIcon({ className: "", html: `<div class="pin clus${g.ps.some(p => inTrip(p.id)) ? " saved" : ""}" style="background-image:url('${lead.thumb}')"><b>${g.ps.length}</b></div>`, iconSize: [40, 40], iconAnchor: [20, 20] }) }).addTo(map);
+      cm.on("click", e => { L.DomEvent.stop(e); $(".peek")?.remove(); map.fitBounds(g.ps.map(p => [p.lat, p.lng]), { padding: [90, 90], maxZoom: Math.min(11, z + 3) }); });
+      clusters.push(cm); });
   }
   function fitRegion() { if (!map) return; const ps = D.places.filter(p => !region || p.region === region); if (!ps.length) return; if (ps.length === 1) map.setView([ps[0].lat, ps[0].lng], 10); else map.fitBounds(ps.map(p => [p.lat, p.lng]), { padding: [60, 60], maxZoom: 11 }); }
   function peek(p) {
