@@ -14,3 +14,4 @@ A practice recorder for playing and singing with a guitar, as an installable, of
 - **Tune:** a chromatic tuner with standard-tuning reference tones, a metronome with tap tempo, and recording settings.
 
 Recordings are stored on the device (IndexedDB) and never uploaded.
+- **Danny’s Song** groove exercise (added v5): backbeat click on 2 and 4 with a down-up folk strum, climbing from 72 bpm. No lyrics or chords are bundled; add your own under Songs.
