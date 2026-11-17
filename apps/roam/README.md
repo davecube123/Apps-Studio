@@ -2,7 +2,7 @@
 
 A minimal travel companion, starting with Thailand: a map, a few great places, and your trip.
 
-- **Map:** an interactive map (Leaflet, CARTO Voyager tiles from OpenStreetMap data) with each place as a round photo
+- **Map:** an interactive map (Leaflet, OpenStreetMap standard tiles, softened) with each place as a round photo
   pin; tap for a preview card; filter by region; your trip is drawn as a dashed route. Tiles you have seen stay
   cached for offline use.
 - **Places:** 17 hand-picked Thai places (Bangkok, Central, North, Andaman coast, Gulf islands) as photo cards, each
