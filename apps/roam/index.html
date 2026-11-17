@@ -62,6 +62,12 @@
     .lbl.sea { font: italic 500 13px var(--display); color: #6f97a6; transform: translate(-50%, -50%); }
     .lbl.city { display: flex; align-items: center; gap: 5px; transform: translate(-4px, -50%); font: 650 12px var(--sans); color: #4a453d; text-shadow: 0 0 3px #fbf6ec, 0 0 3px #fbf6ec, 0 0 6px #fbf6ec; }
     .lbl.city span { margin-left: 18px; } .lbl.capital { font-size: 13.5px; font-weight: 800; }
+    .lbl.prov { font: 650 9.5px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: #b7a98f; transform: translate(-50%, -50%); }
+    .lbl.town { display: flex; align-items: center; gap: 4px; transform: translate(-3px, -50%); font: 500 11px var(--sans); color: #6b6458; text-shadow: 0 0 3px #fbf6ec, 0 0 3px #fbf6ec; }
+    .lbl.town::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #9a9283; flex: none; }
+    .lbl.town.t1, .lbl.town.t2 { font-weight: 650; font-size: 11.5px; } .lbl.town.t0 { color: #8f897f; font-style: italic; }
+    #map[data-z="5"] .lbl.prov, #map[data-z="6"] .lbl.prov, #map[data-z="7"] .lbl.prov, #map[data-z="5"] .t2, #map[data-z="5"] .t3, #map[data-z="6"] .t3, #map[data-z="5"] .t4, #map[data-z="6"] .t4, #map[data-z="7"] .t4 { display: none; }
+    #map[data-z="9"] .lbl.prov, #map[data-z="10"] .lbl.prov, #map[data-z="11"] .lbl.prov { font-size: 11px; }
     #map.far .lbl.minor { display: none; } #map.far .lbl.country { opacity: .7; }
     .leaflet-control-attribution { font-size: 10px !important; background: rgba(255,255,255,.7) !important; } .leaflet-bottom.leaflet-right { bottom: calc(env(safe-area-inset-bottom) + 72px); }
     .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 56px); }
@@ -91,12 +97,22 @@
     .mpin { width: 28px; height: 28px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-size: 15px; box-shadow: 0 3px 10px rgba(0,0,0,.25); }
     .comfort { background: linear-gradient(160deg, #eaf4ef, var(--card) 70%); }
     .surprise .spark { font-size: 44px; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; } @keyframes pop { from { transform: scale(.2) rotate(-30deg); opacity: 0; } }
+    .crowd { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font: 14px var(--sans); color: var(--ink); text-align: left; cursor: pointer; } .crowd span:nth-child(2) { flex: 1; }
+    .dots { display: inline-flex; gap: 3px; vertical-align: -1px; } .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); } .dots i.on.c1, .dots i.on.c2, .months i.c1, .months i.c2 { background: var(--green); } .dots i.on.c3, .months i.c3 { background: #e0a526; } .dots i.on.c4, .dots i.on.c5, .months i.c4, .months i.c5 { background: var(--accent); }
+    .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; } .months div { display: flex; flex-direction: column; align-items: center; gap: 3px; } .months i { width: 100%; border-radius: 5px; opacity: .55; } .months span { font: 650 10.5px var(--sans); color: var(--muted); } .months .now i { opacity: 1; } .months .now span { color: var(--ink); }
+    .fab { position: fixed; left: 12px; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 550; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); font: 650 14px var(--sans); padding: 11px 16px; box-shadow: 0 6px 18px rgba(0,0,0,.2); cursor: pointer; }
+    body:has(.peek) .fab { display: none; }
+    .abpick { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 8px; align-items: center; margin-top: 8px; }
+    .route { padding: 14px; } .rtags { display: flex; gap: 6px; flex-wrap: wrap; } .rtags span { background: var(--accent2); color: #9a3a22; font: 650 12px var(--sans); padding: 3px 9px; border-radius: 999px; }
+    .rmain { margin: 8px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
+    .sheet { max-height: 88vh; overflow-y: auto; }
     .center { text-align: center; } .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   </style>
 </head>
 <body>
 <div id="map" hidden></div>
 <div class="mapbar" id="mapbar" hidden><div class="in" id="mapchips"></div></div>
+<button class="fab" id="fab" data-act="ab" hidden>⇄ A to B</button>
 <main id="app"></main>
 <nav class="tabs" id="tabs"><div class="in">
   <a href="#/" data-tab="map"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Map</a>
@@ -109,7 +125,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "6";
+  const KEY = "roam", VER = "7";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -150,16 +166,27 @@
     map = L.map("map", { zoomControl: false, attributionControl: true, minZoom: 5, maxZoom: 11, maxBounds: B, maxBoundsViscosity: 1.0, worldCopyJump: false }).setView(D.center, D.zoom);
     /* Our own simple map: country shapes (Natural Earth) + English labels. No tiles, works offline. */
     map.attributionControl.addAttribution("Map data: Natural Earth");
-    fetch("data/geo.json").then(r => r.json()).then(g => {
-      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(map).bringToBack();
+    const base = L.featureGroup().addTo(map);
+    Promise.all([fetch("data/geo.json").then(r => r.json()), fetch("data/provinces.json").then(r => r.json()).catch(() => null)]).then(([g, P]) => {
+      L.geoJSON(g, { interactive: false, style: f => f.properties.id === "th" ? { color: "#c9b99f", weight: 1.2, fillColor: "#fbf6ec", fillOpacity: 1 } : { color: "#d6cfc4", weight: 1, fillColor: "#ebe6dd", fillOpacity: 1 } }).addTo(base);
+      if (!P) return;
+      /* Provinces, softly tinted by region, with English names; towns appear as you zoom in. */
+      const TINT = { n: "#e4eed6", ne: "#f8ead0", c: "#fcf4e6", e: "#f7e3d6", w: "#ebecd8", s: "#dff0e5" };
+      L.geoJSON(P.provinces, { interactive: false, style: f => ({ color: "#cdbb9c", weight: .8, fillColor: TINT[f.properties.r] || "#fbf6ec", fillOpacity: 1 }) }).addTo(base);
+      const tn = P.towns.map(t => t[0].toLowerCase().replace(/ /g, ""));
+      P.provinces.features.forEach(f => { const q = f.properties, k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
+      const taken = cityLabels.map(c => [c.la, c.lo, c.n.toLowerCase()]);
+      P.towns.forEach(([n, la, lo, t]) => { if (taken.some(([a, b, nm]) => Math.abs(a - la) < .12 && Math.abs(b - lo) < .12 || nm === n.toLowerCase())) return;
+        lab(la, lo, `<span>${esc(n)}</span>`, `town t${t}`, -1000); });
     }).catch(() => {});
-    const lab = (lat, lng, html, cls) => L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "lbl " + cls, html, iconSize: null }) }).addTo(map);
+    const lab = (lat, lng, html, cls, z = 0) => L.marker([lat, lng], { interactive: false, keyboard: false, zIndexOffset: z, icon: L.divIcon({ className: "lbl " + cls, html, iconSize: null }) }).addTo(map);
+    const cityLabels = [];
     [["MYANMAR", 19.2, 96.6], ["LAOS", 19.6, 102.6], ["CAMBODIA", 12.9, 104.8], ["VIETNAM", 15.8, 107.6], ["MALAYSIA", 5.0, 101.6]].forEach(([n, la, lo]) => lab(la, lo, n, "country"));
     [["Andaman Sea", 9.6, 96.9], ["Gulf of Thailand", 10.6, 101.7]].forEach(([n, la, lo]) => lab(la, lo, n, "sea"));
-    const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui"];
+    const MAJOR = ["bangkok", "chiang-mai", "phuket", "krabi", "samui", "pattaya"];
     (D.cities || []).forEach(c => { const ps = D.places.filter(p => p.city === c.id); if (!ps.length) return; const la = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lo = ps.reduce((a, p) => a + p.lng, 0) / ps.length;
-      lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
-    const zc = () => map.getContainer().classList.toggle("far", map.getZoom() < 7); map.on("zoomend", zc); zc();
+      cityLabels.push({ la, lo, n: c.name.split(" (")[0] }); lab(la, lo, `<span>${esc(c.name.split(" (")[0])}</span>`, "city" + (c.id === "bangkok" ? " capital" : "") + (MAJOR.includes(c.id) ? "" : " minor")); });
+    const zc = () => { const z = map.getZoom(), el = map.getContainer(); el.classList.toggle("far", z < 7); el.dataset.z = z; }; map.on("zoomend", zc); zc();
     D.places.forEach(p => {
       const m = L.marker([p.lat, p.lng], { icon: pinIcon(p) }).addTo(map);
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
@@ -179,7 +206,7 @@
   function fitRegion() { if (!map) return; const ps = D.places.filter(p => !region || p.region === region); if (!ps.length) return; if (ps.length === 1) map.setView([ps[0].lat, ps[0].lng], 10); else map.fitBounds(ps.map(p => [p.lat, p.lng]), { padding: [60, 60], maxZoom: 11 }); }
   function peek(p) {
     $(".peek")?.remove(); const a = document.createElement("a"); a.className = "peek"; a.href = `#/p/${p.id}`;
-    a.innerHTML = `<img src="${p.thumb}" alt=""><div style="min-width:0"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}</div><b>${esc(p.name)}</b><div class="small ink2">${esc(vibeOf(p) ? vibeOf(p).line : p.line)}</div></div>`;
+    a.innerHTML = `<img src="${p.thumb}" alt=""><div style="min-width:0"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}</div><b>${esc(p.name)}</b><div class="small ink2">${esc(vibeOf(p) ? vibeOf(p).line : p.line)}</div>${crowdAt(p) ? `<div class="small muted" style="margin-top:4px">${dots(crowdAt(p))} ${CROWD[crowdAt(p)]} now</div>` : ""}</div>`;
     document.body.appendChild(a);
   }
   function mapChips() { $("#mapchips").innerHTML = [["", "All"], ...Object.entries(D.regions)].map(([k, n]) => `<button class="chip${region === k ? " on" : ""}" data-act="region" data-v="${k}">${esc(n)}</button>`).join(""); }
@@ -187,8 +214,11 @@
   /* ---------- Views ---------- */
   function route_() { const h = location.hash.replace(/^#\/?/, ""); const [v = "", a = ""] = h.split("/"); return { v: v || "map", a }; }
   function render() {
-    const { v, a } = route_(), isMap = v === "map";
-    $("#map").hidden = !isMap; $("#mapbar").hidden = !isMap; $(".peek")?.remove();
+    const { v, a } = route_();
+    if (v === "import") { const code = a; history.replaceState(null, "", "#/trip"); setTimeout(() => importSheet(code), 50); return render(); }
+    $(".sheet-back:not(.keep)")?.remove();
+    const isMap = v === "map";
+    $("#map").hidden = !isMap; $("#mapbar").hidden = !isMap; $("#fab").hidden = !isMap; $(".peek")?.remove();
     if (isMap) { $("#app").innerHTML = ""; if (!window.L) { $("#app").innerHTML = `<div class="card" style="margin-top:40vh">The map needs a connection the first time. Your places are under Places.</div>`; } else { initMap(); setTimeout(() => map.invalidateSize(), 0); mapChips(); refreshPins(); if (sel && place(sel)) peek(place(sel)); } }
     else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, today: viewToday, moments: viewMoments, events: viewEvents, basics: viewBasics }[v] || viewPlaces)()}</div>`;
     $$("#tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "p" || v === "events" ? "places" : v === "moments" ? "today" : v)));
@@ -240,12 +270,13 @@
     return `<div class="hero"><img src="${p.photo}" alt="${esc(p.name)}"><a class="back" href="javascript:history.back()" aria-label="Back">‹</a><button class="fav${t ? " on" : ""}" data-act="trip" data-v="${p.id}" aria-label="${t ? "Remove from trip" : "Add to trip"}">${t ? "♥" : "♡"}</button></div>
       <div style="margin-top:16px"><div class="eyebrow">${TYPE[p.type] || ""} ${esc(D.regions[p.region])}${c ? ` · ${esc(c.name)}` : ""}</div><h1 style="font-size:28px">${esc(p.name)}</h1>
         ${v ? `<div class="vibes">${v.tags.map(x => `<span>${esc(x)}</span>`).join("")}</div><p class="ink2" style="font-size:17px;margin-top:8px">${esc(v.line)}</p>` : `<p class="ink2" style="font-size:17px">${esc(p.line)}</p>`}</div>
+      ${crowdLine(p)}
       ${c && TILES.some(([k]) => has(k)) ? `<div class="tiles">${TILES.filter(([k]) => has(k)).map(([k, e, n]) => `<button class="tile" data-act="tile" data-v="${p.id}:${k}"><span>${e}</span>${n}</button>`).join("")}</div>` : ""}
       <p style="margin-top:16px">${esc(p.about)}</p>
       <div class="facts"><div class="fact"><span class="small muted">Best time</span><b>${esc(p.best)}</b></div><div class="fact"><span class="small muted">Give it</span><b>${esc(p.days)}</b></div></div>
       <details class="card more"><summary><b>Practical</b> <span class="small muted">fees, getting there, more spots, tips</span></summary>${placeExtras(p)}<div class="card"><h3>Good to know</h3><ul class="tips">${p.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></details>
       <div class="card"><h3>My notes</h3><textarea data-note="${p.id}" placeholder="Where to stay, who recommended it, what to eat…">${esc(db.notes[p.id] || "")}</textarea></div>
-      <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="been" data-v="${p.id}">${been ? "✓ Been here" : "Been here?"}</button><a class="btn sm" href="#/" data-act="showmap" data-v="${p.id}">Show on map</a><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Maps ↗</a></div>
+      <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="been" data-v="${p.id}">${been ? "✓ Been here" : "Been here?"}</button><button class="btn sm" data-act="ab" data-v="${p.city}">⇄ Get here</button><a class="btn sm" href="#/" data-act="showmap" data-v="${p.id}">Show on map</a><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Maps ↗</a></div>
       <p class="small muted" style="margin-top:14px">Photo: Unsplash.</p>`;
   }
   function tileSheet(pid, k) {
@@ -266,8 +297,80 @@
     if ((p.localFavs || []).length) out.push(`<div class="card"><h3>🍜 Local favourites</h3>${p.localFavs.map(x => spot(x)).join("")}</div>`);
     return out.join("");
   }
+  /* ---------- Crowds: an estimate from season, weekday, hour and events (not live data) ---------- */
+  const CROWD = ["", "Quiet", "Calm", "Moderate", "Busy", "Packed"];
+  const PEAK = { "morning-peak": [7, 11], "midday-peak": [10, 14], "afternoon-peak": [14, 18], "evening-peak": [17, 22], "night-peak": [21, 27], "all-day": [9, 18] };
+  const thNow = () => { const d = new Date(Date.now() + 7 * 3600e3); return { m: d.getUTCMonth(), h: d.getUTCHours(), dow: d.getUTCDay(), iso: d.toISOString().slice(0, 10) }; };
+  function crowdAt(p, t = thNow()) {
+    const C = p.crowd; if (!C || !C.months) return 0;
+    let v = C.months[t.m]; const [a, b] = PEAK[C.day] || PEAK["all-day"], h = t.h < 6 && b > 24 ? t.h + 24 : t.h;
+    /* months[] is the month's typical level; weekdays sit below it and weekends above, by the place's weekend factor */
+    if (h >= a && h < b) v += .4; else if (h >= a - 2 && h < b + 2) v -= .3; else v -= 1.5;
+    const w = ((C.weekend || 1) - 1) * 1.5; v += t.dow === 0 || t.dow === 6 ? w : -w * .5;
+    if ((D.events || []).some(e => e.city === p.city && evDated(e) && e.start <= t.iso && (e.end || e.start) >= t.iso)) v += 1;
+    return Math.max(1, Math.min(5, Math.round(v - .2)));
+  }
+  const dots = n => `<span class="dots" aria-hidden="true">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on c" + n : ""}"></i>`).join("")}</span>`;
+  const crowdLine = p => { const n = crowdAt(p); return n ? `<button class="crowd" data-act="crowd" data-v="${p.id}">${dots(n)}<span><b>${CROWD[n]}</b> right now</span><span class="muted">›</span></button>` : ""; };
+  function crowdSheet(pid) {
+    const p = place(pid), C = p.crowd, n = crowdAt(p), m = thNow().m, M = "JFMAMJJASOND";
+    const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">${esc(p.name)}</div><h2>How busy is it?</h2>
+      <p style="margin:4px 0 12px">${dots(n)} <b>${CROWD[n]}</b> <span class="muted small">right now (Thai time)</span></p>
+      <div class="months">${C.months.map((v, i) => `<div class="${i === m ? "now" : ""}"><i class="c${v}" style="height:${8 + v * 9}px"></i><span>${M[i]}</span></div>`).join("")}</div>
+      <p class="small" style="margin:12px 0 4px">🌿 <b>Quietest:</b> ${esc(C.quietest)}</p><p class="small" style="margin:0 0 4px">🔥 <b>Busiest:</b> ${esc(C.busiest)}</p>${C.note ? `<p class="small ink2" style="margin:0">${esc(C.note)}</p>` : ""}
+      <a class="btn sm" style="margin-top:12px" href="${gmaps(p.lat, p.lng, p.name)}" target="_blank" rel="noopener">Live busyness on Google Maps ↗</a>
+      <p class="small muted" style="margin:10px 0 0">An estimate from season, day, hour and festivals, not a live count. Google Maps shows live "Popular times" for many spots.</p>
+      <button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+  }
+
+  /* ---------- A to B: fastest, cheapest and best-balance routes over the legs graph ---------- */
+  const mins = s => String(s).split(/\s*(?:\+|plus)\s*/).reduce((tot, part) => {
+    const one = (x, unit) => { let t = 0, any = false; x.replace(/(\d+(?:\.\d+)?)\s*(h|min)/g, (_, n, u) => { any = true; t += u === "h" ? n * 60 : +n; }); if (!any && /\d/.test(x)) t = parseFloat(x) * (unit === "min" ? 1 : 60); return t; };
+    const [l, r] = part.split(/\s+to\s+/); if (!r) return tot + one(l); const ru = (r.match(/h|min/) || ["h"])[0]; return tot + (one(l, ru) + one(r)) / 2; }, 0);
+  const hm = t => { t = Math.round(t / 5) * 5; const h = Math.floor(t / 60), m = t % 60; return h ? `${h} h${m ? " " + m + " min" : ""}` : `${m} min`; };
+  const OVERHEAD = { flight: 150 }; /* getting to the airport, check-in, bags */
+  function routes(a, b) {
+    const adj = {}; (D.legs || []).forEach(l => { (adj[l.a] = adj[l.a] || []).push([l.b, l.options]); (adj[l.b] = adj[l.b] || []).push([l.a, l.options]); });
+    const out = [], walk = (at, path, steps) => {
+      if (at === b) { out.push(steps); return; } if (steps.length >= 3) return;
+      (adj[at] || []).forEach(([to, opts]) => { if (path.includes(to)) return; opts.forEach(o => walk(to, [...path, to], [...steps, { from: at, to, o }])); }); };
+    walk(a, [a], []);
+    return out.map(steps => { const door = steps.reduce((t, s) => t + mins(s.o.duration) + (OVERHEAD[s.o.mode] || 0), 0) + (steps.length - 1) * 40;
+      return { steps, door, lo: steps.reduce((t, s) => t + s.o.thb[0], 0), hi: steps.reduce((t, s) => t + s.o.thb[1], 0) }; }).filter(r => r.door > 0);
+  }
+  function bestRoutes(a, b) {
+    const R = routes(a, b); if (!R.length) return [];
+    const cost = r => (r.lo + r.hi) / 2, tMin = Math.min(...R.map(r => r.door)), cMin = Math.max(1, Math.min(...R.map(cost)));
+    const pick = f => R.reduce((x, y) => f(y) < f(x) ? y : x);
+    const fast = pick(r => r.door + cost(r) / 1000), cheap = pick(r => cost(r) + (r.steps.length - 1) * 200 + r.door / 4), best = pick(r => r.door / tMin + cost(r) / cMin + (r.steps.length - 1) * .35);
+    const res = []; [[best, "Best balance", "🙂"], [fast, "Fastest", "⚡"], [cheap, "Cheapest", "🪙"]].forEach(([r, n, e]) => { const had = res.find(x => x.r === r); if (had) had.tags.push([n, e]); else res.push({ r, tags: [[n, e]] }); });
+    return res;
+  }
+  const cname = id => { const c = city(id); return c ? c.name.split(" (")[0] : id; };
+  function routeCard({ r, tags }, i) {
+    const single = r.steps.length === 1;
+    return `<div class="card route"><div class="row between"><div class="rtags">${tags.map(([n, e]) => `<span>${e} ${n}</span>`).join("")}</div><b>${range([r.lo, r.hi], "THB")}</b></div>
+      <div class="rmain">${r.steps.map(s => MODE[s.o.mode] || "•").join(" → ")} <b>${hm(r.door)}</b> <span class="small muted">door to door${r.steps.some(s => s.o.mode === "flight") ? ", incl. airport time" : ""}</span></div>
+      ${r.steps.map(s => `<div class="rstep small"><span>${single ? "" : `${esc(cname(s.from))} → ${esc(cname(s.to))}: `}${esc(s.o.mode)}, ${esc(s.o.duration)}</span><span class="muted">${range(s.o.thb, "THB")}</span></div>${s.o.note && !i ? `<div class="small ink2 rnote">${esc(s.o.note)}</div>` : ""}`).join("")}</div>`;
+  }
+  let ab = { a: "", b: "" };
+  function abSheet(to) {
+    if (to) { ab.b = to; if (!ab.a || ab.a === to) { const W = whereNow(), h = W ? W.S[W.i].city : "bangkok"; ab.a = h !== to ? h : to !== "bangkok" ? "bangkok" : ""; } }
+    const groups = {}; (D.cities || []).forEach(c => { const p = D.places.find(x => x.city === c.id); const g = p ? D.regions[p.region] : "Other"; (groups[g] = groups[g] || []).push(c); });
+    const opts = sel_ => `<option value="">Choose…</option>` + Object.entries(groups).map(([g, cs]) => `<optgroup label="${esc(g)}">${cs.map(c => `<option value="${c.id}"${c.id === sel_ ? " selected" : ""}>${esc(cname(c.id))}</option>`).join("")}</optgroup>`).join("");
+    const res = ab.a && ab.b && ab.a !== ab.b ? bestRoutes(ab.a, ab.b) : null;
+    $(".sheet-back")?.remove(); const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet ab"><h2>Get from A to B</h2>
+      <div class="abpick"><select data-ab="a" aria-label="From">${opts(ab.a)}</select><button class="iconbtn" data-act="abswap" aria-label="Swap">⇅</button><select data-ab="b" aria-label="To">${opts(ab.b)}</select></div>
+      ${res === null ? `<p class="small muted" style="margin-top:12px">Pick where you are and where you're going.</p>` : res.length ? res.map(routeCard).join("") + `<p class="small muted" style="margin:10px 2px 0">Prices per person, typical ranges; book flights early for the low end. Times include waiting and connections.</p>` : `<p class="small muted" style="margin-top:12px">No good public route we know of. A private car or a flight via Bangkok is the usual answer.</p>`}
+      <button class="btn block" data-act="closesheet" style="margin-top:12px">Close</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b);
+  }
+
   /* ---------- Ease, comfort, surprise, happiness ---------- */
-  const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet." };
+  const STAY_AREA = { bangkok: "Riverside or Banglamphu for the old city and temples; Sukhumvit (Asok to Phrom Phong) for the BTS, food and nightlife. Stay near a BTS or MRT station and Bangkok gets easy.", ayutthaya: "On the old-city island, near the river or the historical park, so you can cycle to the ruins.", kanchanaburi: "Along the River Kwai, quiet raft houses and garden guesthouses within walking distance of the bridge.", sukhothai: "In Old Sukhothai beside the historical park, not New Sukhothai, so you can cycle the ruins at sunrise.", "chiang-mai": "Inside or just outside the Old City moat for temples and markets on foot; Nimman for cafés and a modern feel.", pai: "Walking distance from the town centre, or a quiet bungalow a few minutes out among the rice fields.", "chiang-rai": "Near the clock tower and night bazaar: walkable, with easy rides to the temples.", "khao-sok": "One night in the jungle near the park entrance, one night on the lake in a floating raft house.", krabi: "Ao Nang for easy boats and restaurants; Railay itself for the cliffs without the crowds after 5 pm.", "phi-phi": "The quieter ends of Phi Phi Don (Long Beach or Laem Tong) if you want sleep; Tonsai village if you want nightlife.", phuket: "Old Town for character and food; Kata or Karon for an easy beach; avoid Patong if you want calm.", lanta: "Long Beach or Klong Dao on the west coast: sunsets, easy swimming and good value.", samui: "Bophut (Fisherman's Village) for charm and calm; Chaweng for beach life and nightlife.", "koh-tao": "Sairee Beach for sunsets and dive shops; Tanote or Shark Bay side for quiet.", "koh-chang": "White Sand Beach for easy food and nightlife; Klong Prao or Kai Bae for calmer beaches; Lonely Beach for backpacker parties.", "koh-kood": "The west coast beaches (Klong Chao, Ao Tapao, Bang Bao) for calm water and sunsets; most resorts include the pier pickup.", "koh-mak": "Ao Kao on the south-west for sunsets and walkable cafés, or Ao Suan Yai for a long, quiet beach.", "koh-samet": "Ao Wong Deuan or Ao Phai for easy food and evening fire shows; Ao Prao on the west side for sunsets and quiet.", pattaya: "Naklua or Wong Amat for calm and cleaner sea; Jomtien for a relaxed local feel. Avoid Walking Street if you want sleep.", "hua-hin": "Near the night market and old town for food on foot, or south towards Khao Takiab for a quieter beach.", "khao-yai": "Along Thanarat Road near the park's northern gate, so early wildlife drives are easy. You'll want a car or a driver.", amphawa: "A canal-side homestay in Amphawa itself, so you can stay for the evening market and the firefly boats.", lopburi: "Near the train station in the new town for easy trains; the monkey temples are best as a day visit.", "phang-nga": "Koh Yao Noi for calm island life between Phuket and Krabi; Phang Nga town for a cheap base for bay tours.", similan: "Khao Lak (Bang Niang or Nang Thong beach); Similan boats pick up from hotels there.", "koh-lipe": "Sunrise Beach for swimming and space; Pattaya Beach for restaurants and boats; Walking Street sits in between.", "mae-hong-son": "Around Jong Kham Lake in town: walkable, prettily lit at night, with the temples reflected in the water." };
   const PHRASES = [["Hello", "Sawasdee khrap", "สวัสดีครับ"], ["Thank you", "Khop khun khrap", "ขอบคุณครับ"], ["Sorry / excuse me", "Kho thot khrap", "ขอโทษครับ"], ["How much?", "Tao rai khrap?", "เท่าไหร่ครับ"], ["Can you lower the price?", "Lot dai mai khrap?", "ลดได้ไหมครับ"], ["Not spicy, please", "Mai phet khrap", "ไม่เผ็ดครับ"], ["A little spicy", "Phet nit noi", "เผ็ดนิดหน่อย"], ["Delicious!", "Aroi!", "อร่อย"], ["The bill, please", "Check bin khrap", "เช็คบิลครับ"], ["Where is the toilet?", "Hong nam yoo tee nai khrap?", "ห้องน้ำอยู่ที่ไหนครับ"], ["Water, please", "Nam plao khrap", "น้ำเปล่าครับ"], ["No problem / never mind", "Mai pen rai", "ไม่เป็นไร"], ["Help!", "Chuay duay!", "ช่วยด้วย"]];
   const PACK = [["Documents", ["Passport (6+ months valid) and a photo of it", "Thailand Digital Arrival Card done online before you fly", "Travel insurance details", "Some baht in cash for arrival"]], ["Comfort", ["Light, breathable clothes", "One temple outfit: shoulders and knees covered", "A light jumper for cold buses, planes and northern nights", "Comfortable walking sandals", "Sunglasses and a hat", "Reusable water bottle"]], ["Health", ["Sunscreen (reef-safe for the islands)", "Insect repellent", "Motion-sickness tablets (boats, the Pai road)", "Rehydration salts and your usual medicines", "Small first-aid kit"]], ["Gear", ["Power bank and charging cables", "Universal plug adapter", "Dry bag for boats and beaches", "Small day pack", "Rain poncho (May to October)"]]];
   const MOODS = ["😊", "😍", "🤩", "😌", "😂", "🥹", "😮‍💨"];
@@ -330,6 +433,27 @@
     b.innerHTML = `<div class="sheet center surprise"><div class="spark">✨</div><div class="eyebrow">${k}</div><h2 style="margin-top:6px">${esc(x.name)}</h2><p class="ink2">${esc(x.what)}</p><p class="small">${x.thb ? range(x.thb, "THB") : "Free"}</p><a class="btn acc block" href="${gmaps(x.lat, x.lng, x.name)}" target="_blank" rel="noopener">Take me there ↗</a><button class="btn block" data-act="surprise" style="margin-top:8px;border:0;background:none">Another one</button></div>`;
     b.addEventListener("click", e => { if (e.target === b) b.remove(); }); $(".sheet-back")?.remove(); document.body.appendChild(b);
   }
+  /* ---------- Sharing ---------- */
+  const APP_URL = () => location.href.split("#")[0];
+  const b64u = str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64u = str => decodeURIComponent(escape(atob(str.replace(/-/g, "+").replace(/_/g, "/"))));
+  async function shareLink(title, text, url) {
+    if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(url); toast("Link copied. Paste it in a chat."); } catch { prompt("Copy this link:", url); }
+  }
+  function tripCode() { const P = db.plan; return b64u(JSON.stringify({ v: 1, c: db.country, t: db.trip, n: P.nights, s: P.style, p: P.travelers, d: P.start || "", l: P.leg })); }
+  function importSheet(code) {
+    let T; try { T = JSON.parse(unb64u(code)); } catch { toast("That trip link looks broken"); location.hash = "#/"; return; }
+    const ids = (T.t || []).filter(id => place(id)); if (!ids.length) { toast("That trip has no places"); location.hash = "#/"; return; }
+    const b = document.createElement("div"); b.className = "sheet-back";
+    b.innerHTML = `<div class="sheet"><div class="eyebrow">A friend shared a trip</div><h2 style="margin-top:6px">${ids.length} place${ids.length > 1 ? "s" : ""}${T.d ? ` · from ${esc(dShort(T.d))}` : ""}</h2>
+      <div style="margin:10px 0">${ids.map((id, i) => `<div class="row small" style="margin-top:6px"><span class="n" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 11px var(--sans);flex:none">${i + 1}</span>${esc(place(id).name)}</div>`).join("")}</div>
+      ${db.trip.length ? `<p class="small muted">You already have ${db.trip.length} place${db.trip.length > 1 ? "s" : ""} in your trip.</p>` : ""}
+      <button class="btn acc block" data-act="importtrip" data-v="replace">${db.trip.length ? "Use this trip (replace mine)" : "Use this trip"}</button>
+      ${db.trip.length ? `<button class="btn block" data-act="importtrip" data-v="merge" style="margin-top:8px">Add these places to my trip</button>` : ""}
+      <button class="btn block" data-act="closesheet" style="margin-top:8px;border:0;background:none">Not now</button></div>`;
+    b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); window.__imp = { T, ids };
+  }
   /* ---------- Planner ---------- */
   function stops() { const S = []; db.trip.map(place).filter(Boolean).forEach(p => { const last = S[S.length - 1]; if (last && last.city === p.city) last.places.push(p); else S.push({ city: p.city, places: [p] }); }); return S; }
   const defNights = st => Math.max(1, Math.round(st.places.reduce((a, p) => a + (parseFloat(p.days) || .5), 0)));
@@ -378,7 +502,8 @@
       <div class="card"><h3>Trip start date</h3><input type="date" data-start value="${esc(P.start || "")}" style="margin-top:6px"></div>
       <div class="card"><h3>Flights to Thailand <span class="small muted">(optional)</span></h3><div class="row" style="gap:8px;margin-top:6px"><span class="small">Return fare per person, in baht</span><input type="number" data-flight value="${+P.flight || ""}" placeholder="e.g. 9000" inputmode="numeric" style="width:120px;margin-left:auto"></div>${fx() ? `<p class="small muted" style="margin:6px 0 0">₱1 ≈ ฿${(1 / fx()).toFixed(2)}</p>` : ""}</div>
       </details>
-      <a class="btn pri block" href="#/" style="margin-top:12px">See the route on the map</a>`;
+      <div class="row" style="gap:8px;margin-top:12px"><a class="btn pri" href="#/" style="flex:1">See the route on the map</a><button class="btn" data-act="sharetrip">↗ Share trip</button></div>
+      <p class="small muted" style="margin:8px 4px 0">Sharing sends your route, nights, budget style and dates. Never your notes, moments or photos.</p>`;
   }
   function viewBasics() {
     return `<div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Basics</h1>
@@ -388,7 +513,8 @@
       <div class="card"><h3>Packing list</h3>${PACK.map(([g, items]) => `<div class="small muted" style="margin-top:10px">${g}</div>${items.map(it => `<label class="row small" style="gap:8px;margin-top:6px"><input type="checkbox" data-pack="${esc(it)}" ${db.packed[it] ? "checked" : ""}><span${db.packed[it] ? ' style="text-decoration:line-through;color:var(--muted)"' : ""}>${esc(it)}</span></label>`).join("")}`).join("")}</div>${D.basics.map(([h, t]) => `<div class="card"><h3>${esc(h)}</h3><p class="ink2" style="margin:0">${esc(t)}</p></div>`).join("")}
       ${(D.sources || []).length ? `<details class="card"><summary><b>Price sources</b></summary>${D.sources.map(x => `<p class="small" style="margin:6px 0 0"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a></p>`).join("")}</details>` : ""}
       <div class="card"><h3>Countries</h3><p class="small ink2" style="margin:0">Thailand for now. More are coming.</p></div>
-      ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:12px">Install on your phone</button>`}
+      <button class="btn acc block" data-act="shareapp" style="margin-top:12px">↗ Share Roam with friends</button>
+      ${isStandalone() ? "" : `<button class="btn block" data-act="install" style="margin-top:8px">Install on your phone</button>`}
       <p class="small muted" style="margin-top:16px">Photos from Unsplash (Unsplash License). Map: Natural Earth country shapes (public domain), drawn by Roam. Map library: Leaflet (BSD-2). Practical details change: check entry rules and opening times before you go.</p>
       <div class="ver">Roam v${VER}</div>`;
   }
@@ -417,10 +543,18 @@
     else if (a === "cur") { db.plan.cur = v; save(); render(); }
     else if (a === "nights") { const st = stops()[+v.split("@")[1]]; const cur = +db.plan.nights[v] || defNights(st); db.plan.nights[v] = Math.max(1, Math.min(60, cur + +el.dataset.d)); save(); render(); }
     else if (a === "surprise") surprise();
+    else if (a === "shareapp") shareLink("Roam", "A simple travel companion for Thailand: map, places, a cost planner, events and insider tips. Works offline.", APP_URL());
+    else if (a === "sharetrip") { const n = db.trip.length; shareLink("My Thailand trip", `My Thailand trip on Roam: ${n} place${n > 1 ? "s" : ""}. Open it to see the route and costs.`, `${APP_URL()}#/import/${tripCode()}`); }
+    else if (a === "importtrip") { const { T, ids } = window.__imp || {}; if (!ids) return; if (v === "merge") db.trip = [...db.trip, ...ids.filter(id => !db.trip.includes(id))];
+      else { db.trip = ids; Object.assign(db.plan, { nights: T.n || {}, style: T.s || db.plan.style, travelers: T.p || db.plan.travelers, start: T.d || "", leg: T.l || {} }); }
+      save(); $(".sheet-back")?.remove(); toast("Trip loaded"); render(); }
     else if (a === "evcity") { evCity = v; render(); }
     else if (a === "evgo") { evCity = v; $(".sheet-back")?.remove(); }
     else if (a === "tile") { const [pid, k] = v.split(":"); tileSheet(pid, k); }
     else if (a === "closesheet") $(".sheet-back")?.remove();
+    else if (a === "crowd") crowdSheet(v);
+    else if (a === "ab") { $(".peek")?.remove(); abSheet(v || ""); }
+    else if (a === "abswap") { [ab.a, ab.b] = [ab.b, ab.a]; abSheet(); }
     else if (a === "moment") momentSheet(false); else if (a === "three") momentSheet(true);
     else if (a === "mood") { $$("#moods .chip").forEach(c => c.classList.toggle("on", c === el)); }
     else if (a === "savemoment") { (async () => { const text = $("#mtext").value.trim(); if (!text) return toast("Write a few words first"); const W = whereNow(), m = { id: Date.now().toString(36), at: Date.now(), text, mood: ($("#moods .chip.on") || {}).dataset?.v || "😊", kind: v || "", city: W ? W.S[W.i].city : "" };
@@ -434,6 +568,7 @@
   });
   document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
   document.addEventListener("change", e => { const el = e.target;
+    if (el.dataset.ab) { const k = el.dataset.ab, o = k === "a" ? "b" : "a"; ab[k] = el.value; if (ab[o] === el.value) ab[o] = ""; abSheet(); return; }
     if (el.dataset.leg) { db.plan.leg[el.dataset.leg] = +el.value; save(); render(); }
     else if (el.dataset.extra) { db.plan.extras[el.dataset.extra] = el.checked; save(); render(); }
     else if (el.hasAttribute("data-flight")) { db.plan.flight = +el.value || 0; save(); render(); }

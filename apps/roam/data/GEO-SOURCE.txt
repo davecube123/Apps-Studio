@@ -1,1 +1,1 @@
-Country shapes: Natural Earth (public domain), via world-atlas 2.0.2 (ISC licence, Michael Bostock).
+Country shapes: Natural Earth 1:10m admin 0 (via world-atlas topojson). Provinces: Natural Earth 1:10m admin 1, simplified with mapshaper. Towns: Natural Earth 1:10m populated places. Natural Earth is public domain.

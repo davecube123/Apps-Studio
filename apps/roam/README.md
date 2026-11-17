@@ -2,10 +2,13 @@
 
 A minimal travel companion, starting with Thailand: a map, a few great places, and your trip.
 
-- **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes with English city labels: no tiles, works offline) with each place as a round photo
-  pin; tap for a preview card; filter by region; your trip is drawn as a dashed route. Tiles you have seen stay
-  cached for offline use.
-- **Places:** 17 hand-picked Thai places (Bangkok, Central, North, Andaman coast, Gulf islands) as photo cards, each
+- **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes and 77 province boundaries softly tinted by region, with English town and province
+  labels that appear as you zoom in: no tiles, works offline) with each place as a round photo pin; tap for a preview
+  card (with how busy it is now); filter by region; your trip is drawn as a dashed route. **⇄ A to B:** pick any two
+  towns and see the best-balance, fastest and cheapest way between them (up to three hops, door-to-door time incl.
+  airport time, fares per person); also “Get here” on every place page.
+- **Places:** 31 hand-picked Thai places (Bangkok, Central, North, East coast incl. Koh Chang, Koh Kood, Koh Mak and
+  Koh Samet, Gulf islands, Andaman coast incl. Similan and Koh Lipe) as photo cards, each
   with a short original description, practical tips, best time, how long to stay, your own notes, “Been here”, and an
   Open in Google Maps link.
 - **Plan:** your places grouped into stops with nights per stop; choose how to travel each hop (direct, or routed via a
@@ -17,16 +20,21 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
 - **Vibe and four tiles per place:** 🍜 Eat, 🎒 Do, 🎉 Night, 💡 Know (insider tips), per city with prices and map links;
   everything else folds into “Practical”. **Wish I'd known:** 15 country-wide tips (7-Eleven beer prices, alcohol hours,
   ATM fees, SuperRich, Airport Rail Link, scams). Map limited to Thailand.
-- **Events:** 48 festivals, holidays, concerts, raves and recurring party nights (Nov 2026 to 2027) with dates, tips and
+- **Events:** 80+ festivals, holidays, concerts, raves and recurring party nights (Nov 2026 to 2027) with dates, tips and
   ticket links; estimated lunar dates are flagged. “What's on” by month and city, an Events tile per place with live
   listing links, “Happening soon” on Today, and festivals that fall during your trip on Plan.
 - **Place pages (Practical):** when to go and time of day, entry fees, getting there and around with fares, popular spots, hidden
   gems and local favourites with prices and map links.
 - **Basics:** baht to peso converter, 13 Thai phrases you can hear, a packing list, practical info and price sources.
-- **Data (Nov 2026):** 14 cities, 31 routes with 64 options, fees from official sources; transport fares are typical
+- **How busy:** each place shows a one-line crowd estimate for right now (season, weekday, Thai time of day and
+  festivals), with a month strip, the quietest and busiest times, and a link to Google Maps' live busyness.
+- **Data (Nov 2026):** 28 cities, 63 routes, fees from official sources; transport fares are typical
   ranges and hotel/food/local bands are estimates; exchange rate from the BSP reference.
 - **Basics:** money, getting around, weather by coast, temple etiquette, respect, phone and power, entry, emergencies.
 - Built to add more countries: one data file per country in `data/`.
 
 Photos: Unsplash (Unsplash License), bundled and resized. Map library: Leaflet 1.9.4 (BSD-2, `lib/LEAFLET-LICENSE.txt`).
 Fonts: Fraunces, Inter (SIL OFL). Everything you add stays on the device.
+
+- `COUNTRY-GUIDE.md` is the checklist for adding a country (what places to cover, fields, self-checks) and lists the
+  remaining Thailand gaps (Isaan, Trang islands, Nan, Kanchanaburi town).
