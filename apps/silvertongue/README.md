@@ -4,9 +4,9 @@ A private, PIN-locked training course for the spoken (and written) word: persuas
 leading conversations, attraction, tension, anticipation, direct and indirect influence, texting,
 and spotting manipulation. Unlisted: reachable by its link only.
 
-- **9 modules, 63 techniques.** Each has a difficulty rating, an effectiveness rating, an evidence
+- **12 modules, 91 techniques:** Presence & Listening, Persuasion, Leading the Conversation, Storytelling, Ericksonian Language (truisms, yes-set, pacing and leading, permissive suggestion, embedded commands, presuppositions, double binds, nested stories, utilization; honestly rated), Attraction & Flirting, Subtlety & Implication, Tension & Polarity, Anticipation & Desire, Direct & Indirect, Texting & Written Words, Shields. Each has a difficulty rating, an effectiveness rating, an evidence
   label (research-backed, practitioner-proven or anecdotal), direct/indirect tag, sources, why it
-  works, steps, common mistakes, an ethics line, 6 to 10 "flat → crafted" examples (read aloud on
+  works, steps, common mistakes, an ethics line (*emphasis* marked in gold), 6 to 10 "flat → crafted" examples (read aloud on
   tap), rewrite drills with model answers and two scenario quizzes.
 - **Learn:** rank (Apprentice → Silvertongue), XP, streak, today's technique, module progress.
 - **Browse:** filter by module and direct/indirect; sort by best value, most effective, easiest, hardest.

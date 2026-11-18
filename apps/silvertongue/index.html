@@ -129,7 +129,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis (analog marking): shown highlighted, never read as asterisks */
@@ -191,10 +191,10 @@
     const t = BY[id]; if (!t) return viewHome(); const m = D.modules.find(x => x.techniques.includes(t)), x = M(id);
     if (!x.r) { x.r = 1; save(); setTimeout(() => gain(5, "new technique"), 300); }
     const ctxs = [...new Set(t.examples.map(e => e.ctx))];
-    const learn = `<div class="card"><p style="font:500 20px/1.4 var(--display);margin:0">${esc(t.summary)}</p></div>
-      <h3>Why it works</h3><p class="ink2">${esc(t.why)}</p>
-      <h3>How to do it</h3><ol class="steps">${t.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-      <h3>Common mistakes</h3><ul class="list">${t.mistakes.map(s => `<li class="ink2">${esc(s)}</li>`).join("")}</ul>
+    const learn = `<div class="card"><p style="font:500 20px/1.4 var(--display);margin:0">${fx(t.summary)}</p></div>
+      <h3>Why it works</h3><p class="ink2">${fx(t.why)}</p>
+      <h3>How to do it</h3><ol class="steps">${t.steps.map(s => `<li>${fx(s)}</li>`).join("")}</ol>
+      <h3>Common mistakes</h3><ul class="list">${t.mistakes.map(s => `<li class="ink2">${fx(s)}</li>`).join("")}</ul>
       <div class="card ethics"><div class="eyebrow" style="color:var(--sky)">Use it well</div><p class="small ink2" style="margin:6px 0 0">${esc(t.ethics)}</p></div>
       ${t.sources && t.sources.length ? `<h3>Sources</h3><p class="small muted">${t.sources.map(esc).join(" · ")}</p>` : ""}
       <button class="btn pri block" data-act="tab" data-v="examples" style="margin-top:16px">See ${t.examples.length} examples ›</button>`;
@@ -202,7 +202,7 @@
     const examples = `<div class="chips" style="margin-top:6px"><button class="chip${exCtx ? "" : " on"}" data-act="exctx" data-v="">All</button>${ctxs.map(c => `<button class="chip${exCtx === c ? " on" : ""}" data-act="exctx" data-v="${c}">${esc(CTX[c] || c)}</button>`).join("")}</div>
       ${exs.map(e => `<div class="ex"><div class="row"><span class="ctx">${esc(CTX[e.ctx] || e.ctx)}</span><button class="say" data-act="speak" data-v="${esc(e.better.replace(/\*/g, ""))}">▶ hear it</button></div>${t._mod === "defence" ? `${e.flat ? `<div class="small muted" style="margin-top:6px">They say</div><div style="font-size:15px;color:var(--rose)">“${fx(e.flat)}”</div>` : ""}<div class="small muted" style="margin-top:8px">You say</div><div class="better" style="margin-top:0">“${fx(e.better)}”</div>` : `${e.flat ? `<div class="flat">${fx(e.flat)}</div>` : ""}<div class="better">“${fx(e.better)}”</div>`}${e.note ? `<div class="why">${esc(e.note)}</div>` : ""}</div>`).join("")}
       <button class="btn pri block" data-act="tab" data-v="practise" style="margin-top:16px">Practise it ›</button>`;
-    const practise = `${t.drills.map((d, i) => `<div class="card"><div class="eyebrow">Drill ${i + 1}</div><p style="margin:6px 0 10px">${esc(d.prompt)}</p><textarea data-drill="${id}:${i}" placeholder="Write your line, then compare.">${esc((S.drafts || {})[id + ":" + i] || "")}</textarea>
+    const practise = `${t.drills.map((d, i) => `<div class="card"><div class="eyebrow">Drill ${i + 1}</div><p style="margin:6px 0 10px">${fx(d.prompt)}</p><textarea data-drill="${id}:${i}" placeholder="Write your line, then compare.">${esc((S.drafts || {})[id + ":" + i] || "")}</textarea>
         <button class="btn sm" data-act="reveal" data-v="${i}" style="margin-top:8px">Compare with model answers</button><div id="mod-${i}" hidden>${d.models.map(s => `<div class="model">${fx(s)}</div>`).join("")}</div></div>`).join("")}
       ${t.quiz.map((q, i) => `<div class="card qbox" data-q="${i}"><div class="eyebrow">Scenario ${i + 1}</div><p class="q" style="margin:6px 0 4px">${esc(q.scenario)}</p>${q.options.map((o, k) => `<button class="opt" data-act="answer" data-v="${id}|${i}|${k}">${esc(o)}</button>`).join("")}<div class="explain" hidden>${esc(q.why)}</div></div>`).join("")}
       <div class="card"><div class="eyebrow">Field test</div><p class="small ink2" style="margin:6px 0 10px">Used it for real? Log what you said and what happened. That's how it becomes yours.</p><button class="btn pri block" data-act="field" data-v="${id}">Log a real use (+25 XP)</button></div>`;
