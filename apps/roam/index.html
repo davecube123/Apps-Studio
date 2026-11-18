@@ -71,7 +71,7 @@
     #map[data-z="9"] .lbl.prov, #map[data-z="10"] .lbl.prov, #map[data-z="11"] .lbl.prov { font-size: 11px; }
     #map.far .lbl.minor { display: none; } #map.far .lbl.country { opacity: .7; }
     .leaflet-control-attribution { font-size: 10px !important; background: rgba(255,255,255,.7) !important; } .leaflet-bottom.leaflet-right { bottom: calc(env(safe-area-inset-bottom) + 72px); }
-    .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 56px); }
+    .leaflet-top.leaflet-left { top: calc(env(safe-area-inset-top) + 104px); }
     .view { animation: fade .25s both; } @keyframes fade { from { opacity: 0; } } @keyframes up { from { transform: translateY(16px); opacity: 0; } }
     .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 90px); transform: translateX(-50%); z-index: 900; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font: 650 14px var(--sans); animation: up .25s both; }
     .sheet-back { position: fixed; inset: 0; z-index: 800; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; } .sheet { width: min(560px,100%); background: var(--card); border-radius: 24px 24px 0 0; padding: 18px 20px calc(env(safe-area-inset-bottom) + 18px); animation: up .3s both; }
@@ -119,12 +119,28 @@
     .route { padding: 14px; } .rtags { display: flex; gap: 6px; flex-wrap: wrap; } .rtags span { background: var(--accent2); color: #9a3a22; font: 650 12px var(--sans); padding: 3px 9px; border-radius: 999px; }
     .rchain { margin: 8px 0 2px; font: 600 14px var(--sans); color: var(--ink2); } .rchain span { font-size: 13px; } .rmain { margin: 2px 0 4px; font-size: 15px; } .rstep { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; } .rnote { margin: 2px 0 0; } .rstep span:last-child, .route .between > b { white-space: nowrap; }
     .sheet { max-height: 88vh; overflow-y: auto; }
+    .mapbar .mcol { pointer-events: auto; width: min(640px, 100%); display: flex; flex-direction: column; gap: 8px; }
+    .msearch { position: relative; display: flex; align-items: center; background: var(--card); border-radius: 999px; box-shadow: 0 4px 16px rgba(0,0,0,.12); border: 1px solid var(--line); }
+    .msearch input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font: 16px var(--sans); color: var(--ink); padding: 11px 12px 11px 4px; }
+    .msearch input::-webkit-search-cancel-button { display: none; }
+    .mglass { font-size: 20px; color: var(--muted); padding: 0 4px 0 14px; transform: rotate(-45deg); }
+    .mclear { border: 0; background: none; font-size: 22px; color: var(--muted); padding: 0 14px; cursor: pointer; }
+    .mres { background: var(--card); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.16); border: 1px solid var(--line); max-height: 52vh; overflow-y: auto; }
+    .mrow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 10px 14px; font: 15px var(--sans); color: var(--ink); cursor: pointer; }
+    .mrow:first-child { border-top: 0; } .mrow .k { width: 30px; height: 30px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; flex: none; font-size: 15px; overflow: hidden; }
+    .mrow .k img { width: 100%; height: 100%; object-fit: cover; } .mrow b { display: block; font-weight: 650; } .mrow span.s { font-size: 13px; color: var(--muted); }
+    .hit { display: flex; flex-direction: column; align-items: center; pointer-events: auto; transform: translate(-50%, -100%); }
+    .hit .lab { background: var(--ink); color: var(--bg); font: 650 12.5px var(--sans); padding: 5px 10px; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+    .hit .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; margin-top: 4px; box-shadow: 0 0 0 0 rgba(226,94,62,.5); animation: ping 1.6s ease-out infinite; }
+    @keyframes ping { to { box-shadow: 0 0 0 16px rgba(226,94,62,0); } }
+    .psearch { width: 100%; font: 16px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); outline: none; margin: 4px 0 8px; }
+    .psearch:focus { border-color: var(--ink); }
     .center { text-align: center; } .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   </style>
 </head>
 <body>
 <div id="map" hidden></div>
-<div class="mapbar" id="mapbar" hidden><div class="in" id="mapchips"></div></div>
+<div class="mapbar" id="mapbar" hidden><div class="mcol"><div class="msearch"><span class="mglass" aria-hidden="true">⌕</span><input id="mq" type="search" autocomplete="off" enterkeyhint="search" placeholder="Search places, food, beaches, towns…" aria-label="Search the map"><button class="mclear" data-act="mclear" aria-label="Clear" hidden>×</button></div><div id="mres" class="mres" hidden></div><div class="in" id="mapchips"></div></div></div>
 <button class="fab" id="fab" data-act="ab" hidden>⇄ A to B</button>
 <main id="app"></main>
 <nav class="tabs" id="tabs"><div class="in">
@@ -138,7 +154,7 @@
 <script>
 (() => {
   "use strict";
-  const KEY = "roam", VER = "11";
+  const KEY = "roam", VER = "12";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = m => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -192,6 +208,7 @@
       P.provinces.forEach(q => L.polygon(q.g.map(ring), { interactive: false, color: "#cdbb9c", weight: .8, fillColor: TINT[q.r] || "#fbf6ec", fillOpacity: 1 }).addTo(base));
       const tn = P.towns.map(t => t[0].toLowerCase().replace(/ /g, ""));
       P.provinces.forEach(q => { const k = q.n.toLowerCase().replace(/ /g, ""); if (tn.some(t => k.includes(t) || t.includes(k)) || (D.cities || []).some(c => c.name.toLowerCase().replace(/ /g, "").includes(k))) return; lab(q.la, q.lo, esc(q.n), "prov", -2000); });
+      TOWNS = P.towns || []; PROVS = (P.provinces || []).map(q => ({ n: q.n, la: q.la, lo: q.lo })); SIDX = null;
       const taken = cityLabels.map(c => [c.la, c.lo, c.n.toLowerCase()]);
       P.towns.forEach(([n, la, lo, t]) => { if (taken.some(([a, b, nm]) => Math.abs(a - la) < .12 && Math.abs(b - lo) < .12 || nm === n.toLowerCase())) return;
         lab(la, lo, `<span>${esc(n)}</span>`, `town t${t}`, -1000); });
@@ -209,7 +226,7 @@
       m.on("click", () => { sel = p.id; refreshPins(); peek(p); map.panTo([p.lat, p.lng], { animate: true }); });
       markers[p.id] = m;
     });
-    map.on("click", () => { sel = null; refreshPins(); $(".peek")?.remove(); });
+    map.on("click", () => { sel = null; refreshPins(); $(".peek")?.remove(); clearHit(); const r = $("#mres"); if (r) r.hidden = true; });
   }
   const pinIcon = p => L.divIcon({ className: "", html: `<div class="pin sm${sel === p.id ? " sel" : ""}${inTrip(p.id) ? " saved" : ""}" style="background-image:url('${p.thumb}')"></div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
   function refreshPins() {
@@ -254,13 +271,59 @@
     else $("#app").innerHTML = `<div class="view">${({ places: viewPlaces, p: () => viewPlace(a), trip: viewTrip, today: viewToday, moments: viewMoments, events: viewEvents, basics: viewBasics }[v] || viewPlaces)()}</div>`;
     $$("#tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "p" || v === "events" ? "places" : v === "moments" ? "today" : v)));
     if (v === "today" || v === "moments") hydratePhotos();
-    if (!isMap) window.scrollTo(0, 0);
+    if (!isMap && render.last !== location.hash) window.scrollTo(0, 0); render.last = location.hash;
   }
+
+  /* ---------- Search: places, towns, provinces and the spots inside each place ---------- */
+  let SIDX = null, TOWNS = [], PROVS = [], hitMarker = null;
+  function searchIndex() {
+    if (SIDX) return SIDX; const out = [], seen = new Set(), add = o => { const k = fold(o.name) + "|" + (o.lat ? o.lat.toFixed(2) : o.place || ""); if (seen.has(k)) return; seen.add(k); o.k = fold(o.name); o.k2 = fold((o.alt || "") + " " + (o.what || "")); out.push(o); };
+    D.places.forEach(p => add({ kind: "place", name: p.name, sub: `${TYPE[p.type] || ""} ${D.regions[p.region]}`, lat: p.lat, lng: p.lng, place: p.id, thumb: p.thumb, alt: cname(p.city) + " " + ((vibeOf(p) || {}).tags || []).join(" ") }));
+    (D.cities || []).forEach(c => { const p = D.places.find(x => x.city === c.id); if (p && !D.places.some(x => fold(x.name).startsWith(fold(c.name.split(" (")[0])))) add({ kind: "town", name: c.name.split(" (")[0], sub: "Town · " + D.regions[p.region], lat: c.lat || p.lat, lng: c.lng || p.lng, place: p.id, alt: c.name }); });
+    D.places.forEach(p => [["popular", "⭐"], ["gems", "💎"], ["localFavs", "🍜"]].forEach(([k, ic]) => (p[k] || []).forEach(x => x.name && add({ kind: "spot", ic, name: x.name, sub: `${ic === "🍜" ? "Local favourite" : ic === "💎" ? "Hidden gem" : "Popular"} · ${p.name}`, lat: x.lat, lng: x.lng, place: p.id, what: x.what, thb: x.thb }))));
+    (D.cities || []).forEach(c => { const p = D.places.find(x => x.city === c.id); [["eat", "🍜", "Eat"], ["do", "🎒", "Do"], ["night", "🎉", "Night"]].forEach(([k, ic, lab]) => (c[k] || []).forEach(x => x.name && add({ kind: "spot", ic, name: x.name, sub: `${lab} · ${cname(c.id)}`, lat: x.lat, lng: x.lng, place: p && p.id, what: x.what, thb: x.thb }))); });
+    TOWNS.forEach(([n, la, lo]) => add({ kind: "map", ic: "•", name: n, sub: "Town on the map", lat: la, lng: lo }));
+    PROVS.forEach(q => add({ kind: "map", ic: "▢", name: q.n, sub: "Province", lat: q.la, lng: q.lo, zoom: 8, alt: q.n + " province" }));
+    return (SIDX = out);
+  }
+  function findAll(q, n = 8) {
+    const f = fold(q); if (!f) return [];
+    const RANK = { place: 0, town: .2, spot: .5, map: .8 };
+    return searchIndex().map(o => { const at = o.k.indexOf(f), sc = at === 0 ? 0 : at > 0 && o.k[at - 1] === " " ? 1 : at > 0 ? 2 : f.split(" ").every(w => o.k.includes(w)) ? 3 : o.k2.includes(f) ? 4.5 : f.split(" ").every(w => o.k2.includes(w)) ? 5 : 9; return { o, sc: sc + RANK[o.kind] + (o.kind === "spot" && !o.lat ? .6 : 0) }; })
+      .filter(x => x.sc < 9).sort((a, b) => a.sc - b.sc || a.o.name.length - b.o.name.length).slice(0, n).map(x => x.o);
+  }
+  const resRow = (o, i) => `<button class="mrow" data-act="mgo" data-v="${i}"><span class="k">${o.thumb ? `<img src="${o.thumb}" alt="">` : o.kind === "town" ? "🏙" : o.ic || "📍"}</span><span style="flex:1;min-width:0"><b>${esc(o.name)}</b><span class="s">${esc(o.sub)}</span></span></button>`;
+  let mHits = [];
+  function mapSearchShow() { const q = $("#mq").value; $(".mclear").hidden = !q; mHits = findAll(q); const r = $("#mres");
+    if (!q.trim()) { r.hidden = true; return; } r.hidden = false; r.innerHTML = mHits.length ? mHits.map(resRow).join("") : `<p class="small muted" style="padding:12px 14px;margin:0">Nothing found. Try a town, an island, a beach or a dish.</p>`; }
+  function clearHit() { if (hitMarker && map) { map.removeLayer(hitMarker); hitMarker = null; } }
+  /* Show one search result on the map. */
+  function showOnMap(o) {
+    if (!map) return; $("#mres").hidden = true; $("#mq").blur(); clearHit(); $(".peek")?.remove();
+    if (o.kind === "place") { region = ""; mapChips(); sel = o.place; refreshPins(); map.flyTo([o.lat, o.lng], 11, { duration: .8 }); setTimeout(() => peek(place(o.place)), 850); return; }
+    if (!o.lat) { if (o.place) { const p = place(o.place); region = ""; mapChips(); sel = p.id; refreshPins(); map.flyTo([p.lat, p.lng], 11, { duration: .8 }); setTimeout(() => peek(p), 850); toast(`${o.name} is in ${p.name}: no exact pin, so here's the area`); } return; }
+    region = ""; mapChips(); sel = null; refreshPins();
+    hitMarker = L.marker([o.lat, o.lng], { zIndexOffset: 1000, icon: L.divIcon({ className: "", html: `<div class="hit"><span class="lab">${esc(o.name)}</span><span class="dot"></span></div>`, iconSize: null }) }).addTo(map);
+    hitMarker.on("click", e => { L.DomEvent.stop(e); spotPeek(o); });
+    map.flyTo([o.lat, o.lng], o.zoom || (o.kind === "spot" ? 11 : 10), { duration: .8 });
+    if (o.kind === "spot") setTimeout(() => spotPeek(o), 850);
+  }
+  function spotPeek(o) {
+    $(".peek")?.remove(); const d = document.createElement("div"); d.className = "peek"; d.style.flexDirection = "column"; d.style.gap = "6px";
+    d.innerHTML = `<div class="row between" style="width:100%"><div style="min-width:0"><div class="eyebrow">${o.ic || "📍"} ${esc(o.sub)}</div><b>${esc(o.name)}</b></div>${o.thb && (Array.isArray(o.thb) ? o.thb[1] : o.thb) ? `<span class="small" style="flex:none">${range(o.thb, "THB")}</span>` : ""}</div>${o.what ? `<div class="small ink2">${esc(o.what)}</div>` : ""}
+      <div class="row" style="gap:8px;margin-top:4px;flex-wrap:wrap"><a class="btn sm" href="${gmaps(o.lat, o.lng, o.name)}" target="_blank" rel="noopener">Google Maps ↗</a>${o.place ? `<a class="btn sm" href="#/p/${o.place}">Open ${esc(place(o.place).name.split(" (")[0])}</a>` : ""}</div>`;
+    document.body.appendChild(d);
+  }
+  /* Places page: filter the grid, and list matching spots below it */
+  let plQ = "";
   function viewPlaces() {
-    const L_ = D.places.filter(p => !region || p.region === region);
+    const qf = fold(plQ), match = p => !qf || fold([p.name, cname(p.city), D.regions[p.region], p.line, ((vibeOf(p) || {}).tags || []).join(" "), ...[...(p.popular || []), ...(p.gems || []), ...(p.localFavs || [])].map(x => x.name)].join(" ")).includes(qf) || qf.split(" ").every(w => fold(p.name + " " + cname(p.city)).includes(w));
+    const L_ = D.places.filter(p => (!region || p.region === region) && match(p)), spots = qf ? findAll(plQ, 30).filter(o => o.kind === "spot").slice(0, 8) : [];
     return `<div class="row between"><div><div class="eyebrow">${D.flag} ${esc(D.country)}</div><h1>Places</h1></div>${(D.events || []).length ? `<a class="btn sm" href="#/events">📅 What's on</a>` : ""}</div>
+      <input class="psearch" id="pq" type="search" autocomplete="off" enterkeyhint="search" placeholder="Search places, food, beaches, towns…" value="${esc(plQ)}" aria-label="Search places">
       <div class="chips">${[["", "All"], ...Object.entries(D.regions)].map(([k, n]) => `<button class="chip${region === k ? " on" : ""}" data-act="region" data-v="${k}">${esc(n)}</button>`).join("")}</div>
-      <div class="grid">${L_.map(p => `<a class="pcard" href="#/p/${p.id}"><img src="${p.thumb}" alt="" loading="lazy">${inTrip(p.id) ? `<span class="heart">♥</span>` : ""}<div class="cap"><span>${vibeOf(p) ? esc(vibeOf(p).tags.slice(0, 2).join(" · ")) : `${TYPE[p.type] || ""} ${esc(D.regions[p.region])}`}</span><b>${esc(p.name)}</b></div></a>`).join("")}</div>`;
+      ${qf && !L_.length && !spots.length ? `<p class="muted" style="margin:14px 4px">Nothing matches “${esc(plQ)}”. Try a town, an island or a dish.</p>` : ""}
+      <div class="grid">${L_.map(p => `<a class="pcard" href="#/p/${p.id}"><img src="${p.thumb}" alt="" loading="lazy">${inTrip(p.id) ? `<span class="heart">♥</span>` : ""}<div class="cap"><span>${vibeOf(p) ? esc(vibeOf(p).tags.slice(0, 2).join(" · ")) : `${TYPE[p.type] || ""} ${esc(D.regions[p.region])}`}</span><b>${esc(p.name)}</b></div></a>`).join("")}</div>${spots.length ? `<h3 style="margin:20px 4px 8px">Spots matching “${esc(plQ)}”</h3><div class="card" style="padding:4px 12px">${spots.map(o => `<div class="spot"><div style="flex:1;min-width:0"><b>${o.ic} ${esc(o.name)}</b><div class="small ink2">${esc(o.sub)}${o.what ? " · " + esc(o.what) : ""}</div></div><div style="text-align:right;flex:none"><button class="btn sm" data-act="spotmap" data-v="${esc(o.name)}|${o.place || ""}">Map</button></div></div>`).join("")}</div>` : ""}`;
   }
   const TILES = [["eat", "🍜", "Eat"], ["do", "🎒", "Do"], ["night", "🎉", "Night"], ["events", "📅", "Events"], ["know", "💡", "Know"]];
   /* ---------- Events ---------- */
@@ -753,6 +816,9 @@
     else if (a === "evgo") { evCity = v; $(".sheet-back")?.remove(); }
     else if (a === "tile") { const [pid, k] = v.split(":"); tileSheet(pid, k); }
     else if (a === "closesheet") $(".sheet-back")?.remove();
+    else if (a === "mgo") { const o = mHits[+v]; if (o) { $("#mq").value = o.name; showOnMap(o); } }
+    else if (a === "mclear") { $("#mq").value = ""; mapSearchShow(); clearHit(); $(".peek")?.remove(); }
+    else if (a === "spotmap") { const [nm, pid] = v.split("|"), o = searchIndex().find(x => x.kind === "spot" && x.name === nm && (x.place || "") === pid) || findAll(nm, 1)[0]; if (o) { location.hash = "#/"; setTimeout(() => { $("#mq").value = o.name; showOnMap(o); }, 350); } }
     else if (a === "planme") planSheet();
     else if (a === "wiz") { const W = db.plan.wiz, [k, x] = v.split(":"); if (k === "days") { W.days = Math.max(3, Math.min(30, W.days + +x)); $("#wdays").textContent = W.days; } else if (k === "vibe") { W.vibes = W.vibes.includes(x) ? W.vibes.filter(y => y !== x) : [...W.vibes, x]; el.classList.toggle("on"); } else { W[k] = x; [...el.parentNode.children].forEach(c => c.classList.toggle("on", c === el)); } save(); }
     else if (a === "makeplan") { const W = db.plan.wiz; W.start = $("#wstart").value; if (!W.vibes.length) W.vibes = ["beach", "culture", "food"]; const r = autoPlan(W);
@@ -780,6 +846,8 @@
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
   });
   document.addEventListener("input", e => { const n = e.target.dataset.note; if (n) { db.notes[n] = e.target.value; save(); } });
+  document.addEventListener("input", e => { if (e.target.id === "mq") mapSearchShow(); if (e.target.id === "pq") { plQ = e.target.value; const pos = e.target.selectionStart; render(); const i = $("#pq"); if (i) { i.focus(); i.setSelectionRange(pos, pos); } } });
+  document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "mq") { e.preventDefault(); if (mHits[0]) { $("#mq").value = mHits[0].name; showOnMap(mHits[0]); } } if (e.key === "Escape" && e.target.id === "mq") { e.target.value = ""; mapSearchShow(); } });
   document.addEventListener("input", e => { if (e.target.id === "addq") { const r = $("#addres"); if (r) r.innerHTML = addRows(e.target.value); } });
   document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.abq; if (k) { const r = $("#abres"); if (r) r.innerHTML = abRows(k, e.target.value); } });
   document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "abq") { e.preventDefault(); $("#abres .abrow")?.click(); } if (e.key === "Enter" && e.target.id === "addq") { e.preventDefault(); $("#addres .addrow")?.click(); } });
