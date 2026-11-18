@@ -8,6 +8,7 @@ and spotting manipulation. Unlisted: reachable by its link only.
   label (research-backed, practitioner-proven or anecdotal), direct/indirect tag, sources, why it
   works, steps, common mistakes, an ethics line (*emphasis* marked in gold), 6 to 10 "flat → crafted" examples (read aloud on
   tap), rewrite drills with model answers and two scenario quizzes.
+- **Adult modules (18+), hidden by default:** Sex Talk & Dirty Talk, and Command & Lead (18 techniques, 144 examples), consensual and frank but not graphic, with negotiation, check-ins and aftercare built in. Turned on in Settings after an 18+ confirmation; they live in `data/adult.json`, which is only downloaded once switched on.
 - **Learn:** rank (Apprentice → Silvertongue), XP, streak, today's technique, module progress.
 - **Browse:** filter by module and direct/indirect; sort by best value, most effective, easiest, hardest.
 - **Practise:** 8-question rounds weighted toward what you miss; the rewrite gym.

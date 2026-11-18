@@ -129,7 +129,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "2";
+  const VER = "3";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis (analog marking): shown highlighted, never read as asterisks */
@@ -175,7 +175,7 @@
       <a class="card daily" href="#/t/${t.id}" style="display:block"><div class="eyebrow">Today's technique</div><h2 style="margin-top:6px">${esc(t.name)}</h2><div class="small ink2">${esc(t.summary)}</div>
         ${ex ? `<div class="ex" style="background:rgba(0,0,0,.18)"><div class="ctx">${esc(CTX[ex.ctx] || ex.ctx)}</div><div class="better">“${fx(ex.better)}”</div></div>` : ""}
         <div class="row" style="margin-top:12px"><span class="btn pri sm">Learn & drill it</span><span class="small muted">5 minutes</span></div></a>
-      <h3>Modules</h3>${D.modules.map(m => `<a class="mod" href="#/m/${m.id}"><div class="ic">${m.icon}</div><div style="flex:1;min-width:0"><b>${esc(m.title)}</b><div class="small muted">${esc(m.tagline)}</div><div class="bar"><i style="width:${modProgress(m)}%"></i></div></div></a>`).join("")}
+      <h3>Modules</h3>${D.modules.map(m => `<a class="mod" href="#/m/${m.id}"><div class="ic">${m.icon}</div><div style="flex:1;min-width:0"><b>${esc(m.title)}${m.adult ? ` <span class="tag" style="color:var(--rose);vertical-align:3px">18+</span>` : ""}</b><div class="small muted">${esc(m.tagline)}</div><div class="bar"><i style="width:${modProgress(m)}%"></i></div></div></a>`).join("")}
       <div class="row" style="justify-content:center;gap:8px;margin-top:18px"><button class="btn sm" data-act="settings">Settings</button><button class="btn sm" data-act="how">How to master this</button></div>
       <div class="ver">Silvertongue v${VER}</div>`;
   }
@@ -287,6 +287,8 @@
     sheet(`<h2>Settings</h2>${isStandalone() ? "" : `<button class="btn pri block" data-act="install">Install Silvertongue</button>`}
       <button class="btn block" data-act="lock" style="margin-top:8px">🔒 Lock now</button>
       <button class="btn block" data-act="changepin" style="margin-top:8px">Change PIN</button>
+      <h3>Adult modules (18+)</h3><p class="small muted" style="margin:0 0 8px">Sex Talk & Dirty Talk, and Command & Lead: frank, consensual lessons for you and your partner. Hidden until you switch them on.</p>
+      <button class="btn block" data-act="adult" style="${S.adult ? "" : "border-color:var(--rose);color:var(--rose)"}">${S.adult ? "Hide adult modules" : "Show adult modules (18+)"}</button>
       <button class="btn block" data-act="export" style="margin-top:8px">Back up my progress</button>
       <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
       <button class="btn block" data-act="reset" style="margin-top:8px;color:var(--rose)">Reset progress</button>
@@ -340,6 +342,10 @@
     else if (a === "fmod") { F.mod = v; render(); } else if (a === "fappr") { F.appr = v; render(); } else if (a === "fsort") { F.sort = v; render(); }
     else if (a === "lock") lockScreen();
     else if (a === "changepin") lockScreen("change");
+    else if (a === "adult") {
+      if (!S.adult) { if (!confirm("Show the adult modules?\n\nThey are frank lessons on sex talk, dirty talk and leading in bed, for consenting adults. Confirm you are 18 or older.")) return;
+        try { await loadAdult(); } catch { return toast("Couldn't load them. Are you online?"); } S.adult = true; save(); setData(); close(); location.hash = "#/"; render(); toast("Adult modules unlocked 🌶"); }
+      else { S.adult = false; save(); setData(); close(); location.hash = "#/"; render(); toast("Adult modules hidden"); } }
     else if (a === "settings") settingsSheet(); else if (a === "how") howSheet(); else if (a === "close") close();
     else if (a === "export") { const blob = new Blob([JSON.stringify(S)], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "silvertongue-backup.json"; l.click(); }
     else if (a === "reset") { if (confirm("Reset all progress, XP and notes?")) { S = DEF(); save(); close(); render(); } }
@@ -399,7 +405,14 @@
     else if (unlocked) { if (Date.now() - hiddenAt > AWAY_MS) lockScreen(); else { const c = $("#cover"); if (c) c.remove(); } }
   });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  fetch("data/lessons.json").then(r => r.json()).then(d => { D = d; ALL = d.modules.flatMap(m => m.techniques.map(t => (t._mod = m.id, t))); ALL.forEach(t => BY[t.id] = t); lastHash = location.hash; lockScreen(); })
+  /* Adult modules live in their own file, fetched only after the 18+ switch is turned on. */
+  let BASE = null, ADULT = null;
+  function setData() {
+    const mods = [...BASE.modules]; if (S.adult && ADULT) { const at = Math.max(0, mods.findIndex(m => m.id === "anticipation") + 1); mods.splice(at, 0, ...ADULT.modules); }
+    D = { modules: mods }; ALL = mods.flatMap(m => m.techniques.map(t => (t._mod = m.id, t))); BY = {}; ALL.forEach(t => BY[t.id] = t);
+  }
+  const loadAdult = () => ADULT ? Promise.resolve() : fetch("data/adult.json").then(r => r.json()).then(d => { ADULT = d; });
+  fetch("data/lessons.json").then(r => r.json()).then(async d => { BASE = d; if (S.adult) await loadAdult().catch(() => {}); setData(); lastHash = location.hash; lockScreen(); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load the lessons. Check your connection and reload.</p>`; });
 })();
 </script>
