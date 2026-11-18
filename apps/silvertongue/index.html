@@ -129,7 +129,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "3";
+  const VER = "4";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis (analog marking): shown highlighted, never read as asterisks */
@@ -169,7 +169,7 @@
   function viewHome() {
     const R = rankOf(S.xp), pct = R.next ? Math.round((S.xp - R.at) / (R.next[0] - R.at) * 100) : 100, t = dailyPick(), ex = t.examples[0];
     const started = ALL.filter(x => level(x.id) > 0).length;
-    return `<div class="eyebrow">Silvertongue</div><h1>Master the spoken word</h1>
+    return `<div class="row between"><div class="eyebrow">Silvertongue</div><button class="small muted" data-act="settings" style="font-size:12px">v${VER}</button></div><h1>Master the spoken word</h1>
       <div class="card"><div class="rank"><div class="crest" style="--p:${pct}"><span>${R.name[0]}</span></div><div style="flex:1"><b style="font:600 22px var(--display)">${R.name}</b><div class="small muted">${S.xp} XP${R.next ? ` · ${R.next[0] - S.xp} to ${R.next[1]}` : " · the summit"}${S.streak > 1 ? ` · 🔥 ${S.streak}-day streak` : ""}</div><div class="bar"><i style="width:${pct}%"></i></div></div></div>
         <div class="small muted" style="margin-top:10px">${started} of ${ALL.length} techniques started · ${ALL.filter(x => level(x.id) === 3).length} field-tested</div></div>
       <a class="card daily" href="#/t/${t.id}" style="display:block"><div class="eyebrow">Today's technique</div><h2 style="margin-top:6px">${esc(t.name)}</h2><div class="small ink2">${esc(t.summary)}</div>
@@ -374,7 +374,7 @@
     const T = { unlock: ["Welcome back", "Enter your PIN"], set1: ["Choose a PIN", "4 digits. It guards your progress and journal."], set2: ["Confirm your PIN", "Enter it once more"], change: ["New PIN", "Choose a new 4-digit PIN"] }[mode];
     L.innerHTML = `<img src="icons/icon-192.png" width="64" height="64" style="border-radius:16px" alt=""><h2>${T[0]}</h2><div class="sub" id="lsub">${T[1]}</div>
       <div class="pdots" id="pd">${[0, 1, 2, 3].map(() => "<i></i>").join("")}</div>
-      <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button data-key="${k}">${k}</button>`).join("")}${mode === "unlock" ? `<button class="ghost" data-key="forgot">Forgot?</button>` : mode === "change" ? `<button class="ghost" data-key="cancel">Cancel</button>` : `<span></span>`}<button data-key="0">0</button><button class="ghost" data-key="del" aria-label="Delete">⌫</button></div>`;
+      <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button data-key="${k}">${k}</button>`).join("")}${mode === "unlock" ? `<button class="ghost" data-key="forgot">Forgot?</button>` : mode === "change" ? `<button class="ghost" data-key="cancel">Cancel</button>` : `<span></span>`}<button data-key="0">0</button><button class="ghost" data-key="del" aria-label="Delete">⌫</button></div><div class="small muted" style="margin-top:22px;font-size:12px">Silvertongue v${VER}</div>`;
   }
   const dots = () => $$("#pd i").forEach((d, i) => d.classList.toggle("on", i < entry.length));
   function bad(msg) { const p = $("#pd"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake"); entry = ""; dots(); $("#lsub").textContent = msg; }
