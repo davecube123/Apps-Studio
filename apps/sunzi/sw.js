@@ -1,7 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "sunzi-v1";
+const VERSION = "sunzi-v2";
 // Every file the app needs offline. Add new files here.
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/sunzi.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/wenkai-sunzi.woff2", "./fonts/cinzel-latin-500-normal.woff2", "./fonts/cinzel-latin-700-normal.woff2", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/sunzi.json", "./data/tales.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/wenkai-sunzi.woff2", "./fonts/cinzel-latin-500-normal.woff2", "./fonts/cinzel-latin-700-normal.woff2", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
