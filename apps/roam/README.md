@@ -7,6 +7,7 @@ A minimal travel companion, starting with Thailand: a map, a few great places, a
   card (with how busy it is now); filter by region; your trip is drawn as a dashed route. **⇄ A to B:** search any two
   towns, islands or sights (e.g. “Railay”, “Doi Inthanon”) and see the best-balance, fastest and cheapest way between them (up to four hops, stopovers spelled out, car fares split per person, door-to-door time incl.
   airport time, fares per person); also “Get here” on every place page.
+- **Search:** a search bar on the map finds places, towns, provinces and the spots inside places (restaurants, markets, viewpoints, bars; names and descriptions). Tap a result and the map flies there with a labelled pin and a card (price, Google Maps, the place). The Places page has the same search: it filters the grid and lists matching spots with a Map button.
 - **Places:** 48 hand-picked Thai places (Bangkok, Central, North, Northeast (Isaan), East coast incl. Koh Chang, Koh Kood,
   Koh Mak and Koh Samet, Gulf islands, Andaman coast incl. Similan, the Trang islands and Koh Lipe); nearby pins merge into
   a numbered bubble at low zoom as photo cards, each
