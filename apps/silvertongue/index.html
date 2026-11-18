@@ -74,6 +74,7 @@
   .ex .flat { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(224, 122, 138, .5); margin-top: 6px; font-size: 15px; }
   .ex .better { font: 500 21px/1.35 var(--display); font-style: italic; color: var(--ink); margin-top: 4px; }
   .ex .why { font-size: 13.5px; color: var(--ink2); margin-top: 6px; }
+  em.mk { font-style: normal; color: var(--gold); border-bottom: 1px dotted var(--gold); }
   .say { font-size: 13px; color: var(--muted); margin-left: auto; }
   textarea { width: 100%; min-height: 84px; font: 16px/1.4 var(--sans); padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--card2); color: var(--ink); resize: vertical; outline: none; }
   textarea:focus { border-color: var(--silver); }
@@ -128,9 +129,11 @@
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  /* *word* in a line = spoken emphasis (analog marking): shown highlighted, never read as asterisks */
+  const fx = s => esc(s).replace(/\*([^*\n]{1,80})\*/g, '<em class="mk">$1</em>');
   const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
   const KEY = "silvertongue";
   const DEF = () => ({ m: {}, xp: 0, notes: [], quiz: {}, day: "", streak: 0, last: "" });
@@ -170,7 +173,7 @@
       <div class="card"><div class="rank"><div class="crest" style="--p:${pct}"><span>${R.name[0]}</span></div><div style="flex:1"><b style="font:600 22px var(--display)">${R.name}</b><div class="small muted">${S.xp} XP${R.next ? ` · ${R.next[0] - S.xp} to ${R.next[1]}` : " · the summit"}${S.streak > 1 ? ` · 🔥 ${S.streak}-day streak` : ""}</div><div class="bar"><i style="width:${pct}%"></i></div></div></div>
         <div class="small muted" style="margin-top:10px">${started} of ${ALL.length} techniques started · ${ALL.filter(x => level(x.id) === 3).length} field-tested</div></div>
       <a class="card daily" href="#/t/${t.id}" style="display:block"><div class="eyebrow">Today's technique</div><h2 style="margin-top:6px">${esc(t.name)}</h2><div class="small ink2">${esc(t.summary)}</div>
-        ${ex ? `<div class="ex" style="background:rgba(0,0,0,.18)"><div class="ctx">${esc(CTX[ex.ctx] || ex.ctx)}</div><div class="better">“${esc(ex.better)}”</div></div>` : ""}
+        ${ex ? `<div class="ex" style="background:rgba(0,0,0,.18)"><div class="ctx">${esc(CTX[ex.ctx] || ex.ctx)}</div><div class="better">“${fx(ex.better)}”</div></div>` : ""}
         <div class="row" style="margin-top:12px"><span class="btn pri sm">Learn & drill it</span><span class="small muted">5 minutes</span></div></a>
       <h3>Modules</h3>${D.modules.map(m => `<a class="mod" href="#/m/${m.id}"><div class="ic">${m.icon}</div><div style="flex:1;min-width:0"><b>${esc(m.title)}</b><div class="small muted">${esc(m.tagline)}</div><div class="bar"><i style="width:${modProgress(m)}%"></i></div></div></a>`).join("")}
       <div class="row" style="justify-content:center;gap:8px;margin-top:18px"><button class="btn sm" data-act="settings">Settings</button><button class="btn sm" data-act="how">How to master this</button></div>
@@ -188,19 +191,19 @@
     const t = BY[id]; if (!t) return viewHome(); const m = D.modules.find(x => x.techniques.includes(t)), x = M(id);
     if (!x.r) { x.r = 1; save(); setTimeout(() => gain(5, "new technique"), 300); }
     const ctxs = [...new Set(t.examples.map(e => e.ctx))];
-    const learn = `<div class="card"><p style="font:500 20px/1.4 var(--display);margin:0">${esc(t.summary)}</p></div>
-      <h3>Why it works</h3><p class="ink2">${esc(t.why)}</p>
-      <h3>How to do it</h3><ol class="steps">${t.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-      <h3>Common mistakes</h3><ul class="list">${t.mistakes.map(s => `<li class="ink2">${esc(s)}</li>`).join("")}</ul>
+    const learn = `<div class="card"><p style="font:500 20px/1.4 var(--display);margin:0">${fx(t.summary)}</p></div>
+      <h3>Why it works</h3><p class="ink2">${fx(t.why)}</p>
+      <h3>How to do it</h3><ol class="steps">${t.steps.map(s => `<li>${fx(s)}</li>`).join("")}</ol>
+      <h3>Common mistakes</h3><ul class="list">${t.mistakes.map(s => `<li class="ink2">${fx(s)}</li>`).join("")}</ul>
       <div class="card ethics"><div class="eyebrow" style="color:var(--sky)">Use it well</div><p class="small ink2" style="margin:6px 0 0">${esc(t.ethics)}</p></div>
       ${t.sources && t.sources.length ? `<h3>Sources</h3><p class="small muted">${t.sources.map(esc).join(" · ")}</p>` : ""}
       <button class="btn pri block" data-act="tab" data-v="examples" style="margin-top:16px">See ${t.examples.length} examples ›</button>`;
     const exs = t.examples.filter(e => !exCtx || e.ctx === exCtx);
     const examples = `<div class="chips" style="margin-top:6px"><button class="chip${exCtx ? "" : " on"}" data-act="exctx" data-v="">All</button>${ctxs.map(c => `<button class="chip${exCtx === c ? " on" : ""}" data-act="exctx" data-v="${c}">${esc(CTX[c] || c)}</button>`).join("")}</div>
-      ${exs.map(e => `<div class="ex"><div class="row"><span class="ctx">${esc(CTX[e.ctx] || e.ctx)}</span><button class="say" data-act="speak" data-v="${esc(e.better)}">▶ hear it</button></div>${t._mod === "defence" ? `${e.flat ? `<div class="small muted" style="margin-top:6px">They say</div><div style="font-size:15px;color:var(--rose)">“${esc(e.flat)}”</div>` : ""}<div class="small muted" style="margin-top:8px">You say</div><div class="better" style="margin-top:0">“${esc(e.better)}”</div>` : `${e.flat ? `<div class="flat">${esc(e.flat)}</div>` : ""}<div class="better">“${esc(e.better)}”</div>`}${e.note ? `<div class="why">${esc(e.note)}</div>` : ""}</div>`).join("")}
+      ${exs.map(e => `<div class="ex"><div class="row"><span class="ctx">${esc(CTX[e.ctx] || e.ctx)}</span><button class="say" data-act="speak" data-v="${esc(e.better.replace(/\*/g, ""))}">▶ hear it</button></div>${t._mod === "defence" ? `${e.flat ? `<div class="small muted" style="margin-top:6px">They say</div><div style="font-size:15px;color:var(--rose)">“${fx(e.flat)}”</div>` : ""}<div class="small muted" style="margin-top:8px">You say</div><div class="better" style="margin-top:0">“${fx(e.better)}”</div>` : `${e.flat ? `<div class="flat">${fx(e.flat)}</div>` : ""}<div class="better">“${fx(e.better)}”</div>`}${e.note ? `<div class="why">${esc(e.note)}</div>` : ""}</div>`).join("")}
       <button class="btn pri block" data-act="tab" data-v="practise" style="margin-top:16px">Practise it ›</button>`;
-    const practise = `${t.drills.map((d, i) => `<div class="card"><div class="eyebrow">Drill ${i + 1}</div><p style="margin:6px 0 10px">${esc(d.prompt)}</p><textarea data-drill="${id}:${i}" placeholder="Write your line, then compare.">${esc((S.drafts || {})[id + ":" + i] || "")}</textarea>
-        <button class="btn sm" data-act="reveal" data-v="${i}" style="margin-top:8px">Compare with model answers</button><div id="mod-${i}" hidden>${d.models.map(s => `<div class="model">${esc(s)}</div>`).join("")}</div></div>`).join("")}
+    const practise = `${t.drills.map((d, i) => `<div class="card"><div class="eyebrow">Drill ${i + 1}</div><p style="margin:6px 0 10px">${fx(d.prompt)}</p><textarea data-drill="${id}:${i}" placeholder="Write your line, then compare.">${esc((S.drafts || {})[id + ":" + i] || "")}</textarea>
+        <button class="btn sm" data-act="reveal" data-v="${i}" style="margin-top:8px">Compare with model answers</button><div id="mod-${i}" hidden>${d.models.map(s => `<div class="model">${fx(s)}</div>`).join("")}</div></div>`).join("")}
       ${t.quiz.map((q, i) => `<div class="card qbox" data-q="${i}"><div class="eyebrow">Scenario ${i + 1}</div><p class="q" style="margin:6px 0 4px">${esc(q.scenario)}</p>${q.options.map((o, k) => `<button class="opt" data-act="answer" data-v="${id}|${i}|${k}">${esc(o)}</button>`).join("")}<div class="explain" hidden>${esc(q.why)}</div></div>`).join("")}
       <div class="card"><div class="eyebrow">Field test</div><p class="small ink2" style="margin:6px 0 10px">Used it for real? Log what you said and what happened. That's how it becomes yours.</p><button class="btn pri block" data-act="field" data-v="${id}">Log a real use (+25 XP)</button></div>`;
     return `<a href="#/m/${m.id}" class="small muted">‹ ${esc(m.title)}</a>
@@ -328,7 +331,7 @@
       const h = S.quiz[x.k] || (S.quiz[x.k] = { ok: 0, no: 0 }); if (k === x.q.answer) { P.right++; h.ok++; const m = M(x.t.id); m.d = 1; save(); gain(10, "right call"); } else { h.no++; save(); } }
     else if (a === "pnext") { P.i++; P.answered = false; render(); scrollTo(0, 0); }
     else if (a === "gym") { const t = ALL[Math.floor(Math.random() * ALL.length)], d = t.drills[Math.floor(Math.random() * t.drills.length)];
-      sheet(`<div class="eyebrow">${esc(t.name)}</div><h2 style="margin-top:6px">Rewrite gym</h2><p>${esc(d.prompt)}</p><textarea id="gymT" placeholder="Your line"></textarea><button class="btn pri block" data-act="gymreveal" style="margin-top:10px">Compare</button><div id="gymM" hidden>${d.models.map(s => `<div class="model">${esc(s)}</div>`).join("")}<div class="row" style="margin-top:12px"><button class="btn" data-act="gym">Another</button><a class="btn" href="#/t/${t.id}" data-act="close">Study ${esc(t.name)}</a></div></div>`); }
+      sheet(`<div class="eyebrow">${esc(t.name)}</div><h2 style="margin-top:6px">Rewrite gym</h2><p>${esc(d.prompt)}</p><textarea id="gymT" placeholder="Your line"></textarea><button class="btn pri block" data-act="gymreveal" style="margin-top:10px">Compare</button><div id="gymM" hidden>${d.models.map(s => `<div class="model">${fx(s)}</div>`).join("")}<div class="row" style="margin-top:12px"><button class="btn" data-act="gym">Another</button><a class="btn" href="#/t/${t.id}" data-act="close">Study ${esc(t.name)}</a></div></div>`); }
     else if (a === "gymreveal") { $("#gymM").hidden = false; el.remove(); if ($("#gymT").value.trim()) gain(5, "rewrite"); }
     else if (a === "field") fieldSheet(v);
     else if (a === "fnr") { fnR = +v; $$("#fnR .chip").forEach((c, i) => c.classList.toggle("on", i < fnR)); }
