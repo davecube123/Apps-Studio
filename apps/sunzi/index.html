@@ -4,311 +4,190 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sunzi</title>
-<meta name="description" content="Sunzi's Art of War in an original scholarly and poetic rendering, with the classical Chinese and reflections for skilful living and making things happen.">
-<meta name="theme-color" content="#e9dcb6">
+<meta name="description" content="Sunzi's Art of War in an original rendering, with tales from history and legend and what each principle means for daily living.">
+<meta name="theme-color" content="#ece2c6">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sunzi">
 <style>
-  @font-face { font-family: "Cinzel"; src: url(fonts/cinzel-latin-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; }
   @font-face { font-family: "Cinzel"; src: url(fonts/cinzel-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
   @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
   @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
   @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
-  @font-face { font-family: "WenKai"; src: url(fonts/wenkai-sunzi.woff2) format("woff2"); font-display: swap; }
-  :root { --bg: #e9dcb6; --slip: #f3e8c8; --ink: #2a1d12; --ink2: #5a4630; --muted: #8b7655; --line: rgba(90, 60, 20, .18); --seal: #a8291f; --seal-ink: #fdf0e0; --gold: #8a6420; --lacq: #2a1410; --shadow: 0 8px 24px rgba(80, 50, 10, .15);
-    --serif: "Cormorant", Georgia, serif; --caps: "Cinzel", Georgia, serif; --brush: "WenKai", "Kaiti TC", "STKaiti", "KaiTi", serif; --sans: system-ui, -apple-system, Roboto, sans-serif; --size: 21px; color-scheme: light; }
-  :root[data-theme="night"] { --bg: #140c09; --slip: #1d1410; --ink: #efdcb4; --ink2: #c9b18a; --muted: #8e7a5c; --line: rgba(230, 190, 120, .15); --seal: #c23a2c; --gold: #d0a85c; --lacq: #0c0705; --shadow: 0 8px 24px rgba(0, 0, 0, .45); color-scheme: dark; }
+  /* Colours chosen for contrast: body text ≥ 10:1, secondary text ≥ 5.5:1 on the page and card backgrounds. */
+  :root { --bg: #ece2c6; --card: #f7f0dc; --ink: #24180c; --ink2: #3f2f1c; --muted: #5e4a30; --line: rgba(70, 45, 15, .16);
+    --seal: #9a2318; --seal-ink: #fff4e6; --accent-bg: #f1e3cf; --shadow: 0 6px 20px rgba(70, 45, 10, .12);
+    --serif: "Cormorant", Georgia, serif; --caps: "Cinzel", Georgia, serif; --size: 21px; color-scheme: light; }
+  :root[data-theme="night"] { --bg: #15100c; --card: #1f1813; --ink: #f2e6cc; --ink2: #dccbab; --muted: #bba887; --line: rgba(240, 215, 170, .14);
+    --seal: #e0614f; --seal-ink: #1a0c08; --accent-bg: #2a1a14; --shadow: 0 6px 20px rgba(0, 0, 0, .4); color-scheme: dark; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
   html, body { margin: 0; }
-  body { background: var(--bg); color: var(--ink); font: 400 var(--size)/1.55 var(--serif); min-height: 100vh;
-    background-image: repeating-linear-gradient(90deg, transparent 0 46px, rgba(90, 60, 20, .07) 46px 48px), linear-gradient(180deg, rgba(255, 255, 255, .15), transparent 40%); }
-  :root[data-theme="night"] body { background-image: repeating-linear-gradient(90deg, transparent 0 46px, rgba(230, 190, 120, .04) 46px 48px), radial-gradient(120% 70% at 50% 0%, #2a1611, transparent 60%); }
-  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; } a { color: inherit; text-decoration: none; }
-  main { max-width: 680px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 66px) 18px calc(env(safe-area-inset-bottom) + 100px); }
-  .bar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; padding: calc(env(safe-area-inset-top) + 10px) 12px 10px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(var(--bg) 65%, transparent); }
+  body { background: var(--bg); color: var(--ink); font: 400 var(--size)/1.6 var(--serif); min-height: 100vh; }
+  a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  main { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 64px) 20px calc(env(safe-area-inset-bottom) + 96px); }
+  .bar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .brand { font: 700 16px var(--caps); letter-spacing: .3em; padding-left: .3em; }
   .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink2); }
   .ib svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .brand { font: 700 17px var(--caps); letter-spacing: .3em; padding-left: .3em; }
-  h1 { font: 700 30px/1.15 var(--caps); letter-spacing: .03em; margin: 6px 0 4px; }
-  h2 { font: 600 24px/1.2 var(--serif); margin: 0 0 6px; }
-  h3 { font: 600 12.5px var(--caps); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 22px 0 8px; }
-  p { margin: 0 0 12px; } .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 16px; }
-  .slip { background: var(--slip); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px; box-shadow: var(--shadow); margin-top: 14px; position: relative; }
-  .seal { flex: none; background: var(--seal); color: var(--seal-ink); border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 700 20px/1 var(--caps); letter-spacing: .04em; padding: 7px 5px; min-width: 50px; min-height: 54px; box-shadow: inset 0 0 0 3px rgba(255, 240, 220, .22), inset 0 0 12px rgba(80, 0, 0, .35); transform: rotate(-2deg); }
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 16px var(--serif); padding: 10px 18px; border-radius: 999px; border: 1px solid var(--ink); color: var(--ink); }
-  .btn.solid { background: var(--ink); color: var(--slip); } .btn.seal2 { background: var(--seal); border-color: var(--seal); color: var(--seal-ink); } .btn.block { display: flex; width: 100%; } .btn.sm { padding: 6px 13px; font-size: 15px; }
-  .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .wrap { flex-wrap: wrap; }
+  h1 { font: 700 28px/1.2 var(--caps); letter-spacing: .02em; margin: 6px 0 4px; }
+  h2 { font: 700 15px var(--caps); letter-spacing: .14em; text-transform: uppercase; color: var(--seal); margin: 28px 0 10px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); } .sub { color: var(--ink2); font-size: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px 18px; margin-top: 12px; }
+  .seal { flex: none; width: 54px; height: 54px; border-radius: 8px; background: var(--seal); color: var(--seal-ink); display: grid; place-items: center; font: 700 19px var(--caps); }
 
-  /* home */
-  .hero { display: flex; gap: 18px; align-items: center; margin-top: 4px; }
-  .hero .vt { writing-mode: vertical-rl; font: 44px/1.05 var(--brush); letter-spacing: .08em; color: var(--ink); background: var(--slip); border: 1px solid var(--line); padding: 14px 8px; border-radius: 4px; box-shadow: var(--shadow); }
-  .ch { display: flex; gap: 14px; align-items: center; padding: 14px 4px; border-top: 1px solid var(--line); }
-  .ch:first-child { border-top: 0; }
-  .ch .num { font: 700 16px var(--caps); color: var(--seal); width: 44px; text-align: center; flex: none; }
-  .ch b { display: block; font: 600 20px/1.2 var(--serif); } .ch .zt { font: 15px var(--brush); color: var(--muted); letter-spacing: .1em; }
-  .ch .es { font-size: 15.5px; color: var(--ink2); font-style: italic; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--seal); flex: none; margin-left: auto; }
+  /* chapter list */
+  .row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; }
+  .row .n { font: 700 15px var(--caps); color: var(--seal); width: 38px; flex: none; text-align: center; }
+  .row b { font: 600 20px/1.25 var(--serif); display: block; } .row .meta { font-size: 15px; color: var(--muted); }
+  .chev { margin-left: auto; color: var(--muted); font-size: 22px; }
 
-  /* chapter */
-  .head { display: flex; gap: 16px; align-items: center; margin-top: 4px; }
-  .head .zt { font: 26px var(--brush); letter-spacing: .14em; color: var(--seal); }
-  .modes { display: flex; gap: 6px; margin: 16px 0 4px; position: sticky; top: calc(env(safe-area-inset-top) + 60px); z-index: 5; }
-  .modes button { flex: 1; padding: 8px 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--slip); font: 600 15px var(--serif); color: var(--ink2); }
-  .modes button.on { background: var(--ink); color: var(--slip); border-color: var(--ink); }
-  .modes button b { font: 16px var(--brush); margin-right: 4px; font-weight: 400; }
-  .verse { padding: 18px 0 16px; border-top: 1px solid var(--line); position: relative; }
-  .verse:first-of-type { border-top: 0; }
-  .vn { font: 600 11px var(--caps); letter-spacing: .14em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-  .vn .mk { margin-left: auto; font-size: 20px; color: var(--muted); padding: 2px 6px; } .vn .mk.on { color: var(--seal); }
-  .zh { font: 23px/1.75 var(--brush); letter-spacing: .06em; color: var(--ink); margin: 8px 0 10px; }
-  .en { white-space: pre-wrap; font-size: var(--size); line-height: 1.6; }
+  /* verses */
+  .verse { padding: 20px 0 18px; border-top: 1px solid var(--line); }
+  .verse:first-child { border-top: 0; }
+  .vn { font: 700 11px var(--caps); letter-spacing: .14em; color: var(--muted); margin-bottom: 6px; }
+  .en { font-size: var(--size); line-height: 1.62; color: var(--ink); }
   .en .ln { display: block; padding-left: 1.1em; text-indent: -1.1em; }
-  .living { margin-top: 12px; padding: 12px 14px; border-left: 3px solid var(--seal); background: rgba(168, 41, 31, .06); border-radius: 0 8px 8px 0; font-size: 17.5px; line-height: 1.5; color: var(--ink2); }
-  .living b { font: 600 11px var(--caps); letter-spacing: .14em; color: var(--seal); display: block; margin-bottom: 3px; }
-  .terms { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-  .term { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font: 15px var(--serif); background: var(--slip); }
-  .term span { font: 16px var(--brush); color: var(--seal); margin-right: 4px; }
-  ul.prac { list-style: none; padding: 0; margin: 0; } ul.prac li { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 18px; } ul.prac li:first-child { border-top: 0; }
-  ul.prac input { width: 20px; height: 20px; accent-color: var(--seal); flex: none; margin-top: 4px; }
-  .navch { display: flex; gap: 10px; margin-top: 18px; } .navch a { flex: 1; }
+  .living { margin-top: 12px; padding: 12px 14px; border-left: 3px solid var(--seal); background: var(--accent-bg); border-radius: 0 8px 8px 0; font-size: 18px; line-height: 1.5; color: var(--ink2); }
+  .living b { display: block; font: 700 11px var(--caps); letter-spacing: .14em; color: var(--seal); margin-bottom: 3px; }
+  .tlink { display: flex; gap: 8px; align-items: baseline; margin-top: 10px; font: 600 17px var(--serif); color: var(--seal); }
+  .navch { display: flex; gap: 10px; margin-top: 22px; }
+  .btn { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font: 600 16px var(--serif); padding: 11px 14px; border-radius: 999px; border: 1px solid var(--ink2); color: var(--ink); }
+  .btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
-  /* draw a slip */
-  .draw { text-align: center; }
-  .tube { width: 120px; margin: 4px auto 10px; display: block; }
-  .tube.shake { animation: shake .6s ease; } @keyframes shake { 20% { transform: rotate(-9deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-6deg); } 80% { transform: rotate(4deg); } }
-  .stick { display: flex; gap: 14px; align-items: stretch; text-align: left; animation: rise .5s ease both; } @keyframes rise { from { transform: translateY(18px); opacity: 0; } }
-  .stick .vz { writing-mode: vertical-rl; font: 24px/1.15 var(--brush); letter-spacing: .1em; background: var(--slip); border: 1px solid var(--line); border-radius: 4px; padding: 10px 6px; box-shadow: var(--shadow); color: var(--ink); max-height: 46vh; flex: none; }
-  .stick .ve { font: italic 22px/1.45 var(--serif); }
+  /* tales */
+  .story p { font-size: var(--size); line-height: 1.68; margin: 0 0 14px; color: var(--ink); }
+  .story { padding: 18px 18px 6px; }
+  details.teach { margin-top: 14px; } details.teach summary { cursor: pointer; list-style: none; font: 600 18px var(--serif); color: var(--seal); padding: 14px 0; }
+  details.teach summary::-webkit-details-marker { display: none; }
+  details.teach .lesson { font: italic 21px/1.45 var(--serif); color: var(--ink); margin: 0 0 14px; }
 
-  nav.tabs { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
-  nav.tabs .in { display: flex; width: min(560px, 100%); justify-content: space-around; }
-  nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 12px; font: 600 12px var(--sans); color: var(--muted); }
-  nav.tabs a svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } nav.tabs a.on { color: var(--seal); } nav.tabs a { padding: 4px 8px; }
+  nav.tabs { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 40px; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: var(--bg); border-top: 1px solid var(--line); }
+  nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 16px; font: 600 13px system-ui, sans-serif; color: var(--muted); }
+  nav.tabs a.on { color: var(--seal); }
+  nav.tabs svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .back { position: fixed; inset: 0; z-index: 60; background: rgba(20, 10, 4, .5); display: flex; align-items: flex-end; justify-content: center; }
-  .sheet { width: min(620px, 100%); max-height: 90vh; overflow-y: auto; background: var(--slip); color: var(--ink); border-radius: 18px 18px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); animation: up .25s ease; }
-  @keyframes up { from { transform: translateY(26px); opacity: 0; } }
-  .seg { display: flex; gap: 6px; } .seg button { flex: 1; padding: 9px; border-radius: 10px; border: 1px solid var(--line); font-size: 16px; } .seg button.on { background: var(--ink); color: var(--slip); border-color: var(--ink); }
+  .sheet { width: min(600px, 100%); background: var(--card); color: var(--ink); border-radius: 18px 18px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); }
+  .sheet h3 { font: 700 13px var(--caps); letter-spacing: .14em; color: var(--seal); margin: 16px 0 8px; text-transform: uppercase; }
+  .seg { display: flex; gap: 6px; } .seg button { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--line); font-size: 17px; } .seg button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   input[type=range] { width: 100%; accent-color: var(--seal); }
-  textarea, input.txt, select { width: 100%; font: 17px var(--serif); padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); outline: none; }
-  textarea { min-height: 90px; resize: vertical; }
-  .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 86px); transform: translateX(-50%); background: var(--ink); color: var(--slip); padding: 10px 18px; border-radius: 999px; font-size: 16px; max-width: 90vw; text-align: center; }
-  .ver { text-align: center; color: var(--muted); font: 500 12px var(--caps); letter-spacing: .14em; margin-top: 22px; }
-  .hit { padding: 12px 0; border-top: 1px solid var(--line); display: block; } .hit:first-child { border-top: 0; }
-  .hit .w { font: 600 11px var(--caps); letter-spacing: .12em; color: var(--muted); } .hit mark { background: rgba(168, 41, 31, .18); color: inherit; border-radius: 3px; }
-  ol.isteps { padding-left: 22px; margin: 6px 0; } ol.isteps li { margin: 7px 0; font-size: 17px; }
+  ol.isteps { padding-left: 22px; margin: 6px 0; } ol.isteps li { margin: 7px 0; font-size: 18px; }
   .ic { display: inline-block; width: 20px; height: 20px; vertical-align: -4px; fill: none; stroke: var(--seal); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
   .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--line); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
-  .talecard { display: block; padding: 14px 4px; border-top: 1px solid var(--line); } .talecard:first-child { border-top: 0; }
-  .talecard b { font: 600 20px/1.2 var(--serif); display: block; } .talecard .src { font-size: 14.5px; color: var(--muted); }
-  .tlink { display: inline-flex; gap: 6px; align-items: center; margin-top: 10px; padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--seal) 10%, var(--slip)); border: 1px solid color-mix(in srgb, var(--seal) 30%, transparent); font: 600 15px var(--serif); color: var(--seal); }
-  .story p { font-size: var(--size); line-height: 1.65; margin: 0 0 14px; } .story p:first-child::first-letter { font: 700 2.6em/0.9 var(--caps); float: left; margin: 6px 8px 0 0; color: var(--seal); }
-  .reveal { margin-top: 14px; } .reveal summary { cursor: pointer; list-style: none; font: 600 17px var(--serif); color: var(--seal); } .reveal summary::-webkit-details-marker { display: none; }
-  .quote { border-left: 2px solid var(--gold); padding: 2px 0 2px 12px; margin: 8px 0; font: italic 18px/1.45 var(--serif); color: var(--ink2); display: block; }
-  .view { animation: fade .25s ease; } @keyframes fade { from { opacity: 0; } }
+  .ver { text-align: center; color: var(--muted); font: 700 11px var(--caps); letter-spacing: .14em; margin-top: 22px; }
 </style>
 </head>
 <body>
 <header class="bar">
   <a class="ib" href="#/" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg></a>
   <div class="brand">Sunzi</div>
-  <div class="row" style="gap:0"><button class="ib" data-act="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button><button class="ib" data-act="settings" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
+  <button class="ib" data-act="settings" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
 </header>
 <main id="app"></main>
-<nav class="tabs"><div class="in">
+<nav class="tabs">
   <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Chapters</a>
   <a href="#/tales" data-tab="tales"><svg viewBox="0 0 24 24"><path d="M4 6c3-1.5 5.5-1.5 8 0v13c-2.5-1.5-5-1.5-8 0z"/><path d="M12 6c2.5-1.5 5-1.5 8 0v13c-3-1.5-5.5-1.5-8 0"/></svg>Tales</a>
-  <a href="#/draw" data-tab="draw"><svg viewBox="0 0 24 24"><path d="M7 9h10l-1.2 11H8.2z"/><path d="M9.5 9V3M12 9V2.5M14.5 9V4"/></svg>Draw</a>
-  <a href="#/saved" data-tab="saved"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Saved</a>
-  <a href="#/journal" data-tab="journal"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1z"/><path d="M9 8h6M9 12h6"/></svg>Journal</a>
-</div></nav>
+</nav>
 <script>
 (() => {
   "use strict";
-  const VER = "3";
+  const VER = "4";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  /* the rendition never shows Chinese characters (a few slipped into the English as glosses) */
+  const clean = s => String(s ?? "").replace(/[㐀-鿿豈-﫿　-〿（），：；！？]+/g, "").replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/ ([,.;:])/g, "$1");
+  const tx = s => esc(clean(s));
+  const lines = s => tx(s).split("\n").map(l => `<span class="ln">${l || "&nbsp;"}</span>`).join("");
   const KEY = "sunzi";
-  const DEF = () => ({ read: {}, saved: [], prac: {}, notes: [], last: 1, modes: { zh: false, living: true }, theme: "", size: 0, talesRead: {}, v2: 1 });
-  let S; try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { S = DEF(); }
-  if (!S.v2) { S.modes = Object.assign({}, S.modes, { zh: false }); S.v2 = 1; S.talesRead = S.talesRead || {}; }
+  let S; try { S = Object.assign({ last: 1, theme: "", size: 0 }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { S = { last: 1, theme: "", size: 0 }; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
-  let D = null, T = [];
   const ROM = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]], roman = n => { let r = ""; for (const [v, x] of ROM) while (n >= v) { r += x; n -= v; } return r; };
-  const talesFor = id => T.filter(t => t.verses.includes(id));
-  const tale = id => T.find(t => t.id === id);
-  const dayTale = () => T.length ? T[Math.floor(Date.now() / 864e5) % T.length] : null;
-  const ZD = "〇一二三四五六七八九", zhNum = n => n <= 10 ? (n === 10 ? "十" : ZD[n]) : "十" + ZD[n % 10];
-  const lines = s => esc(s).split("\n").map(l => `<span class="ln">${l || "&nbsp;"}</span>`).join("");
+  let D = null, T = [];
   const ch = n => D.chapters.find(c => c.n === n);
-  const vid = (n, i) => `${n}.${i + 1}`;
+  const talesFor = id => T.filter(t => t.verses.includes(id));
 
-  /* ---------- views ---------- */
   function viewHome() {
     const last = ch(S.last) || D.chapters[0];
-    const tt = dayTale();
-    return `<div class="hero"><img src="icons/icon-192.png" width="96" height="96" alt="" style="border-radius:16px;box-shadow:var(--shadow)"><div><div style="font:600 12px var(--caps);letter-spacing:.16em;color:var(--gold)">SUNZI</div><h1>The Art of War</h1><p class="ink2" style="font-size:18px;margin:0">For skilful living and making things happen. An original rendering, with tales that bring each principle to life.</p></div></div>
-      <a class="slip" href="#/c/${last.n}" style="display:block"><div class="row"><div class="seal" style="min-width:46px;min-height:46px;font-size:16px">${roman(last.n)}</div><div><div class="muted" style="font-size:14px">${Object.keys(S.read).length ? "Continue" : "Begin"}</div><b style="font:600 20px var(--serif)">${esc(last.title_en)}</b></div></div></a>
-      <a class="slip" href="#/draw" style="display:block;background:linear-gradient(135deg,var(--slip),color-mix(in srgb,var(--seal) 10%,var(--slip)))"><div class="row"><span style="font-size:26px">🎋</span><div><b style="font:600 19px var(--serif)">Draw today's slip</b><div class="small muted">A maxim to carry through the day</div></div></div></a>
-      ${tt ? `<a class="slip" href="#/tale/${tt.id}" style="display:block"><div class="muted" style="font-size:14px">📖 Tale of the day · ${esc(ch(tt.ch).title_en)}</div><b style="font:600 21px var(--serif)">${esc(tt.title)}</b><div class="small muted">${esc(tt.source)}</div></a>` : ""}
-      <h3>The thirteen chapters</h3>
-      <div class="slip" style="padding:4px 14px">${D.chapters.map(c => `<a class="ch" href="#/c/${c.n}"><span class="num">${roman(c.n)}</span><div style="min-width:0"><b>${esc(c.title_en)}</b>${S.zh ? `<div class="zt">${esc(c.zh_title)} · ${esc(c.pinyin || "")}</div>` : ""}<div class="es">${esc(c.essence)}</div></div>${S.read[c.n] ? `<span class="dot" title="Read"></span>` : ""}</a>`).join("")}</div>
+    return `<h1>The Art of War</h1><p class="sub">Sunzi, rendered for daily living, with tales from history and legend.</p>
+      <a class="card" href="#/c/${last.n}" style="display:flex;gap:14px;align-items:center;padding:14px 18px"><div class="seal">${roman(last.n)}</div><div><div class="muted" style="font-size:15px">Continue reading</div><b style="font:600 20px var(--serif)">${tx(last.title_en)}</b></div></a>
+      <h2>The thirteen chapters</h2>
+      <div class="card">${D.chapters.map(c => `<a class="row" href="#/c/${c.n}"><span class="n">${roman(c.n)}</span><div><b>${tx(c.title_en)}</b><div class="meta">${c.verses.length} verses · ${T.filter(t => t.ch === c.n).length} tales</div></div><span class="chev">›</span></a>`).join("")}</div>
       <div class="ver">Sunzi v${VER}</div>`;
   }
   function viewChapter(n) {
-    const c = ch(n); if (!c) return viewHome(); S.last = n; S.read[n] = 1; save();
-    const M = S.modes;
+    const c = ch(n); if (!c) return viewHome(); S.last = n; save();
     const chTales = T.filter(t => t.ch === n);
-    return `<div class="head"><div class="seal">${roman(n)}</div><div>${S.zh ? `<div class="zt">${esc(c.zh_title)}</div>` : ""}<h1 style="margin:2px 0 0">${esc(c.title_en)}</h1><div class="muted" style="font-size:15px">Chapter ${n} of 13${chTales.length ? ` · ${chTales.length} tales` : ""}</div></div></div>
-      <div class="slip"><p style="margin:0">${esc(c.intro)}</p><p style="margin:12px 0 0;font:italic 20px/1.4 var(--serif);color:var(--seal)">${esc(c.essence)}</p></div>
-      <div class="modes"><button class="${M.living ? "on" : ""}" data-act="mode" data-v="living">For living</button><button class="${M.tales !== false ? "on" : ""}" data-act="mode" data-v="tales">Tales</button></div>
-      <div class="slip" style="padding:4px 18px">${c.verses.map((v, i) => { const id = vid(n, i), sv = S.saved.includes(id);
-        return `<div class="verse" id="v${id}"><div class="vn">${n}.${i + 1}<button class="mk${sv ? " on" : ""}" data-act="save" data-v="${id}" aria-label="${sv ? "Unsave" : "Save"}">${sv ? "♥" : "♡"}</button></div>
-          ${S.zh ? `<div class="zh" lang="zh-Hant">${esc(v.zh)}</div>` : ""}<div class="en">${lines(v.en)}</div>
-          ${(v.terms || []).length ? `<div class="terms">${v.terms.map(t => `<button class="term" data-act="term" data-v="${esc(t.zh)}|${esc(t.py)}|${esc(t.gloss)}">${S.zh ? `<span>${esc(t.zh)}</span>` : ""}${esc(t.py)}</button>`).join("")}</div>` : ""}
-          ${M.living ? `<div class="living"><b>For living</b>${esc(v.living)}</div>` : ""}
-          ${M.tales !== false ? talesFor(id).map(t => `<a class="tlink" href="#/tale/${t.id}">📖 A tale: ${esc(t.title)}</a>`).join(" ") : ""}</div>`; }).join("")}</div>
-      ${chTales.length ? `<h3>Tales for this chapter</h3><div class="slip" style="padding:4px 16px">${chTales.map(taleRow).join("")}</div>` : ""}
-      <h3>Practise this week</h3><div class="slip" style="padding:6px 16px"><ul class="prac">${c.practices.map((p, i) => `<li><input type="checkbox" data-prac="${n}:${i}" ${S.prac[n + ":" + i] ? "checked" : ""} aria-label="Done"><span>${esc(p)}</span></li>`).join("")}</ul></div>
-      <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm" data-act="say">♪ Read aloud</button><button class="btn sm" data-act="note" data-v="${n}">Apply it in the journal</button></div>
-      <div class="navch">${ch(n - 1) ? `<a class="btn" href="#/c/${n - 1}">‹ ${esc(ch(n - 1).title_en)}</a>` : ""}${ch(n + 1) ? `<a class="btn solid" href="#/c/${n + 1}">${esc(ch(n + 1).title_en)} ›</a>` : ""}</div>`;
+    return `<div style="display:flex;gap:16px;align-items:center;margin-top:4px"><div class="seal">${roman(n)}</div><div><div class="muted" style="font-size:15px">Chapter ${n} of 13</div><h1 style="margin:0">${tx(c.title_en)}</h1></div></div>
+      <div class="card">${c.verses.map((v, i) => { const id = `${n}.${i + 1}`;
+        return `<div class="verse" id="v${id}"><div class="vn">${roman(n)} · ${i + 1}</div><div class="en">${lines(v.en)}</div>
+          <div class="living"><b>For daily living</b>${tx(v.living)}</div>
+          ${talesFor(id).map(t => `<a class="tlink" href="#/tale/${t.id}"><span>📖</span><span>${tx(t.title)}</span></a>`).join("")}</div>`; }).join("")}</div>
+      ${chTales.length ? `<h2>Tales for this chapter</h2><div class="card">${chTales.map(t => `<a class="row" href="#/tale/${t.id}"><div><b>${tx(t.title)}</b><div class="meta">${tx(t.source)}</div></div><span class="chev">›</span></a>`).join("")}</div>` : ""}
+      <div class="navch">${ch(n - 1) ? `<a class="btn" href="#/c/${n - 1}">‹ ${roman(n - 1)}</a>` : ""}${ch(n + 1) ? `<a class="btn solid" href="#/c/${n + 1}">Chapter ${roman(n + 1)} ›</a>` : ""}</div>`;
   }
-  const taleRow = t => `<a class="talecard" href="#/tale/${t.id}"><b>${esc(t.title)}${S.talesRead[t.id] ? ` <span class="dot" style="display:inline-block;margin-left:6px;vertical-align:4px"></span>` : ""}</b><div class="src">${esc(t.source)} · ${esc(t.region)}</div></a>`;
-  let tReg = "";
   function viewTales() {
-    const regs = [...new Set(T.map(t => t.region))], L = T.filter(t => !tReg || t.region === tReg);
-    return `<div style="font:600 12px var(--caps);letter-spacing:.16em;color:var(--gold)">Tales</div><h1>Stories that teach</h1>
-      <p class="ink2" style="font-size:18px">${T.length} tales from history and legend, each bringing one of Sunzi's principles to life. Read the tale first; the lesson waits behind a tap.</p>
-      <div class="row wrap" style="gap:6px;margin-bottom:6px"><button class="btn sm${tReg ? "" : " solid"}" data-act="treg" data-v="">All</button>${regs.map(r => `<button class="btn sm${tReg === r ? " solid" : ""}" data-act="treg" data-v="${esc(r)}">${esc(r)}</button>`).join("")}</div>
-      ${D.chapters.map(c => { const ts = L.filter(t => t.ch === c.n); return ts.length ? `<h3>${roman(c.n)} · ${esc(c.title_en)}</h3><div class="slip" style="padding:4px 16px;margin-top:0">${ts.map(taleRow).join("")}</div>` : ""; }).join("")}`;
+    return `<h1>Tales</h1><p class="sub">${T.length} stories, five for each chapter. Read the tale, then see what it teaches.</p>
+      ${D.chapters.map(c => { const ts = T.filter(t => t.ch === c.n); return ts.length ? `<h2>${roman(c.n)} · ${tx(c.title_en)}</h2><div class="card" style="margin-top:0">${ts.map(t => `<a class="row" href="#/tale/${t.id}"><div><b>${tx(t.title)}</b><div class="meta">${tx(t.source)}</div></div><span class="chev">›</span></a>`).join("")}</div>` : ""; }).join("")}`;
   }
   function viewTale(id) {
-    const t = tale(id); if (!t) return viewTales(); const c = ch(t.ch); S.talesRead[id] = 1; save();
-    const i = T.indexOf(t), nx = T[(i + 1) % T.length];
-    const quotes = t.verses.map(v => { const [n, k] = v.split(".").map(Number), cc = ch(n), vv = cc && cc.verses[k - 1]; return vv ? `<a class="quote" href="#/c/${n}" data-goto="${v}">${esc(vv.en.split("\n").slice(0, 4).join(" / "))}<span class="muted" style="font-style:normal;font-size:14px"> · ${roman(n)}.${k}</span></a>` : ""; }).join("");
-    return `<a href="#/tales" class="muted" style="font-size:15px">‹ Tales</a>
-      <div class="muted" style="font-size:15px;margin-top:10px">${esc(t.source)} · ${esc(t.region)}</div><h1 style="margin-top:2px">${esc(t.title)}</h1>
-      <a class="muted" href="#/c/${c.n}" style="font-size:15px">Chapter ${roman(c.n)}: ${esc(c.title_en)}</a>
-      <div class="slip story">${t.tale.split(/\n\n+/).map(p => `<p>${esc(p)}</p>`).join("")}</div>
-      <details class="slip reveal"><summary>What does it teach? Tap when you've thought about it</summary><p style="margin:10px 0 0;font:italic 21px/1.45 var(--serif)">${esc(t.lesson)}</p><p class="ink2" style="margin:10px 0 0;font-size:17px">${esc(t.why)}</p>${quotes}</details>
-      <div class="living" style="margin-top:14px"><b>For your life</b>${esc(t.living)}</div>
-      <div class="row wrap" style="margin-top:14px;gap:8px"><button class="btn sm" data-act="saytale" data-v="${t.id}">♪ Read it aloud</button><button class="btn sm" data-act="note" data-v="${t.ch}">Apply it in the journal</button></div>
-      <a class="btn solid block" href="#/tale/${nx.id}" style="margin-top:16px">Next tale: ${esc(nx.title)} ›</a>`;
-  }
-  let drawn = null;
-  function viewDraw() {
-    return `<div style="font:600 12px var(--caps);letter-spacing:.16em;color:var(--gold)">Draw a slip</div><h1>Today's strategy</h1>
-      <p class="ink2" style="font-size:18px">Shake the tube. One maxim from Sunzi, and what it asks of you today.</p>
-      <div class="draw"><button data-act="shake" aria-label="Shake the tube"><svg class="tube" id="tube" viewBox="0 0 120 150"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M30 40h60l-6 100H36z" fill="var(--slip)"/><path d="M30 40h60" stroke-width="3"/></g>${[40, 50, 58, 66, 74, 82].map((x, i) => `<rect x="${x}" y="${8 + (i % 3) * 6}" width="5" height="40" rx="2" fill="${i === 2 ? "var(--seal)" : "var(--gold)"}"/>`).join("")}<circle cx="60" cy="95" r="10" fill="none" stroke="var(--seal)" stroke-width="2"/></svg></button></div>
-      <div id="drawn">${drawn ? stick(drawn) : `<p class="muted" style="text-align:center">Tap the tube</p>`}</div>`;
-  }
-  const stick = d => `<div class="stick"><div class="slip" style="margin:0;flex:1">${S.zh ? `<div class="zh" lang="zh-Hant">${esc(d.m.zh)}</div>` : ""}<div class="ve">${lines(d.m.en)}</div><div class="living" style="margin-top:12px"><b>Today</b>${esc(d.m.living)}</div>
-    <div class="row wrap" style="margin-top:12px;gap:8px"><a class="btn sm" href="#/c/${d.c.n}">Read ${esc(d.c.title_en)}</a>${T.some(t => t.ch === d.c.n) ? `<a class="btn sm" href="#/tale/${T.filter(t => t.ch === d.c.n)[0].id}">📖 A tale</a>` : ""}<button class="btn sm" data-act="share">Share</button></div></div></div>`;
-  function viewSaved() {
-    const L = S.saved.map(id => { const [n, i] = id.split(".").map(Number), c = ch(n); return c && c.verses[i - 1] ? { id, c, v: c.verses[i - 1] } : null; }).filter(Boolean);
-    return `<div style="font:600 12px var(--caps);letter-spacing:.16em;color:var(--gold)">Saved</div><h1>Your verses</h1>
-      ${L.length ? `<div class="slip" style="padding:4px 16px">${L.map(x => `<a class="hit" href="#/c/${x.c.n}" data-goto="${x.id}"><div class="w">${esc(x.c.title_en)} · ${x.id}</div><div class="en" style="font-size:19px">${lines(x.v.en.split("\n").slice(0, 4).join("\n"))}</div></a>`).join("")}</div>` : `<div class="slip"><p style="margin:0" class="ink2">Tap ♡ on any verse to keep it here.</p></div>`}`;
-  }
-  function viewJournal() {
-    const N = [...S.notes].reverse();
-    return `<div style="font:600 12px var(--caps);letter-spacing:.16em;color:var(--gold)">Journal</div><h1>Strategy notes</h1>
-      <p class="ink2" style="font-size:18px">Name the situation, pick the principle, decide the move. Sunzi wins before the battle; this is where you plan.</p>
-      <button class="btn seal2 block" data-act="note" data-v="">＋ New plan</button>
-      <div class="slip" style="padding:4px 16px">${N.length ? N.map(x => `<div class="hit"><div class="w">${new Date(x.at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}${x.ch ? " · " + esc(ch(x.ch).title_en) : ""}</div><b style="font-size:19px">${esc(x.sit)}</b>${x.move ? `<div class="ink2" style="font-size:17px;margin-top:4px">→ ${esc(x.move)}</div>` : ""}</div>`).join("") : `<p class="muted" style="margin:12px 0">No plans yet.</p>`}</div>`;
+    const t = T.find(x => x.id === id); if (!t) return viewTales(); const c = ch(t.ch);
+    const same = T.filter(x => x.ch === t.ch), i = same.indexOf(t), nx = same[i + 1] || T[(T.indexOf(t) + 1) % T.length];
+    return `<a href="#/c/${c.n}" class="muted" style="font-size:16px">‹ Chapter ${roman(c.n)}: ${tx(c.title_en)}</a>
+      <h1 style="margin-top:10px">${tx(t.title)}</h1><div class="muted" style="font-size:16px">${tx(t.source)}</div>
+      <div class="card story">${clean(t.tale).split(/\n\n+/).map(p => `<p>${esc(p)}</p>`).join("")}</div>
+      <details class="teach"><summary>What it teaches ›</summary><p class="lesson">${tx(t.lesson)}</p><div class="living"><b>For your life</b>${tx(t.living)}</div></details>
+      <div class="navch"><a class="btn" href="#/c/${c.n}">Read chapter ${roman(c.n)}</a><a class="btn solid" href="#/tale/${nx.id}">Next tale ›</a></div>`;
   }
 
-  /* With the Chinese switched off, strip Han characters from whatever is on screen (the writers sometimes put a term like 勢 inside the English). */
-  function dehan(root) { if (S.zh || !root) return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); const R = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff08\uff09\uff0c\uff1a\uff1b\uff01\uff1f]+/g; let n;
-    while ((n = w.nextNode())) { if (!R.test(n.nodeValue)) continue; R.lastIndex = 0; n.nodeValue = n.nodeValue.replace(R, "").replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/ ([,.;:])/g, "$1"); } }
-  /* ---------- router ---------- */
   function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "home", a: h[1] || "" }; }
   function render() { if (!D) return; const { v, a } = route();
-    $("#app").innerHTML = `<div class="view">${({ home: viewHome, c: () => viewChapter(+a), tales: viewTales, tale: () => viewTale(a), draw: viewDraw, saved: viewSaved, journal: viewJournal }[v] || viewHome)()}</div>`;
-    $$("nav.tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "c" ? "home" : v === "tale" ? "tales" : v))); dehan($("#app")); }
-  addEventListener("hashchange", () => { stopSay(); close(); render(); scrollTo(0, 0); });
+    $("#app").innerHTML = ({ home: viewHome, c: () => viewChapter(+a), tales: viewTales, tale: () => viewTale(a) }[v] || viewHome)();
+    $$("nav.tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "tale" || v === "tales" ? "tales" : "home"))); }
+  addEventListener("hashchange", () => { close(); render(); scrollTo(0, 0); });
 
-  /* ---------- sheets ---------- */
-  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); dehan(b); return b; }
-  const close = () => $$(".back").forEach(b => b.remove());
-  function searchSheet() {
-    sheet(`<h2>Search</h2><input class="txt" id="q" type="search" placeholder="momentum, water, patience, a tale…" autocomplete="off"><div id="qr" style="margin-top:8px"></div>`);
-    const q = $("#q"); q.focus(); q.addEventListener("input", () => { const s = q.value.trim().toLowerCase(); if (s.length < 2) return $("#qr").innerHTML = "";
-      const hits = []; D.chapters.forEach(c => c.verses.forEach((v, i) => { const hay = (v.en + " " + v.living + " " + v.zh).toLowerCase(); if (hay.includes(s)) hits.push({ c, v, i }); }));
-      T.forEach(t => { if ((t.title + " " + t.tale + " " + t.source).toLowerCase().includes(s)) hits.unshift({ tale: t }); });
-      const mk = t => esc(t).replace(new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), m => `<mark>${m}</mark>`);
-      setTimeout(() => dehan($("#qr")), 0); $("#qr").innerHTML = hits.length ? hits.slice(0, 30).map(h => h.tale ? `<a class="hit" href="#/tale/${h.tale.id}"><div class="w">📖 Tale · ${esc(h.tale.source)}</div><div style="font-size:18px">${mk(h.tale.title)}</div></a>` : `<a class="hit" href="#/c/${h.c.n}" data-goto="${vid(h.c.n, h.i)}"><div class="w">${esc(h.c.title_en)} · ${vid(h.c.n, h.i)}</div><div style="font-size:18px">${mk(h.v.en.replace(/\n/g, " ").slice(0, 160))}</div></a>`).join("") : `<p class="muted">Nothing found.</p>`; });
-  }
-  function noteSheet(n) {
-    sheet(`<h2>Plan a move</h2><p class="muted" style="font-size:16px;margin-top:0">Private: it stays on this device.</p>
-      <h3>The situation</h3><input class="txt" id="nSit" placeholder="e.g. Asking for a raise next week">
-      <h3>The principle</h3><select id="nCh"><option value="">Choose a chapter…</option>${D.chapters.map(c => `<option value="${c.n}"${+n === c.n ? " selected" : ""}>${roman(c.n)} · ${esc(c.title_en)}</option>`).join("")}</select>
-      <h3>Your move</h3><textarea id="nMove" placeholder="What will you do, when, and what will you not do?"></textarea>
-      <button class="btn seal2 block" data-act="savenote" style="margin-top:14px">Save the plan</button>`);
-  }
+  function sheet(html) { close(); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); }
+  function close() { $$(".back").forEach(b => b.remove()); }
   function settingsSheet() {
-    const th = document.documentElement.dataset.theme || "day";
-    sheet(`<h2>Settings</h2><h3>Look</h3><div class="seg"><button class="${th === "day" ? "on" : ""}" data-act="theme" data-v="day">Bamboo</button><button class="${th === "night" ? "on" : ""}" data-act="theme" data-v="night">Lacquer night</button></div>
-      <div class="row" style="margin-top:12px;flex-wrap:nowrap"><span style="font-size:15px">A</span><input type="range" id="size" min="17" max="28" value="${S.size || 21}"><span style="font-size:24px">A</span></div>
-      <h3>Original text</h3><button class="btn block" data-act="zh">${S.zh ? "Hide the original Chinese" : "Show the original Chinese"}</button>
-      <h3>App</h3>${isStandalone() ? "" : `<button class="btn block" data-act="install">Install Sunzi</button>`}
-      <p class="small muted" style="margin-top:12px">The classical text is public domain. The English rendering, the "For living" reflections, chapter introductions and practices were written for this app. Fonts: Cinzel, Cormorant Garamond, LXGW WenKai TC (SIL OFL).</p>
+    const th = document.documentElement.dataset.theme;
+    sheet(`<h3>Look</h3><div class="seg"><button class="${th === "day" ? "on" : ""}" data-act="theme" data-v="day">Day</button><button class="${th === "night" ? "on" : ""}" data-act="theme" data-v="night">Night</button></div>
+      <h3>Text size</h3><input type="range" id="size" min="17" max="28" value="${S.size || 21}">
+      ${isStandalone() ? "" : `<h3>App</h3><button class="btn" data-act="install" style="width:100%">Install Sunzi</button>`}
       <div class="ver">Sunzi v${VER}</div>`);
     $("#size").addEventListener("input", e => { S.size = +e.target.value; document.documentElement.style.setProperty("--size", S.size + "px"); save(); });
   }
 
-  /* ---------- read aloud ---------- */
-  let saying = false;
-  function say() { const { v, a } = route(); if (v !== "c") return; if (saying) return stopSay(); const c = ch(+a);
-    try { const u = new SpeechSynthesisUtterance([c.title_en, ...c.verses.map(x => x.en)].join(". ").replace(/\n/g, " ")); u.lang = "en-GB"; u.rate = .88; u.onend = () => saying = false; speechSynthesis.cancel(); speechSynthesis.speak(u); saying = true; toast("Reading… tap again to stop"); } catch { toast("Read-aloud isn't available here"); } }
-  function stopSay() { try { speechSynthesis.cancel(); } catch {} saying = false; }
-
-  /* ---------- install prompt ---------- */
+  /* install prompt */
   let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA), iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
   const IC = { share: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="dots3">•••</span>` };
-  const installBody = () => deferred ? `<button class="btn seal2 block" data-act="doinstall">Install Sunzi</button>`
-    : inApp ? `<p class="small">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p><button class="btn block" data-act="copylink">Copy the link</button>`
-    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add} (you may need <b>More</b>).</li><li>Tap <b>Add</b>.</li></ol>`
-    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol>`
+  const installBody = () => deferred ? `<button class="btn solid" data-act="doinstall" style="width:100%">Install Sunzi</button>`
+    : inApp ? `<p style="font-size:18px">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p>`
+    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Tap <b>Add</b>.</li></ol>`
+    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari (on newer iPhones, tap ${IC.more} first).</li><li>Tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Tap <b>Add</b>.</li></ol>`
     : isAndroid ? `<ol class="isteps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`
     : `<ol class="isteps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b>.</li></ol>`;
   function showInstall(force) { if (isStandalone() || (!force && $(".back"))) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("sunzi-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
-    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:12px" alt=""><div><h2 style="margin:0">Install Sunzi</h2><p class="muted" style="margin:0;font-size:16px">All thirteen chapters, offline, one tap away.</p></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;border:0">Not now</button>`); }
+    sheet(`<div style="display:flex;gap:14px;align-items:center"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:12px" alt=""><div><b style="font:600 21px var(--serif)">Install Sunzi</b><div class="muted" style="font-size:16px">Read offline, one tap away.</div></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn" data-act="notnow" style="width:100%;margin-top:8px;border:0">Not now</button>`); }
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
 
-  /* ---------- actions ---------- */
-  document.addEventListener("click", async e => {
-    const g = e.target.closest("[data-goto]"); if (g) { const id = g.dataset.goto; close(); setTimeout(() => { const el = document.getElementById("v" + id); if (el) el.scrollIntoView({ block: "center" }); }, 120); }
+  document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
-    if (a === "mode") { S.modes[v] = S.modes[v] === false ? true : v === "tales" ? false : !S.modes[v]; save(); const y = scrollY; render(); scrollTo(0, y); }
-    else if (a === "save") { S.saved = S.saved.includes(v) ? S.saved.filter(x => x !== v) : [...S.saved, v]; save(); el.classList.toggle("on"); el.textContent = S.saved.includes(v) ? "♥" : "♡"; toast(S.saved.includes(v) ? "Saved" : "Removed"); }
-    else if (a === "term") { const [z, p, gl] = v.split("|"); sheet(`${S.zh ? `<div style="font:44px var(--brush);color:var(--seal)">${esc(z)}</div>` : ""}<div style="font:600 24px var(--serif)">${esc(p)}</div><p class="ink2" style="margin-top:8px">${esc(gl)}</p><button class="btn block" data-act="close">Close</button>`); }
-    else if (a === "shake") { const c = D.chapters[Math.floor(Math.random() * 13)], m = c.maxims[Math.floor(Math.random() * c.maxims.length)]; drawn = { c, m }; const t = $("#tube"); t.classList.remove("shake"); void t.getBBox(); t.classList.add("shake"); setTimeout(() => { $("#drawn").innerHTML = stick(drawn); dehan($("#drawn")); }, 550); }
-    else if (a === "share" && drawn) { const txt = `${drawn.m.zh}\n${drawn.m.en}\n\nSunzi, ${drawn.c.title_en}`; try { if (navigator.share) await navigator.share({ text: txt }); else { await navigator.clipboard.writeText(txt); toast("Copied"); } } catch {} }
-    else if (a === "say") say();
-    else if (a === "treg") { tReg = v; render(); }
-    else if (a === "saytale") { const t = tale(v); if (saying) return stopSay(); try { const u = new SpeechSynthesisUtterance(t.title + ". " + t.tale.replace(/\n+/g, " ")); u.lang = "en-GB"; u.rate = .9; u.onend = () => saying = false; speechSynthesis.cancel(); speechSynthesis.speak(u); saying = true; toast("Telling the tale… tap again to stop"); } catch { toast("Read-aloud isn't available here"); } }
-    else if (a === "zh") { S.zh = !S.zh; save(); settingsSheet(); render(); }
-    else if (a === "note") noteSheet(v);
-    else if (a === "savenote") { const sit = $("#nSit").value.trim(), move = $("#nMove").value.trim(); if (!sit) return toast("Name the situation first"); S.notes.push({ sit, move, ch: +$("#nCh").value || 0, at: Date.now() }); save(); close(); toast("Plan saved"); if (route().v === "journal") render(); }
-    else if (a === "search") searchSheet(); else if (a === "settings") settingsSheet(); else if (a === "close") close();
+    if (a === "settings") settingsSheet();
     else if (a === "theme") { S.theme = v; save(); applyTheme(); settingsSheet(); }
     else if (a === "install") showInstall(true);
     else if (a === "notnow") { try { localStorage.setItem("sunzi-install-snooze", Date.now()); } catch {} close(); }
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
-    else if (a === "copylink") { try { await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Link copied"); } catch { prompt("Copy this link:", location.href.split("#")[0]); } }
   });
-  document.addEventListener("change", e => { const p = e.target.dataset && e.target.dataset.prac; if (p) { S.prac[p] = e.target.checked; save(); if (e.target.checked) toast("Done. Well played."); } });
-  addEventListener("keydown", e => { if ($(".back")) { if (e.key === "Escape") close(); return; } const { v, a } = route(); if (v === "c") { if (e.key === "ArrowLeft" && +a > 1) location.hash = `#/c/${+a - 1}`; if (e.key === "ArrowRight" && +a < 13) location.hash = `#/c/${+a + 1}`; } });
-
-  function applyTheme() { const th = S.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "day"); document.documentElement.dataset.theme = th; $("meta[name=theme-color]").content = th === "night" ? "#140c09" : "#e9dcb6"; }
+  addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+  function applyTheme() { const th = S.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "day"); document.documentElement.dataset.theme = th; $("meta[name=theme-color]").content = th === "night" ? "#15100c" : "#ece2c6"; }
   applyTheme(); if (S.size) document.documentElement.style.setProperty("--size", S.size + "px");
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  Promise.all([fetch("data/sunzi.json").then(r => r.json()), fetch("data/tales.json").then(r => r.json()).catch(() => ({ tales: [] }))]).then(([d, t]) => { D = d; T = t.tales || []; render(); setTimeout(() => showInstall(false), 5000); })
+  Promise.all([fetch("data/sunzi.json").then(r => r.json()), fetch("data/tales.json").then(r => r.json()).catch(() => ({ tales: [] }))])
+    .then(([d, t]) => { D = d; T = t.tales || []; render(); setTimeout(() => showInstall(false), 5000); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load the text. Check your connection and reload.</p>`; });
 })();
 </script>
