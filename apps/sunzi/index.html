@@ -221,15 +221,18 @@
       <div class="slip" style="padding:4px 16px">${N.length ? N.map(x => `<div class="hit"><div class="w">${new Date(x.at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}${x.ch ? " · " + esc(ch(x.ch).title_en) : ""}</div><b style="font-size:19px">${esc(x.sit)}</b>${x.move ? `<div class="ink2" style="font-size:17px;margin-top:4px">→ ${esc(x.move)}</div>` : ""}</div>`).join("") : `<p class="muted" style="margin:12px 0">No plans yet.</p>`}</div>`;
   }
 
+  /* With the Chinese switched off, strip Han characters from whatever is on screen (the writers sometimes put a term like 勢 inside the English). */
+  function dehan(root) { if (S.zh || !root) return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); const R = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff08\uff09\uff0c\uff1a\uff1b\uff01\uff1f]+/g; let n;
+    while ((n = w.nextNode())) { if (!R.test(n.nodeValue)) continue; R.lastIndex = 0; n.nodeValue = n.nodeValue.replace(R, "").replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/ ([,.;:])/g, "$1"); } }
   /* ---------- router ---------- */
   function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "home", a: h[1] || "" }; }
   function render() { if (!D) return; const { v, a } = route();
     $("#app").innerHTML = `<div class="view">${({ home: viewHome, c: () => viewChapter(+a), tales: viewTales, tale: () => viewTale(a), draw: viewDraw, saved: viewSaved, journal: viewJournal }[v] || viewHome)()}</div>`;
-    $$("nav.tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "c" ? "home" : v === "tale" ? "tales" : v))); }
-  addEventListener("hashchange", () => { stopSay(); render(); scrollTo(0, 0); });
+    $$("nav.tabs a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "c" ? "home" : v === "tale" ? "tales" : v))); dehan($("#app")); }
+  addEventListener("hashchange", () => { stopSay(); close(); render(); scrollTo(0, 0); });
 
   /* ---------- sheets ---------- */
-  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); dehan(b); return b; }
   const close = () => $$(".back").forEach(b => b.remove());
   function searchSheet() {
     sheet(`<h2>Search</h2><input class="txt" id="q" type="search" placeholder="momentum, water, patience, a tale…" autocomplete="off"><div id="qr" style="margin-top:8px"></div>`);
@@ -237,7 +240,7 @@
       const hits = []; D.chapters.forEach(c => c.verses.forEach((v, i) => { const hay = (v.en + " " + v.living + " " + v.zh).toLowerCase(); if (hay.includes(s)) hits.push({ c, v, i }); }));
       T.forEach(t => { if ((t.title + " " + t.tale + " " + t.source).toLowerCase().includes(s)) hits.unshift({ tale: t }); });
       const mk = t => esc(t).replace(new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), m => `<mark>${m}</mark>`);
-      $("#qr").innerHTML = hits.length ? hits.slice(0, 30).map(h => h.tale ? `<a class="hit" href="#/tale/${h.tale.id}"><div class="w">📖 Tale · ${esc(h.tale.source)}</div><div style="font-size:18px">${mk(h.tale.title)}</div></a>` : `<a class="hit" href="#/c/${h.c.n}" data-goto="${vid(h.c.n, h.i)}"><div class="w">${esc(h.c.title_en)} · ${vid(h.c.n, h.i)}</div><div style="font-size:18px">${mk(h.v.en.replace(/\n/g, " ").slice(0, 160))}</div></a>`).join("") : `<p class="muted">Nothing found.</p>`; });
+      setTimeout(() => dehan($("#qr")), 0); $("#qr").innerHTML = hits.length ? hits.slice(0, 30).map(h => h.tale ? `<a class="hit" href="#/tale/${h.tale.id}"><div class="w">📖 Tale · ${esc(h.tale.source)}</div><div style="font-size:18px">${mk(h.tale.title)}</div></a>` : `<a class="hit" href="#/c/${h.c.n}" data-goto="${vid(h.c.n, h.i)}"><div class="w">${esc(h.c.title_en)} · ${vid(h.c.n, h.i)}</div><div style="font-size:18px">${mk(h.v.en.replace(/\n/g, " ").slice(0, 160))}</div></a>`).join("") : `<p class="muted">Nothing found.</p>`; });
   }
   function noteSheet(n) {
     sheet(`<h2>Plan a move</h2><p class="muted" style="font-size:16px;margin-top:0">Private: it stays on this device.</p>
@@ -284,7 +287,7 @@
     if (a === "mode") { S.modes[v] = S.modes[v] === false ? true : v === "tales" ? false : !S.modes[v]; save(); const y = scrollY; render(); scrollTo(0, y); }
     else if (a === "save") { S.saved = S.saved.includes(v) ? S.saved.filter(x => x !== v) : [...S.saved, v]; save(); el.classList.toggle("on"); el.textContent = S.saved.includes(v) ? "♥" : "♡"; toast(S.saved.includes(v) ? "Saved" : "Removed"); }
     else if (a === "term") { const [z, p, gl] = v.split("|"); sheet(`${S.zh ? `<div style="font:44px var(--brush);color:var(--seal)">${esc(z)}</div>` : ""}<div style="font:600 24px var(--serif)">${esc(p)}</div><p class="ink2" style="margin-top:8px">${esc(gl)}</p><button class="btn block" data-act="close">Close</button>`); }
-    else if (a === "shake") { const c = D.chapters[Math.floor(Math.random() * 13)], m = c.maxims[Math.floor(Math.random() * c.maxims.length)]; drawn = { c, m }; const t = $("#tube"); t.classList.remove("shake"); void t.getBBox(); t.classList.add("shake"); setTimeout(() => { $("#drawn").innerHTML = stick(drawn); }, 550); }
+    else if (a === "shake") { const c = D.chapters[Math.floor(Math.random() * 13)], m = c.maxims[Math.floor(Math.random() * c.maxims.length)]; drawn = { c, m }; const t = $("#tube"); t.classList.remove("shake"); void t.getBBox(); t.classList.add("shake"); setTimeout(() => { $("#drawn").innerHTML = stick(drawn); dehan($("#drawn")); }, 550); }
     else if (a === "share" && drawn) { const txt = `${drawn.m.zh}\n${drawn.m.en}\n\nSunzi, ${drawn.c.title_en}`; try { if (navigator.share) await navigator.share({ text: txt }); else { await navigator.clipboard.writeText(txt); toast("Copied"); } } catch {} }
     else if (a === "say") say();
     else if (a === "treg") { tReg = v; render(); }
