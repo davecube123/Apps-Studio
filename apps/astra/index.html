@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Astra</title>
+<meta name="description" content="Your real birth chart and today's sky, read for power, abundance, love and sex.">
+<meta name="theme-color" content="#0d0b1a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Astra">
+<style>
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+  :root { --bg: #0d0b1a; --card: #17142a; --card2: #221e3a; --ink: #f1ecf8; --ink2: #cbc3dc; --muted: #9a91b3; --line: rgba(255, 255, 255, .09); --gold: #e6c47c;
+    --power: #f0b64e; --abundance: #6fd39b; --love: #f48fb0; --sex: #ee5d57;
+    --display: "Cormorant", Georgia, serif; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; color: var(--ink); font: 16px/1.5 var(--sans); background: var(--bg); }
+  body { min-height: 100vh; background: radial-gradient(130% 55% at 50% -12%, #2b2052 0%, rgba(13, 11, 26, 0) 70%), var(--bg); }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .55;
+    background-image: radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 72% 9%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 33%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 41%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 24%, #ddd 50%, transparent 51%), radial-gradient(1px 1px at 8% 66%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 64% 72%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 91% 84%, #ccc 50%, transparent 51%), radial-gradient(1px 1px at 25% 90%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 46% 58%, #bbb 50%, transparent 51%); }
+  a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  main { max-width: 680px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 96px); }
+  h1 { font: 600 34px/1.1 var(--display); margin: 4px 0 4px; }
+  h2 { font: 600 24px/1.2 var(--display); margin: 0; }
+  h3 { font: 700 11.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 26px 0 10px; }
+  p { margin: 0 0 10px; }
+  .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 14px; } .tiny { font-size: 12.5px; }
+  .eyebrow { font: 700 11px var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .wrap { flex-wrap: wrap; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card2); font-weight: 650; font-size: 15px; }
+  .btn.pri { background: linear-gradient(135deg, #f3dfa8, var(--gold)); color: #1b1407; border: 0; } .btn.block { display: flex; width: 100%; } .btn.sm { padding: 8px 14px; font-size: 14px; }
+  .field { display: block; margin-top: 14px; } .field > span { display: block; font-size: 13px; font-weight: 650; color: var(--ink2); margin-bottom: 6px; }
+  input[type=text], input[type=search], input[type=date], input[type=time], input[type=number], select { width: 100%; font: 16px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); outline: none; }
+  input:focus, select:focus { border-color: var(--gold); }
+  .check { display: flex; gap: 10px; align-items: center; margin-top: 10px; font-size: 14.5px; color: var(--ink2); } .check input { width: 20px; height: 20px; accent-color: var(--gold); }
+  .chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 4px; } .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: none; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink2); font-size: 13.5px; font-weight: 600; }
+  .chip.on { background: var(--gold); color: #1b1407; border-color: var(--gold); }
+  .g { font-family: "Segoe UI Symbol", "Noto Sans Symbols", "Noto Sans Symbols 2", "Apple Symbols", sans-serif; font-variant-emoji: text; }
+
+  /* domains */
+  .doms { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .dom { position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 14px 13px; min-height: 138px; display: flex; flex-direction: column; }
+  .dom::after { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: var(--c); opacity: .13; filter: blur(4px); }
+  .dom .ic { width: 28px; height: 28px; color: var(--c); } .dom .ic svg { width: 28px; height: 28px; }
+  .dom b { font: 600 22px/1 var(--display); margin-top: 8px; }
+  .dom .word { font-size: 13px; color: var(--c); font-weight: 700; margin-top: 2px; }
+  .dom .hint { font-size: 12.5px; color: var(--muted); margin-top: auto; padding-top: 6px; line-height: 1.35; }
+  .meter { display: flex; gap: 4px; margin-top: 8px; } .meter i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .1); position: relative; overflow: hidden; }
+  .meter i::after { content: ""; position: absolute; inset: 0; background: var(--c); width: calc(var(--f, 0) * 100%); }
+  .sky { display: flex; gap: 12px; align-items: center; }
+  .moon { font-size: 34px; line-height: 1; }
+  .now { display: flex; gap: 12px; align-items: center; }
+  .now .pg { font-size: 26px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--card2); flex: none; color: var(--gold); }
+  .tr { padding: 12px 0; border-top: 1px solid var(--line); } .tr:first-child { border-top: 0; padding-top: 2px; }
+  .tr .h { font-size: 13px; font-weight: 700; color: var(--ink2); }
+  .tr .h .k { font-weight: 700; } .k.flow { color: #8fd6ff; } .k.tension { color: #ff9a8a; } .k.fusion { color: var(--gold); }
+  .tr p { margin: 4px 0 0; color: var(--ink); }
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--card2); color: var(--ink2); margin: 2px 4px 0 0; }
+  .lead { font: 500 21px/1.4 var(--display); }
+  .hour { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); } .hour:first-child { border-top: 0; }
+  .hour .t { width: 108px; flex: none; font-size: 14px; color: var(--ink2); font-variant-numeric: tabular-nums; } .hour.cur .t { color: var(--gold); font-weight: 700; }
+  .day { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--line); } .day:first-child { border-top: 0; }
+  .day .dt { width: 52px; flex: none; text-align: center; } .day .dt b { display: block; font: 600 24px/1 var(--display); } .day .dt span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .bp { padding: 12px 0; border-top: 1px solid var(--line); } .bp:first-child { border-top: 0; padding-top: 2px; }
+  .bp .h { font: 600 18px var(--display); } .bp p { margin: 4px 0 0; color: var(--ink2); }
+  .pr { padding: 12px 0; border-top: 1px solid var(--line); } .pr:first-child { border-top: 0; padding-top: 2px; } .pr b { display: block; } .pr p { margin: 3px 0 0; color: var(--ink2); font-size: 15px; }
+  .back-link { font-size: 14px; color: var(--muted); }
+  .dh { display: flex; gap: 14px; align-items: center; margin-top: 10px; } .dh .ic { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--card2); color: var(--c); flex: none; } .dh .ic svg { width: 30px; height: 30px; }
+  .big { font: 600 44px/1 var(--display); color: var(--c); }
+
+  /* chart */
+  .wheel { display: block; width: 100%; max-width: 420px; margin: 8px auto 0; }
+  .pl { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); } .pl:first-child { border-top: 0; }
+  .pl .gl { font-size: 22px; width: 30px; text-align: center; color: var(--gold); flex: none; }
+  .pl .nm { flex: 1; min-width: 0; } .pl .nm b { font: 600 18px var(--display); } .pl .pos { font-size: 14px; color: var(--ink2); text-align: right; }
+  .ev { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); } .ev:first-child { border-top: 0; }
+  .ev .gl { font-size: 22px; width: 32px; flex: none; text-align: center; color: var(--gold); }
+  .city { display: block; width: 100%; text-align: left; padding: 11px 4px; border-top: 1px solid var(--line); } .city:first-child { border-top: 0; }
+  .score2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  nav.tabsbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 6px calc(env(safe-area-inset-bottom) + 8px); background: rgba(13, 11, 26, .94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+  nav.tabsbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 10px; font: 650 11.5px var(--sans); color: var(--muted); min-width: 64px; }
+  nav.tabsbar a.on { color: var(--gold); } nav.tabsbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .back { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: min(620px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 22px 22px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); animation: up .25s ease; }
+  .sheet h2 { margin: 0 0 8px; }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+  .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); transform: translateX(-50%); background: var(--gold); color: #1b1407; padding: 10px 16px; border-radius: 999px; font-weight: 650; font-size: 14px; max-width: 90vw; text-align: center; }
+  .ic2 { display: inline-block; width: 20px; height: 20px; vertical-align: -5px; fill: none; stroke: var(--gold); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--card2); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
+  ol.isteps { padding-left: 20px; } ol.isteps li { margin: 7px 0; }
+  .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 22px; }
+</style>
+</head>
+<body>
+<main id="app"><p class="muted" style="text-align:center;margin-top:40vh">Reading the sky…</p></main>
+<nav class="tabsbar" hidden>
+  <a href="#/" data-tab="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</a>
+  <a href="#/chart" data-tab="chart"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M3 12h18M12 3v18"/></svg>My chart</a>
+  <a href="#/sky" data-tab="sky"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Sky ahead</a>
+  <a href="#/match" data-tab="match"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Match</a>
+</nav>
+<script src="lib/astronomy.min.js"></script>
+<script src="lib/chart.js"></script>
+<script>
+(() => {
+  "use strict";
+  const VER = "1";
+  const C = window.Chart;
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const cap = s => s ? s[0].toUpperCase() + s.slice(1) : "";
+  const KEY = "astra";
+  let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { S = {}; }
+  S.partners = S.partners || [];
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  let T = null; /* written content */
+
+  /* ---------- names, glyphs, icons ---------- */
+  const VS = "︎";
+  const SG = { aries: "♈", taurus: "♉", gemini: "♊", cancer: "♋", leo: "♌", virgo: "♍", libra: "♎", scorpio: "♏", sagittarius: "♐", capricorn: "♑", aquarius: "♒", pisces: "♓" };
+  const PG = { sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂", jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇", asc: "AC", mc: "MC" };
+  const sg = s => `<span class="g">${SG[s]}${VS}</span>`, pg = p => `<span class="g">${PG[p]}${p === "asc" || p === "mc" ? "" : VS}</span>`;
+  const PN = p => ({ asc: "Rising", mc: "Midheaven" }[p] || cap(p));
+  const DOM = {
+    power: { name: "Power", c: "var(--power)", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/><path d="M5 19h14"/></svg>` },
+    abundance: { name: "Abundance", c: "var(--abundance)", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="9" cy="7" rx="6" ry="2.6"/><path d="M3 7v4c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V7"/><path d="M9 13.6v4c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-4c0-1.4-2.7-2.6-6-2.6"/><path d="M9 17.6c0 0 0 0 0 0"/></svg>` },
+    love: { name: "Love", c: "var(--love)", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/></svg>` },
+    sex: { name: "Sex", c: "var(--sex)", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 21c-4 0-7-2.8-7-6.6 0-3.4 2.4-5.4 3.6-8.4.6 2 1.8 3 2.8 3.4C11.2 6.6 12.6 4 15 3c-.4 3 1.4 5 2.6 6.6.9 1.3 1.4 2.8 1.4 4.6C19 18.1 16 21 12 21z"/><path d="M12 21c-1.8 0-3-1.3-3-3 0-1.8 1.6-2.6 2.2-4.2.8 1 2.4 1.8 2.4 1.8s.4 1.2.4 2.4c0 1.7-.8 3-2 3z"/></svg>` }
+  };
+  const WORD = v => v >= 4.5 ? "Peak day" : v >= 3.75 ? "Open door" : v >= 3 ? "Steady" : v >= 2 ? "Go gently" : "Hold back";
+  const meter = v => `<div class="meter">${[1, 2, 3, 4, 5].map(i => `<i style="--f:${Math.max(0, Math.min(1, v - i + 1))}"></i>`).join("")}</div>`;
+  const MOONS = { new: "🌑", crescent: "🌒", "first-quarter": "🌓", gibbous: "🌔", full: "🌕", disseminating: "🌖", "last-quarter": "🌗", balsamic: "🌘" };
+  const ord = n => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");
+  const deg = d => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, "0")}′`;
+
+  /* ---------- time in the place you are now ---------- */
+  const here = () => S.here || (S.me && S.me.place) || { tz: Intl.DateTimeFormat().resolvedOptions().timeZone, lat: 0, lon: 0, name: "" };
+  const fmtT = d => d.toLocaleTimeString(undefined, { timeZone: here().tz, hour: "numeric", minute: "2-digit" });
+  const fmtD = (d, o) => d.toLocaleDateString(undefined, Object.assign({ timeZone: here().tz }, o || { weekday: "short", day: "numeric", month: "short" }));
+  const localYMD = d => { const p = {}; new Intl.DateTimeFormat("en-CA", { timeZone: here().tz, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(d).forEach(x => p[x.type] = x.value); return [+p.year, +p.month, +p.day]; };
+  const noonOf = d => { const [y, m, dd] = localYMD(d); return C.zonedToUtc(y, m, dd, 12, 0, here().tz); };
+
+  /* ---------- my chart (cached per session) ---------- */
+  let ME = null;
+  const birthOf = p => ({ y: p.y, m: p.m, d: p.d, h: p.h || 12, mi: p.mi || 0, timeKnown: !!p.timeKnown, tz: (p.place && p.place.tz) || here().tz, lat: p.place ? p.place.lat : 0, lon: p.place ? p.place.lon : 0 });
+  const myChart = () => ME || (ME = C.natal(birthOf(S.me)));
+
+  /* today's reading, cached for a few minutes */
+  let todayCache = null;
+  function today() {
+    const now = new Date(); if (todayCache && now - todayCache.at < 5 * 6e4) return todayCache;
+    const ch = myChart(), sc = C.score(now, ch), h = here(); let hours = null; try { hours = C.planetaryHours(now, h.lat, h.lon); } catch {}
+    return (todayCache = { at: now, sc, hours });
+  }
+  /* best days ahead for every domain, computed once a day */
+  let aheadCache = null;
+  function ahead() {
+    const key = localYMD(new Date()).join("-"); if (aheadCache && aheadCache.key === key) return aheadCache.days;
+    const ch = myChart(), start = noonOf(new Date()), days = [];
+    for (let i = 0; i < 30; i++) { const d = new Date(start.getTime() + i * 864e5); days.push({ d, sc: C.score(d, ch) }); }
+    aheadCache = { key, days }; return days;
+  }
+
+  /* ---------- text helpers ---------- */
+  const trText = x => (((T.transits[x.t] || {})[x.n] || {})[x.kind]) || "";
+  const trHead = x => `${pg(x.t)} ${PN(x.t)} <span class="k ${x.kind}">${x.name}</span> your ${pg(x.n)} ${PN(x.n)}`;
+  const hourDoms = p => (T.hours[p] && T.hours[p].domains) || [];
+  const houseName = h => (T.houses[h] && T.houses[h].name) || ord(h) + " house";
+
+  /* ---------- views ---------- */
+  function viewToday() {
+    const { sc, hours } = today(), ch = myChart(), now = new Date();
+    const cur = hours && hours.hours.find(x => x.start <= now && now < x.end);
+    const ms = T.moonSign[sc.moonSign] || {}, ph = T.moonPhase[sc.phaseId] || {};
+    return `<div class="row between"><div class="eyebrow">Astra · ${esc(fmtD(now, { weekday: "long", day: "numeric", month: "long" }))}</div><button class="tiny muted" data-act="settings">⚙︎ Settings</button></div>
+      <h1>${S.me.name ? `${esc(S.me.name)}, your day` : "Your day"}</h1>
+      <div class="card sky"><div class="moon">${MOONS[sc.phaseId]}</div><div style="min-width:0"><b>${esc(ph.name || cap(sc.phaseId))} Moon in ${cap(sc.moonSign)} ${sg(sc.moonSign)}</b><div class="small ink2">${esc(ms.mood || "")}</div></div></div>
+      <div class="doms">${C.DOMAINS.map(d => { const v = sc.domains[d].val, top = sc.domains[d].why[0];
+        return `<a class="dom" href="#/d/${d}" style="--c:${DOM[d].c}"><span class="ic">${DOM[d].icon}</span><b>${DOM[d].name}</b><span class="word">${WORD(v)}</span>${meter(v)}<span class="hint">${top ? `${PN(top.t)} ${top.name} your ${PN(top.n)}` : `Moon in ${cap(sc.moonSign)}`}</span></a>`; }).join("")}</div>
+      ${cur ? `<div class="card now"><div class="pg">${pg(cur.planet)}</div><div style="min-width:0;flex:1"><div class="small muted">Now: ${cap(cur.planet)} hour, until ${fmtT(cur.end)}</div><div>${esc((T.hours[cur.planet] || {}).tip || "")}</div><div>${hourDoms(cur.planet).map(d => `<span class="pill" style="color:${DOM[d].c}">${DOM[d].name}</span>`).join("")}</div></div></div>` : ""}
+      ${hours ? `<p class="tiny muted" style="margin-top:8px">${cap(hours.ruler)}'s day. ${esc(T.days[hours.ruler] || "")}</p>` : ""}
+      <h3>What's moving you today</h3>
+      <div class="card">${sc.transits.length ? sc.transits.slice(0, 4).map(x => `<div class="tr"><div class="h">${trHead(x)}</div><p>${esc(trText(x))}</p></div>`).join("") : `<p class="ink2" style="margin:0">A quiet sky for you: no close transits to your key points. The Moon sets the tone, so follow its lead below each domain.</p>`}</div>
+      <p class="tiny muted" style="margin-top:14px">Tap a domain for today's full reading, your best hours and days, and your birth blueprint.</p>`;
+  }
+
+  function blueprint(d) {
+    const ch = myChart(), P = ch.pl, out = [];
+    const add = (h, t) => { if (t) out.push(`<div class="bp"><div class="h">${h}</div><p>${esc(t)}</p></div>`); };
+    const pl = (p, dom) => add(`${pg(p)} ${cap(p)} in ${cap(P[p].sign)} ${sg(P[p].sign)}`, ((T.placements[p] || {})[P[p].sign] || {})[dom]);
+    const hs = h => add(`${ord(h)} house in ${cap(ch.houseSign(h))} ${sg(ch.houseSign(h))} <span class="tiny muted">${esc(houseName(h))}</span>`, (T.houseSigns[h] || {})[ch.houseSign(h)]);
+    const ins = hs2 => { for (const p of ["sun", "moon", "venus", "mars", "jupiter", "saturn"]) if (hs2.includes(P[p].house)) add(`${pg(p)} ${cap(p)} in your ${ord(P[p].house)} house`, (T.inHouse[p] || {})[P[p].house]); };
+    if (d === "power") { pl("sun", "power"); pl("mars", "power"); pl("saturn", "power"); pl("jupiter", "power"); if ((T.placements.pluto || {})[P.pluto.sign]) pl("pluto", "power"); hs(10); ins([1, 10]); }
+    if (d === "abundance") { pl("jupiter", "abundance"); pl("venus", "abundance"); pl("sun", "abundance"); pl("saturn", "abundance"); pl("moon", "abundance"); hs(2); ins([2, 8, 11]); }
+    if (d === "love") { pl("venus", "love"); pl("moon", "love"); hs(7); hs(5); ins([5, 7]); }
+    if (d === "sex") { pl("mars", "sex"); pl("venus", "sex"); pl("moon", "sex"); if ((T.placements.pluto || {})[P.pluto.sign]) pl("pluto", "sex"); hs(8); ins([8, 5]); }
+    return out.join("");
+  }
+
+  function viewDomain(d) {
+    if (!DOM[d]) return viewToday();
+    const { sc, hours } = today(), now = new Date(), r = sc.domains[d], ms = T.moonSign[sc.moonSign] || {}, ph = T.moonPhase[sc.phaseId] || {};
+    const goodHours = hours ? hours.hours.filter(h => h.end > now && hourDoms(h.planet).includes(d)) : [];
+    const days = ahead().map(x => ({ d: x.d, v: x.sc.domains[d].val, raw: x.sc.domains[d].raw, top: x.sc.domains[d].why[0], ms: x.sc.moonSign })).sort((a, b) => b.raw - a.raw).slice(0, 5).sort((a, b) => a.d - b.d);
+    const ch = myChart();
+    return `<a href="#/" class="back-link">‹ Today</a>
+      <div class="dh" style="--c:${DOM[d].c}"><div class="ic">${DOM[d].icon}</div><div style="flex:1"><h1 style="margin:0">${DOM[d].name}</h1><div class="small" style="color:${DOM[d].c};font-weight:700">${WORD(r.val)} today</div></div><div class="big">${r.val}</div></div>
+      <div style="--c:${DOM[d].c}">${meter(r.val)}</div>
+      <h3>Today</h3>
+      <div class="card">
+        ${r.why.slice(0, 3).map(x => `<div class="tr"><div class="h">${trHead(x)}</div><p>${esc(trText(x))}</p></div>`).join("")}
+        <div class="tr"><div class="h">☽ Moon in ${cap(sc.moonSign)} ${sg(sc.moonSign)}</div><p>${esc(ms[d] || "")}</p></div>
+        <div class="tr"><div class="h">${MOONS[sc.phaseId]} ${esc(ph.name || "")}</div><p>${esc(ph[d] || "")}</p></div>
+        ${["venus", "mars", "mercury", "jupiter", "saturn"].filter(p => sc.pos[p].retro && T.retro[p]).map(p => `<div class="tr"><div class="h">${pg(p)} ${cap(p)} retrograde</div><p>${esc(T.retro[p][d] || "")}</p></div>`).join("")}
+      </div>
+      ${hours ? `<h3>Your best hours today${here().name ? ` · ${esc(here().name)}` : ""}</h3><div class="card">${goodHours.length ? goodHours.slice(0, 6).map(h => `<div class="hour${h.start <= now ? " cur" : ""}"><span class="t">${fmtT(h.start)} – ${fmtT(h.end)}</span><span>${pg(h.planet)} ${cap(h.planet)} hour${h.start <= now ? " · now" : ""}</span></div>`).join("") : `<p class="ink2 small" style="margin:0">No more ${DOM[d].name.toLowerCase()} hours today. Tomorrow starts at sunrise, ${fmtT(hours.next)}.</p>`}
+        <p class="tiny muted" style="margin:8px 0 0">Planetary hours split daylight and night into twelve each, ruled in turn by the seven classical planets.</p></div>` : ""}
+      <h3>Best days in the next 30</h3>
+      <div class="card">${days.map(x => `<div class="day"><div class="dt"><b>${fmtD(x.d, { day: "numeric" })}</b><span>${fmtD(x.d, { month: "short" })}</span></div><div style="flex:1;min-width:0"><div class="row between"><b style="font-size:15px">${fmtD(x.d, { weekday: "long" })}</b><span class="small" style="color:${DOM[d].c};font-weight:700">${WORD(x.v)}</span></div><div class="small ink2">${x.top ? `${PN(x.top.t)} ${x.top.name} your ${PN(x.top.n)}. ` : ""}Moon in ${cap(x.ms)}.</div></div></div>`).join("")}</div>
+      <h3>Your ${DOM[d].name.toLowerCase()} blueprint</h3>
+      <div class="card">${blueprint(d)}</div>
+      ${ch.timeKnown ? "" : `<p class="tiny muted">Without a birth time, houses are counted from your Sun sign. Add your time in Settings for your true houses.</p>`}
+      <h3>Practices</h3>
+      <div class="card">${(T.practices[d] || []).map(p => `<div class="pr"><b>${esc(p.title)}</b><p>${esc(p.how)}</p><div class="tiny" style="color:${DOM[d].c};margin-top:4px">Best: ${esc(p.best)}</div></div>`).join("")}</div>`;
+  }
+
+  function wheel(ch) {
+    const cx = 160, cy = 160, R = 150, r1 = 122, r2 = 98, base = ch.timeKnown ? ch.asc : ch.first * 30;
+    const ang = lon => (180 + lon - base) * Math.PI / 180, P = (lon, r) => [cx + r * Math.cos(ang(lon)), cy - r * Math.sin(ang(lon))];
+    let s = `<svg class="wheel" viewBox="0 0 320 320" font-family="sans-serif"><circle cx="${cx}" cy="${cy}" r="${R}" fill="#17142a" stroke="rgba(255,255,255,.18)"/><circle cx="${cx}" cy="${cy}" r="${r1}" fill="#120f22" stroke="rgba(255,255,255,.18)"/><circle cx="${cx}" cy="${cy}" r="58" fill="none" stroke="rgba(255,255,255,.1)"/>`;
+    const EC = ["#f0b64e", "#6fd39b", "#9fc3ff", "#8f9cff"];
+    C.SIGNS.forEach((g, i) => { const [x1, y1] = P(i * 30, R), [x2, y2] = P(i * 30, r1), [tx, ty] = P(i * 30 + 15, (R + r1) / 2);
+      s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,.18)"/><text x="${tx}" y="${ty}" fill="${EC[i % 4]}" font-size="15" text-anchor="middle" dominant-baseline="central" class="g">${SG[g]}${VS}</text>`;
+      const [hx, hy] = P(i * 30, r1), [hx2, hy2] = P(i * 30, 58), hn = ((i - ch.first + 12) % 12) + 1, [nx, ny] = P(i * 30 + 15, 66);
+      s += `<line x1="${hx}" y1="${hy}" x2="${hx2}" y2="${hy2}" stroke="rgba(255,255,255,.06)"/><text x="${nx}" y="${ny}" fill="#6f678a" font-size="9" text-anchor="middle" dominant-baseline="central">${hn}</text>`; });
+    if (ch.timeKnown) for (const [l, lab] of [[ch.asc, "AC"], [ch.mc, "MC"]]) { const [a, b] = P(l, R + 2), [c, d] = P(l, 58), [tx, ty] = P(l, R - 2 + 0); s += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#e6c47c" stroke-width="1.4"/>`; const [lx, ly] = P(l + 4, r1 - 9); s += `<text x="${lx}" y="${ly}" fill="#e6c47c" font-size="8.5" font-weight="700" text-anchor="middle" dominant-baseline="central">${lab}</text>`; }
+    const list = C.PLANETS.map(p => ({ p, lon: ch.pl[p].lon, at: ch.pl[p].lon })).sort((a, b) => a.lon - b.lon);
+    for (let k = 0; k < 3; k++) for (let i = 0; i < list.length; i++) { const a = list[i], b = list[(i + 1) % list.length]; let gap = C.norm(b.at - a.at); if (gap < 9 && list.length > 1) { a.at -= (9 - gap) / 2; b.at += (9 - gap) / 2; } }
+    for (const x of list) { const [px, py] = P(x.lon, r1), [qx, qy] = P(x.lon, r1 - 6), [gx, gy] = P(x.at, r2 - 4);
+      s += `<line x1="${px}" y1="${py}" x2="${qx}" y2="${qy}" stroke="#e6c47c"/><text x="${gx}" y="${gy}" fill="#f1ecf8" font-size="16" text-anchor="middle" dominant-baseline="central" class="g">${PG[x.p]}${VS}</text>`; }
+    return s + `</svg>`;
+  }
+
+  function viewChart() {
+    const ch = myChart(), P = ch.pl, me = S.me;
+    const birth = new Date(Date.UTC(me.y, me.m - 1, me.d)).toLocaleDateString(undefined, { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" });
+    return `<div class="eyebrow">My chart</div><h1>${cap(P.sun.sign)} Sun, ${cap(P.moon.sign)} Moon${ch.timeKnown ? `, ${cap(C.signOf(ch.asc))} Rising` : ""}</h1>
+      <div class="small muted">${esc(birth)}${me.timeKnown ? ` · ${String(me.h).padStart(2, "0")}:${String(me.mi).padStart(2, "0")}` : " · time unknown"}${me.place && me.place.name ? ` · ${esc(me.place.name)}` : ""}</div>
+      ${wheel(ch)}
+      <div class="card">${(ch.timeKnown ? ["asc", "mc"] : []).map(a => `<a class="pl" href="#/p/${a}"><span class="gl">${pg(a)}</span><span class="nm"><b>${PN(a)}</b></span><span class="pos">${sg(C.signOf(ch[a]))} ${cap(C.signOf(ch[a]))} ${deg(C.degIn(ch[a]))}</span></a>`).join("")}
+        ${C.PLANETS.map(p => `<a class="pl" href="#/p/${p}"><span class="gl">${pg(p)}</span><span class="nm"><b>${cap(p)}</b>${P[p].retro ? ` <span class="tiny" style="color:#ff9a8a">℞ retrograde</span>` : ""}<div class="tiny muted">${ord(P[p].house)} house · ${esc(houseName(P[p].house))}</div></span><span class="pos">${sg(P[p].sign)} ${cap(P[p].sign)} ${deg(P[p].deg)}</span></a>`).join("")}</div>
+      <p class="tiny muted" style="margin-top:12px">Tropical zodiac, whole sign houses${ch.timeKnown ? "" : " counted from your Sun sign (no birth time)"}. Positions from Astronomy Engine. Tap a planet to read it.</p>`;
+  }
+
+  function viewPoint(p) {
+    const ch = myChart(); let sign, house, txt = [];
+    if (p === "asc" || p === "mc") { if (!ch.timeKnown) return viewChart(); sign = C.signOf(ch[p]); house = p === "asc" ? 1 : ch.houseOf(ch.mc); }
+    else if (ch.pl[p]) { sign = ch.pl[p].sign; house = ch.pl[p].house; } else return viewChart();
+    const s = T.signs[sign] || {}, pd = (T.placements[p] || {})[sign] || {};
+    for (const d of C.DOMAINS) if (pd[d]) txt.push(`<div class="bp"><div class="h" style="color:${DOM[d].c}">${DOM[d].name}</div><p>${esc(pd[d])}</p></div>`);
+    if (p === "mc" && (T.houseSigns["10"] || {})[sign]) txt.push(`<div class="bp"><div class="h" style="color:var(--power)">Power</div><p>${esc(T.houseSigns["10"][sign])}</p></div>`);
+    const ih = (T.inHouse[p] || {})[house];
+    const tr = today().sc.transits.filter(x => x.n === p);
+    return `<a href="#/chart" class="back-link">‹ My chart</a>
+      <div class="row" style="margin-top:10px;gap:14px"><span style="font-size:40px;color:var(--gold)">${pg(p)}</span><div><h1 style="margin:0">${PN(p)} in ${cap(sign)}</h1><div class="small muted">${sg(sign)} ${esc(s.element ? `${cap(s.modality)} ${s.element}, ruled by ${cap(s.ruler)}` : "")}${p !== "asc" ? ` · ${ord(house)} house, ${esc(houseName(house))}` : ""}</div></div></div>
+      ${s.essence ? `<p class="lead" style="margin-top:14px">${esc(s.essence)}</p><div class="small muted">${esc(s.keywords || "")}</div>` : ""}
+      ${txt.length ? `<div class="card">${txt.join("")}</div>` : ""}
+      ${ih && p !== "asc" ? `<h3>In your ${ord(house)} house</h3><div class="card"><p class="ink2" style="margin:0">${esc(ih)}</p></div>` : ""}
+      ${tr.length ? `<h3>Touching it now</h3><div class="card">${tr.map(x => `<div class="tr"><div class="h">${trHead(x)}</div><p>${esc(trText(x))}</p></div>`).join("")}</div>` : ""}`;
+  }
+
+  let skyCache = null;
+  function viewSky() {
+    const now = new Date(); if (!skyCache || now - skyCache.at > 36e5) skyCache = { at: now, ev: C.events(now, 60), pos: C.positions(now) };
+    const ch = myChart(), { ev, pos } = skyCache;
+    const retros = ["mercury", "venus", "mars", "jupiter", "saturn"].filter(p => pos[p].retro);
+    const key = ev.filter(e => e.type !== "ingress" || ["sun", "mercury", "venus", "mars", "jupiter", "saturn"].includes(e.p));
+    let lastDay = "";
+    const row = e => {
+      const day = fmtD(e.at, { weekday: "short", day: "numeric", month: "short" }), head = day !== lastDay ? `<h3 style="margin:18px 0 4px">${esc(day)}</h3>` : ""; lastDay = day;
+      const h = ch.houseOf(C.SIGNS.indexOf(e.sign) * 30 + 1), inH = `your ${ord(h)} house, ${esc(houseName(h))}`;
+      if (e.type === "phase") { const ph = T.moonPhase[e.phase] || {}; return `${head}<div class="ev"><span class="gl">${MOONS[e.phase]}</span><div><b>${esc(ph.name || cap(e.phase))} Moon in ${cap(e.sign)}</b> <span class="tiny muted">${fmtT(e.at)}</span><div class="small ink2">${esc(ph.theme || "")} It lights up ${inH}.</div></div></div>`; }
+      if (e.type === "ingress") { const pl = T.planets[e.p] || {}, sgn = T.signs[e.sign] || {}; return `${head}<div class="ev"><span class="gl">${pg(e.p)}</span><div><b>${cap(e.p)} enters ${cap(e.sign)} ${sg(e.sign)}</b><div class="small ink2">${esc(pl.gift ? cap(pl.gift) : cap(e.p))} moves into ${esc(cap(e.sign))}: ${esc(sgn.keywords || "")}. In ${inH}.</div></div></div>`; }
+      const R = T.retro[e.p]; return `${head}<div class="ev"><span class="gl">${pg(e.p)}</span><div><b>${cap(e.p)} ${e.type === "retro" ? "turns retrograde ℞" : "turns direct"} in ${cap(e.sign)}</b><div class="small ink2">${e.type === "retro" && R ? esc(Object.entries(R).map(([d, t]) => t).slice(0, 2).join(" ")) : e.type === "direct" ? "The pressure releases: what stalled starts to move again over the next days." : ""}</div></div></div>`;
+    };
+    return `<div class="eyebrow">Sky ahead</div><h1>The next 60 days</h1>
+      ${retros.length ? `<div class="card"><b>Retrograde now:</b> ${retros.map(p => `${pg(p)} ${cap(p)}`).join(", ")}${retros.map(p => T.retro[p] ? `<p class="small ink2" style="margin:6px 0 0"><b>${cap(p)}:</b> ${esc(T.retro[p].love || "")}</p>` : "").join("")}</div>` : `<div class="card small ink2">No personal planet is retrograde right now. A good stretch to start things.</div>`}
+      <div>${key.map(row).join("")}</div>`;
+  }
+
+  function viewMatch(id) {
+    const ch = myChart();
+    if (id) { const pa = S.partners.find(x => x.id === id); if (!pa) return viewMatch();
+      const pc = C.natal(birthOf(pa)), asp = C.synastry(ch, pc);
+      let love = 0, sex = 0; for (const a of asp) { const w = 1 - a.orb / 8; const lv = (a.a === "venus" || a.b === "venus" || a.a === "moon" || a.b === "moon" ? 1 : .5); const sx = (a.a === "mars" || a.b === "mars") && (a.a === "venus" || a.b === "venus" || a.a === "mars" && a.b === "mars") ? 1.3 : (a.a === "mars" || a.b === "mars") ? .8 : (a.a === "venus" || a.b === "venus") ? .5 : .2;
+        love += w * lv * (a.kind === "flow" ? 1 : a.kind === "fusion" ? 1 : -.5); sex += w * sx * (a.kind === "tension" ? .7 : 1); }
+      const pct = v => Math.max(5, Math.min(99, Math.round(50 + v * 9)));
+      return `<a href="#/match" class="back-link">‹ Match</a><h1 style="margin-top:10px">You and ${esc(pa.name)}</h1>
+        <div class="small muted">${esc(pa.name)}: ${cap(pc.pl.sun.sign)} Sun, ${cap(pc.pl.moon.sign)} Moon${pa.timeKnown ? "" : " (approx.)"}, Venus in ${cap(pc.pl.venus.sign)}, Mars in ${cap(pc.pl.mars.sign)}</div>
+        <div class="score2" style="margin-top:12px"><div class="card" style="--c:var(--love);margin:0"><div class="small muted">Love</div><div class="big">${pct(love)}<span style="font-size:20px">%</span></div>${meter(pct(love) / 20)}</div><div class="card" style="--c:var(--sex);margin:0"><div class="small muted">Chemistry</div><div class="big">${pct(sex)}<span style="font-size:20px">%</span></div>${meter(pct(sex) / 20)}</div></div>
+        <h3>The threads between you</h3>
+        <div class="card">${asp.length ? asp.map(a => `<div class="tr"><div class="h">Your ${pg(a.a)} ${cap(a.a)} <span class="k ${a.kind}">${a.name}</span> their ${pg(a.b)} ${cap(a.b)}</div><p>${esc((((T.synastry[a.a] || {})[a.b] || {})[a.kind]) || "")}</p></div>`).join("") : `<p class="ink2" style="margin:0">No close contacts between your Sun, Moon, Venus and Mars. Chemistry here grows from choice and time, not instant recognition.</p>`}</div>
+        <button class="btn block" data-act="delpartner" data-v="${pa.id}" style="margin-top:18px;color:#ff9a8a">Remove ${esc(pa.name)}</button>`; }
+    return `<div class="eyebrow">Match</div><h1>Love and chemistry</h1>
+      <p class="ink2">Compare your Sun, Moon, Venus and Mars with someone else's. A birth date is enough; a time makes the Moon exact.</p>
+      ${S.partners.length ? `<div class="card">${S.partners.map(p => `<a class="pl" href="#/match/${p.id}"><span class="gl" style="color:var(--love)">♥</span><span class="nm"><b>${esc(p.name)}</b><div class="tiny muted">${new Date(Date.UTC(p.y, p.m - 1, p.d)).toLocaleDateString(undefined, { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" })}</div></span><span class="pos">›</span></a>`).join("")}</div>` : ""}
+      <button class="btn pri block" data-act="addpartner" style="margin-top:14px">＋ Add a person</button>`;
+  }
+
+  /* ---------- birth data form (me and partners) ---------- */
+  let CITIES = null;
+  const loadCities = () => CITIES ? Promise.resolve(CITIES) : fetch("data/cities.json").then(r => r.json()).then(d => (CITIES = d));
+  const fold = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  function citySearch(q) {
+    if (!CITIES || q.trim().length < 2) return []; const f = fold(q.trim()), out = [];
+    for (const c of CITIES.cities) { const n = fold(c[0]); if (n.startsWith(f) || (f.length > 3 && n.includes(f))) { out.push(c); if (out.length > 30) break; } }
+    return out.sort((a, b) => (fold(a[0]).startsWith(f) ? 0 : 1) - (fold(b[0]).startsWith(f) ? 0 : 1)).slice(0, 12);
+  }
+  const cityObj = c => ({ name: `${c[0]}${c[1] && c[1] !== c[0] ? ", " + c[1] : ""}, ${CITIES.countries[c[2]] || c[2]}`, lat: c[3], lon: c[4], tz: CITIES.tz[c[5]] });
+  function placePicker(id, cur, label) {
+    return `<label class="field"><span>${label}</span><input type="search" id="${id}" placeholder="Start typing a city" value="${esc(cur ? cur.name : "")}" autocomplete="off" data-city="${id}"></label><div id="${id}-res"></div>`;
+  }
+  let picked = {};
+  function birthForm(who, p) {
+    p = p || {}; picked = { place: p.place || null };
+    const date = p.y ? `${p.y}-${String(p.m).padStart(2, "0")}-${String(p.d).padStart(2, "0")}` : "", time = p.timeKnown ? `${String(p.h).padStart(2, "0")}:${String(p.mi).padStart(2, "0")}` : "";
+    return `<label class="field"><span>${who === "me" ? "Your first name (optional)" : "Their name"}</span><input type="text" id="f-name" value="${esc(p.name || "")}" autocomplete="off"></label>
+      <label class="field"><span>Birth date</span><input type="date" id="f-date" value="${date}" min="1900-01-01" max="2100-12-31"></label>
+      <label class="field"><span>Birth time</span><input type="time" id="f-time" value="${time}"></label>
+      <label class="check"><input type="checkbox" id="f-notime" ${p.y && !p.timeKnown ? "checked" : ""}> I don't know the birth time</label>
+      ${placePicker("f-place", p.place, "Birthplace")}`;
+  }
+  function readForm(who) {
+    const name = $("#f-name").value.trim(), dv = $("#f-date").value, tv = $("#f-time").value, notime = $("#f-notime").checked || !tv;
+    if (!dv) { toast("Add a birth date"); return null; } if (who !== "me" && !name) { toast("Add their name"); return null; }
+    const [y, m, d] = dv.split("-").map(Number); const [h, mi] = notime ? [12, 0] : tv.split(":").map(Number);
+    if (!picked.place && (who === "me" && !notime)) { toast("Choose your birthplace from the list"); return null; }
+    return { name, y, m, d, h, mi, timeKnown: !notime && !!picked.place, place: picked.place };
+  }
+
+  function viewSetup() {
+    return `<div style="text-align:center;margin-top:6vh"><img src="icons/icon-192.png" width="72" height="72" style="border-radius:18px" alt=""><h1 style="margin-top:12px">Astra</h1>
+      <p class="ink2">Your real birth chart and today's sky, read for <b style="color:var(--power)">power</b>, <b style="color:var(--abundance)">abundance</b>, <b style="color:var(--love)">love</b> and <b style="color:var(--sex)">sex</b>.</p></div>
+      <div class="card" style="margin-top:18px">${birthForm("me", S.me)}
+      <p class="tiny muted" style="margin:12px 0 0">Your exact birth time gives your Rising sign and true houses. It's on most birth certificates. Everything stays on this phone.</p></div>
+      <button class="btn pri block" data-act="saveme" style="margin-top:16px">${S.me ? "Save" : "Cast my chart"}</button>
+      ${S.me ? `<button class="btn block" data-act="cancelsetup" style="margin-top:8px;background:none;border:0">Cancel</button>` : ""}`;
+  }
+
+  /* ---------- router ---------- */
+  let editing = false;
+  function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "today", a: h[1] || "" }; }
+  function render() {
+    if (!T) return;
+    const nav = $("nav.tabsbar");
+    if (!S.me || editing) { nav.hidden = true; $("#app").innerHTML = viewSetup(); loadCities().catch(() => {}); return; }
+    nav.hidden = false; const { v, a } = route();
+    let html; try { html = ({ today: viewToday, d: () => viewDomain(a), chart: viewChart, p: () => viewPoint(a), sky: viewSky, match: () => viewMatch(a) }[v] || viewToday)(); }
+    catch (e) { console.error(e); html = `<p class="muted" style="margin-top:30vh;text-align:center">Something went wrong reading the sky. Try reloading.</p>`; }
+    $("#app").innerHTML = html + `<div class="ver">Astra v${VER}</div>`;
+    const tab = { today: "today", d: "today", chart: "chart", p: "chart", sky: "sky", match: "match" }[v] || "today";
+    $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === tab));
+  }
+  addEventListener("hashchange", () => { close(); render(); scrollTo(0, 0); });
+
+  /* ---------- sheets ---------- */
+  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  const close = () => $$(".back").forEach(b => b.remove());
+  function settingsSheet() {
+    const h = here();
+    sheet(`<h2>Settings</h2>
+      <div class="card" style="margin-top:6px"><div class="small muted">Birth chart</div><div>${esc(S.me.name || "Me")} · ${cap(myChart().pl.sun.sign)} Sun</div><button class="btn sm" data-act="editme" style="margin-top:8px">Edit birth details</button></div>
+      <div class="card"><div class="small muted">Where you are now (for planetary hours and times)</div><div>${esc(h.name || h.tz)}</div>
+        ${placePicker("f-here", null, "Change place")}<button class="btn sm" data-act="geo" style="margin-top:8px">📍 Use my location</button></div>
+      ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:12px">Install Astra</button>`}
+      <p class="tiny muted" style="margin-top:14px">Astra reads a real tropical chart with whole sign houses. Planet positions come from Astronomy Engine (MIT); cities from simplemaps World Cities (CC BY 4.0). Astrology is a mirror for reflection and timing, not a promise: use your judgment.</p>
+      <button class="btn block" data-act="reset" style="margin-top:8px;background:none;border:0;color:#ff9a8a">Erase everything</button>
+      <div class="ver">Astra v${VER}</div>`);
+    loadCities().catch(() => {});
+  }
+  function partnerSheet() {
+    sheet(`<h2>Add a person</h2><p class="small muted" style="margin:0">Their birthplace and time are optional.</p>${birthForm("them")}<button class="btn pri block" data-act="savepartner" style="margin-top:16px">Compare</button>`);
+    loadCities().catch(() => {});
+  }
+
+  /* ---------- install prompt ---------- */
+  let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA), iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
+  const IC = { share: `<svg class="ic2" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic2" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="dots3">•••</span>` };
+  const installBody = () => deferred ? `<button class="btn pri block" data-act="doinstall">Install Astra</button>`
+    : inApp ? `<p class="small ink2">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p><button class="btn block" data-act="copylink">Copy the link</button>`
+    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add} (you may need <b>More</b>).</li><li>Tap <b>Add</b>.</li></ol>`
+    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol>`
+    : isAndroid ? `<ol class="isteps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`
+    : `<ol class="isteps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b>.</li></ol>`;
+  function showInstall(force) {
+    if (isStandalone() || (!force && $(".back"))) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("astra-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
+    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><h2 style="margin:0">Install Astra</h2><p class="small muted" style="margin:0">Your day's sky, one tap away, offline.</p></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;background:none;border:0">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+  const scheduleInstall = () => setTimeout(() => showInstall(false), 6000);
+
+  /* ---------- actions ---------- */
+  const resetCaches = () => { ME = null; todayCache = null; aheadCache = null; skyCache = null; };
+  document.addEventListener("click", async e => {
+    const cityBtn = e.target.closest("[data-pick]");
+    if (cityBtn) { const c = CITIES.cities[+cityBtn.dataset.i], o = cityObj(c), id = cityBtn.dataset.pick;
+      if (id === "f-here") { S.here = o; save(); resetCaches(); close(); render(); toast(`Now in ${c[0]}`); return; }
+      picked.place = o; $("#" + id).value = o.name; $("#" + id + "-res").innerHTML = ""; return; }
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
+    if (a === "saveme") { const p = readForm("me"); if (!p) return; const first = !S.me; S.me = p; if (first && !S.here) { const dev = Intl.DateTimeFormat().resolvedOptions().timeZone; if (p.place && p.place.tz !== dev && CITIES) { const c = CITIES.cities.find(c => CITIES.tz[c[5]] === dev); if (c) S.here = cityObj(c); } }
+      save(); resetCaches(); editing = false; location.hash = "#/"; render(); if (first) { toast("Your chart is cast ✨"); scheduleInstall(); } }
+    else if (a === "cancelsetup") { editing = false; render(); }
+    else if (a === "editme") { close(); editing = true; render(); scrollTo(0, 0); }
+    else if (a === "settings") settingsSheet();
+    else if (a === "geo") { if (!navigator.geolocation) return toast("Location isn't available here");
+      navigator.geolocation.getCurrentPosition(async pos => { await loadCities().catch(() => {}); const { latitude: la, longitude: lo } = pos.coords; let best = null, bd = 1e9;
+        if (CITIES) for (const c of CITIES.cities) { const dd = (c[3] - la) ** 2 + ((c[4] - lo) * Math.cos(la * Math.PI / 180)) ** 2; if (dd < bd) { bd = dd; best = c; } }
+        S.here = { name: best ? `Near ${best[0]}` : "My location", lat: la, lon: lo, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }; save(); resetCaches(); close(); render(); toast("Location set"); }, () => toast("Couldn't get your location"), { timeout: 10000 }); }
+    else if (a === "addpartner") partnerSheet();
+    else if (a === "savepartner") { const p = readForm("them"); if (!p) return; p.id = "p" + Date.now().toString(36); S.partners.push(p); save(); close(); location.hash = "#/match/" + p.id; }
+    else if (a === "delpartner") { if (!confirm("Remove this person?")) return; S.partners = S.partners.filter(x => x.id !== v); save(); location.hash = "#/match"; }
+    else if (a === "reset") { if (!confirm("Erase your chart, people and settings from this phone?")) return; localStorage.removeItem(KEY); S = { partners: [] }; resetCaches(); close(); location.hash = "#/"; render(); }
+    else if (a === "install") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("astra-install-snooze", Date.now()); } catch {} close(); }
+    else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
+    else if (a === "copylink") { try { await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Link copied"); } catch { prompt("Copy this link:", location.href.split("#")[0]); } }
+  });
+  document.addEventListener("input", e => {
+    const id = e.target.dataset && e.target.dataset.city; if (!id) return;
+    if (id === "f-place") picked.place = null;
+    const box = $("#" + id + "-res"); const go = () => { const res = citySearch(e.target.value);
+      box.innerHTML = res.length ? `<div class="card" style="padding:2px 12px">${res.map(c => `<button class="city" data-pick="${id}" data-i="${CITIES.cities.indexOf(c)}">${esc(c[0])}<span class="tiny muted"> ${esc(c[1] && c[1] !== c[0] ? c[1] + ", " : "")}${esc(CITIES.countries[c[2]] || c[2])}</span></button>`).join("")}</div>` : e.target.value.trim().length > 1 ? `<p class="tiny muted" style="margin:6px 2px">No match. Try the nearest big city: same time zone, close enough.</p>` : ""; };
+    if (CITIES) go(); else loadCities().then(go).catch(() => { box.innerHTML = `<p class="tiny muted">Couldn't load the city list. Are you online?</p>`; });
+  });
+
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  fetch("data/astra.json").then(r => r.json()).then(d => { T = d; render(); if (S.me) scheduleInstall(); })
+    .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Astra. Check your connection and reload.</p>`; });
+  /* refresh the reading when the app comes back to the front */
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && S.me && !editing && !$(".back")) { todayCache = null; const y = scrollY; render(); scrollTo(0, y); } });
+})();
+</script>
+</body>
+</html>
