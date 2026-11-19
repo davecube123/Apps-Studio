@@ -107,6 +107,15 @@
   .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--card2); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
   ol.isteps { padding-left: 20px; } ol.isteps li { margin: 7px 0; }
   .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+  /* PIN lock */
+  #lock { position: fixed; inset: 0; z-index: 200; background: radial-gradient(120% 60% at 50% -10%, #3d1625 0%, var(--bg) 60%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+  #lock h2 { font: 600 30px var(--display); margin: 14px 0 4px; } #lock .sub { color: var(--muted); font-size: 14.5px; min-height: 22px; }
+  .pdots { display: flex; gap: 16px; margin: 22px 0 26px; } .pdots i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--gold); } .pdots i.on { background: var(--gold); }
+  .pdots.shake { animation: shake .35s; } @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  .keys { display: grid; grid-template-columns: repeat(3, 72px); gap: 14px; }
+  .keys button { width: 72px; height: 72px; border-radius: 50%; background: var(--card2); font: 500 26px var(--sans); color: var(--ink); } .keys button:active { background: var(--gold); color: #1d1206; }
+  .keys .ghost { background: none; font-size: 15px; color: var(--muted); }
+  #cover { position: fixed; inset: 0; z-index: 190; background: var(--bg); }
 </style>
 </head>
 <body>
@@ -119,7 +128,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
@@ -218,7 +227,7 @@
   /* ---------- router ---------- */
   function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "home", a: h[1] || "", b: h[2] || "" }; }
   function render() {
-    if (!P.length) return; const { v, a, b } = route();
+    if (!P.length || !unlocked) return; const { v, a, b } = route();
     const html = ({ home: viewHome, p: () => viewPrinciple(a), t: () => viewTale(a, b), tales: viewTales, notebook: viewNotebook }[v] || viewHome)();
     $("#app").innerHTML = html + (v === "home" ? `<div class="ver">Allure v${VER}</div>` : "");
     const tab = v === "tales" || v === "t" ? "tales" : v === "notebook" ? "notebook" : "home";
@@ -227,7 +236,7 @@
   }
   let prevHash = location.hash, pageY = 0, cameIn = false;
   addEventListener("hashchange", () => {
-    close(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
+    if (!unlocked) return; close(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
     const opening = v === "p" && b === "notes";
     if (opening) { cameIn = !(was[0] === "p" && was[2] === "notes") && was[0] !== "notebook" && !!was[0]; if (cameIn) pageY = scrollY; }
     const back = !opening && was[0] === "p" && was[2] === "notes";
@@ -286,10 +295,12 @@
   const close = () => $$(".back").forEach(b => b.remove());
   function settingsSheet() {
     sheet(`<h2>Settings</h2>
-      <button class="btn block" data-act="export">Back up my notebook</button>
+      <button class="btn block" data-act="lock">🔒 Lock now</button>
+      <button class="btn block" data-act="changepin" style="margin-top:8px">Change PIN</button>
+      <button class="btn block" data-act="export" style="margin-top:8px">Back up my notebook</button>
       <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
       ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:8px">Install Allure</button>`}
-      <p class="small muted" style="margin-top:14px">Your notes stay on this phone. The principles and tales are original writing; quotations come from the historical sources named under each tale.</p>
+      <p class="small muted" style="margin-top:14px">Your notes stay on this phone, behind your PIN. The principles and tales are original writing; quotations come from the historical sources named under each tale.</p>
       <div class="ver">Allure v${VER}</div>`);
     $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (d.app !== "allure" || !d.pages) throw 0;
       for (const [id, p0] of Object.entries(d.pages)) { const pg = { html: clean(p0.html), at: +p0.at || Date.now() }, cur = S.pages[id]; if (!plain(pg.html)) continue;
@@ -318,6 +329,8 @@
     const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act;
     if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/p/${id}`); }
     else if (a === "settings") settingsSheet();
+    else if (a === "lock") lockScreen();
+    else if (a === "changepin") lockScreen("change");
     else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "allure", pages: S.pages })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "allure-notebook.json"; l.click(); }
     else if (a === "install") showInstall(true);
     else if (a === "notnow") { try { localStorage.setItem("allure-install-snooze", Date.now()); } catch {} close(); }
@@ -329,11 +342,57 @@
     const keep = (sel, set) => { const pos = e.target.selectionStart; set(e.target.value); render(); const i = $(sel); if (i) { i.focus(); i.setSelectionRange(pos, pos); } };
     if (e.target.id === "q") keep("#q", x => q = x); if (e.target.id === "tq") keep("#tq", x => tq = x); if (e.target.id === "nq") keep("#nq", x => nq = x);
   });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(saveT); saveEditor(); } });
-  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); });
+  /* ---------- PIN lock: the PIN is never stored, only a salted PBKDF2 hash ---------- */
+  const PK = "allure-pin", AWAY_MS = 60e3;
+  const getPin = () => { try { return JSON.parse(localStorage.getItem(PK) || "null"); } catch { return null; } };
+  const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+  async function hashPin(pin, salt) {
+    if (!(window.crypto && crypto.subtle)) return "plain:" + [...(salt + pin)].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7);
+    const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+    return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 150000, hash: "SHA-256" }, k, 256));
+  }
+  let unlocked = false, entry = "", mode = "", first = "", firstFrom = "", fails = 0, waitUntil = 0;
+  function lockScreen(m) {
+    closeEditor(); clearTimeout(saveT); save();
+    mode = m || (getPin() ? "unlock" : "set1"); entry = ""; unlocked = false; $("#app").innerHTML = ""; $$(".back").forEach(b => b.remove()); const cv = $("#cover"); if (cv) cv.remove();
+    let L = $("#lock"); if (!L) { L = document.createElement("div"); L.id = "lock"; document.body.appendChild(L); }
+    const T = { unlock: ["Welcome back", "Enter your PIN"], set1: ["Choose a PIN", "4 digits. It guards Allure and your notebook."], set2: ["Confirm your PIN", "Enter it once more"], change: ["New PIN", "Choose a new 4-digit PIN"] }[mode];
+    L.innerHTML = `<img src="icons/icon-192.png" width="64" height="64" style="border-radius:16px" alt=""><h2>${T[0]}</h2><div class="sub" id="lsub">${T[1]}</div>
+      <div class="pdots" id="pd">${[0, 1, 2, 3].map(() => "<i></i>").join("")}</div>
+      <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button data-key="${k}">${k}</button>`).join("")}${mode === "unlock" ? `<button class="ghost" data-key="forgot">Forgot?</button>` : mode === "change" ? `<button class="ghost" data-key="cancel">Cancel</button>` : `<span></span>`}<button data-key="0">0</button><button class="ghost" data-key="del" aria-label="Delete">⌫</button></div><div class="small muted" style="margin-top:22px;font-size:12px">Allure v${VER}</div>`;
+  }
+  const pdots = () => $$("#pd i").forEach((d, i) => d.classList.toggle("on", i < entry.length));
+  function bad(msg) { const p = $("#pd"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake"); entry = ""; pdots(); $("#lsub").textContent = msg; }
+  async function pinDone() {
+    if (mode === "unlock") {
+      if (Date.now() < waitUntil) return bad(`Too many tries. Wait ${Math.ceil((waitUntil - Date.now()) / 1000)} s`);
+      const P = getPin(); if (P && await hashPin(entry, P.salt) === P.hash) { fails = 0; unlock(); }
+      else { fails++; if (fails >= 5) { waitUntil = Date.now() + 30e3; fails = 0; bad("Too many tries. Wait 30 s"); } else bad(`Wrong PIN${fails >= 3 ? ` · ${5 - fails} tries left` : ""}`); }
+    } else if (mode === "set1" || mode === "change") { first = entry; firstFrom = mode; lockScreen("set2"); }
+    else if (mode === "set2") {
+      if (entry !== first) { first = ""; lockScreen(firstFrom === "change" ? "change" : "set1"); $("#lsub").textContent = "Those didn't match. Try again."; return; }
+      const salt = hex(crypto.getRandomValues(new Uint8Array(16))); localStorage.setItem(PK, JSON.stringify({ salt, hash: await hashPin(entry, salt) })); first = ""; unlock(); toast("PIN set");
+    }
+  }
+  function unlock() { unlocked = true; const L = $("#lock"); if (L) L.remove(); render(); if (!unlock.once) { unlock.once = true; setTimeout(() => showInstall(false), 4000); } }
+  document.addEventListener("click", e => {
+    const k = e.target.closest("[data-key]"); if (!k || !$("#lock")) return; const v = k.dataset.key;
+    if (v === "del") { entry = entry.slice(0, -1); pdots(); }
+    else if (v === "cancel") unlock();
+    else if (v === "forgot") { if (confirm("Forgot your PIN?\n\nThe only way in is to erase everything in Allure on this phone (your notebook too) and start again. Erase?")) { localStorage.setItem(PK, "null"); localStorage.setItem(KEY, "{}"); S = { pages: {} }; lockScreen("set1"); } }
+    else if (entry.length < 4) { entry += v; pdots(); if (entry.length === 4) setTimeout(pinDone, 120); }
+  });
+  addEventListener("keydown", e => { if (!$("#lock")) return; if (/^\d$/.test(e.key) && entry.length < 4) { entry += e.key; pdots(); if (entry.length === 4) setTimeout(pinDone, 120); } else if (e.key === "Backspace") { entry = entry.slice(0, -1); pdots(); } });
+  /* hide the content in the app switcher, and ask again after a minute away */
+  let hiddenAt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { clearTimeout(saveT); saveEditor(); save(); hiddenAt = Date.now(); if (unlocked && !$("#cover")) { const c = document.createElement("div"); c.id = "cover"; document.body.appendChild(c); } }
+    else if (unlocked) { if (Date.now() - hiddenAt > AWAY_MS) lockScreen(); else { const c = $("#cover"); if (c) c.remove(); } }
+  });
+  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
 
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  fetch("data/allure.json").then(r => r.json()).then(d => { P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); render(); setTimeout(() => showInstall(false), 8000); })
+  fetch("data/allure.json").then(r => r.json()).then(d => { P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; lockScreen(); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Allure. Check your connection and reload.</p>`; });
 })();
 </script>
