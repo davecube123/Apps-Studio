@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Silvertongue</title>
 <meta name="description" content="Techniques of the spoken word with many examples, and a private notebook page for every lesson.">
 <meta name="theme-color" content="#121216">
@@ -65,15 +65,27 @@
   details.more { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; }
   details.more summary { cursor: pointer; list-style: none; padding: 10px 0; font-weight: 650; color: var(--ink2); } details.more summary::-webkit-details-marker { display: none; }
   details.more p, details.more li { color: var(--ink2); font-size: 15px; }
-  .jump { position: sticky; top: calc(env(safe-area-inset-top) + 8px); z-index: 5; float: right; margin-top: -2px; }
-
-  /* notebook page: lined paper with a red margin */
-  .nb { margin-top: 10px; background: var(--paper); color: var(--paper-ink); border-radius: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); position: relative; overflow: hidden; }
-  .nb::before { content: ""; position: absolute; top: 0; bottom: 0; left: 40px; width: 1.5px; background: var(--paper-margin); }
-  .nb .head { padding: 12px 14px 4px 52px; font: 600 19px var(--display); }
-  .nb textarea { display: block; width: 100%; min-height: 300px; border: 0; outline: none; resize: none; background: transparent; color: var(--paper-ink);
-    font: 19px/30px var(--display); padding: 2px 14px 30px 52px; background-image: repeating-linear-gradient(transparent 0 29px, var(--paper-line) 29px 30px); background-attachment: local; }
-  .nb .foot { padding: 6px 14px 10px 52px; font: 12px var(--sans); color: #7a7466; }
+  /* floating note button on every lesson */
+  .fab { position: fixed; z-index: 25; left: max(16px, calc(50% - 314px)); bottom: calc(env(safe-area-inset-bottom) + 76px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px;
+    background: linear-gradient(135deg, #ecdcb2, var(--gold)); color: #1a1408; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+  .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: #1a1408; }
+  /* the note editor: a plain notes-app page */
+  .editor { position: fixed; inset: 0; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
+  .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 660px; width: 100%; margin: 0 auto; }
+  .ed-top .done { color: var(--gold); font-weight: 700; font-size: 16px; padding: 6px 8px; }
+  .ed-tools { display: flex; gap: 6px; padding: 6px 12px 10px; max-width: 660px; width: 100%; margin: 0 auto; border-bottom: 1px solid var(--line); }
+  .ed-tools button { min-width: 44px; height: 38px; padding: 0 10px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); color: var(--ink2); display: grid; place-items: center; font-weight: 700; }
+  .ed-tools button.on { background: var(--silver); color: #15151a; border-color: var(--silver); }
+  .ed-tools svg { width: 20px; height: 20px; fill: currentColor; }
+  .ed-scroll { flex: 1; overflow-y: auto; }
+  .ed-wrap { max-width: 660px; margin: 0 auto; padding: 16px 18px calc(env(safe-area-inset-bottom) + 60px); }
+  .ed-title { font: 600 28px/1.15 var(--display); margin: 0; }
+  .ed-when { font-size: 12.5px; color: var(--muted); margin: 4px 0 14px; }
+  .ed { outline: none; min-height: 50vh; font: 17px/1.55 var(--sans); color: var(--ink); word-wrap: break-word; caret-color: var(--gold); }
+  .ed { position: relative; } .ed.blank::before { content: attr(data-ph); position: absolute; left: 0; right: 0; top: 0; color: var(--muted); pointer-events: none; }
+  .ed ul, .ed ol { margin: 4px 0; padding-left: 26px; } .ed li { margin: 3px 0; } .ed ul li::marker { color: var(--gold); } .ed ol li::marker { color: var(--gold); font-weight: 700; }
+  .ed b, .ed strong { color: #fff; }
   .snippet { font: italic 17px/1.4 var(--display); color: var(--ink2); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   nav.tabsbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 48px; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(18, 18, 22, .94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
@@ -108,7 +120,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "5";
+  const VER = "6";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis: shown highlighted, never read as asterisks */
@@ -118,19 +130,32 @@
   const DEF = () => ({ pages: {}, adult: false });
   let S; try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { S = DEF(); }
   S.pages = S.pages || {};
+  /* Notes are kept as a small, safe subset of HTML: paragraphs, lists, bold, italic. */
+  const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
+  function clean(html) {
+    const t = document.createElement("template"); t.innerHTML = html || "";
+    (function walk(node) { [...node.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1) return c.remove();
+      if (/^(SCRIPT|STYLE|IFRAME|OBJECT|SVG|IMG|VIDEO|AUDIO|TEMPLATE)$/.test(c.tagName)) return c.remove(); walk(c);
+      if (!OK_TAGS.has(c.tagName)) { c.replaceWith(...c.childNodes); return; } [...c.attributes].forEach(x => c.removeAttribute(x.name)); }); })(t.content);
+    return t.innerHTML;
+  }
+  const plain = html => { const t = document.createElement("template"); t.innerHTML = String(html || "").replace(/<\/(li|div|p)>|<br\s*\/?>/gi, "$&\n"); return t.content.textContent.replace(/\u00a0/g, " ").replace(/\n{2,}/g, "\n").trim(); };
+  const toHtml = text => String(text || "").split("\n").map(l => `<div>${l.trim() ? esc(l) : "<br>"}</div>`).join("");
   /* carry old field notes from the previous version onto each lesson's notebook page */
   if (Array.isArray(S.notes) && S.notes.length) {
     S.notes.forEach(n => { if (!n.t) return; const d = new Date(n.at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
       const add = `${d}${n.r ? " " + "★".repeat(n.r) : ""}\n${n.said ? `Said: ${n.said}\n` : ""}${n.what ? `${n.what}\n` : ""}`; const p = S.pages[n.t] || { text: "", at: n.at };
       p.text = (p.text ? p.text.replace(/\s+$/, "") + "\n\n" : "") + add.trim(); p.at = Math.max(p.at || 0, n.at); S.pages[n.t] = p; });
   }
+  /* v5 pages were plain text: turn them into note HTML */
+  for (const p of Object.values(S.pages)) if (p.text != null && p.html == null) { p.html = toHtml(p.text); delete p.text; }
   for (const k of ["notes", "m", "xp", "quiz", "day", "streak", "last", "drafts"]) delete S[k];
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
   save();
   let D = null, ALL = [], BY = {};
   const CTX = { work: "Work", negotiation: "Negotiation", dating: "Dating", partner: "Partner", friends: "Friends", text: "Text", family: "Family" };
   const dots = n => `<span class="dots">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`;
-  const hasNote = id => !!(S.pages[id] && S.pages[id].text && S.pages[id].text.trim());
+  const hasNote = id => !!(S.pages[id] && plain(S.pages[id].html));
   const modOf = t => D.modules.find(m => m.id === t._mod);
   const when = at => new Date(at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
@@ -152,10 +177,10 @@
   }
   let exCtx = "";
   function viewLesson(id, toNotes) {
-    const t = BY[id]; if (!t) return viewHome(); const m = modOf(t), pg = S.pages[id] || { text: "" };
+    const t = BY[id]; if (!t) return viewHome(); const m = modOf(t);
     const ctxs = [...new Set(t.examples.map(e => e.ctx))], exs = t.examples.filter(e => !exCtx || e.ctx === exCtx);
     const i = m.techniques.indexOf(t), nx = m.techniques[i + 1];
-    return `<a href="#/m/${m.id}" class="small muted">‹ ${esc(m.title)}</a><a class="btn jump" href="#/t/${id}/notes" data-act="tonotes" style="padding:7px 13px;font-size:14px">✎ Notes</a>
+    return `<a href="#/m/${m.id}" class="small muted">‹ ${esc(m.title)}</a>
       <h1 style="margin-top:10px">${esc(t.name)}</h1>
       <div class="meta"><span>Difficulty${dots(t.difficulty)}</span><span>Effect${dots(t.effect)}</span></div>
       <p class="lead">${fx(t.summary)}</p>
@@ -164,19 +189,19 @@
       ${ctxs.length > 1 ? `<div class="chips"><button class="chip${exCtx ? "" : " on"}" data-act="exctx" data-v="">All</button>${ctxs.map(c => `<button class="chip${exCtx === c ? " on" : ""}" data-act="exctx" data-v="${c}">${esc(CTX[c] || c)}</button>`).join("")}</div>` : ""}
       ${exs.map(e => `<div class="ex"><div class="row"><span class="ctx">${esc(CTX[e.ctx] || e.ctx)}</span><button class="say" data-act="speak" data-v="${esc(e.better.replace(/\*/g, ""))}">▶ hear it</button></div>${t._mod === "defence" ? `${e.flat ? `<div class="small muted" style="margin-top:6px">They say</div><div style="font-size:15px;color:#f08a98">“${fx(e.flat)}”</div>` : ""}<div class="small muted" style="margin-top:8px">You say</div><div class="better" style="margin-top:0">“${fx(e.better)}”</div>` : `${e.flat ? `<div class="flat">${fx(e.flat)}</div>` : ""}<div class="better">“${fx(e.better)}”</div>`}${e.note ? `<div class="why">${fx(e.note)}</div>` : ""}</div>`).join("")}
       <details class="more"><summary>Why it works, mistakes and sources ›</summary><p>${fx(t.why)}</p><h3 style="margin-top:12px">Common mistakes</h3><ul style="padding-left:20px;margin:6px 0">${t.mistakes.map(s => `<li>${fx(s)}</li>`).join("")}</ul><h3 style="margin-top:12px">Use it well</h3><p>${fx(t.ethics)}</p>${(t.sources || []).length ? `<p class="small muted">${t.sources.map(esc).join(" · ")}</p>` : ""}</details>
-      <h3 id="notes">My notes</h3>
-      <div class="nb"><div class="head">${esc(t.name)}</div><textarea id="page" data-page="${id}" placeholder="Your own lines, what worked, what didn't, ideas to try…">${esc(pg.text)}</textarea><div class="foot" id="saved">${pg.at && pg.text ? `Saved ${when(pg.at)}` : "Saves as you write"}</div></div>
-      ${nx ? `<a class="card" href="#/t/${nx.id}" style="display:block;padding:12px 16px"><div class="small muted">Next lesson</div><b style="font:600 19px var(--display)">${esc(nx.name)} ›</b></a>` : ""}`;
+      ${nx ? `<a class="card" href="#/t/${nx.id}" style="display:block;padding:12px 16px"><div class="small muted">Next lesson</div><b style="font:600 19px var(--display)">${esc(nx.name)} ›</b></a>` : ""}
+      <div style="height:72px"></div>
+      <a class="fab" href="#/t/${id}/notes" aria-label="Notes for this lesson"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note" : "Note"}${hasNote(id) ? `<span class="has"></span>` : ""}</a>`;
   }
   let nq = "";
   function viewNotebook() {
     const f = nq.trim().toLowerCase();
-    const L = Object.entries(S.pages).filter(([id, p]) => BY[id] && p.text && p.text.trim() && (!f || (BY[id].name + " " + p.text).toLowerCase().includes(f))).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
-    const total = Object.entries(S.pages).filter(([id, p]) => BY[id] && p.text && p.text.trim()).length;
+    const all = Object.entries(S.pages).map(([id, p]) => [id, p, plain(p.html)]).filter(([id, , tx]) => BY[id] && tx);
+    const L = all.filter(([id, , tx]) => !f || (BY[id].name + " " + tx).toLowerCase().includes(f)).sort((a, b) => (b[1].at || 0) - (a[1].at || 0)), total = all.length;
     return `<div class="eyebrow">Silvertongue</div><h1>Notebook</h1>
       ${total ? `<input class="search" id="nq" type="search" placeholder="Search your notes" value="${esc(nq)}" autocomplete="off">
-        <div class="card">${L.map(([id, p]) => `<a class="li" href="#/t/${id}/notes" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row between"><b>${esc(BY[id].name)}</b><span class="small muted" style="flex:none">${when(p.at)}</span></div><div class="small muted">${esc(modOf(BY[id]).title)}</div><div class="snippet">${esc(p.text.trim().split("\n").slice(0, 3).join(" · "))}</div></div></a>`).join("") || `<p class="muted" style="padding:12px 0;margin:0">No notes match.</p>`}</div>`
-      : `<div class="card" style="padding:16px"><p class="ink2" style="margin:0">Every lesson has its own notebook page. Open a lesson and tap <b>✎ Notes</b> to start writing: your own lines, what worked, what to try next.</p></div>`}`;
+        <div class="card">${L.map(([id, p, tx]) => `<a class="li" href="#/t/${id}/notes" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row between"><b>${esc(BY[id].name)}</b><span class="small muted" style="flex:none">${when(p.at)}</span></div><div class="small muted">${esc(modOf(BY[id]).title)}</div><div class="snippet">${esc(tx.split("\n").slice(0, 3).join(" · "))}</div></div></a>`).join("") || `<p class="muted" style="padding:12px 0;margin:0">No notes match.</p>`}</div>`
+      : `<div class="card" style="padding:16px"><p class="ink2" style="margin:0">Every lesson has its own notebook page. Open a lesson and tap the <b>✎ Note</b> button at the bottom to start writing: your own lines, what worked, what to try next.</p></div>`}`;
   }
 
   /* ---------- router ---------- */
@@ -187,10 +212,56 @@
     if (v === "t" && a !== lastLesson) { exCtx = ""; lastLesson = a; }
     $("#app").innerHTML = ({ home: viewHome, m: () => viewModule(a), t: () => viewLesson(a), notebook: viewNotebook }[v] || viewHome)();
     $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === (v === "notebook" ? "notebook" : "home")));
-    if (v === "t") { grow(); if (b === "notes") setTimeout(() => { $("#notes")?.scrollIntoView({ block: "start" }); }, 30); }
+    if (v === "t" && b === "notes" && BY[a]) openEditor(a); else closeEditor();
   }
-  addEventListener("hashchange", () => { close(); const { v, b } = route(); render(); if (!(v === "t" && b === "notes")) scrollTo(0, 0); });
-  const grow = () => { const ta = $("#page"); if (ta) { ta.style.height = "auto"; ta.style.height = Math.max(300, ta.scrollHeight) + "px"; } };
+  let prevHash = location.hash, lessonY = 0, cameIn = false;
+  addEventListener("hashchange", () => {
+    close(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
+    const opening = v === "t" && b === "notes", leaving = was[0] === "t" && was[2] === "notes" && v === "t" && was[1] === a && !b;
+    if (opening) { if (was[0] === "t" && was[1] === a && !was[2]) { lessonY = scrollY; cameIn = true; } else cameIn = false; }
+    render(); if (leaving) scrollTo(0, lessonY); else if (!opening) scrollTo(0, 0);
+  });
+
+  /* ---------- note editor ---------- */
+  const ICO = { ul: `<svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="17" r="1.8"/><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>`,
+    ol: `<svg viewBox="0 0 24 24"><text x="2" y="9" font-size="7" font-weight="700" font-family="sans-serif">1</text><text x="2" y="14.5" font-size="7" font-weight="700" font-family="sans-serif">2</text><text x="2" y="20" font-size="7" font-weight="700" font-family="sans-serif">3</text><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>` };
+  let edId = "";
+  function openEditor(id) {
+    if (edId === id && $(".editor")) return; closeEditor(); edId = id; const t = BY[id], p = S.pages[id] || {};
+    const E = document.createElement("div"); E.className = "editor";
+    E.innerHTML = `<div class="ed-top"><button class="done" data-act="eddone">‹ Done</button><span class="small muted" style="margin-left:auto">${esc(modOf(t).title)}</span></div>
+      <div class="ed-tools"><button data-cmd="bold" aria-label="Bold">B</button><button data-cmd="italic" aria-label="Italic" style="font-style:italic;font-family:Georgia,serif">I</button><button data-cmd="insertUnorderedList" aria-label="Bullet list">${ICO.ul}</button><button data-cmd="insertOrderedList" aria-label="Numbered list">${ICO.ol}</button><button data-cmd="outdent" aria-label="Outdent" style="margin-left:auto">⇤</button><button data-cmd="indent" aria-label="Indent">⇥</button></div>
+      <div class="ed-scroll"><div class="ed-wrap"><h2 class="ed-title">${esc(t.name)}</h2><div class="ed-when" id="edwhen">${p.at && plain(p.html) ? `Edited ${when(p.at)}` : "Your note for this lesson"}</div>
+      <div class="ed" id="ed" contenteditable="true" spellcheck="true" data-ph="Write anything: lines to try, what worked… Type “- ” for bullets or “1. ” for numbers.">${clean(p.html || "")}</div></div></div>`;
+    document.body.appendChild(E); document.body.style.overflow = "hidden";
+    try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch {}
+    const ed = $("#ed"); seed(ed);
+    setTimeout(() => { ed.focus(); let n = ed; while (n.lastChild && n.lastChild.nodeType === 1 && n.lastChild.tagName !== "BR") n = n.lastChild;
+      const r = document.createRange(); if (n.lastChild && n.lastChild.tagName === "BR") r.setStartBefore(n.lastChild); else { r.selectNodeContents(n); r.collapse(false); }
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); tools(); }, 220);
+  }
+  /* always keep at least one paragraph in the note, so lists and lines behave */
+  function seed(ed) { [...ed.childNodes].forEach(c => { if (c.nodeType === 3 && c.textContent.trim()) { const d = document.createElement("div"); c.replaceWith(d); d.appendChild(c); } });
+    if (!ed.firstElementChild) ed.innerHTML = "<div><br></div>"; ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); }
+  function saveEditor() { const ed = $("#ed"); if (!ed || !edId) return; const html = clean(ed.innerHTML), had = S.pages[edId];
+    if (!plain(html)) { if (had) delete S.pages[edId]; } else if (!had || had.html !== html) S.pages[edId] = { html, at: Date.now() }; save(); }
+  function closeEditor() { if (!$(".editor")) { edId = ""; return; } clearTimeout(saveT); saveEditor(); $$(".editor").forEach(x => x.remove()); document.body.style.overflow = ""; edId = ""; }
+  const tools = () => $$(".ed-tools [data-cmd]").forEach(b => { let on = false; try { on = /bold|italic|List/.test(b.dataset.cmd) && document.queryCommandState(b.dataset.cmd); } catch {} b.classList.toggle("on", on); });
+  document.addEventListener("selectionchange", () => { if ($(".editor")) tools(); });
+  /* keep the caret in the note when a toolbar button is pressed */
+  document.addEventListener("pointerdown", e => { if (e.target.closest(".ed-tools [data-cmd]")) e.preventDefault(); });
+  document.addEventListener("click", e => { const b = e.target.closest(".ed-tools [data-cmd]"); if (!b) return; $("#ed").focus(); document.execCommand(b.dataset.cmd, false, null); tools(); noteChanged(); });
+  function noteChanged() { const w = $("#edwhen"), ed = $("#ed"); if (ed && !ed.firstElementChild) seed(ed); else if (ed) ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); clearTimeout(saveT); saveT = setTimeout(() => { saveEditor(); if (w) w.textContent = "Saved"; }, 400); }
+  /* "- " or "* " starts a bullet list, "1. " a numbered one, like most notes apps */
+  function autoList(e) {
+    if (e.inputType !== "insertText" || e.data !== " ") return; const sel = getSelection(), n = sel.anchorNode;
+    if (!n || n.nodeType !== 3 || n.previousSibling || n.parentNode.closest("li")) return;
+    const m = n.textContent.slice(0, sel.anchorOffset).replace(/\u00a0/g, " ").match(/^([-*•]|1[.)]) $/); if (!m) return;
+    const rest = n.textContent.slice(sel.anchorOffset), r = document.createRange();
+    if (rest) { n.textContent = rest; r.setStart(n, 0); } else { const br = document.createElement("br"); n.replaceWith(br); r.setStartBefore(br); }
+    r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand(/^1/.test(m[1]) ? "insertOrderedList" : "insertUnorderedList", false, null); tools();
+  }
 
   /* ---------- sheets ---------- */
   function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
@@ -206,7 +277,8 @@
       <p class="small muted" style="margin-top:14px">Your notes stay on this phone, behind your PIN.</p>
       <div class="ver">Silvertongue v${VER}</div>`);
     $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (!d.pages && !d.notes) throw 0;
-      for (const [id, p] of Object.entries(d.pages || {})) { const cur = S.pages[id]; if (!cur || !cur.text) S.pages[id] = p; else if (p.text && !cur.text.includes(p.text)) S.pages[id] = { text: cur.text + "\n\n" + p.text, at: Math.max(cur.at || 0, p.at || 0) }; }
+      for (const [id, p0] of Object.entries(d.pages || {})) { const p = { html: clean(p0.html != null ? p0.html : toHtml(p0.text)), at: +p0.at || Date.now() }, cur = S.pages[id]; if (!plain(p.html)) continue;
+        if (!cur || !plain(cur.html)) S.pages[id] = p; else if (!plain(cur.html).includes(plain(p.html))) S.pages[id] = { html: cur.html + "<div><br></div>" + p.html, at: Math.max(cur.at || 0, p.at) }; }
       save(); close(); render(); toast("Notebook restored"); } catch { toast("That isn't a Silvertongue backup"); } });
   }
 
@@ -232,7 +304,7 @@
     const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
     if (a === "exctx") { exCtx = v; const y = scrollY; render(); scrollTo(0, y); }
     else if (a === "speak") speak(v);
-    else if (a === "tonotes") { e.preventDefault(); $("#notes")?.scrollIntoView({ behavior: "smooth", block: "start" }); setTimeout(() => $("#page")?.focus({ preventScroll: true }), 450); }
+    else if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/t/${id}`); }
     else if (a === "lock") lockScreen();
     else if (a === "changepin") lockScreen("change");
     else if (a === "adult") {
@@ -248,8 +320,7 @@
   });
   let saveT = 0;
   document.addEventListener("input", e => {
-    const id = e.target.dataset && e.target.dataset.page;
-    if (id) { grow(); S.pages[id] = { text: e.target.value, at: Date.now() }; clearTimeout(saveT); saveT = setTimeout(() => { save(); const f = $("#saved"); if (f) f.textContent = "Saved"; }, 400); }
+    if (e.target.id === "ed") { autoList(e); noteChanged(); return; }
     const keep = (sel, set) => { const pos = e.target.selectionStart; set(e.target.value); render(); const i = $(sel); if (i) { i.focus(); i.setSelectionRange(pos, pos); } };
     if (e.target.id === "q") keep("#q", x => q = x);
     if (e.target.id === "nq") keep("#nq", x => nq = x);
@@ -266,7 +337,7 @@
   }
   let unlocked = false, entry = "", mode = "", first = "", firstFrom = "", fails = 0, waitUntil = 0;
   function lockScreen(m) {
-    clearTimeout(saveT); save();
+    closeEditor(); clearTimeout(saveT); save();
     mode = m || (getPin() ? "unlock" : "set1"); entry = ""; unlocked = false; $("#app").innerHTML = ""; $$(".back").forEach(b => b.remove()); const cv = $("#cover"); if (cv) cv.remove();
     let L = $("#lock"); if (!L) { L = document.createElement("div"); L.id = "lock"; document.body.appendChild(L); }
     const T = { unlock: ["Welcome back", "Enter your PIN"], set1: ["Choose a PIN", "4 digits. It guards your notebook."], set2: ["Confirm your PIN", "Enter it once more"], change: ["New PIN", "Choose a new 4-digit PIN"] }[mode];
@@ -299,10 +370,10 @@
   /* hide the content in the app switcher, and ask again after a minute away */
   let hiddenAt = 0;
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { clearTimeout(saveT); save(); hiddenAt = Date.now(); if (unlocked && !$("#cover")) { const c = document.createElement("div"); c.id = "cover"; document.body.appendChild(c); } }
+    if (document.hidden) { clearTimeout(saveT); saveEditor(); save(); hiddenAt = Date.now(); if (unlocked && !$("#cover")) { const c = document.createElement("div"); c.id = "cover"; document.body.appendChild(c); } }
     else if (unlocked) { if (Date.now() - hiddenAt > AWAY_MS) lockScreen(); else { const c = $("#cover"); if (c) c.remove(); } }
   });
-  addEventListener("pagehide", () => { clearTimeout(saveT); save(); });
+  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   /* Adult modules live in their own file, fetched only after the 18+ switch is turned on. */
   let BASE = null, ADULT = null;
