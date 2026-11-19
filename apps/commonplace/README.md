@@ -35,6 +35,7 @@ in the spirit of Apple Books, Kindle and ReadEra, with Apple-style restraint.
 - **Go to page** and the **scrubber**.
 - **Search in the book**, with highlighted snippets; a result opens with the match highlighted.
 - **Bookmarks** (the ribbon), listed next to Contents and this book's Quotes.
+- **Collections:** group books any way you like (Philosophy, Poetry, a project, a reading year). Chips under the Library search show All books, each collection with its count, and ＋ New collection; a collection view has Add books, Rename and Delete (books stay in the library). A book can be in several collections (press and hold → Collections, where you can also make a new one). Quotes filter by collection too, and backups carry collections and reconnect them on restore.
 - **Library:** three columns of identical book tiles (any cover shape fits; landscape covers shown whole), most recently opened at the top left, with a search box for titles and authors.
 - **Reading now and the Shelf:** only a few books are in front of you. Reading now holds 3 by default (1–5 in
   Settings); every other book waits on the folded Shelf, and new books go there. A slot opens only when you finish

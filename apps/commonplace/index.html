@@ -305,7 +305,7 @@
      PDFs show their original pages; EPUB and text are laid out as pages
      you turn. Books, quotes and notes stay on this device (IndexedDB).
      ===================================================================== */
-  const APP_VERSION = "14", APP_DATE = "11 Nov 2026";
+  const APP_VERSION = "15", APP_DATE = "19 Nov 2026";
   const $ = s => document.querySelector(s), DAY = 864e5;
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clean = s => String(s || "").replace(/\s+/g, " ").trim();
@@ -863,7 +863,15 @@
     const usual = sum(7, 34) / Math.min(28, first - 6), diff = wk - usual;
     return `<p class="week">This week: <b>${Math.round(wk)} min a day</b> · your usual ${Math.round(usual)}${Math.abs(diff) < 2 ? " · steady" : diff > 0 ? " · ahead" : ""}</p>`;
   }
-  let libQ = "";
+  let libQ = "", libCol = "";
+  /* Collections: named groups of books. The list lives in settings; each book keeps the ids of its collections in b.cols. */
+  const cols = () => settings.collections || (settings.collections = []);
+  const colName = id => (cols().find(c => c.id === id) || {}).name || "";
+  const inCol = (b, id) => (b.cols || []).includes(id);
+  const colCount = id => library.filter(b => inCol(b, id)).length;
+  const newColId = () => "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  function addCollection(name) { name = (name || "").trim(); if (!name) return null; const ex = cols().find(c => c.name.toLowerCase() === name.toLowerCase()); if (ex) return ex.id; const c = { id: newColId(), name }; cols().push(c); saveSettings(); return c.id; }
+  const colChips = () => `<div class="chips scroll" style="margin-top:12px"><button class="chip ${!libCol ? "on" : ""}" data-act="libcol" data-v="">All books</button>${cols().map(c => `<button class="chip ${libCol === c.id ? "on" : ""}" data-act="libcol" data-v="${c.id}">${esc(c.name)} <span style="opacity:.55">${colCount(c.id)}</span></button>`).join("")}<button class="chip" data-act="newcol" style="background:none;border:1px dashed var(--label3)">＋ New collection</button></div>`;
   const qn = id => quotes.filter(x => x.book === id).length;
   function tile(b, small) {
     return `<div class="book" data-act="open" data-id="${b.id}">${coverHTML(b)}<div class="bar"><i style="width:${b.lastAt ? pctRead(b) : 0}%"></i></div>
@@ -874,6 +882,10 @@
   const shelfBooks = () => library.filter(b => b.state !== "now").sort((a, b) => (b.next - a.next) || (isDone(a) - isDone(b)) || ((b.lastAt ? 1 : 0) - (a.lastAt ? 1 : 0)) || (b.lastAt || 0) - (a.lastAt || 0) || b.addedAt - a.addedAt);
   function shelfHTML() {
     const q = libQ.trim().toLowerCase();
+    if (libCol && cols().some(c => c.id === libCol)) { const books = shelfOrder().filter(b => inCol(b, libCol) && (!q || `${b.title} ${b.author}`.toLowerCase().includes(q)));
+      return `<div class="shead"><h2>${esc(colName(libCol))}</h2><span class="cnt">${colCount(libCol)} book${colCount(libCol) === 1 ? "" : "s"}</span></div>
+        <div class="row" style="gap:8px;margin:2px 0 10px"><button class="btn gray sm" data-act="colpick" data-v="${libCol}">Add books</button><button class="btn gray sm" data-act="renamecol" data-v="${libCol}">Rename</button><button class="btn gray sm" data-act="delcol" data-v="${libCol}" style="color:#d6453d">Delete</button></div>
+        ${books.length ? `<div class="shelf">${books.map(b => tile(b)).join("")}</div>` : `<p class="sub" style="text-align:center;margin-top:20px">${q ? `No book in this collection matches “${esc(libQ.trim())}”.` : `No books here yet. Tap <b>Add books</b>, or press and hold any book and choose <b>Collections</b>.`}</p>`}`; }
     if (q) { const books = shelfOrder().filter(b => `${b.title} ${b.author}`.toLowerCase().includes(q));
       return books.length ? `<div class="shelf">${books.map(b => tile(b)).join("")}</div>` : `<p class="sub" style="text-align:center;margin-top:24px">No book matches “${esc(libQ.trim())}”.</p>`; }
     const now = nowBooks(), sh = shelfBooks(), free = Math.max(0, SLOTS() - now.length), nx = upNext();
@@ -890,6 +902,7 @@
   function viewLibrary() {
     return `<div class="row between"><h1>Library</h1><button class="icon-btn" data-act="import" aria-label="Add a book"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
       ${library.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="libsearch" placeholder="Search your books" value="${esc(libQ)}" autocomplete="off"></div>
+        ${colChips()}
         <div id="shelf">${shelfHTML()}</div>
         <p class="fine" style="text-align:center;margin-top:22px">Press and hold a book for its options.</p>`
       : `<div class="empty"><div style="font-size:56px">📖</div><h2 style="margin-top:12px">Your library is empty</h2>
@@ -907,6 +920,7 @@
         ${b.state === "now" ? `<button class="cell" data-act="open" data-id="${id}"><span class="grow">Continue reading</span></button>`
           : `<button class="cell" data-act="open" data-id="${id}"><span class="grow">${isDone(b) ? "Read again" : b.lastAt ? "Pick it back up" : "Start reading"}${nowBooks().length >= SLOTS() ? ` <span class="fine">(Reading now is full)</span>` : ""}</span></button>
              ${isDone(b) ? "" : `<button class="cell" data-act="setnext" data-id="${id}"><span class="grow">${b.next ? "Remove from Up next" : "Make it Up next"}</span></button>`}`}
+        <button class="cell" data-act="colsheet" data-id="${id}"><span class="grow">Collections <span class="fine">${(b.cols || []).filter(c => colName(c)).map(colName).map(esc).join(", ") || "none yet"}</span></span></button>
         <button class="cell" data-act="gofilter" data-id="${id}"><span class="grow">Quotes from this book</span></button>
         ${!isDone(b) && b.lastAt ? `<button class="cell" data-act="markdone" data-id="${id}"><span class="grow">Mark as finished</span></button>` : ""}
         ${b.state === "now" ? `<button class="cell" data-act="aside" data-id="${id}"><span class="grow">Set aside <span class="fine">(back to the Shelf)</span></span></button>` : ""}
@@ -914,13 +928,35 @@
         <button class="cell" data-act="delbook" data-id="${id}"><span class="grow" style="color:#d6453d">Remove from library</span></button></div>`);
   }
 
+  /* Pick the collections a book belongs to, or make a new one. */
+  function colSheet(id) {
+    const b = library.find(x => x.id === id); if (!b) return;
+    sheet(`<h2>Collections</h2><div class="sub" style="margin-bottom:12px">${esc(b.title)}</div>
+      ${cols().length ? `<div class="group">${cols().map(c => `<button class="cell" data-act="coltoggle" data-id="${id}" data-v="${c.id}"><span class="grow">${esc(c.name)}</span><span style="font-size:20px;color:var(--tint)">${inCol(b, c.id) ? "✓" : ""}</span></button>`).join("")}</div>` : `<p class="fine" style="margin:0 2px 10px">No collections yet. Make your first one below.</p>`}
+      <div class="row" style="gap:8px;margin-top:14px"><input type="text" id="colname" placeholder="New collection, e.g. Philosophy" autocomplete="off" style="flex:1;font:16px var(--sans);padding:11px 12px;border-radius:12px;border:1px solid var(--sep);background:var(--fill);color:var(--label)"><button class="btn sm" data-act="coladd" data-id="${id}">Add</button></div>
+      <button class="btn gray" data-act="closesheet" style="width:100%;margin-top:14px">Done</button>`);
+  }
+  /* Make a collection from the Library, then choose its books. */
+  function newColSheet() {
+    sheet(`<h2>New collection</h2><p class="sub" style="margin-bottom:12px">Group books any way you like: by subject, mood, a project, a reading year.</p>
+      <input type="text" id="colname" placeholder="Name, e.g. Philosophy" autocomplete="off" style="width:100%;font:16px var(--sans);padding:12px;border-radius:12px;border:1px solid var(--sep);background:var(--fill);color:var(--label)">
+      <button class="btn" data-act="colcreate" style="width:100%;margin-top:12px">Create and choose books</button>`);
+    setTimeout(() => $("#colname")?.focus(), 250);
+  }
+  /* Tick the books that belong in a collection. */
+  function colPickSheet(cid) {
+    sheet(`<h2>${esc(colName(cid))}</h2><p class="sub" style="margin-bottom:12px">Tap books to add or remove them.</p>
+      <div class="group">${shelfOrder().map(b => `<button class="cell" data-act="colpicktoggle" data-id="${b.id}" data-v="${cid}"><span style="width:34px;flex:none">${coverHTML(b)}</span><span class="grow">${esc(b.title)}<span class="fine" style="display:block">${esc(b.author || "")}</span></span><span style="font-size:20px;color:var(--tint)">${inCol(b, cid) ? "✓" : ""}</span></button>`).join("")}</div>
+      <button class="btn" data-act="colpickdone" style="width:100%;margin-top:14px">Done</button>`);
+  }
+
   /* ---------- Quotes collection ---------- */
-  let qFilter = { book: "", tag: "", q: "", sort: "new" };
+  let qFilter = { book: "", tag: "", q: "", sort: "new", col: "" };
   const allTags = () => [...new Set(quotes.flatMap(q => q.tags || []))].sort((a, b) => a.localeCompare(b));
   const qOrder = q => q.rects ? [q.page, q.rects[0]?.[1] || 0, 0] : [q.ch, q.p, q.s];
   function filtered() {
     const s = qFilter.q.toLowerCase();
-    let list = quotes.filter(q => (!qFilter.book || q.book === qFilter.book) && (!qFilter.tag || q.tags?.includes(qFilter.tag))
+    let list = quotes.filter(q => (!qFilter.book || q.book === qFilter.book) && (!qFilter.tag || q.tags?.includes(qFilter.tag)) && (!qFilter.col || inCol(library.find(b => b.id === q.book) || {}, qFilter.col))
       && (!s || [q.text, q.note, ...(q.tags || []), library.find(b => b.id === q.book)?.title].join(" ").toLowerCase().includes(s)));
     const cmp = (a, b) => { const x = qOrder(a), y = qOrder(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
     list.sort(qFilter.sort === "book" ? (a, b) => (a.book === b.book ? cmp(a, b) : a.book.localeCompare(b.book)) : (a, b) => b.at - a.at);
@@ -938,7 +974,8 @@
     const list = filtered(), tags = allTags(), books = library.filter(b => quotes.some(q => q.book === b.id));
     return `<div class="row between"><h1>Quotes</h1>${quotes.length ? `<button class="btn gray sm" data-act="export">Export</button>` : ""}</div>
       ${quotes.length ? `<div class="search" style="margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="qsearch" placeholder="Search quotes, notes, tags" value="${esc(qFilter.q)}"></div>
-        <div class="chips scroll" style="margin-top:12px"><button class="chip ${!qFilter.book ? "on" : ""}" data-act="fbook" data-v="">All books</button>${books.map(b => `<button class="chip ${qFilter.book === b.id ? "on" : ""}" data-act="fbook" data-v="${b.id}">${esc(b.title)}</button>`).join("")}</div>
+        ${cols().some(c => colCount(c.id)) ? `<div class="chips scroll" style="margin-top:12px"><button class="chip ${!qFilter.col ? "on" : ""}" data-act="fcol" data-v="">All collections</button>${cols().filter(c => colCount(c.id)).map(c => `<button class="chip ${qFilter.col === c.id ? "on" : ""}" data-act="fcol" data-v="${c.id}">${esc(c.name)}</button>`).join("")}</div>` : ""}
+        <div class="chips scroll" style="margin-top:${cols().some(c => colCount(c.id)) ? 8 : 12}px"><button class="chip ${!qFilter.book ? "on" : ""}" data-act="fbook" data-v="">All books</button>${books.map(b => `<button class="chip ${qFilter.book === b.id ? "on" : ""}" data-act="fbook" data-v="${b.id}">${esc(b.title)}</button>`).join("")}</div>
         ${tags.length ? `<div class="chips scroll" style="margin-top:8px">${tags.map(t => `<button class="chip ${qFilter.tag === t ? "on" : ""}" data-act="ftag" data-v="${esc(t)}">#${esc(t)} <span style="opacity:.55">${quotes.filter(q => q.tags?.includes(t)).length}</span></button>`).join("")}</div>` : ""}
         <div class="row between" style="margin:16px 2px 10px"><span class="fine">${list.length} quote${list.length === 1 ? "" : "s"}</span>
           <div class="seg" style="width:190px"><button class="${qFilter.sort === "new" ? "on" : ""}" data-act="sort" data-v="new">Newest</button><button class="${qFilter.sort === "book" ? "on" : ""}" data-act="sort" data-v="book">In order</button></div></div>
@@ -963,7 +1000,7 @@
       <p class="fine" style="margin:8px 4px">Select a word while reading and tap Look up. Modern senses come from Princeton’s WordNet 3.1; the classic definitions, with their quotations, from Webster’s Unabridged Dictionary of 1913 (public domain). Save word adds it to your quotes under #words.</p>
       <div class="ghead caps">Your data</div><div class="group">
         <button class="cell" data-act="export"><span class="grow">Export quotes as Markdown</span></button>
-        <button class="cell" data-act="backup"><span class="grow">Back up quotes, notes and bookmarks (.json)</span></button>
+        <button class="cell" data-act="backup"><span class="grow">Back up quotes, notes, bookmarks and collections (.json)</span></button>
         <label class="cell"><span class="grow">Restore from a backup…</span><input type="file" id="restore" accept=".json,application/json" hidden></label>
         ${isStandalone() ? "" : `<button class="cell" data-act="installsheet"><span class="grow" style="color:var(--tint)">Install the app</span></button>`}</div>
       <p class="fine" style="margin:8px 4px">Books, quotes and notes stay on this device. A backup holds your quotes, notes and bookmarks; add the books again on a new device and they reconnect by title.</p>
@@ -1751,15 +1788,28 @@
       const h = `#/read/${q.book}/q/${q.id}`; closeSheet(() => { if (location.hash === h) openFromHash(h); else location.hash = h; });
     }
     else if (a === "editq") { e.stopPropagation(); const q = quotes.find(x => x.id === d.q); if (q) quoteSheet(q); }
+    else if (a === "libcol") { libCol = d.v; render(); }
+    else if (a === "newcol") newColSheet();
+    else if (a === "colcreate") { const id = addCollection($("#colname").value); if (!id) return toast("Give it a name"); libCol = id; render(); colPickSheet(id); }
+    else if (a === "colsheet") colSheet(d.id);
+    else if (a === "coltoggle" || a === "colpicktoggle") { const b = library.find(x => x.id === d.id); if (!b) return; b.cols = inCol(b, d.v) ? b.cols.filter(c => c !== d.v) : [...(b.cols || []), d.v]; await saveLib();
+      if (a === "coltoggle") colSheet(d.id); else colPickSheet(d.v); const sh = $("#shelf"); if (sh) { sh.innerHTML = shelfHTML(); } }
+    else if (a === "coladd") { const id = addCollection($("#colname").value); if (!id) return toast("Give it a name"); const b = library.find(x => x.id === d.id); if (b && !inCol(b, id)) { b.cols = [...(b.cols || []), id]; await saveLib(); } colSheet(d.id); toast(`Added to ${colName(id)}`); }
+    else if (a === "colpick") colPickSheet(d.v);
+    else if (a === "colpickdone" || a === "closesheet") closeSheet(() => render());
+    else if (a === "renamecol") { const c = cols().find(x => x.id === d.v); const nm = c && prompt("Rename collection", c.name); if (nm && nm.trim()) { c.name = nm.trim(); saveSettings(); render(); } }
+    else if (a === "delcol") { const c = cols().find(x => x.id === d.v); if (!c || !confirm(`Delete the collection “${c.name}”? The books stay in your library.`)) return;
+      settings.collections = cols().filter(x => x.id !== d.v); library.forEach(b => { if (b.cols) b.cols = b.cols.filter(x => x !== d.v); }); saveSettings(); await saveLib(); libCol = ""; if (qFilter.col === d.v) qFilter.col = ""; render(); toast("Collection deleted"); }
+    else if (a === "fcol") { qFilter.col = d.v; render(); }
     else if (a === "fbook") { qFilter.book = d.v; render(); } else if (a === "ftag") { qFilter.tag = qFilter.tag === d.v ? "" : d.v; render(); } else if (a === "sort") { qFilter.sort = d.v; render(); }
     else if (a === "timesheet") timeSheet();
     else if (a === "planmin") { settings.planMin = +d.v || 0; saveSettings(); timeSheet(true); const c = $(".timecard"); if (c) c.outerHTML = timeCard(); }
-    else if (a === "gofilter") { qFilter = { book: d.id, tag: "", q: "", sort: "book" }; closeSheet(() => { location.hash = "#/quotes"; render(); }); }
+    else if (a === "gofilter") { qFilter = { book: d.id, tag: "", q: "", sort: "book", col: "" }; closeSheet(() => { location.hash = "#/quotes"; render(); }); }
     else if (a === "delbook") { const b = library.find(x => x.id === d.id), n = quotes.filter(q => q.book === d.id).length;
       if (!confirm(`Remove “${b.title}”?${n ? ` Its ${n} quote${n === 1 ? "" : "s"} stay in your collection.` : ""}`)) return;
       library = library.filter(x => x.id !== d.id); await saveLib(); await dbDel("content:" + d.id); await dbDel("file:" + d.id); closeSheet(); render(); }
     else if (a === "export") exportMd();
-    else if (a === "backup") download(`commonplace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "commonplace", v: 2, quotes, books: library.map(b => ({ id: b.id, title: b.title, author: b.author, bookmarks: b.bookmarks || [] })) }, null, 1), "application/json");
+    else if (a === "backup") download(`commonplace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "commonplace", v: 3, quotes, collections: cols(), books: library.map(b => ({ id: b.id, title: b.title, author: b.author, bookmarks: b.bookmarks || [], cols: b.cols || [] })) }, null, 1), "application/json");
     else if (a === "installsheet") showInstall(true);
     else if (a === "later") { closeSheet(); try { localStorage.setItem(SNOOZE, String(Date.now() + 3 * DAY)); } catch (err) {} }
     else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.then(() => closeSheet()).catch(() => {}); }
@@ -1795,6 +1845,8 @@
     if (e.target.id === "restore" && e.target.files[0]) {
       try { const j = JSON.parse(await e.target.files[0].text()); if (j.app !== "commonplace" || !Array.isArray(j.quotes)) throw 0;
         const map = {}; for (const ob of j.books || []) { const nb = library.find(b => b.id === ob.id) || library.find(b => b.title === ob.title); if (nb) { map[ob.id] = nb.id; if (ob.bookmarks?.length && !nb.bookmarks?.length) nb.bookmarks = ob.bookmarks; } }
+        const cmap = {}; for (const c of j.collections || []) cmap[c.id] = addCollection(c.name);
+        for (const ob of j.books || []) { const nb = library.find(b => b.id === map[ob.id]); if (nb && ob.cols?.length) nb.cols = [...new Set([...(nb.cols || []), ...ob.cols.map(c => cmap[c]).filter(Boolean)])]; }
         let added = 0; for (const q of j.quotes) { if (quotes.some(x => x.id === q.id)) continue; quotes.push({ ...q, book: map[q.book] || q.book }); added++; }
         await saveQuotes(); await saveLib(); toast(`Restored ${added} quote${added === 1 ? "" : "s"}`); render();
       } catch (err) { toast("That isn't a Commonplace backup"); }
