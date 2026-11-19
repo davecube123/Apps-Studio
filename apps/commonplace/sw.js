@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "commonplace-v14";
+const VERSION = "commonplace-v15";
 // The dictionary lives in its own cache, kept across app updates (it is large and rarely changes).
 const DICT_CACHE = "commonplace-dict-v1";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2", "./data/sample-tao-te-ching.json"];
