@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "allure-v3";
+const VERSION = "allure-v4";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/allure.json", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
