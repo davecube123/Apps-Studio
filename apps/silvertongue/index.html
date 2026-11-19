@@ -66,20 +66,21 @@
   details.more summary { cursor: pointer; list-style: none; padding: 10px 0; font-weight: 650; color: var(--ink2); } details.more summary::-webkit-details-marker { display: none; }
   details.more p, details.more li { color: var(--ink2); font-size: 15px; }
   /* floating note button on every lesson */
-  .fab { position: fixed; z-index: 25; left: max(16px, calc(50% - 314px)); bottom: calc(env(safe-area-inset-bottom) + 76px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px;
+  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 314px)); bottom: calc(env(safe-area-inset-bottom) + 76px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px;
     background: linear-gradient(135deg, #ecdcb2, var(--gold)); color: #1a1408; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
   .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .fab .has { width: 7px; height: 7px; border-radius: 50%; background: #1a1408; }
   /* the note editor: a plain notes-app page */
-  .editor { position: fixed; inset: 0; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
+  .editor { position: fixed; left: 0; right: 0; top: 0; height: 100%; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
   .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 660px; width: 100%; margin: 0 auto; }
   .ed-top .done { color: var(--gold); font-weight: 700; font-size: 16px; padding: 6px 8px; }
-  .ed-tools { display: flex; gap: 6px; padding: 6px 12px 10px; max-width: 660px; width: 100%; margin: 0 auto; border-bottom: 1px solid var(--line); }
+  /* the format bar sits at the bottom of the note, so it rides just above the keyboard */
+  .ed-tools { order: 3; flex: none; display: flex; gap: 6px; padding: 8px max(12px, calc(50% - 318px)) calc(8px + var(--kb-safe, env(safe-area-inset-bottom))); width: 100%; border-top: 1px solid var(--line); background: #17171d; }
   .ed-tools button { min-width: 44px; height: 38px; padding: 0 10px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); color: var(--ink2); display: grid; place-items: center; font-weight: 700; }
   .ed-tools button.on { background: var(--silver); color: #15151a; border-color: var(--silver); }
   .ed-tools svg { width: 20px; height: 20px; fill: currentColor; }
-  .ed-scroll { flex: 1; overflow-y: auto; }
-  .ed-wrap { max-width: 660px; margin: 0 auto; padding: 16px 18px calc(env(safe-area-inset-bottom) + 60px); }
+  .ed-scroll { flex: 1; min-height: 0; overflow-y: auto; order: 2; }
+  .ed-wrap { max-width: 660px; margin: 0 auto; padding: 16px 18px 40px; }
   .ed-title { font: 600 28px/1.15 var(--display); margin: 0; }
   .ed-when { font-size: 12.5px; color: var(--muted); margin: 4px 0 14px; }
   .ed { outline: none; min-height: 50vh; font: 17px/1.55 var(--sans); color: var(--ink); word-wrap: break-word; caret-color: var(--gold); }
@@ -120,7 +121,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "6";
+  const VER = "7";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis: shown highlighted, never read as asterisks */
@@ -233,7 +234,7 @@
       <div class="ed-tools"><button data-cmd="bold" aria-label="Bold">B</button><button data-cmd="italic" aria-label="Italic" style="font-style:italic;font-family:Georgia,serif">I</button><button data-cmd="insertUnorderedList" aria-label="Bullet list">${ICO.ul}</button><button data-cmd="insertOrderedList" aria-label="Numbered list">${ICO.ol}</button><button data-cmd="outdent" aria-label="Outdent" style="margin-left:auto">⇤</button><button data-cmd="indent" aria-label="Indent">⇥</button></div>
       <div class="ed-scroll"><div class="ed-wrap"><h2 class="ed-title">${esc(t.name)}</h2><div class="ed-when" id="edwhen">${p.at && plain(p.html) ? `Edited ${when(p.at)}` : "Your note for this lesson"}</div>
       <div class="ed" id="ed" contenteditable="true" spellcheck="true" data-ph="Write anything: lines to try, what worked… Type “- ” for bullets or “1. ” for numbers.">${clean(p.html || "")}</div></div></div>`;
-    document.body.appendChild(E); document.body.style.overflow = "hidden";
+    document.body.appendChild(E); document.body.style.overflow = "hidden"; fitEditor();
     try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch {}
     const ed = $("#ed"); seed(ed);
     setTimeout(() => { ed.focus(); let n = ed; while (n.lastChild && n.lastChild.nodeType === 1 && n.lastChild.tagName !== "BR") n = n.lastChild;
@@ -243,6 +244,14 @@
   /* always keep at least one paragraph in the note, so lists and lines behave */
   function seed(ed) { [...ed.childNodes].forEach(c => { if (c.nodeType === 3 && c.textContent.trim()) { const d = document.createElement("div"); c.replaceWith(d); d.appendChild(c); } });
     if (!ed.firstElementChild) ed.innerHTML = "<div><br></div>"; ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); }
+  function fitEditor() {
+    const E = $(".editor"), vv = window.visualViewport; if (!E || !vv) return;
+    const kb = innerHeight - vv.height - vv.offsetTop > 80; /* keyboard is covering part of the layout */
+    E.style.top = vv.offsetTop + "px"; E.style.height = vv.height + "px"; E.style.setProperty("--kb-safe", kb ? "0px" : "env(safe-area-inset-bottom)");
+    const sel = getSelection(); if (sel.rangeCount && $("#ed").contains(sel.anchorNode)) { let r = sel.getRangeAt(0).getBoundingClientRect(); if (!r.bottom) { const n = sel.anchorNode; r = (n.nodeType === 1 ? n : n.parentElement).getBoundingClientRect(); } const sc = $(".ed-scroll"), box = sc.getBoundingClientRect();
+      if (r.bottom && r.bottom > box.bottom - 12) sc.scrollTop += r.bottom - box.bottom + 24; }
+  }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fitEditor); visualViewport.addEventListener("scroll", fitEditor); }
   function saveEditor() { const ed = $("#ed"); if (!ed || !edId) return; const html = clean(ed.innerHTML), had = S.pages[edId];
     if (!plain(html)) { if (had) delete S.pages[edId]; } else if (!had || had.html !== html) S.pages[edId] = { html, at: Date.now() }; save(); }
   function closeEditor() { if (!$(".editor")) { edId = ""; return; } clearTimeout(saveT); saveEditor(); $$(".editor").forEach(x => x.remove()); document.body.style.overflow = ""; edId = ""; }
@@ -320,7 +329,7 @@
   });
   let saveT = 0;
   document.addEventListener("input", e => {
-    if (e.target.id === "ed") { autoList(e); noteChanged(); return; }
+    if (e.target.id === "ed") { autoList(e); noteChanged(); fitEditor(); return; }
     const keep = (sel, set) => { const pos = e.target.selectionStart; set(e.target.value); render(); const i = $(sel); if (i) { i.focus(); i.setSelectionRange(pos, pos); } };
     if (e.target.id === "q") keep("#q", x => q = x);
     if (e.target.id === "nq") keep("#nq", x => nq = x);

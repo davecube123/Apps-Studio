@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "silvertongue-v6";
+const VERSION = "silvertongue-v7";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/lessons.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2"];
 
