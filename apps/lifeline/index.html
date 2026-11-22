@@ -61,6 +61,10 @@
   .box.no { background: var(--red2); } .box.no b { color: var(--red); } .box.call2 { background: var(--amber2); } .box.call2 b { color: var(--amber); }
   .box ul { margin: 6px 0 0; padding-left: 20px; } .box li { margin: 4px 0; }
   .tools { display: flex; gap: 10px; margin-top: 12px; } .tools .btn { flex: 1; }
+  .fig { counter-increment: none !important; list-style: none; margin: 8px 0 0; padding: 0 !important; background: none !important; border: 0 !important; cursor: default !important; }
+  .fig::before { content: none !important; }
+  .fig img { display: block; width: 100%; height: auto; border-radius: 16px; background: #fbf7f4; border: 1px solid var(--line); }
+  .fig figcaption, .fig .cap { font-size: 13.5px; font-weight: 600; color: var(--muted); margin: 6px 4px 0; }
   ul.plain { margin: 6px 0 0; padding-left: 20px; } ul.plain li { margin: 5px 0; }
   ol.lsteps { margin: 6px 0 0; padding-left: 22px; } ol.lsteps li { margin: 7px 0; }
 
@@ -81,9 +85,9 @@
   .kit.ok .c { background: var(--green); border-color: var(--green); }
 
   /* floating note button and note editor */
-  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 324px)); bottom: calc(env(safe-area-inset-bottom) + 80px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px; background: var(--ink); color: var(--bg); font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 324px)); bottom: calc(env(safe-area-inset-bottom) + 80px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px; background: linear-gradient(135deg, #f6dca0, #e3b95c); color: #2a1d06; font-weight: 800; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .28); }
   .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: #2a1d06; }
   .editor { position: fixed; left: 0; right: 0; top: 0; height: 100%; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
   .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 680px; width: 100%; margin: 0 auto; flex: none; }
   .ed-top .done { color: var(--red); font-weight: 800; font-size: 17px; padding: 6px 8px; }
@@ -124,7 +128,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -158,6 +162,10 @@
   const callBtn = () => `<a class="call" href="${tel()}">${phoneIc}<span>Call ${esc(num().n)}<small>${esc(num().name)} emergency</small></span></a>`;
 
   let MODS = [], L = [], BY = {};
+  let VIS = {};
+  const figIn = (id, i) => (VIS[id] || []).filter(v => v.after === i).map(v => `<div class="fig" style="margin-top:10px"><img src="${v.file}" alt="${esc(v.alt)}" loading="lazy" width="400" height="260"><div class="cap">${esc(v.caption)}</div></div>`).join("");
+  const fig = (id, i) => (VIS[id] || []).filter(v => v.after === i).map(v => `<li class="fig"><img src="${v.file}" alt="${esc(v.alt)}" loading="lazy" width="400" height="260"><div class="cap">${esc(v.caption)}</div></li>`).join("");
+  const noteFab = (href, id) => `<div style="height:70px"></div><a class="fab" href="${href}" aria-label="Notes on this topic"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note<span class=\"has\"></span>" : "Note"}</a>`;
   const LEVEL = { call: "Call now", urgent: "See a doctor", care: "First aid" };
   const hasNote = id => !!(S.pages[id] && plain(S.pages[id].html));
   const mastered = l => l.quiz.every((_, i) => S.q[l.id + "|" + i]);
@@ -185,11 +193,12 @@
     const isCPR = /^cpr-/.test(id) || id === "drowning";
     return `<div class="ehead"><a href="#/">‹ Emergency</a><h1>${l.icon} ${esc(l.title)}</h1>${l.level === "call" ? callBtn() : `<div class="tiny" style="margin-top:6px;opacity:.9">${esc(fixNum(l.call))}</div>`}</div>
       ${isCPR || l.timer ? `<div class="tools">${isCPR ? `<button class="btn red" data-act="cpr">♥ CPR beat</button>` : ""}${l.timer ? `<button class="btn" data-act="timer" data-v="${id}">⏱ ${esc(l.timer.label)} (${l.timer.minutes} min)</button>` : ""}</div>` : ""}
-      <ol class="steps">${l.steps.map((s, i) => `<li data-act="tick" data-v="${i}" class="${tk[i] ? "ok" : ""}">${esc(fixNum(s))}</li>`).join("")}</ol>
+      <ol class="steps">${l.steps.map((s, i) => `<li data-act="tick" data-v="${i}" class="${tk[i] ? "ok" : ""}">${esc(fixNum(s))}</li>${fig(id, i)}`).join("")}</ol>
       <div class="box no"><b>Don't</b><ul>${l.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
       ${l.level === "call" ? "" : `<div class="box call2"><b>Call or get help if</b><p style="margin:4px 0 0">${esc(fixNum(l.call))}</p></div>`}
       ${l.special && l.special.length ? `<div class="card"><b class="small">Children, pregnancy, elderly</b><ul class="plain small">${l.special.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-      <a class="btn block" href="#/l/${id}" style="margin-top:14px">Signs, reasons and practice ›</a>`;
+      <a class="btn block" href="#/l/${id}" style="margin-top:14px">Signs, reasons and practice ›</a>
+      ${noteFab(`#/e/${id}/notes`, id)}`;
   }
   function viewLearn() {
     const tot = L.length, m = L.filter(mastered).length;
@@ -204,13 +213,13 @@
       <p class="ink2" style="margin-top:12px">${esc(l.when)}</p>
       <div class="tools"><a class="btn red" href="#/e/${id}">Emergency card</a><a class="btn" href="#/q/${id}">Practise (${qDone(l)}/${l.quiz.length})</a></div>
       <h3>Recognise it</h3><div class="card"><ul class="plain">${l.recognize.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-      <h3>What to do</h3><div class="card"><ol class="lsteps">${l.steps.map(x => `<li>${esc(fixNum(x))}</li>`).join("")}</ol></div>
+      <h3>What to do</h3><div class="card"><ol class="lsteps">${l.steps.map((x, i) => `<li>${esc(fixNum(x))}${figIn(id, i)}</li>`).join("")}</ol></div>
       <h3>Don't</h3><div class="card"><ul class="plain">${l.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
       <h3>When to call</h3><div class="card"><p style="margin:0">${esc(fixNum(l.call))}</p></div>
       ${l.special && l.special.length ? `<h3>Children, pregnancy, elderly</h3><div class="card"><ul class="plain">${l.special.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
       <h3>Why it works</h3><div class="card"><p style="margin:0" class="ink2">${esc(l.why)}</p></div>
       <p class="tiny muted" style="margin-top:12px">Based on: ${esc(l.sources.join("; "))}</p>
-      <div style="height:70px"></div><a class="fab" href="#/l/${id}/notes" aria-label="Notes on this topic"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note<span class=\"has\"></span>" : "Note"}</a>`;
+      ${noteFab(`#/l/${id}/notes`, id)}`;
   }
 
   /* ---------- practice ---------- */
@@ -270,14 +279,14 @@
     $("#app").innerHTML = html + (v === "sos" || v === "learn" ? `<div class="ver">Lifeline v${VER}</div>` : "");
     const tab = { sos: "sos", e: "sos", learn: "learn", l: "learn", practice: "practice", q: "practice", kit: "kit" }[v] || "sos";
     $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === tab));
-    if (v === "l" && b === "notes" && BY[a]) openEditor(a); else closeEditor();
+    if ((v === "l" || v === "e") && b === "notes" && BY[a]) openEditor(a); else closeEditor();
     if (v === "e") wake(true); else if (!$(".overlay")) wake(false);
   }
   let prevHash = location.hash, pageY = 0, cameIn = false;
   addEventListener("hashchange", () => {
     close(); stopOverlay(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
-    const opening = v === "l" && b === "notes"; if (opening) { cameIn = was[0] === "l" && was[1] === a && !was[2]; if (cameIn) pageY = scrollY; }
-    const back = !opening && was[0] === "l" && was[2] === "notes";
+    const opening = (v === "l" || v === "e") && b === "notes"; if (opening) { cameIn = was[0] === v && was[1] === a && !was[2]; if (cameIn) pageY = scrollY; }
+    const back = !opening && (was[0] === "l" || was[0] === "e") && was[2] === "notes";
     if (v === "q" && !(was[0] === "q" && was[1] === a)) QZ = null;
     render(); if (back) scrollTo(0, pageY); else if (!opening) scrollTo(0, 0);
   });
@@ -415,7 +424,7 @@
   /* ---------- actions ---------- */
   document.addEventListener("click", async e => {
     const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
-    if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/l/${id}`); }
+    if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/${route().v === "e" ? "e" : "l"}/${id}`); }
     else if (a === "tick") { const { a: id } = route(); const tk = ticks[id] || (ticks[id] = {}); tk[v] = !tk[v]; el.classList.toggle("ok", !!tk[v]); }
     else if (a === "cpr") cpr();
     else if (a === "cprmode") { cprMode = v; $$(".seg button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); $("#cprtxt").textContent = v === "30" ? "30 compressions, then 2 breaths" : "Hands-only: don't stop until help or an AED takes over"; const b = $("#beat"); b.classList.remove("breath"); b.textContent = "♥"; runBeat(); }
@@ -440,6 +449,7 @@
   addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
 
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  fetch("data/visuals.json").then(r => r.json()).then(v => { v.forEach(x => (VIS[x.lesson] = VIS[x.lesson] || []).push(x)); if (L.length) render(); }).catch(() => {});
   fetch("data/lifeline.json").then(r => r.json()).then(d => { MODS = d.modules; L = MODS.flatMap(m => m.lessons); L.forEach(l => BY[l.id] = l); render(); setTimeout(() => { if (!/^#\/e\//.test(location.hash)) showInstall(false); }, 9000); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:30vh;text-align:center">Couldn't load Lifeline. Check your connection and reload.<br><br><a class="call" href="tel:911">Call 911</a></p>`; });
 })();
