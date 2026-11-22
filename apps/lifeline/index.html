@@ -168,7 +168,7 @@
   let sq = "";
   const lRow = (l, href) => `<a class="li" href="${href || `#/l/${l.id}`}"><span class="i">${l.icon}</span><div style="min-width:0;flex:1"><b>${esc(l.title)}</b><div class="s">${esc(l.when)}</div></div><span class="r${mastered(l) ? " done" : ""}">${mastered(l) ? "✓" : hasNote(l.id) ? "✎" : "›"}</span></a>`;
   function viewSOS() {
-    const f = sq.trim().toLowerCase(), E = L.filter(l => l.emergency);
+    const f = sq.trim().toLowerCase(), R = { call: 0, urgent: 1, care: 2 }, E = L.filter(l => l.emergency).map((l, i) => [l, i]).sort((x, y) => R[x[0].level] - R[y[0].level] || x[1] - y[1]).map(x => x[0]);
     const hits = f ? L.filter(l => [l.title, l.when, ...l.recognize].join(" ").toLowerCase().includes(f)) : [];
     return `<div class="row between"><div class="eyebrow">Lifeline</div><button class="tiny muted" data-act="settings">⚙︎ ${esc(num().name)} · v${VER}</button></div>
       ${callBtn()}
