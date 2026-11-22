@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<line x1="200" y1="20" x2="200" y2="240" stroke="#d9cfc7" stroke-width="3"/>
+<line x1="14" y1="240" x2="386" y2="240" stroke="#d9cfc7" stroke-width="4"/>
+<!-- panel 1: back blows -->
+<g stroke="#3a2f2b" stroke-width="2.5" fill="none">
+<path d="M80 238L80 160" stroke-width="28"/><path d="M80 238L80 160" stroke="#2f5d8a" stroke-width="23"/>
+<path d="M80 160L80 92" stroke-width="36"/><path d="M80 160L80 92" stroke="#2f5d8a" stroke-width="31"/>
+<path d="M84 100L128 150L152 146" stroke-width="18"/><path d="M84 100L128 150L152 146" stroke="#2f5d8a" stroke-width="13"/>
+<path d="M126 236L124 150" stroke-width="28"/><path d="M126 236L124 150" stroke="#8a8f98" stroke-width="23"/>
+<path d="M124 152L166 112" stroke-width="38"/><path d="M124 152L166 112" stroke="#8a8f98" stroke-width="33"/>
+</g>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<circle cx="184" cy="118" r="17" fill="#c98d68"/>
+<circle cx="82" cy="64" r="19" fill="#f1c7a8"/>
+<circle cx="152" cy="146" r="8" fill="#f1c7a8"/>
+<path d="M80 92L112 74L136 100" stroke="#3a2f2b" stroke-width="18" fill="none"/>
+<path d="M80 92L112 74L136 100" stroke="#2f5d8a" stroke-width="13" fill="none"/>
+<rect x="130" y="88" width="20" height="14" rx="7" fill="#f1c7a8" transform="rotate(45 140 95)"/>
+</g>
+<path d="M116 62Q140 66 144 84" stroke="#c8102e" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+<text x="14" y="30" font-size="15" fill="#3a2f2b">1. Up to 5 back blows</text>
+<!-- panel 2: abdominal thrusts -->
+<g stroke="#3a2f2b" stroke-width="2.5" fill="none">
+<path d="M262 238L264 160" stroke-width="28"/><path d="M264 238L266 160" stroke="#2f5d8a" stroke-width="23"/>
+<path d="M266 160L270 92" stroke-width="36"/><path d="M266 160L270 92" stroke="#2f5d8a" stroke-width="31"/>
+<path d="M312 238L310 160" stroke-width="28"/><path d="M312 238L310 160" stroke="#8a8f98" stroke-width="23"/>
+<path d="M310 162L318 96" stroke-width="40"/><path d="M310 162L318 96" stroke="#8a8f98" stroke-width="35"/>
+</g>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<circle cx="330" cy="70" r="18" fill="#c98d68"/>
+<circle cx="268" cy="64" r="19" fill="#f1c7a8"/>
+<path d="M274 102L300 138L322 140" stroke="#3a2f2b" stroke-width="18" fill="none"/>
+<path d="M274 102L300 138L322 140" stroke="#2f5d8a" stroke-width="13" fill="none"/>
+<rect x="318" y="130" width="22" height="20" rx="7" fill="#f1c7a8"/>
+</g>
+
+<circle cx="333" cy="160" r="2.5" fill="#3a2f2b"/>
+<path d="M376 168Q372 144 350 134" stroke="#c8102e" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+<text x="214" y="30" font-size="15" fill="#3a2f2b">2. Up to 5 thrusts</text>
+</svg>

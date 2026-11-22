@@ -1,7 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "lifeline-v1";
+const VERSION = "lifeline-v2";
 // Every file the app needs offline. Add new files here.
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/lifeline.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/lifeline.json", "./data/visuals.json", "./img/aed-pads.svg", "./img/bleeding-pressure.svg", "./img/burn-cool.svg", "./img/choking-adult.svg", "./img/choking-infant.svg", "./img/cpr-hands.svg", "./img/cpr-infant.svg", "./img/epipen.svg", "./img/heart-attack-rest.svg", "./img/heat-cooling.svg", "./img/jellyfish-vinegar.svg", "./img/nosebleed.svg", "./img/primary-check-flow.svg", "./img/recovery.svg", "./img/seizure.svg", "./img/shock.svg", "./img/sling.svg", "./img/snakebite.svg", "./img/spinal-hold.svg", "./img/stroke-befast.svg", "./img/tourniquet.svg", "./img/wound-packing.svg", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

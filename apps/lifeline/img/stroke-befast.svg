@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<g transform="translate(14 14)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">B</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Balance</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><circle cx="70" cy="22" r="9" fill="#f1c7a8"/><path d="M68 32L62 60M62 60L52 78M62 60L72 78M66 40L50 50M66 40L84 34" stroke-width="6" fill="none"/></g>
+<path d="M82 52q8 6 4 14M42 40q-8 6-4 14" stroke="#c8102e" stroke-width="2.5" fill="none"/></g>
+<g transform="translate(141 14)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">E</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Eyes</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><path d="M34 52Q60 28 86 52Q60 76 34 52Z" fill="#fff"/><circle cx="60" cy="52" r="10" fill="#2f5d8a"/><circle cx="60" cy="52" r="4" fill="#3a2f2b"/></g>
+<path d="M38 72L84 30" stroke="#c8102e" stroke-width="4"/></g>
+<g transform="translate(268 14)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">F</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Face</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><circle cx="64" cy="52" r="28" fill="#f1c7a8"/><circle cx="54" cy="46" r="2.5" fill="#3a2f2b"/><path d="M70 47h6" /><path d="M50 62Q60 66 66 66Q74 68 78 74" fill="none"/></g>
+<path d="M90 60v12" stroke="#c8102e" stroke-width="3" marker-end="url(#ar)"/></g>
+<g transform="translate(14 137)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">A</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Arm</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><circle cx="60" cy="24" r="9" fill="#f1c7a8"/><path d="M60 34V64M60 64L52 84M60 64L68 84" stroke-width="6" fill="none"/><path d="M60 40L38 22M60 40L84 38" stroke="#2f5d8a" stroke-width="6" fill="none"/></g>
+<path d="M94 36v14" stroke="#c8102e" stroke-width="3" marker-end="url(#ar)"/></g>
+<g transform="translate(141 137)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">S</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Speech</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><path d="M30 30H90Q96 30 96 36V62Q96 68 90 68H52L40 80V68H30Q24 68 24 62V36Q24 30 30 30Z" fill="#fff"/></g>
+<path d="M34 50q6-10 12 0t12 0t12 0t12 0" stroke="#c8102e" stroke-width="3" fill="none"/></g>
+<g transform="translate(268 137)"><rect width="118" height="112" rx="12" fill="#fff" stroke="#3a2f2b" stroke-width="2.5"/><text x="12" y="34" font-size="28" fill="#c8102e">T</text><text x="59" y="102" font-size="13" fill="#3a2f2b" text-anchor="middle">Time to call</text>
+<g stroke="#3a2f2b" stroke-width="2.5"><rect x="26" y="30" width="26" height="46" rx="5" fill="#2f5d8a"/><rect x="31" y="36" width="16" height="28" rx="2" fill="#fff" stroke="none"/><circle cx="80" cy="54" r="20" fill="#fff"/><path d="M80 42V54L88 60" fill="none"/></g>
+<text x="39" y="56" font-size="11" fill="#c8102e" text-anchor="middle">911</text></g>
+</svg>
