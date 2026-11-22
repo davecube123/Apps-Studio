@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Keel</title>
+<meta name="description" content="Thirty principles of self-reliance for a life of equanimity and fullness, each taught through tales, with your own notebook.">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Keel">
+<style>
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+  :root { --bg: #0b1220; --card: #131c2e; --card2: #1c2840; --ink: #eef2f8; --ink2: #d3dbea; --muted: #a2adc2; --line: rgba(210, 225, 255, .1);
+    --gold: #d9b56e; --rose: #62c4cc; --display: "Cormorant", Georgia, serif; --read: "Noto Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; color: var(--ink); font: 16px/1.55 var(--sans); background: var(--bg); }
+  body { min-height: 100vh; background: radial-gradient(120% 55% at 50% -12%, #1a2c4f 0%, rgba(11, 18, 32, 0) 70%), var(--bg); }
+  a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  main { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 100px); }
+  h1 { font: 600 34px/1.1 var(--display); margin: 4px 0 6px; }
+  h3 { font: 700 11.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 28px 0 10px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 14px; } .tiny { font-size: 12.5px; }
+  .eyebrow { font: 700 11px var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card2); font-weight: 650; font-size: 15px; }
+  .btn.pri { background: linear-gradient(135deg, #f1d9a6, var(--gold)); color: #1d1206; border: 0; } .btn.block { display: flex; width: 100%; }
+  .search { width: 100%; font: 16px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); outline: none; margin: 10px 0 2px; }
+  .search:focus { border-color: var(--gold); }
+  .roman { font: 600 13px var(--display); letter-spacing: .12em; color: var(--gold); }
+
+  /* home */
+  .today { display: block; margin-top: 14px; padding: 18px; border-radius: 20px; background: linear-gradient(150deg, #1d3358, #20121a 70%); border: 1px solid rgba(224, 185, 116, .25); }
+  .today .m { font: 400 17px/1.5 var(--read); margin-top: 8px; color: var(--ink2); }
+  .part { margin-top: 26px; } .part .ph { display: flex; align-items: baseline; gap: 10px; } .part .ph h2 { font: 600 25px var(--display); margin: 0; }
+  .part .pl { font-size: 14px; color: var(--muted); margin: 2px 0 6px; }
+  .pr { display: flex; gap: 12px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
+  .pr:first-child { border-top: 0; }
+  .pr .n { font: 600 18px var(--display); color: var(--gold); width: 28px; flex: none; text-align: center; }
+  .pr b { font: 600 17px/1.3 var(--read); display: block; } .pr .s { font-size: 14.5px; color: var(--ink2); margin-top: 2px; }
+  .pr .pen { margin-left: auto; color: var(--gold); flex: none; } .chev { margin-left: auto; color: var(--muted); flex: none; font-size: 20px; }
+
+  /* principle */
+  .motto { font: 400 19px/1.5 var(--read); margin: 12px 0 0; color: var(--gold); }
+  .ess { font: 400 17px/1.7 var(--read); color: var(--ink); margin-top: 14px; }
+  .tcard { display: block; padding: 16px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); margin-top: 10px; position: relative; overflow: hidden; }
+  .tcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--rose); }
+  .tcard b { font: 600 18px/1.3 var(--read); display: block; } .tcard .meta { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .tcard .go { font-size: 13.5px; font-weight: 700; color: var(--rose); margin-top: 8px; }
+  details.depth { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 4px 16px; }
+  details.depth summary { list-style: none; cursor: pointer; padding: 12px 0; font-weight: 700; color: var(--ink2); } details.depth summary::-webkit-details-marker { display: none; }
+  details.depth p { font: 400 16.5px/1.7 var(--read); color: var(--ink2); }
+  ul.practice { list-style: none; padding: 0; margin: 0; } ul.practice li { position: relative; padding: 10px 0 10px 26px; border-top: 1px solid var(--line); color: var(--ink); }
+  ul.practice li:first-child { border-top: 0; } ul.practice li::before { content: "✦"; position: absolute; left: 2px; top: 10px; color: var(--gold); font-size: 13px; }
+  .shadow { border-left: 3px solid #4d6a8a; padding: 4px 0 4px 14px; color: var(--ink2); margin-top: 10px; font-size: 16px; }
+  .nav2 { display: flex; gap: 10px; margin-top: 24px; } .nav2 a { flex: 1; padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); min-width: 0; }
+  .nav2 a b { font: 600 15px/1.3 var(--read); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* tale */
+  .tale { font: 400 18px/1.75 var(--read); color: var(--ink); margin-top: 18px; }
+  .tale p { margin: 0 0 16px; } .tale p:first-child::first-letter { font-size: 3.1em; float: left; line-height: .9; padding: 6px 8px 0 0; color: var(--gold); font-weight: 600; }
+  .reveal { margin-top: 10px; padding: 16px; border-radius: 18px; background: linear-gradient(150deg, #172a47, #20121a); border: 1px solid rgba(98, 196, 204, .25); }
+  .reveal .h { font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
+  .reveal p { margin: 6px 0 0; font: 400 17px/1.6 var(--read); }
+  .src { font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+  .ti { display: block; padding: 12px 0; border-top: 1px solid var(--line); } .ti:first-child { border-top: 0; }
+  .ti b { font: 600 16.5px/1.3 var(--read); display: block; } .ti .meta { font-size: 13px; color: var(--muted); }
+  .snippet { font: 400 15px/1.5 var(--read); color: var(--ink2); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* floating note button and note editor */
+  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 314px)); bottom: calc(env(safe-area-inset-bottom) + 78px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px;
+    background: linear-gradient(135deg, #f1d9a6, var(--gold)); color: #1d1206; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+  .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: #1d1206; }
+  .editor { position: fixed; left: 0; right: 0; top: 0; height: 100%; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
+  .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 660px; width: 100%; margin: 0 auto; flex: none; }
+  .ed-top .done { color: var(--gold); font-weight: 700; font-size: 16px; padding: 6px 8px; }
+  .ed-tools { order: 3; flex: none; display: flex; gap: 6px; padding: 8px max(12px, calc(50% - 318px)) calc(8px + var(--kb-safe, env(safe-area-inset-bottom))); width: 100%; border-top: 1px solid var(--line); background: #0f1828; }
+  .ed-tools button { min-width: 44px; height: 38px; padding: 0 10px; border-radius: 10px; background: var(--card2); border: 1px solid var(--line); color: var(--ink2); display: grid; place-items: center; font-weight: 700; }
+  .ed-tools button.on { background: var(--gold); color: #1d1206; border-color: var(--gold); }
+  .ed-tools svg { width: 20px; height: 20px; fill: currentColor; }
+  .ed-scroll { flex: 1; min-height: 0; overflow-y: auto; order: 2; }
+  .ed-wrap { max-width: 660px; margin: 0 auto; padding: 16px 18px 40px; }
+  .ed-title { font: 600 28px/1.15 var(--display); margin: 0; }
+  .ed-when { font-size: 12.5px; color: var(--muted); margin: 4px 0 14px; }
+  .ed { position: relative; outline: none; min-height: 40vh; font: 18px/1.65 var(--sans); color: var(--ink); word-wrap: break-word; caret-color: var(--gold); }
+  .ed ul, .ed ol { margin: 4px 0; padding-left: 26px; } .ed li { margin: 3px 0; } .ed li::marker { color: var(--gold); } .ed ol li::marker { font-weight: 700; }
+  .ed b, .ed strong { color: #fff; }
+
+  nav.tabsbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(11, 18, 32, .94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+  nav.tabsbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 14px; font: 650 12px var(--sans); color: var(--muted); }
+  nav.tabsbar a.on { color: var(--gold); } nav.tabsbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .back { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: min(600px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 22px 22px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); animation: up .25s ease; }
+  .sheet h2 { font: 600 25px var(--display); margin: 0 0 8px; }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+  .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); transform: translateX(-50%); background: var(--gold); color: #1d1206; padding: 10px 16px; border-radius: 999px; font-weight: 650; font-size: 14px; max-width: 90vw; text-align: center; }
+  .ic2 { display: inline-block; width: 20px; height: 20px; vertical-align: -5px; fill: none; stroke: var(--gold); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--card2); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
+  ol.isteps { padding-left: 20px; } ol.isteps li { margin: 7px 0; }
+  .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+</style>
+</head>
+<body>
+<main id="app"><p class="muted" style="text-align:center;margin-top:40vh">…</p></main>
+<nav class="tabsbar">
+  <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M12 3c2 3 5 4.5 5 9a5 5 0 0 1-10 0c0-4.5 3-6 5-9z"/><path d="M12 21v-4"/></svg>Principles</a>
+  <a href="#/tales" data-tab="tales"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Tales</a>
+  <a href="#/notebook" data-tab="notebook"><svg viewBox="0 0 24 24"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h6M10 12h6M10 16h4"/></svg>Notebook</a>
+</nav>
+<script>
+(() => {
+  "use strict";
+  const VER = "1";
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
+  const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const KEY = "keel";
+  let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { S = {}; }
+  S.pages = S.pages || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX"];
+  const PARTS = [
+    { id: "mind", title: "The Inner Citadel", line: "Your mind is the one fortress no one can take." },
+    { id: "hands", title: "The Able Hands", line: "Make, mend, grow, learn and prepare." },
+    { id: "purse", title: "The Free Purse", line: "Money and time as servants, never masters." },
+    { id: "heart", title: "The Steady Heart", line: "Feel everything, and stay upright." },
+    { id: "people", title: "The Open Hand", line: "Self-reliance that gives, asks and belongs." },
+    { id: "spirit", title: "The Quiet Fullness", line: "Presence, nature, mortality and a life loved whole." }
+  ];
+  let P = [], BY = {};
+
+  /* ---------- notes: a small, safe subset of HTML ---------- */
+  const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
+  function clean(html) {
+    const t = document.createElement("template"); t.innerHTML = html || "";
+    (function walk(node) { [...node.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1) return c.remove();
+      if (/^(SCRIPT|STYLE|IFRAME|OBJECT|SVG|IMG|VIDEO|AUDIO|TEMPLATE)$/.test(c.tagName)) return c.remove(); walk(c);
+      if (!OK_TAGS.has(c.tagName)) { c.replaceWith(...c.childNodes); return; } [...c.attributes].forEach(x => c.removeAttribute(x.name)); }); })(t.content);
+    return t.innerHTML;
+  }
+  const plain = html => { const t = document.createElement("template"); t.innerHTML = String(html || "").replace(/<\/(li|div|p)>|<br\s*\/?>/gi, "$&\n"); return t.content.textContent.replace(/ /g, " ").replace(/\n{2,}/g, "\n").trim(); };
+  const hasNote = id => !!(S.pages[id] && plain(S.pages[id].html));
+  const when = at => new Date(at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  const fab = id => `<div style="height:70px"></div><a class="fab" href="#/p/${id}/notes" aria-label="Notes on this principle"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note<span class=\"has\"></span>" : "Note"}</a>`;
+  const partOf = p => PARTS.find(x => x.id === p.part) || PARTS[0];
+
+  /* ---------- views ---------- */
+  let q = "";
+  const prRow = p => `<a class="pr" href="#/p/${p.id}"><span class="n">${ROMAN[p.n]}</span><div style="min-width:0"><b>${esc(p.title)}</b><div class="s">${esc(p.motto)}</div></div>${hasNote(p.id) ? `<span class="pen">✎</span>` : `<span class="chev">›</span>`}</a>`;
+  function viewHome() {
+    const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5), t = P[day % P.length];
+    const f = q.trim().toLowerCase(), hits = f ? P.filter(p => [p.title, p.motto, p.essence, p.depth, ...p.tales.map(x => x.title + " " + x.who)].join(" ").toLowerCase().includes(f)) : [];
+    return `<div class="row between"><div class="eyebrow">Keel</div><button class="tiny muted" data-act="settings">v${VER} · Settings</button></div>
+      <h1>Steady on your own keel</h1><p class="ink2" style="margin:0">Thirty principles, each taught by the tales that reveal it.</p>
+      <input class="search" id="q" type="search" placeholder="Search principles, people, tales…" value="${esc(q)}" autocomplete="off">
+      ${f ? `<div class="card">${hits.map(prRow).join("") || `<p class="muted" style="margin:0;padding:10px 0">Nothing matches.</p>`}</div>`
+        : `<a class="today" href="#/p/${t.id}"><div class="eyebrow">Today's principle · ${ROMAN[t.n]}</div><div style="font:600 26px/1.15 var(--display);margin-top:6px">${esc(t.title)}</div><div class="m">${esc(t.motto)}</div><div class="tiny muted" style="margin-top:8px">With ${esc(t.tales.map(x => x.who).join(", and "))}</div></a>
+        ${PARTS.map((pt, i) => { const L = P.filter(p => p.part === pt.id); return L.length ? `<div class="part"><div class="ph"><span class="roman">BOOK ${ROMAN[i + 1]}</span><h2>${esc(pt.title)}</h2></div><div class="pl">${esc(pt.line)}</div><div class="card" style="padding:2px 16px">${L.map(prRow).join("")}</div></div>` : ""; }).join("")}`}`;
+  }
+  function viewPrinciple(id) {
+    const p = BY[id]; if (!p) return viewHome(); const i = P.indexOf(p), pv = P[i - 1], nx = P[i + 1], pt = partOf(p);
+    return `<a href="#/" class="tiny muted">‹ ${esc(pt.title)}</a>
+      <div class="roman" style="margin-top:14px">PRINCIPLE ${ROMAN[p.n]}</div><h1>${esc(p.title)}</h1>
+      <p class="motto">“${esc(p.motto)}”</p>
+      <p class="ess">${esc(p.essence)}</p>
+      <h3>The tales</h3>
+      ${p.tales.map((t, k) => `<a class="tcard" href="#/t/${p.id}/${k}"><b>${esc(t.title)}</b><div class="meta">${esc(t.who)} · ${esc(t.where)}, ${esc(t.when)}</div><div class="go">Read the tale ›</div></a>`).join("")}
+      <details class="depth"><summary>The deeper why: psychology and philosophy ›</summary>${paras(p.depth)}</details>
+      <h3>Live it this week</h3>
+      <div class="card"><ul class="practice">${p.practice.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <h3>The shadow</h3>
+      <div class="shadow">${esc(p.shadow)}</div>
+      <div class="nav2">${pv ? `<a href="#/p/${pv.id}"><span class="tiny muted">‹ ${ROMAN[pv.n]}</span><b>${esc(pv.title)}</b></a>` : "<span style='flex:1'></span>"}${nx ? `<a href="#/p/${nx.id}" style="text-align:right"><span class="tiny muted">${ROMAN[nx.n]} ›</span><b>${esc(nx.title)}</b></a>` : "<span style='flex:1'></span>"}</div>
+      ${fab(p.id)}`;
+  }
+  function viewTale(id, k) {
+    const p = BY[id]; if (!p) return viewHome(); k = +k || 0; const t = p.tales[k]; if (!t) return viewPrinciple(id); const other = p.tales[1 - k];
+    return `<a href="#/p/${p.id}" class="tiny muted">‹ ${ROMAN[p.n]}. ${esc(p.title)}</a>
+      <div class="eyebrow" style="margin-top:14px">A tale of ${esc(p.title.toLowerCase())}</div><h1>${esc(t.title)}</h1>
+      <div class="small muted">${esc(t.who)} · ${esc(t.where)}, ${esc(t.when)}</div>
+      <div class="tale">${paras(t.tale)}</div>
+      <div class="reveal"><div class="h">What it reveals</div><p>${esc(t.reveals)}</p></div>
+      <div class="src">Source: ${esc(t.source)}</div>
+      ${other ? `<h3>The other tale</h3><a class="tcard" href="#/t/${p.id}/${1 - k}"><b>${esc(other.title)}</b><div class="meta">${esc(other.who)} · ${esc(other.when)}</div><div class="go">Read it ›</div></a>` : ""}
+      <a class="tcard" href="#/p/${p.id}" style="margin-top:10px"><div class="tiny muted">The principle</div><b>${ROMAN[p.n]}. ${esc(p.title)}</b><div class="go" style="color:var(--gold)">Practice and shadow ›</div></a>
+      ${fab(p.id)}`;
+  }
+  let tq = "";
+  function viewTales() {
+    const f = tq.trim().toLowerCase();
+    const rows = P.flatMap(p => p.tales.map((t, k) => ({ p, t, k }))).filter(x => !f || [x.t.title, x.t.who, x.t.where, x.t.when, x.p.title].join(" ").toLowerCase().includes(f));
+    return `<div class="eyebrow">Keel</div><h1>Tales</h1><p class="ink2" style="margin:0">${P.length * 2} stories from history, myth and literature.</p>
+      <input class="search" id="tq" type="search" placeholder="Search: Thoreau, Seneca, bayanihan…" value="${esc(tq)}" autocomplete="off">
+      ${f ? `<div class="card">${rows.map(r => `<a class="ti" href="#/t/${r.p.id}/${r.k}"><b>${esc(r.t.title)}</b><div class="meta">${esc(r.t.who)} · ${esc(r.t.when)} · ${ROMAN[r.p.n]}. ${esc(r.p.title)}</div></a>`).join("") || `<p class="muted" style="margin:0">Nothing matches.</p>`}</div>`
+        : PARTS.map(pt => { const L = rows.filter(r => r.p.part === pt.id); return L.length ? `<h3>${esc(pt.title)}</h3><div class="card">${L.map(r => `<a class="ti" href="#/t/${r.p.id}/${r.k}"><b>${esc(r.t.title)}</b><div class="meta">${esc(r.t.who)} · ${esc(r.t.when)} · ${ROMAN[r.p.n]}. ${esc(r.p.title)}</div></a>`).join("")}</div>` : ""; }).join("")}`;
+  }
+  let nq = "";
+  function viewNotebook() {
+    const f = nq.trim().toLowerCase();
+    const all = Object.entries(S.pages).map(([id, pg]) => [id, pg, plain(pg.html)]).filter(([id, , tx]) => BY[id] && tx);
+    const L = all.filter(([id, , tx]) => !f || (BY[id].title + " " + tx).toLowerCase().includes(f)).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
+    return `<div class="eyebrow">Keel</div><h1>Notebook</h1>
+      ${all.length ? `<input class="search" id="nq" type="search" placeholder="Search your notes" value="${esc(nq)}" autocomplete="off">
+        <div class="card">${L.map(([id, pg, tx]) => `<a class="ti" href="#/p/${id}/notes"><div class="row between"><b>${ROMAN[BY[id].n]}. ${esc(BY[id].title)}</b><span class="tiny muted" style="flex:none">${when(pg.at)}</span></div><div class="snippet">${esc(tx.split("\n").slice(0, 3).join(" · "))}</div></a>`).join("") || `<p class="muted" style="margin:0">No notes match.</p>`}</div>`
+      : `<div class="card"><p class="ink2" style="margin:0">Every principle has its own page in your notebook. Open a principle or one of its tales and tap <b>✎ Note</b> at the bottom right: what struck you, how it shows up in your life, what you will try.</p></div>`}`;
+  }
+
+  /* ---------- router ---------- */
+  function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "home", a: h[1] || "", b: h[2] || "" }; }
+  function render() {
+    if (!P.length || !unlocked) return; const { v, a, b } = route();
+    const html = ({ home: viewHome, p: () => viewPrinciple(a), t: () => viewTale(a, b), tales: viewTales, notebook: viewNotebook }[v] || viewHome)();
+    $("#app").innerHTML = html + (v === "home" ? `<div class="ver">Keel v${VER}</div>` : "");
+    const tab = v === "tales" || v === "t" ? "tales" : v === "notebook" ? "notebook" : "home";
+    $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === tab));
+    if (v === "p" && b === "notes" && BY[a]) openEditor(a); else closeEditor();
+  }
+  let prevHash = location.hash, pageY = 0, cameIn = false;
+  addEventListener("hashchange", () => {
+    if (!unlocked) return; close(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
+    const opening = v === "p" && b === "notes";
+    if (opening) { cameIn = !(was[0] === "p" && was[2] === "notes") && was[0] !== "notebook" && !!was[0]; if (cameIn) pageY = scrollY; }
+    const back = !opening && was[0] === "p" && was[2] === "notes";
+    if (opening && cameIn && !(was[0] === "p" && was[1] === a)) { /* opened from a tale: keep the tale on screen behind the note */ return openEditor(a); }
+    render(); if (back) scrollTo(0, pageY); else if (!opening) scrollTo(0, 0);
+  });
+
+  /* ---------- note editor (format bar rides above the keyboard) ---------- */
+  const ICO = { ul: `<svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="17" r="1.8"/><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>`,
+    ol: `<svg viewBox="0 0 24 24"><text x="2" y="9" font-size="7" font-weight="700" font-family="sans-serif">1</text><text x="2" y="14.5" font-size="7" font-weight="700" font-family="sans-serif">2</text><text x="2" y="20" font-size="7" font-weight="700" font-family="sans-serif">3</text><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>` };
+  let edId = "", saveT = 0;
+  function openEditor(id) {
+    if (edId === id && $(".editor")) return; closeEditor(); edId = id; const t = BY[id], pg = S.pages[id] || {};
+    const E = document.createElement("div"); E.className = "editor";
+    E.innerHTML = `<div class="ed-top"><button class="done" data-act="eddone">‹ Done</button><span class="tiny muted" style="margin-left:auto">Principle ${ROMAN[t.n]}</span></div>
+      <div class="ed-tools"><button data-cmd="bold" aria-label="Bold">B</button><button data-cmd="italic" aria-label="Italic" style="font-style:italic;font-family:Georgia,serif">I</button><button data-cmd="insertUnorderedList" aria-label="Bullet list">${ICO.ul}</button><button data-cmd="insertOrderedList" aria-label="Numbered list">${ICO.ol}</button><button data-cmd="outdent" aria-label="Outdent" style="margin-left:auto">⇤</button><button data-cmd="indent" aria-label="Indent">⇥</button></div>
+      <div class="ed-scroll"><div class="ed-wrap"><h2 class="ed-title">${esc(t.title)}</h2><div class="ed-when" id="edwhen">${pg.at && plain(pg.html) ? `Edited ${when(pg.at)}` : esc(t.motto)}</div>
+      <div class="ed" id="ed" contenteditable="true" spellcheck="true">${clean(pg.html || "")}</div></div></div>`;
+    document.body.appendChild(E); document.body.style.overflow = "hidden"; fitEditor();
+    try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch {}
+    const ed = $("#ed"); seed(ed);
+    setTimeout(() => { ed.focus(); let n = ed; while (n.lastChild && n.lastChild.nodeType === 1 && n.lastChild.tagName !== "BR") n = n.lastChild;
+      const r = document.createRange(); if (n.lastChild && n.lastChild.tagName === "BR") r.setStartBefore(n.lastChild); else { r.selectNodeContents(n); r.collapse(false); }
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); tools(); }, 220);
+  }
+  function seed(ed) { [...ed.childNodes].forEach(c => { if (c.nodeType === 3 && c.textContent.trim()) { const d = document.createElement("div"); c.replaceWith(d); d.appendChild(c); } });
+    if (!ed.firstElementChild) ed.innerHTML = "<div><br></div>"; ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); }
+  function fitEditor() {
+    const E = $(".editor"), vv = window.visualViewport; if (!E || !vv) return;
+    const kb = innerHeight - vv.height - vv.offsetTop > 80;
+    E.style.top = vv.offsetTop + "px"; E.style.height = vv.height + "px"; E.style.setProperty("--kb-safe", kb ? "0px" : "env(safe-area-inset-bottom)");
+    const sel = getSelection(); if (sel.rangeCount && $("#ed") && $("#ed").contains(sel.anchorNode)) { let r = sel.getRangeAt(0).getBoundingClientRect(); if (!r.bottom) { const n = sel.anchorNode; r = (n.nodeType === 1 ? n : n.parentElement).getBoundingClientRect(); } const sc = $(".ed-scroll"), box = sc.getBoundingClientRect();
+      if (r.bottom && r.bottom > box.bottom - 12) sc.scrollTop += r.bottom - box.bottom + 24; }
+  }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fitEditor); visualViewport.addEventListener("scroll", fitEditor); }
+  function saveEditor() { const ed = $("#ed"); if (!ed || !edId) return; const html = clean(ed.innerHTML), had = S.pages[edId];
+    if (!plain(html)) { if (had) delete S.pages[edId]; } else if (!had || had.html !== html) S.pages[edId] = { html, at: Date.now() }; save(); }
+  function closeEditor() { if (!$(".editor")) { edId = ""; return; } clearTimeout(saveT); saveEditor(); $$(".editor").forEach(x => x.remove()); document.body.style.overflow = ""; edId = ""; }
+  const tools = () => $$(".ed-tools [data-cmd]").forEach(b => { let on = false; try { on = /bold|italic|List/.test(b.dataset.cmd) && document.queryCommandState(b.dataset.cmd); } catch {} b.classList.toggle("on", on); });
+  document.addEventListener("selectionchange", () => { if ($(".editor")) tools(); });
+  document.addEventListener("pointerdown", e => { if (e.target.closest(".ed-tools [data-cmd]")) e.preventDefault(); });
+  document.addEventListener("click", e => { const b = e.target.closest(".ed-tools [data-cmd]"); if (!b) return; $("#ed").focus(); document.execCommand(b.dataset.cmd, false, null); tools(); noteChanged(); });
+  function noteChanged() { const w = $("#edwhen"), ed = $("#ed"); if (ed && !ed.firstElementChild) seed(ed); else if (ed) ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); clearTimeout(saveT); saveT = setTimeout(() => { saveEditor(); if (w) w.textContent = "Saved"; }, 400); }
+  function autoList(e) {
+    if (e.inputType !== "insertText" || e.data !== " ") return; const sel = getSelection(), n = sel.anchorNode;
+    if (!n || n.nodeType !== 3 || n.previousSibling || n.parentNode.closest("li")) return;
+    const m = n.textContent.slice(0, sel.anchorOffset).replace(/ /g, " ").match(/^([-*•]|1[.)]) $/); if (!m) return;
+    const rest = n.textContent.slice(sel.anchorOffset), r = document.createRange();
+    if (rest) { n.textContent = rest; r.setStart(n, 0); } else { const br = document.createElement("br"); n.replaceWith(br); r.setStartBefore(br); }
+    r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand(/^1/.test(m[1]) ? "insertOrderedList" : "insertUnorderedList", false, null); tools();
+  }
+
+  /* ---------- sheets ---------- */
+  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  const close = () => $$(".back").forEach(b => b.remove());
+  function settingsSheet() {
+    sheet(`<h2>Settings</h2>
+      <button class="btn block" data-act="export">Back up my notebook</button>
+      <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
+      ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:8px">Install Keel</button>`}
+      <p class="small muted" style="margin-top:14px">Your notes stay on this phone. The principles and tales are original writing; quotations come from the historical sources named under each tale.</p>
+      <div class="ver">Keel v${VER}</div>`);
+    $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (d.app !== "keel" || !d.pages) throw 0;
+      for (const [id, p0] of Object.entries(d.pages)) { const pg = { html: clean(p0.html), at: +p0.at || Date.now() }, cur = S.pages[id]; if (!plain(pg.html)) continue;
+        if (!cur || !plain(cur.html)) S.pages[id] = pg; else if (!plain(cur.html).includes(plain(pg.html))) S.pages[id] = { html: cur.html + "<div><br></div>" + pg.html, at: Math.max(cur.at || 0, pg.at) }; }
+      save(); close(); render(); toast("Notebook restored"); } catch { toast("That isn't a Keel backup"); } });
+  }
+
+  /* ---------- install prompt ---------- */
+  let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA), iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
+  const IC = { share: `<svg class="ic2" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic2" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="dots3">•••</span>` };
+  const installBody = () => deferred ? `<button class="btn pri block" data-act="doinstall">Install Keel</button>`
+    : inApp ? `<p class="small ink2">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p><button class="btn block" data-act="copylink">Copy the link</button>`
+    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add} (you may need <b>More</b>).</li><li>Tap <b>Add</b>.</li></ol>`
+    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol>`
+    : isAndroid ? `<ol class="isteps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`
+    : `<ol class="isteps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b>.</li></ol>`;
+  function showInstall(force) {
+    if (isStandalone() || (!force && ($(".back") || $(".editor")))) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("keel-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
+    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><h2 style="margin:0">Install Keel</h2><p class="small muted" style="margin:0">The principles, tales and your notebook, offline.</p></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;background:none;border:0">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+
+  /* ---------- actions ---------- */
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act;
+    if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/p/${id}`); }
+    else if (a === "settings") settingsSheet();
+    else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "keel", pages: S.pages })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "keel-notebook.json"; l.click(); }
+    else if (a === "install") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("keel-install-snooze", Date.now()); } catch {} close(); }
+    else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
+    else if (a === "copylink") { try { await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Link copied"); } catch { prompt("Copy this link:", location.href.split("#")[0]); } }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "ed") { autoList(e); noteChanged(); fitEditor(); return; }
+    const keep = (sel, set) => { const pos = e.target.selectionStart; set(e.target.value); render(); const i = $(sel); if (i) { i.focus(); i.setSelectionRange(pos, pos); } };
+    if (e.target.id === "q") keep("#q", x => q = x); if (e.target.id === "tq") keep("#tq", x => tq = x); if (e.target.id === "nq") keep("#nq", x => nq = x);
+  });
+  let unlocked = true;
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(saveT); saveEditor(); save(); } });
+  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
+
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  fetch("data/keel.json").then(r => r.json()).then(d => { P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; render(); setTimeout(() => showInstall(false), 8000); })
+    .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Keel. Check your connection and reload.</p>`; });
+})();
+</script>
+</body>
+</html>
