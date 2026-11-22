@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<path d="M118 96L86 250M282 96L314 250" stroke="#3a2f2b" stroke-width="34" fill="none"/>
+<path d="M118 96L86 250M282 96L314 250" stroke="#f1c7a8" stroke-width="29" fill="none"/>
+<rect x="184" y="40" width="32" height="30" fill="#f1c7a8"/>
+<circle cx="200" cy="34" r="26" fill="#f1c7a8"/>
+
+<path d="M126 260L116 108Q118 72 150 66L250 66Q282 72 284 108L274 260Z" fill="#f1c7a8"/>
+<path d="M146 84Q172 92 194 84M206 84Q228 92 254 84" fill="none" stroke-width="2"/>
+<path d="M200 96V176" fill="none" stroke-width="1.5" stroke-dasharray="3 4"/>
+</g>
+<circle cx="166" cy="140" r="4" fill="#c98d68"/><circle cx="234" cy="140" r="4" fill="#c98d68"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<rect x="140" y="92" width="50" height="38" rx="8" fill="#fff" transform="rotate(-8 165 111)"/>
+<rect x="246" y="140" width="40" height="56" rx="8" fill="#fff" transform="rotate(-8 266 168)"/>
+</g>
+<g fill="#c8102e">
+<path d="M165 104c-3-5-11-3-9 3l9 9l9-9c2-6-6-8-9-3z"/>
+<path d="M266 160c-3-5-11-3-9 3l9 9l9-9c2-6-6-8-9-3z"/>
+</g>
+<path d="M150 124C130 160 100 190 62 214M260 194C230 240 120 236 62 226" stroke="#3a2f2b" stroke-width="2.5" fill="none"/>
+<rect x="10" y="190" width="54" height="56" rx="10" fill="#157347" stroke="#3a2f2b" stroke-width="2.5"/>
+<path d="M37 206c-4-6-12-2-9 4l9 9l9-9c3-6-5-10-9-4z" fill="#fff"/>
+<path d="M39 208l-4 6h5l-3 6" stroke="#c8102e" stroke-width="2" fill="none"/>
+<circle cx="37" cy="234" r="5" fill="#c8102e"/>
+<text x="20" y="30" font-size="15" fill="#3a2f2b">Their RIGHT</text>
+<text x="318" y="30" font-size="15" fill="#3a2f2b">Their LEFT</text>
+<path d="M60 40Q90 70 136 96" stroke="#c8102e" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+<path d="M352 40Q350 120 294 160" stroke="#c8102e" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+</svg>

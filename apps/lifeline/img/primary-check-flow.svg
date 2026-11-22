@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<g stroke="#3a2f2b" stroke-width="2.5" fill="#fff">
+<rect x="14" y="26" width="84" height="48" rx="10"/>
+<rect x="128" y="26" width="110" height="48" rx="10"/>
+<rect x="268" y="18" width="118" height="64" rx="10"/>
+</g>
+<g font-size="15" fill="#3a2f2b" text-anchor="middle">
+<text x="56" y="56">Safe?</text>
+<text x="183" y="56">Responds?</text>
+<text x="327" y="45">Breathing</text><text x="327" y="64">normally?</text>
+</g>
+<g stroke="#3a2f2b" stroke-width="2.5" fill="none" marker-end="url(#ad)">
+<path d="M100 50H122"/><path d="M240 50H262"/>
+</g>
+<g font-size="12" fill="#3a2f2b" text-anchor="middle"><text x="111" y="42">Yes</text><text x="251" y="42">No</text></g>
+<path d="M300 84L130 146" stroke="#157347" stroke-width="3" fill="none" marker-end="url(#ag)"/>
+<path d="M352 84L318 146" stroke="#c8102e" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+<text x="196" y="108" font-size="14" fill="#157347">YES</text>
+<text x="344" y="118" font-size="14" fill="#c8102e">NO</text>
+<rect x="16" y="152" width="200" height="94" rx="12" fill="#fff" stroke="#157347" stroke-width="3"/>
+<rect x="228" y="152" width="158" height="94" rx="12" fill="#fff" stroke="#c8102e" stroke-width="3"/>
+<g stroke="#3a2f2b" stroke-width="2">
+<rect x="70" y="178" width="70" height="22" rx="10" fill="#8a8f98"/>
+<rect x="138" y="182" width="56" height="14" rx="7" fill="#8a8f98"/>
+<path d="M118 196L118 218L150 218" stroke="#3a2f2b" stroke-width="16" fill="none"/><path d="M118 196L118 218L150 218" stroke="#8a8f98" stroke-width="11" fill="none"/>
+<circle cx="56" cy="194" r="14" fill="#f1c7a8"/>
+</g>
+<text x="116" y="238" font-size="14" fill="#3a2f2b" text-anchor="middle">Recovery position</text>
+<g transform="translate(246 168)" stroke="#3a2f2b" stroke-width="2">
+<rect x="0" y="0" width="26" height="42" rx="5" fill="#2f5d8a"/><rect x="5" y="6" width="16" height="24" rx="2" fill="#fff" stroke="none"/>
+<rect x="44" y="12" width="34" height="18" rx="8" fill="#f1c7a8"/><rect x="48" y="4" width="26" height="14" rx="7" fill="#f1c7a8"/>
+<path d="M61 32V42" stroke="#c8102e" stroke-width="4" marker-end="url(#ar)"/>
+<rect x="94" y="0" width="38" height="42" rx="7" fill="#157347"/>
+<path d="M113 13c-4-6-12-2-9 4l9 9l9-9c3-6-5-10-9-4z" fill="#fff" stroke="none"/>
+<path d="M115 15l-4 6h5l-3 6" stroke="#c8102e" stroke-width="2" fill="none"/>
+</g>
+<text x="307" y="238" font-size="14" fill="#3a2f2b" text-anchor="middle">Call, CPR, AED</text>
+</svg>

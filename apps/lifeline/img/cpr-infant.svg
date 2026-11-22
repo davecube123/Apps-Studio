@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<rect x="20" y="66" width="300" height="140" rx="16" fill="#d9cfc7"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<!-- baby top view, head left -->
+<path d="M206 124L262 112M206 146L262 160" stroke="#3a2f2b" stroke-width="24" fill="none"/>
+<path d="M206 124L262 112M206 146L262 160" stroke="#f1c7a8" stroke-width="19" fill="none"/>
+<path d="M120 112L136 80M120 158L136 190" stroke="#3a2f2b" stroke-width="20" fill="none"/>
+<path d="M120 112L136 80M120 158L136 190" stroke="#f1c7a8" stroke-width="15" fill="none"/>
+<rect x="108" y="102" width="112" height="66" rx="28" fill="#f1c7a8"/>
+<circle cx="80" cy="135" r="32" fill="#f1c7a8"/>
+<circle cx="72" cy="124" r="3" fill="#3a2f2b" stroke="none"/><circle cx="72" cy="146" r="3" fill="#3a2f2b" stroke="none"/><path d="M94 129q5 6 0 12" fill="none" stroke-width="2"/>
+<!-- rescuer arms from the feet end -->
+<path d="M396 34L196 92" stroke="#3a2f2b" stroke-width="30" fill="none"/>
+<path d="M396 34L196 92" stroke="#2f5d8a" stroke-width="25" fill="none"/>
+<path d="M396 236L196 178" stroke="#3a2f2b" stroke-width="30" fill="none"/>
+<path d="M396 236L196 178" stroke="#2f5d8a" stroke-width="25" fill="none"/>
+<path d="M214 84C188 82 170 92 166 106L166 118C178 122 192 120 204 114Z" fill="#c98d68"/>
+<path d="M214 186C188 188 170 178 166 164L166 152C178 148 192 150 204 156Z" fill="#c98d68"/>
+<rect x="150" y="121" width="56" height="13" rx="6.5" fill="#c98d68"/>
+<rect x="150" y="136" width="56" height="13" rx="6.5" fill="#c98d68"/>
+</g>
+<circle cx="132" cy="120" r="3" fill="#3a2f2b"/><circle cx="132" cy="150" r="3" fill="#3a2f2b"/>
+<circle cx="160" cy="135" r="20" fill="none" stroke="#c8102e" stroke-width="3"/>
+<text x="20" y="40" font-size="15" fill="#3a2f2b">2 thumbs, lower half of breastbone</text>
+<text x="20" y="236" font-size="15" fill="#3a2f2b">About 4 cm, 100 to 120 / min</text>
+</svg>
