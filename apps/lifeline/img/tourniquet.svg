@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<rect x="-10" y="92" width="80" height="110" rx="20" fill="#8a8f98"/>
+<path d="M60 118H300V168H60Z" fill="#f1c7a8"/>
+<circle cx="304" cy="144" r="28" fill="#f1c7a8"/>
+<path d="M310 124H372Q384 124 384 138V150Q384 164 372 164H310Z" fill="#f1c7a8"/>
+</g>
+<rect x="64" y="120" width="12" height="46" fill="#f1c7a8"/>
+<path d="M290 112V176" stroke="#3a2f2b" stroke-width="3" stroke-dasharray="6 5"/>
+<path d="M318 112V176" stroke="#3a2f2b" stroke-width="3" stroke-dasharray="6 5"/>
+<path d="M290 104L318 184M318 104L290 184" stroke="#c8102e" stroke-width="5"/>
+<ellipse cx="236" cy="143" rx="16" ry="10" fill="#c8102e" stroke="#3a2f2b" stroke-width="2"/>
+<path d="M236 160q-4 10 0 12q4-2 0-12z" fill="#c8102e"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<rect x="150" y="112" width="24" height="62" rx="5" fill="#3a2f2b"/>
+<rect x="128" y="98" width="68" height="10" rx="5" fill="#2f5d8a" transform="rotate(-8 162 103)"/>
+<path d="M148 112l4-10M176 112l-4-10" stroke-width="4"/>
+<rect x="104" y="50" width="56" height="30" rx="6" fill="#fff"/>
+</g>
+<path d="M152 80L160 100" stroke="#3a2f2b" stroke-width="2"/>
+<text x="132" y="71" font-size="13" fill="#3a2f2b" text-anchor="middle">14:05</text>
+<path d="M176 196H222" stroke="#c8102e" stroke-width="3" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<path d="M174 180V204M226 180V204" stroke="#3a2f2b" stroke-width="2"/>
+<text x="200" y="226" font-size="15" fill="#3a2f2b" text-anchor="middle">5 to 7 cm above</text>
+<text x="132" y="36" font-size="14" fill="#3a2f2b" text-anchor="middle">Note the time</text>
+<text x="304" y="96" font-size="14" fill="#3a2f2b" text-anchor="middle">Not on a joint</text>
+<path d="M18 228l10-10 10 10-10 10z" fill="none"/>
+<path d="M36 214c-4-6-12-2-9 4l9 9l9-9c3-6-5-10-9-4z" fill="#c8102e" transform="translate(0 0)"/>
+<path d="M90 222H56" stroke="#c8102e" stroke-width="3" marker-end="url(#ar)"/>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<line x1="200" y1="20" x2="200" y2="240" stroke="#d9cfc7" stroke-width="3"/>
+<!-- panel 1 -->
+<g stroke="#3a2f2b" stroke-width="2.5">
+<rect x="14" y="150" width="172" height="80" rx="14" fill="#c98d68"/>
+<ellipse cx="100" cy="182" rx="40" ry="14" fill="#c8102e"/>
+<ellipse cx="100" cy="184" rx="26" ry="7" fill="#3a2f2b"/>
+<path d="M180 96C186 120 150 140 120 160L108 184L96 180L108 152C130 130 160 116 164 92Z" fill="#fff"/>
+<circle cx="172" cy="84" r="18" fill="#fff"/>
+<circle cx="172" cy="84" r="6" fill="#d9cfc7"/>
+<path d="M10 40L62 96" stroke="#3a2f2b" stroke-width="28" fill="none"/>
+<path d="M10 40L62 96" stroke="#2f5d8a" stroke-width="23" fill="none"/>
+<rect x="52" y="86" width="44" height="40" rx="14" fill="#f1c7a8"/>
+<path d="M88 116L104 176M78 120L94 176" stroke="#3a2f2b" stroke-width="12" fill="none"/>
+<path d="M88 116L104 176M78 120L94 176" stroke="#f1c7a8" stroke-width="8" fill="none"/>
+</g>
+
+<path d="M58 140L66 172" stroke="#c8102e" stroke-width="4" marker-end="url(#ar)"/>
+<text x="100" y="250" font-size="15" fill="#3a2f2b" text-anchor="middle">1. Pack deep</text>
+<!-- panel 2 -->
+<g transform="translate(200 0)">
+<g stroke="#3a2f2b" stroke-width="2.5">
+<rect x="14" y="150" width="172" height="80" rx="14" fill="#c98d68"/>
+<ellipse cx="100" cy="186" rx="58" ry="16" fill="#fff"/>
+<path d="M84 150L66 10M116 150L134 10" stroke="#3a2f2b" stroke-width="28" fill="none"/>
+<path d="M84 150L66 10M116 150L134 10" stroke="#2f5d8a" stroke-width="23" fill="none"/>
+<rect x="50" y="172" width="100" height="22" rx="10" fill="#f1c7a8"/>
+<rect x="56" y="150" width="90" height="24" rx="11" fill="#f1c7a8"/>
+</g>
+<path d="M26 100V160" stroke="#c8102e" stroke-width="5" marker-end="url(#ar)"/>
+<path d="M174 100V160" stroke="#c8102e" stroke-width="5" marker-end="url(#ar)"/>
+<text x="100" y="250" font-size="15" fill="#3a2f2b" text-anchor="middle">2. Press hard</text>
+</g>
+</svg>

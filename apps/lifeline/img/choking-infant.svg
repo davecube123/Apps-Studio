@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260" font-family="system-ui, sans-serif" font-weight="700" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="260" rx="18" fill="#fbf7f4"/><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8102e"/></marker><marker id="ad" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a2f2b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#157347"/></marker></defs>
+<line x1="200" y1="20" x2="200" y2="240" stroke="#d9cfc7" stroke-width="3"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<path d="M66 124L60 158" stroke="#3a2f2b" stroke-width="13" fill="none"/>
+<path d="M66 124L60 158" stroke="#f1c7a8" stroke-width="9" fill="none"/>
+<path d="M0 116L150 166" stroke="#3a2f2b" stroke-width="28" fill="none"/>
+<path d="M0 116L150 166" stroke="#2f5d8a" stroke-width="23" fill="none"/>
+<path d="M140 156C150 178 178 182 186 164L180 152L168 160L150 152Z" fill="#f1c7a8"/>
+<ellipse cx="96" cy="122" rx="42" ry="17" fill="#f1c7a8" transform="rotate(19 96 122)"/>
+<circle cx="158" cy="146" r="18" fill="#f1c7a8"/>
+<path d="M58 118L50 152" stroke="#3a2f2b" stroke-width="13" fill="none"/>
+<path d="M58 118L50 152" stroke="#f1c7a8" stroke-width="9" fill="none"/>
+<path d="M128 138L124 168" stroke="#3a2f2b" stroke-width="12" fill="none"/>
+<path d="M128 138L124 168" stroke="#f1c7a8" stroke-width="8" fill="none"/>
+</g>
+<path d="M146 133A18 18 0 0 1 172 136" stroke="#3a2f2b" stroke-width="5" fill="none"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<path d="M10 22L82 72" stroke="#3a2f2b" stroke-width="24" fill="none"/>
+<path d="M10 22L82 72" stroke="#2f5d8a" stroke-width="19" fill="none"/>
+<rect x="76" y="64" width="38" height="20" rx="10" fill="#f1c7a8" transform="rotate(25 95 74)"/>
+</g>
+<path d="M136 50L118 84" stroke="#c8102e" stroke-width="4" marker-end="url(#ar)"/>
+<text x="14" y="236" font-size="15" fill="#3a2f2b">1. 5 back blows</text>
+<g transform="translate(200 0)">
+<g stroke="#3a2f2b" stroke-width="2.5">
+<path d="M66 124L60 158" stroke="#3a2f2b" stroke-width="13" fill="none"/>
+<path d="M66 124L60 158" stroke="#f1c7a8" stroke-width="9" fill="none"/>
+<path d="M0 116L150 166" stroke="#3a2f2b" stroke-width="28" fill="none"/>
+<path d="M0 116L150 166" stroke="#2f5d8a" stroke-width="23" fill="none"/>
+<path d="M140 156C150 178 178 182 186 164L180 152L168 160L150 152Z" fill="#f1c7a8"/>
+<ellipse cx="96" cy="122" rx="42" ry="17" fill="#f1c7a8" transform="rotate(19 96 122)"/>
+<circle cx="158" cy="146" r="18" fill="#f1c7a8"/>
+<path d="M58 118L50 152" stroke="#3a2f2b" stroke-width="13" fill="none"/>
+<path d="M58 118L50 152" stroke="#f1c7a8" stroke-width="9" fill="none"/>
+<path d="M128 138L124 168" stroke="#3a2f2b" stroke-width="12" fill="none"/>
+<path d="M128 138L124 168" stroke="#f1c7a8" stroke-width="8" fill="none"/>
+</g>
+<circle cx="164" cy="140" r="2.5" fill="#3a2f2b"/>
+<path d="M160 154q5 3 9 0" stroke="#3a2f2b" stroke-width="2" fill="none"/>
+<g stroke="#3a2f2b" stroke-width="2.5">
+<path d="M50 18L104 76" stroke="#3a2f2b" stroke-width="24" fill="none"/>
+<path d="M50 18L104 76" stroke="#2f5d8a" stroke-width="19" fill="none"/>
+<path d="M106 78L114 104M114 74L122 100" stroke="#3a2f2b" stroke-width="10" fill="none"/>
+<path d="M106 78L114 104M114 74L122 100" stroke="#f1c7a8" stroke-width="6" fill="none"/>
+<circle cx="106" cy="76" r="10" fill="#f1c7a8"/>
+</g>
+<path d="M152 64L136 98" stroke="#c8102e" stroke-width="4" marker-end="url(#ar)"/>
+<text x="14" y="236" font-size="15" fill="#3a2f2b">2. 5 chest thrusts</text>
+</g>
+</svg>
