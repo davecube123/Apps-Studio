@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Lifeline</title>
+<meta name="description" content="First aid you can trust: emergency step-by-step cards, CPR beat, timers, lessons, practice and a kit checklist. Works offline.">
+<meta name="theme-color" content="#c8102e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lifeline">
+<style>
+  :root { --bg: #f6f4f2; --card: #ffffff; --card2: #efebe8; --ink: #1b1716; --ink2: #3f3836; --muted: #6f6663; --line: rgba(0, 0, 0, .09);
+    --red: #c8102e; --red2: #fde8eb; --amber: #b45309; --amber2: #fdf0dc; --green: #157347; --green2: #e3f4ea; --blue: #1d5fa8;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141213; --card: #1f1c1c; --card2: #2a2626; --ink: #f4efed; --ink2: #ddd4d1; --muted: #a79d9a; --line: rgba(255, 255, 255, .1);
+    --red: #ff5a6e; --red2: #3a1a1f; --amber: #f2b45a; --amber2: #3a2a14; --green: #5fd39a; --green2: #15301f; --blue: #7fb3ff; color-scheme: dark; } }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--sans); }
+  a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  main { max-width: 680px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 100px); }
+  h1 { font-size: 28px; line-height: 1.15; margin: 6px 0 6px; letter-spacing: -.01em; }
+  h3 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 24px 0 8px; }
+  p { margin: 0 0 10px; }
+  .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 15px; } .tiny { font-size: 13px; }
+  .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
+  .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); font-weight: 700; font-size: 16px; }
+  .btn.red { background: var(--red); color: #fff; border: 0; } .btn.block { display: flex; width: 100%; } .btn.sm { padding: 9px 14px; font-size: 14px; }
+  .search { width: 100%; font: 17px var(--sans); padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); outline: none; margin-top: 12px; }
+  .search:focus { border-color: var(--red); }
+  .call { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 18px; border-radius: 20px; background: var(--red); color: #fff; font-size: 22px; font-weight: 800; margin-top: 12px; box-shadow: 0 8px 22px rgba(200, 16, 46, .28); }
+  .call svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .call small { display: block; font-size: 13px; font-weight: 600; opacity: .85; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; min-height: 96px; display: flex; flex-direction: column; justify-content: space-between; }
+  .tile .i { font-size: 28px; } .tile b { font-size: 16px; line-height: 1.25; }
+  .tile.call-l { border-left: 5px solid var(--red); }
+  .badge { display: inline-block; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+  .badge.call { background: var(--red2); color: var(--red); } .badge.urgent { background: var(--amber2); color: var(--amber); } .badge.care { background: var(--green2); color: var(--green); }
+  .li { display: flex; gap: 12px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); } .li:first-child { border-top: 0; }
+  .li .i { font-size: 24px; width: 32px; text-align: center; flex: none; } .li b { display: block; font-size: 17px; } .li .s { font-size: 14px; color: var(--muted); }
+  .li .r { margin-left: auto; flex: none; font-size: 14px; color: var(--muted); }
+  .done { color: var(--green) !important; font-weight: 800; }
+  .prog { height: 6px; border-radius: 3px; background: var(--card2); overflow: hidden; margin-top: 6px; } .prog i { display: block; height: 100%; background: var(--green); }
+
+  /* emergency card */
+  .ehead { margin: -16px -16px 0; padding: calc(env(safe-area-inset-top) + 14px) 16px 16px; background: var(--red); color: #fff; }
+  .ehead a { color: #fff; opacity: .9; font-size: 15px; } .ehead h1 { color: #fff; font-size: 30px; margin: 8px 0 0; }
+  .ehead .call { background: #fff; color: var(--red); box-shadow: none; } .ehead .call svg { stroke: var(--red); }
+  @media (prefers-color-scheme: dark) { .ehead { background: #8f0c22; } }
+  .steps { list-style: none; padding: 0; margin: 14px 0 0; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding: 14px 14px 14px 58px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; margin-top: 8px; font-size: 20px; line-height: 1.4; font-weight: 600; cursor: pointer; }
+  .steps li::before { content: counter(s); position: absolute; left: 14px; top: 13px; width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #fff; font-size: 17px; font-weight: 800; display: grid; place-items: center; }
+  .steps li.ok { opacity: .45; } .steps li.ok::before { content: "✓"; background: var(--green); }
+  .box { border-radius: 16px; padding: 12px 14px; margin-top: 12px; }
+  .box.no { background: var(--red2); } .box.no b { color: var(--red); } .box.call2 { background: var(--amber2); } .box.call2 b { color: var(--amber); }
+  .box ul { margin: 6px 0 0; padding-left: 20px; } .box li { margin: 4px 0; }
+  .tools { display: flex; gap: 10px; margin-top: 12px; } .tools .btn { flex: 1; }
+  ul.plain { margin: 6px 0 0; padding-left: 20px; } ul.plain li { margin: 5px 0; }
+  ol.lsteps { margin: 6px 0 0; padding-left: 22px; } ol.lsteps li { margin: 7px 0; }
+
+  /* CPR beat and timer */
+  .overlay { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+  .beat { width: 210px; height: 210px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-size: 64px; font-weight: 800; transition: transform .08s; }
+  .beat.on { transform: scale(.88); }
+  .beat.breath { background: var(--blue); font-size: 26px; }
+  .bigtime { font-size: 88px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .seg { display: flex; gap: 6px; background: var(--card2); padding: 4px; border-radius: 12px; margin-top: 18px; }
+  .seg button { padding: 9px 14px; border-radius: 9px; font-weight: 700; font-size: 15px; color: var(--muted); } .seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+
+  /* quiz */
+  .opt { display: block; width: 100%; text-align: left; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); margin-top: 8px; font-size: 16.5px; }
+  .opt.right { border-color: var(--green); background: var(--green2); } .opt.wrong { border-color: var(--red); background: var(--red2); }
+  .kit { display: flex; gap: 12px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; } .kit:first-child { border-top: 0; }
+  .kit .c { width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--muted); flex: none; display: grid; place-items: center; color: #fff; font-size: 15px; font-weight: 800; }
+  .kit.ok .c { background: var(--green); border-color: var(--green); }
+
+  /* floating note button and note editor */
+  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 324px)); bottom: calc(env(safe-area-inset-bottom) + 80px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px; background: var(--ink); color: var(--bg); font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+  .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+  .editor { position: fixed; left: 0; right: 0; top: 0; height: 100%; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
+  .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 680px; width: 100%; margin: 0 auto; flex: none; }
+  .ed-top .done { color: var(--red); font-weight: 800; font-size: 17px; padding: 6px 8px; }
+  .ed-tools { order: 3; flex: none; display: flex; gap: 6px; padding: 8px max(12px, calc(50% - 328px)) calc(8px + var(--kb-safe, env(safe-area-inset-bottom))); width: 100%; border-top: 1px solid var(--line); background: var(--card); }
+  .ed-tools button { min-width: 44px; height: 38px; padding: 0 10px; border-radius: 10px; background: var(--card2); border: 1px solid var(--line); color: var(--ink2); display: grid; place-items: center; font-weight: 700; }
+  .ed-tools button.on { background: var(--ink); color: var(--bg); }
+  .ed-tools svg { width: 20px; height: 20px; fill: currentColor; }
+  .ed-scroll { flex: 1; min-height: 0; overflow-y: auto; order: 2; }
+  .ed-wrap { max-width: 680px; margin: 0 auto; padding: 16px 18px 40px; }
+  .ed-title { font-size: 26px; margin: 0; }
+  .ed-when { font-size: 13px; color: var(--muted); margin: 4px 0 14px; }
+  .ed { position: relative; outline: none; min-height: 40vh; font: 18px/1.65 var(--sans); color: var(--ink); word-wrap: break-word; caret-color: var(--red); }
+  .ed ul, .ed ol { margin: 4px 0; padding-left: 26px; } .ed li { margin: 3px 0; }
+
+  nav.tabsbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 6px calc(env(safe-area-inset-bottom) + 8px); background: var(--card); border-top: 1px solid var(--line); }
+  nav.tabsbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--muted); min-width: 64px; }
+  nav.tabsbar a.on { color: var(--red); } nav.tabsbar svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .back { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .45); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: min(620px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 22px 22px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); animation: up .25s ease; }
+  .sheet h2 { margin: 0 0 8px; font-size: 22px; }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+  .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; max-width: 90vw; text-align: center; }
+  .ic2 { display: inline-block; width: 20px; height: 20px; vertical-align: -5px; fill: none; stroke: var(--red); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--card2); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
+  ol.isteps { padding-left: 20px; } ol.isteps li { margin: 7px 0; }
+  select { width: 100%; font: 16px var(--sans); padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<main id="app"><p class="muted" style="text-align:center;margin-top:40vh">Loading…</p></main>
+<nav class="tabsbar">
+  <a href="#/" data-tab="sos"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18" stroke-width="3.2"/></svg>Emergency</a>
+  <a href="#/learn" data-tab="learn"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Learn</a>
+  <a href="#/practice" data-tab="practice"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Practice</a>
+  <a href="#/kit" data-tab="kit"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M12 11v5M9.5 13.5h5"/></svg>Kit</a>
+</nav>
+<script>
+(() => {
+  "use strict";
+  const VER = "1";
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const KEY = "lifeline";
+  let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { S = {}; }
+  S.pages = S.pages || {}; S.q = S.q || {}; S.kit = S.kit || {}; S.country = S.country || "PH";
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+
+  /* emergency numbers */
+  const NUM = {
+    PH: { name: "Philippines", n: "911", extra: "Philippine Red Cross 143 · Mental health crisis 1553" },
+    TH: { name: "Thailand", n: "1669", extra: "Police 191 · Tourist police 1155" },
+    ID: { name: "Indonesia", n: "112", extra: "Ambulance 118 or 119" },
+    MY: { name: "Malaysia", n: "999", extra: "From a mobile also 112" },
+    VN: { name: "Vietnam", n: "115", extra: "Police 113 · Fire 114" },
+    SG: { name: "Singapore", n: "995", extra: "Police 999" },
+    KH: { name: "Cambodia", n: "119", extra: "Police 117" },
+    JP: { name: "Japan", n: "119", extra: "Police 110" },
+    KR: { name: "South Korea", n: "119", extra: "Police 112" },
+    IN: { name: "India", n: "112", extra: "Ambulance 108" },
+    AU: { name: "Australia", n: "000", extra: "From a mobile also 112" },
+    US: { name: "USA / Canada", n: "911", extra: "Poison control 1-800-222-1222 (US)" },
+    UK: { name: "United Kingdom", n: "999", extra: "Non-emergency NHS 111" },
+    EU: { name: "Europe (EU)", n: "112", extra: "" },
+    AE: { name: "UAE", n: "998", extra: "Police 999" }
+  };
+  const num = () => (S.country === "custom" && S.custom) ? { name: "My number", n: S.custom, extra: "" } : (NUM[S.country] || NUM.PH);
+  const fixNum = s => String(s || "").replace(/911 in the Philippines/g, `${num().n} where you are`).replace(/\(911\)/g, `(${num().n})`);
+  const tel = () => `tel:${num().n}`;
+  const phoneIc = `<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>`;
+  const callBtn = () => `<a class="call" href="${tel()}">${phoneIc}<span>Call ${esc(num().n)}<small>${esc(num().name)} emergency</small></span></a>`;
+
+  let MODS = [], L = [], BY = {};
+  const LEVEL = { call: "Call now", urgent: "See a doctor", care: "First aid" };
+  const hasNote = id => !!(S.pages[id] && plain(S.pages[id].html));
+  const mastered = l => l.quiz.every((_, i) => S.q[l.id + "|" + i]);
+  const qDone = l => l.quiz.filter((_, i) => S.q[l.id + "|" + i]).length;
+  const modOf = l => MODS.find(m => m.lessons.includes(l));
+
+  /* ---------- views ---------- */
+  let sq = "";
+  const lRow = (l, href) => `<a class="li" href="${href || `#/l/${l.id}`}"><span class="i">${l.icon}</span><div style="min-width:0;flex:1"><b>${esc(l.title)}</b><div class="s">${esc(l.when)}</div></div><span class="r${mastered(l) ? " done" : ""}">${mastered(l) ? "✓" : hasNote(l.id) ? "✎" : "›"}</span></a>`;
+  function viewSOS() {
+    const f = sq.trim().toLowerCase(), R = { call: 0, urgent: 1, care: 2 }, E = L.filter(l => l.emergency).map((l, i) => [l, i]).sort((x, y) => R[x[0].level] - R[y[0].level] || x[1] - y[1]).map(x => x[0]);
+    const hits = f ? L.filter(l => [l.title, l.when, ...l.recognize].join(" ").toLowerCase().includes(f)) : [];
+    return `<div class="row between"><div class="eyebrow">Lifeline</div><button class="tiny muted" data-act="settings">⚙︎ ${esc(num().name)} · v${VER}</button></div>
+      ${callBtn()}
+      <p class="small ink2" style="margin:12px 2px 0">Make sure it's safe for you. Call early. Then choose what's happening:</p>
+      <input class="search" id="sq" type="search" placeholder="What's happening? e.g. bleeding, burn, not breathing" value="${esc(sq)}" autocomplete="off">
+      ${f ? `<div class="card">${hits.map(l => lRow(l, `#/e/${l.id}`)).join("") || `<p class="muted" style="margin:0">No match. Try another word, or call now.</p>`}</div>`
+        : `<div class="tiles">${E.map(l => `<a class="tile${l.level === "call" ? " call-l" : ""}" href="#/e/${l.id}"><span class="i">${l.icon}</span><b>${esc(l.title)}</b></a>`).join("")}</div>
+        <a class="card row" href="#/learn" style="margin-top:14px"><span style="font-size:22px">📚</span><div><b>Everything else</b><div class="tiny muted">All ${L.length} topics, from minor cuts to childbirth</div></div><span class="muted" style="margin-left:auto">›</span></a>`}
+      <p class="tiny muted" style="margin-top:16px">Lifeline follows international first aid guidelines (ILCOR, AHA and Red Cross, ERC, IFRC, WHO). It is not a substitute for hands-on training: take a first aid and CPR course, for example with the Philippine Red Cross.</p>`;
+  }
+  let ticks = {};
+  function viewEmergency(id) {
+    const l = BY[id]; if (!l) return viewSOS(); const tk = ticks[id] || (ticks[id] = {});
+    const isCPR = /^cpr-/.test(id) || id === "drowning";
+    return `<div class="ehead"><a href="#/">‹ Emergency</a><h1>${l.icon} ${esc(l.title)}</h1>${l.level === "call" ? callBtn() : `<div class="tiny" style="margin-top:6px;opacity:.9">${esc(fixNum(l.call))}</div>`}</div>
+      ${isCPR || l.timer ? `<div class="tools">${isCPR ? `<button class="btn red" data-act="cpr">♥ CPR beat</button>` : ""}${l.timer ? `<button class="btn" data-act="timer" data-v="${id}">⏱ ${esc(l.timer.label)} (${l.timer.minutes} min)</button>` : ""}</div>` : ""}
+      <ol class="steps">${l.steps.map((s, i) => `<li data-act="tick" data-v="${i}" class="${tk[i] ? "ok" : ""}">${esc(fixNum(s))}</li>`).join("")}</ol>
+      <div class="box no"><b>Don't</b><ul>${l.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      ${l.level === "call" ? "" : `<div class="box call2"><b>Call or get help if</b><p style="margin:4px 0 0">${esc(fixNum(l.call))}</p></div>`}
+      ${l.special && l.special.length ? `<div class="card"><b class="small">Children, pregnancy, elderly</b><ul class="plain small">${l.special.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      <a class="btn block" href="#/l/${id}" style="margin-top:14px">Signs, reasons and practice ›</a>`;
+  }
+  function viewLearn() {
+    const tot = L.length, m = L.filter(mastered).length;
+    return `<div class="eyebrow">Lifeline</div><h1>Learn</h1>
+      <div class="card"><div class="row between"><b>Your competence</b><span class="small ${m === tot ? "done" : "muted"}">${m} of ${tot} mastered</span></div><div class="prog"><i style="width:${tot ? m / tot * 100 : 0}%"></i></div><p class="tiny muted" style="margin:8px 0 0">A topic is mastered when you've answered all its practice scenarios right. Start with Life support: it saves the most lives.</p></div>
+      ${MODS.map(md => `<h3>${md.icon} ${esc(md.title)}</h3><div class="card" style="padding:2px 16px">${md.lessons.map(l => lRow(l)).join("")}</div>`).join("")}`;
+  }
+  function viewLesson(id) {
+    const l = BY[id]; if (!l) return viewLearn(); const md = modOf(l);
+    return `<a href="#/learn" class="small muted">‹ ${esc(md.title)}</a>
+      <div class="row" style="margin-top:10px;gap:12px"><span style="font-size:38px">${l.icon}</span><div><h1 style="margin:0">${esc(l.title)}</h1><span class="badge ${l.level}">${LEVEL[l.level]}</span></div></div>
+      <p class="ink2" style="margin-top:12px">${esc(l.when)}</p>
+      <div class="tools"><a class="btn red" href="#/e/${id}">Emergency card</a><a class="btn" href="#/q/${id}">Practise (${qDone(l)}/${l.quiz.length})</a></div>
+      <h3>Recognise it</h3><div class="card"><ul class="plain">${l.recognize.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <h3>What to do</h3><div class="card"><ol class="lsteps">${l.steps.map(x => `<li>${esc(fixNum(x))}</li>`).join("")}</ol></div>
+      <h3>Don't</h3><div class="card"><ul class="plain">${l.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <h3>When to call</h3><div class="card"><p style="margin:0">${esc(fixNum(l.call))}</p></div>
+      ${l.special && l.special.length ? `<h3>Children, pregnancy, elderly</h3><div class="card"><ul class="plain">${l.special.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      <h3>Why it works</h3><div class="card"><p style="margin:0" class="ink2">${esc(l.why)}</p></div>
+      <p class="tiny muted" style="margin-top:12px">Based on: ${esc(l.sources.join("; "))}</p>
+      <div style="height:70px"></div><a class="fab" href="#/l/${id}/notes" aria-label="Notes on this topic"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note<span class=\"has\"></span>" : "Note"}</a>`;
+  }
+
+  /* ---------- practice ---------- */
+  let QZ = null; /* { items:[{l,i,order}], k, picked, score, back } */
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  function startQuiz(which) {
+    let pool = which === "mix" ? L.flatMap(l => l.quiz.map((_, i) => ({ l, i }))) : which.startsWith("mod:") ? MODS.find(m => m.id === which.slice(4)).lessons.flatMap(l => l.quiz.map((_, i) => ({ l, i }))) : (BY[which] ? BY[which].quiz.map((_, i) => ({ l: BY[which], i })) : []);
+    if (which === "mix" || which.startsWith("mod:")) { const notYet = shuffle(pool.filter(x => !S.q[x.l.id + "|" + x.i])), known = shuffle(pool.filter(x => S.q[x.l.id + "|" + x.i])); pool = notYet.concat(known).slice(0, 10); pool = shuffle(pool); }
+    QZ = { which, items: pool.map(x => Object.assign(x, { order: shuffle(x.l.quiz[x.i].options.map((_, k) => k)) })), k: 0, picked: null, score: 0 };
+  }
+  function viewPractice() {
+    const tot = L.reduce((a, l) => a + l.quiz.length, 0), got = Object.keys(S.q).filter(k => S.q[k]).length;
+    return `<div class="eyebrow">Lifeline</div><h1>Practice</h1><p class="ink2">Real scenarios. Decide what you would do, then see why. Questions you haven't mastered come first.</p>
+      <div class="card"><div class="row between"><b>Scenarios mastered</b><span class="small muted">${got} of ${tot}</span></div><div class="prog"><i style="width:${tot ? got / tot * 100 : 0}%"></i></div></div>
+      <a class="btn red block" href="#/q/mix" style="margin-top:14px">Start a round of 10</a>
+      <h3>By area</h3><div class="card" style="padding:2px 16px">${MODS.map(md => { const t = md.lessons.reduce((a, l) => a + l.quiz.length, 0), g = md.lessons.reduce((a, l) => a + qDone(l), 0); return `<a class="li" href="#/q/mod:${md.id}"><span class="i">${md.icon}</span><div style="flex:1"><b>${esc(md.title)}</b><div class="prog"><i style="width:${g / t * 100}%"></i></div></div><span class="r">${g}/${t}</span></a>`; }).join("")}</div>`;
+  }
+  function viewQuiz(which) {
+    if (!QZ || QZ.which !== which || QZ.k >= QZ.items.length && QZ.restart) { startQuiz(which); }
+    if (!QZ.items.length) return viewPractice();
+    if (QZ.k >= QZ.items.length) { QZ.restart = true; const backTo = BY[which] ? `#/l/${which}` : "#/practice";
+      return `<div style="text-align:center;margin-top:12vh"><div style="font-size:56px">${QZ.score === QZ.items.length ? "🏅" : "💪"}</div><h1>${QZ.score} of ${QZ.items.length} right</h1><p class="ink2">${QZ.score === QZ.items.length ? "Clear thinking under pressure. Keep it fresh with a round every week." : "Every wrong answer here is one you won't make for real. Read the ones you missed, then go again."}</p>
+        <button class="btn red block" data-act="again" style="margin-top:16px">Another round</button><a class="btn block" href="${backTo}" style="margin-top:8px">Done</a></div>`; }
+    const it = QZ.items[QZ.k], q = it.l.quiz[it.i], picked = QZ.picked;
+    return `<div class="row between"><a href="${BY[which] ? `#/l/${which}` : "#/practice"}" class="small muted">‹ Stop</a><span class="small muted">${QZ.k + 1} / ${QZ.items.length}</span></div>
+      <div class="prog"><i style="width:${(QZ.k) / QZ.items.length * 100}%"></i></div>
+      <div class="tiny muted" style="margin-top:16px">${it.l.icon} ${esc(it.l.title)}</div>
+      <h2 style="font-size:21px;line-height:1.35;margin:6px 0 8px">${esc(fixNum(q.q))}</h2>
+      ${it.order.map(k => `<button class="opt${picked != null ? (k === q.answer ? " right" : k === picked ? " wrong" : "") : ""}" data-act="pick" data-v="${k}" ${picked != null ? "disabled" : ""}>${esc(fixNum(q.options[k]))}</button>`).join("")}
+      ${picked != null ? `<div class="card" style="border-left:4px solid ${picked === q.answer ? "var(--green)" : "var(--red)"}"><b>${picked === q.answer ? "Right." : "Not quite."}</b> ${esc(fixNum(q.why))}</div><button class="btn red block" data-act="next" style="margin-top:12px">${QZ.k + 1 < QZ.items.length ? "Next" : "See result"}</button>` : ""}`;
+  }
+
+  /* ---------- kit ---------- */
+  const KIT = [
+    ["Disposable gloves (several pairs)", "Protect you and them"], ["CPR face shield or pocket mask", "For rescue breaths"], ["Windlass tourniquet (e.g. CAT or SOF-T)", "For life-threatening limb bleeding"],
+    ["Trauma / pressure bandage", "Like an Israeli bandage"], ["Sterile gauze pads and a gauze roll", "Packing and dressing wounds"], ["Adhesive plasters, assorted", "Small cuts"],
+    ["Medical tape", ""], ["Triangular bandages (2)", "Slings and improvised splints"], ["Elastic (crepe) bandage", "Sprains and pressure"], ["Mouldable splint (SAM type)", "Fractures"],
+    ["Trauma shears", "Cut clothing safely"], ["Tweezers", "Splinters and stingers"], ["Saline or clean bottled water", "Rinsing wounds and eyes"], ["Cling film (plastic wrap)", "Covering burns after cooling"],
+    ["Emergency (space) blanket", "Shock and cold"], ["Oral rehydration salts (ORS)", "Diarrhoea and dehydration"], ["Glucose tablets or sugar sachets", "Low blood sugar"],
+    ["Chewable aspirin (adults)", "Suspected heart attack, if not allergic"], ["Antihistamine tablets", "Mild allergic reactions"], ["Paracetamol", "Pain and fever"],
+    ["White vinegar (small bottle) for the beach", "Box jellyfish stings"], ["Adrenaline auto-injector (if prescribed)", "Anaphylaxis"], ["Torch or headlamp", ""],
+    ["Pen, notepad, and an emergency contact card", "Note times: tourniquet, seizure, medicines"], ["Charged power bank", "Your phone is your lifeline"]
+  ];
+  function viewKit() {
+    const have = KIT.filter((_, i) => S.kit[i]).length, n = num();
+    return `<div class="eyebrow">Lifeline</div><h1>Kit and numbers</h1>
+      <h3>Emergency numbers · ${esc(n.name)}</h3><div class="card"><a class="li" href="${tel()}"><span class="i">📞</span><div><b>${esc(n.n)}</b><div class="s">Emergency</div></div></a>${n.extra ? `<div class="small ink2" style="padding:0 0 10px">${esc(n.extra)}</div>` : ""}<button class="btn sm" data-act="settings">Change country</button></div>
+      <h3>Your first aid kit · ${have} of ${KIT.length}</h3><div class="card" style="padding:2px 16px">${KIT.map(([t, s], i) => `<button class="kit${S.kit[i] ? " ok" : ""}" data-act="kit" data-v="${i}"><span class="c">${S.kit[i] ? "✓" : ""}</span><span><b style="font-size:16px">${esc(t)}</b>${s ? `<div class="tiny muted">${esc(s)}</div>` : ""}</span></button>`).join("")}</div>
+      <p class="tiny muted" style="margin-top:12px">Check expiry dates every six months. Keep one kit at home and a small one in your bag or bike.</p>`;
+  }
+
+  /* ---------- router ---------- */
+  function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "sos", a: h[1] || "", b: h[2] || "" }; }
+  function render() {
+    if (!L.length) return; const { v, a, b } = route();
+    const html = ({ sos: viewSOS, e: () => viewEmergency(a), learn: viewLearn, l: () => viewLesson(a), practice: viewPractice, q: () => viewQuiz(a), kit: viewKit }[v] || viewSOS)();
+    $("#app").innerHTML = html + (v === "sos" || v === "learn" ? `<div class="ver">Lifeline v${VER}</div>` : "");
+    const tab = { sos: "sos", e: "sos", learn: "learn", l: "learn", practice: "practice", q: "practice", kit: "kit" }[v] || "sos";
+    $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === tab));
+    if (v === "l" && b === "notes" && BY[a]) openEditor(a); else closeEditor();
+    if (v === "e") wake(true); else if (!$(".overlay")) wake(false);
+  }
+  let prevHash = location.hash, pageY = 0, cameIn = false;
+  addEventListener("hashchange", () => {
+    close(); stopOverlay(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
+    const opening = v === "l" && b === "notes"; if (opening) { cameIn = was[0] === "l" && was[1] === a && !was[2]; if (cameIn) pageY = scrollY; }
+    const back = !opening && was[0] === "l" && was[2] === "notes";
+    if (v === "q" && !(was[0] === "q" && was[1] === a)) QZ = null;
+    render(); if (back) scrollTo(0, pageY); else if (!opening) scrollTo(0, 0);
+  });
+
+  /* ---------- keep the screen on during an emergency ---------- */
+  let lock = null;
+  async function wake(on) { try { if (on && !lock && navigator.wakeLock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => { lock = null; }); } else if (!on && lock) { lock.release(); lock = null; } } catch {} }
+
+  /* ---------- CPR beat (110 per minute) and countdown timer ---------- */
+  let AC = null, beatT = 0, tickT = 0;
+  const click = (hi) => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = hi ? 1320 : 880; g.gain.setValueAtTime(.35, AC.currentTime); g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + .07); o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + .08); } catch {} };
+  function overlay(html) { stopOverlay(); const o = document.createElement("div"); o.className = "overlay"; o.innerHTML = html; document.body.appendChild(o); wake(true); return o; }
+  function stopOverlay() { clearInterval(beatT); clearTimeout(beatT); clearInterval(tickT); $$(".overlay").forEach(o => o.remove()); }
+  let cprMode = "hands";
+  function cpr() {
+    overlay(`<div class="small muted">Push hard and fast in the centre of the chest, with the beat</div><div style="height:22px"></div><div class="beat" id="beat">♥</div>
+      <div class="small" id="cprtxt" style="margin-top:18px;min-height:24px">Hands-only: don't stop until help or an AED takes over</div>
+      <div class="seg"><button data-act="cprmode" data-v="hands" class="${cprMode === "hands" ? "on" : ""}">Hands-only</button><button data-act="cprmode" data-v="30" class="${cprMode === "30" ? "on" : ""}">30 : 2 with breaths</button></div>
+      <a class="call" href="${tel()}" style="max-width:360px">${phoneIc}<span>Call ${esc(num().n)}</span></a>
+      <button class="btn block" data-act="closeov" style="margin-top:10px;max-width:360px">Stop</button>`);
+    runBeat();
+  }
+  function runBeat() {
+    clearInterval(beatT); clearTimeout(beatT); let n = 0; const b = $("#beat"), t = $("#cprtxt"); if (!b) return;
+    const step = () => {
+      if (!$("#beat")) return;
+      if (cprMode === "30" && n === 30) { b.classList.add("breath"); b.textContent = "2 breaths"; t.textContent = "Tilt the head, lift the chin, give 2 breaths (1 second each)"; clearInterval(beatT); beatT = setTimeout(() => { n = 0; b.classList.remove("breath"); t.textContent = "Compressions"; beatT = setInterval(step, 545); }, 5000); return; }
+      n++; click(cprMode === "30" ? n === 1 : n % 2 === 1); b.textContent = cprMode === "30" ? n : "♥"; b.classList.add("on"); setTimeout(() => b.classList.remove("on"), 120);
+    };
+    beatT = setInterval(step, 545);
+  }
+  function timer(id) {
+    const l = BY[id]; if (!l || !l.timer) return; const end = Date.now() + l.timer.minutes * 6e4;
+    overlay(`<div class="small muted">${esc(l.icon)} ${esc(l.title)}</div><h2 style="margin:6px 0 0">${esc(l.timer.label)}</h2><div class="bigtime" id="tleft"></div><div class="small muted" id="tsub">The screen stays on.</div>
+      <a class="call" href="${tel()}" style="max-width:360px">${phoneIc}<span>Call ${esc(num().n)}</span></a><button class="btn block" data-act="closeov" style="margin-top:10px;max-width:360px">Close</button>`);
+    const tick = () => { const left = Math.max(0, end - Date.now()), m = Math.floor(left / 6e4), s = Math.floor(left % 6e4 / 1000), el = $("#tleft"); if (!el) return clearInterval(tickT);
+      el.textContent = `${m}:${String(s).padStart(2, "0")}`; if (left <= 0) { clearInterval(tickT); el.style.color = "var(--red)"; $("#tsub").textContent = id === "seizure" ? "5 minutes: call emergency services now if it hasn't stopped." : "Time's up."; [0, 300, 600].forEach(d => setTimeout(() => click(true), d)); try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch {} } };
+    tick(); tickT = setInterval(tick, 250);
+  }
+
+  /* ---------- notes: a small, safe subset of HTML ---------- */
+  const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
+  function clean(html) {
+    const t = document.createElement("template"); t.innerHTML = html || "";
+    (function walk(node) { [...node.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1) return c.remove();
+      if (/^(SCRIPT|STYLE|IFRAME|OBJECT|SVG|IMG|VIDEO|AUDIO|TEMPLATE)$/.test(c.tagName)) return c.remove(); walk(c);
+      if (!OK_TAGS.has(c.tagName)) { c.replaceWith(...c.childNodes); return; } [...c.attributes].forEach(x => c.removeAttribute(x.name)); }); })(t.content);
+    return t.innerHTML;
+  }
+  const plain = html => { const t = document.createElement("template"); t.innerHTML = String(html || "").replace(/<\/(li|div|p)>|<br\s*\/?>/gi, "$&\n"); return t.content.textContent.replace(/ /g, " ").replace(/\n{2,}/g, "\n").trim(); };
+  /* ---------- note editor (format bar rides above the keyboard) ---------- */
+  const ICO = { ul: `<svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="17" r="1.8"/><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>`,
+    ol: `<svg viewBox="0 0 24 24"><text x="2" y="9" font-size="7" font-weight="700" font-family="sans-serif">1</text><text x="2" y="14.5" font-size="7" font-weight="700" font-family="sans-serif">2</text><text x="2" y="20" font-size="7" font-weight="700" font-family="sans-serif">3</text><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>` };
+  let edId = "", saveT = 0;
+  function openEditor(id) {
+    if (edId === id && $(".editor")) return; closeEditor(); edId = id; const t = BY[id], pg = S.pages[id] || {};
+    const E = document.createElement("div"); E.className = "editor";
+    E.innerHTML = `<div class="ed-top"><button class="done" data-act="eddone">‹ Done</button><span class="tiny muted" style="margin-left:auto">${esc(modOf(t).title)}</span></div>
+      <div class="ed-tools"><button data-cmd="bold" aria-label="Bold">B</button><button data-cmd="italic" aria-label="Italic" style="font-style:italic;font-family:Georgia,serif">I</button><button data-cmd="insertUnorderedList" aria-label="Bullet list">${ICO.ul}</button><button data-cmd="insertOrderedList" aria-label="Numbered list">${ICO.ol}</button><button data-cmd="outdent" aria-label="Outdent" style="margin-left:auto">⇤</button><button data-cmd="indent" aria-label="Indent">⇥</button></div>
+      <div class="ed-scroll"><div class="ed-wrap"><h2 class="ed-title">${esc(t.title)}</h2><div class="ed-when" id="edwhen">${pg.at && plain(pg.html) ? `Edited ${when(pg.at)}` : esc(t.when)}</div>
+      <div class="ed" id="ed" contenteditable="true" spellcheck="true">${clean(pg.html || "")}</div></div></div>`;
+    document.body.appendChild(E); document.body.style.overflow = "hidden"; fitEditor();
+    try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch {}
+    const ed = $("#ed"); seed(ed);
+    setTimeout(() => { ed.focus(); let n = ed; while (n.lastChild && n.lastChild.nodeType === 1 && n.lastChild.tagName !== "BR") n = n.lastChild;
+      const r = document.createRange(); if (n.lastChild && n.lastChild.tagName === "BR") r.setStartBefore(n.lastChild); else { r.selectNodeContents(n); r.collapse(false); }
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); tools(); }, 220);
+  }
+  function seed(ed) { [...ed.childNodes].forEach(c => { if (c.nodeType === 3 && c.textContent.trim()) { const d = document.createElement("div"); c.replaceWith(d); d.appendChild(c); } });
+    if (!ed.firstElementChild) ed.innerHTML = "<div><br></div>"; ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); }
+  function fitEditor() {
+    const E = $(".editor"), vv = window.visualViewport; if (!E || !vv) return;
+    const kb = innerHeight - vv.height - vv.offsetTop > 80;
+    E.style.top = vv.offsetTop + "px"; E.style.height = vv.height + "px"; E.style.setProperty("--kb-safe", kb ? "0px" : "env(safe-area-inset-bottom)");
+    const sel = getSelection(); if (sel.rangeCount && $("#ed") && $("#ed").contains(sel.anchorNode)) { let r = sel.getRangeAt(0).getBoundingClientRect(); if (!r.bottom) { const n = sel.anchorNode; r = (n.nodeType === 1 ? n : n.parentElement).getBoundingClientRect(); } const sc = $(".ed-scroll"), box = sc.getBoundingClientRect();
+      if (r.bottom && r.bottom > box.bottom - 12) sc.scrollTop += r.bottom - box.bottom + 24; }
+  }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fitEditor); visualViewport.addEventListener("scroll", fitEditor); }
+  function saveEditor() { const ed = $("#ed"); if (!ed || !edId) return; const html = clean(ed.innerHTML), had = S.pages[edId];
+    if (!plain(html)) { if (had) delete S.pages[edId]; } else if (!had || had.html !== html) S.pages[edId] = { html, at: Date.now() }; save(); }
+  function closeEditor() { if (!$(".editor")) { edId = ""; return; } clearTimeout(saveT); saveEditor(); $$(".editor").forEach(x => x.remove()); document.body.style.overflow = ""; edId = ""; }
+  const tools = () => $$(".ed-tools [data-cmd]").forEach(b => { let on = false; try { on = /bold|italic|List/.test(b.dataset.cmd) && document.queryCommandState(b.dataset.cmd); } catch {} b.classList.toggle("on", on); });
+  document.addEventListener("selectionchange", () => { if ($(".editor")) tools(); });
+  document.addEventListener("pointerdown", e => { if (e.target.closest(".ed-tools [data-cmd]")) e.preventDefault(); });
+  document.addEventListener("click", e => { const b = e.target.closest(".ed-tools [data-cmd]"); if (!b) return; $("#ed").focus(); document.execCommand(b.dataset.cmd, false, null); tools(); noteChanged(); });
+  function noteChanged() { const w = $("#edwhen"), ed = $("#ed"); if (ed && !ed.firstElementChild) seed(ed); else if (ed) ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); clearTimeout(saveT); saveT = setTimeout(() => { saveEditor(); if (w) w.textContent = "Saved"; }, 400); }
+  function autoList(e) {
+    if (e.inputType !== "insertText" || e.data !== " ") return; const sel = getSelection(), n = sel.anchorNode;
+    if (!n || n.nodeType !== 3 || n.previousSibling || n.parentNode.closest("li")) return;
+    const m = n.textContent.slice(0, sel.anchorOffset).replace(/ /g, " ").match(/^([-*•]|1[.)]) $/); if (!m) return;
+    const rest = n.textContent.slice(sel.anchorOffset), r = document.createRange();
+    if (rest) { n.textContent = rest; r.setStart(n, 0); } else { const br = document.createElement("br"); n.replaceWith(br); r.setStartBefore(br); }
+    r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand(/^1/.test(m[1]) ? "insertOrderedList" : "insertUnorderedList", false, null); tools();
+  }
+
+
+  /* ---------- sheets ---------- */
+  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  const close = () => $$(".back").forEach(b => b.remove());
+  function settingsSheet() {
+    sheet(`<h2>Settings</h2>
+      <label class="small"><b>Where are you?</b> Sets the emergency number on every card.</label>
+      <select id="country" style="margin-top:8px">${Object.entries(NUM).map(([k, v]) => `<option value="${k}" ${S.country === k ? "selected" : ""}>${esc(v.name)} · ${esc(v.n)}</option>`).join("")}<option value="custom" ${S.country === "custom" ? "selected" : ""}>Other: type a number</option></select>
+      <input id="custom" class="search" inputmode="tel" placeholder="Emergency number" value="${esc(S.custom || "")}" ${S.country === "custom" ? "" : "hidden"}>
+      <button class="btn block" data-act="export" style="margin-top:14px">Back up notes and progress</button>
+      <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
+      ${isStandalone() ? "" : `<button class="btn red block" data-act="install" style="margin-top:8px">Install Lifeline</button>`}
+      <p class="tiny muted" style="margin-top:14px">Lifeline teaches first aid for laypeople from international guidelines. It can't replace a hands-on course or professional care. In any doubt, call.</p>
+      <div class="ver">Lifeline v${VER}</div>`);
+    $("#country").addEventListener("change", e => { S.country = e.target.value; save(); $("#custom").hidden = S.country !== "custom"; render(); });
+    $("#custom").addEventListener("input", e => { S.custom = e.target.value.replace(/[^\d+*#]/g, ""); save(); render(); });
+    $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (d.app !== "lifeline") throw 0;
+      for (const [id, p0] of Object.entries(d.pages || {})) { const pg = { html: clean(p0.html), at: +p0.at || Date.now() }; if (plain(pg.html) && !hasNote(id)) S.pages[id] = pg; }
+      Object.assign(S.q, d.q || {}); Object.assign(S.kit, d.kit || {}); save(); close(); render(); toast("Backup restored"); } catch { toast("That isn't a Lifeline backup"); } });
+  }
+
+  /* ---------- install prompt ---------- */
+  let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA), iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
+  const IC = { share: `<svg class="ic2" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic2" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="dots3">•••</span>` };
+  const installBody = () => deferred ? `<button class="btn pri block" data-act="doinstall">Install Lifeline</button>`
+    : inApp ? `<p class="small ink2">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p><button class="btn block" data-act="copylink">Copy the link</button>`
+    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add} (you may need <b>More</b>).</li><li>Tap <b>Add</b>.</li></ol>`
+    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol>`
+    : isAndroid ? `<ol class="isteps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`
+    : `<ol class="isteps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b>.</li></ol>`;
+  function showInstall(force) {
+    if (isStandalone() || (!force && ($(".back") || $(".editor")))) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("lifeline-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
+    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><h2 style="margin:0">Install Lifeline</h2><p class="small muted" style="margin:0">Emergency cards, CPR beat and lessons, offline, one tap away.</p></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;background:none;border:0">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+
+
+  /* ---------- actions ---------- */
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act, v = el.dataset.v;
+    if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/l/${id}`); }
+    else if (a === "tick") { const { a: id } = route(); const tk = ticks[id] || (ticks[id] = {}); tk[v] = !tk[v]; el.classList.toggle("ok", !!tk[v]); }
+    else if (a === "cpr") cpr();
+    else if (a === "cprmode") { cprMode = v; $$(".seg button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); $("#cprtxt").textContent = v === "30" ? "30 compressions, then 2 breaths" : "Hands-only: don't stop until help or an AED takes over"; const b = $("#beat"); b.classList.remove("breath"); b.textContent = "♥"; runBeat(); }
+    else if (a === "timer") timer(v);
+    else if (a === "closeov") { stopOverlay(); if (!/^#\/e\//.test(location.hash)) wake(false); }
+    else if (a === "pick") { if (QZ.picked != null) return; const it = QZ.items[QZ.k], q = it.l.quiz[it.i]; QZ.picked = +v; if (+v === q.answer) { QZ.score++; S.q[it.l.id + "|" + it.i] = true; } else S.q[it.l.id + "|" + it.i] = false; save(); const y = scrollY; render(); scrollTo(0, y); }
+    else if (a === "next") { QZ.k++; QZ.picked = null; render(); scrollTo(0, 0); }
+    else if (a === "again") { QZ = null; render(); scrollTo(0, 0); }
+    else if (a === "kit") { S.kit[v] = !S.kit[v]; save(); const y = scrollY; render(); scrollTo(0, y); }
+    else if (a === "settings") settingsSheet();
+    else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "lifeline", pages: S.pages, q: S.q, kit: S.kit })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "lifeline-backup.json"; l.click(); }
+    else if (a === "install") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("lifeline-install-snooze", Date.now()); } catch {} close(); }
+    else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
+    else if (a === "copylink") { try { await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Link copied"); } catch { prompt("Copy this link:", location.href.split("#")[0]); } }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "ed") { autoList(e); noteChanged(); fitEditor(); return; }
+    if (e.target.id === "sq") { const pos = e.target.selectionStart; sq = e.target.value; render(); const i = $("#sq"); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(saveT); saveEditor(); save(); } else if (/^#\/e\//.test(location.hash) || $(".overlay")) { lock = null; wake(true); } });
+  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
+
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  fetch("data/lifeline.json").then(r => r.json()).then(d => { MODS = d.modules; L = MODS.flatMap(m => m.lessons); L.forEach(l => BY[l.id] = l); render(); setTimeout(() => { if (!/^#\/e\//.test(location.hash)) showInstall(false); }, 9000); })
+    .catch(() => { $("#app").innerHTML = `<p style="margin-top:30vh;text-align:center">Couldn't load Lifeline. Check your connection and reload.<br><br><a class="call" href="tel:911">Call 911</a></p>`; });
+})();
+</script>
+</body>
+</html>
