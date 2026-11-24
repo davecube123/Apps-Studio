@@ -134,7 +134,7 @@
   let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { S = {}; }
   S.pages = S.pages || {};
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
-  const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX"];
+  const ROMAN = Array.from({ length: 100 }, (_, n) => { let r = "", x = n; for (const [v, sym] of [[90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]) while (x >= v) { r += sym; x -= v; } return r; });
   let PARTS = []; /* book titles come from the encrypted content */
   let P = [], BY = {}, INTRO = {}, SCN = "";
 
