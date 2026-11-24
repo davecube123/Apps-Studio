@@ -125,7 +125,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "7";
+  const VER = "8";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
@@ -156,7 +156,7 @@
   /* ---------- views ---------- */
   let q = "";
   const prRow = p => `<a class="pr" href="#/p/${p.id}"><span class="n">${ROMAN[p.n]}</span><div style="min-width:0"><b>${esc(p.title)}</b><div class="s">${esc(p.motto)}</div></div>${hasNote(p.id) ? `<span class="pen">✎</span>` : `<span class="chev">›</span>`}</a>`;
-  const text = p => [p.title, p.motto, p.essence, p.why, p.scene, ...p.say.map(x => x.moment + " " + x.line), ...p.body, ...p.strategy].join(" ").toLowerCase();
+  const text = p => [p.title, p.motto, p.essence, p.why, p.scene, ...p.say.map(x => x.moment + " " + x.line), ...(p.messages || []).map(x => x.moment + " " + x.line), ...p.body, ...p.strategy].join(" ").toLowerCase();
   function viewHome() {
     const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5), t = P[day % P.length];
     const f = q.trim().toLowerCase(), hits = f ? P.filter(p => text(p).includes(f)) : [];
@@ -178,6 +178,8 @@
       <a class="tcard" href="#/s/${p.id}"><div class="tiny muted">A moment, told</div><b>${esc(SCN)}</b><div class="go">Read the scene ›</div></a>
       <h3>Say it</h3>
       <div class="card">${p.say.map(x => `<div class="say"><div class="m">${esc(x.moment)}</div><div class="l">“${esc(x.line)}”</div><div class="w">${esc(x.why)}</div></div>`).join("")}</div>
+      ${(p.messages || []).length ? `<h3>By message</h3>
+      <div class="card">${p.messages.map(x => `<div class="say"><div class="m">${esc(x.moment)}</div><div class="l">${esc(x.line)}</div><div class="w">${esc(x.why)}</div></div>`).join("")}</div>` : ""}
       <h3>Without words</h3>
       <div class="card"><ul class="practice">${p.body.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
       <h3>Strategy</h3>
@@ -204,7 +206,7 @@
     const f = tq.trim().toLowerCase();
     return `<div class="eyebrow">Trine</div><h1>Lines</h1><p class="ink2" style="margin:0">Every line to say, by moment. Search for the moment you're in.</p>
       <input class="search" id="tq" type="search" placeholder="Search: hesitates, after, first touch…" value="${esc(tq)}" autocomplete="off">
-      ${PARTS.map(pt => { const L = P.filter(p => p.part === pt.id).flatMap(p => p.say.map(x => ({ p, x }))).filter(({ p, x }) => !f || (x.moment + " " + x.line + " " + p.title).toLowerCase().includes(f));
+      ${PARTS.map(pt => { const L = P.filter(p => p.part === pt.id).flatMap(p => p.say.concat((p.messages || []).map(m => Object.assign({}, m, { moment: "by message · " + m.moment }))).map(x => ({ p, x }))).filter(({ p, x }) => !f || (x.moment + " " + x.line + " " + p.title).toLowerCase().includes(f));
         return L.length ? `<h3>${esc(pt.title)}</h3><div class="card">${L.map(({ p, x }) => `<a class="say" href="#/p/${p.id}" style="display:block"><div class="m">${esc(x.moment)} · ${ROMAN[p.n]}</div><div class="l">“${esc(x.line)}”</div></a>`).join("")}</div>` : ""; }).join("") || `<p class="muted">No line matches.</p>`}`;
   }
   let nq = "";
