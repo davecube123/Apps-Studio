@@ -119,7 +119,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "6";
+  const VER = "7";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
@@ -287,6 +287,7 @@
   function settingsSheet() {
     sheet(`<h2>Settings</h2>
       <button class="btn block" data-act="lock">🔒 Lock now</button>
+      <button class="btn block" data-act="quickpin" style="margin-top:8px">🔢 Quick PIN for this phone</button>
       <button class="btn block" data-act="export" style="margin-top:8px">Back up my notebook</button>
       <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
       ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:8px">Install Allure</button>`}
@@ -320,6 +321,7 @@
     if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/p/${id}`); }
     else if (a === "settings") settingsSheet();
     else if (a === "lock") Vault.lock();
+    else if (a === "quickpin") { close(); Vault.managePin(); }
     else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "allure", pages: S.pages })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "allure-notebook.json"; l.click(); }
     else if (a === "install") showInstall(true);
     else if (a === "notnow") { try { localStorage.setItem("allure-install-snooze", Date.now()); } catch {} close(); }

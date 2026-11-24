@@ -179,7 +179,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "13";
+  const KEY = "anchor", VER = "14";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], profile: { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] }, modes: null, protHome: [], protPublic: [], protEx: "", stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -850,6 +850,7 @@
         <label class="f"><span>Your pet name for her</span><input type="text" data-prof="pet" value="${esc(P.pet || "")}" placeholder="e.g. baby girl"></label></div>
       <div class="card"><div class="eyebrow">Privacy</div><p class="small muted" style="margin:6px 0 10px">The app's content is encrypted: nobody can read it without your 8-digit passcode, even with the link. Your own entries are stored on this phone only.</p>
         <button class="btn block" data-act="vaultlock">🔒 Lock now</button>
+        <button class="btn block" data-act="quickpin" style="margin-top:6px">🔢 Quick PIN for this phone</button>
 </div>
       <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="backupfile" style="margin-top:10px">${ic("download")} Download a backup file</button>
         <label class="btn block" style="margin-top:8px">${ic("upload")} Restore from a backup file<input type="file" accept="application/json,.json" hidden data-import></label>
@@ -899,6 +900,7 @@
     else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
     else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
     else if (a === "vaultlock") Vault.lock();
+    else if (a === "quickpin") Vault.managePin();
     else if (a === "pinoff") { if (!confirm("Remove the PIN?")) return; db.pin = null; save(); render(); }
     else if (a === "lessondone") { db.lessons[v] = Date.now(); save(); const l = C.lessons.find(x => x.id === v); toast("Noted."); location.hash = `#/learn/${l.module}`; }
     else if (a === "lim") { const x = el.dataset.x; db.limits[v] = db.limits[v] === x ? "" : x; save(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.x === db.limits[v])); }

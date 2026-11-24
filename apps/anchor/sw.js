@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "anchor-v13";
+const VERSION = "anchor-v14";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/fraunces-latin-soft-normal.woff2", "./fonts/inter-latin-wght-normal.woff2", "./lib/vault.js", "./data/vault.json", "./data/content.enc.json"];
 
