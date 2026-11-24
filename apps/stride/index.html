@@ -13,6 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Stride">
+<link rel="stylesheet" href="lib/leaflet.css">
 <style>
   :root { --bg: #0d100f; --card: #171b19; --ink: #f2f5f3; --muted: #93a09a; --line: rgba(220, 255, 230, .09);
     --lime: #c8f560; --amber: #ffb547; --red: #ff6b5b; --ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -40,6 +41,15 @@
   .tile .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
   .tile .v { font-size: 28px; font-weight: 750; margin-top: 2px; }
   .tile .v small { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 3px; }
+  .mapwrap { position: relative; margin-top: 12px; }
+  .map { height: 220px; border-radius: 16px; overflow: hidden; background: #1a1f1d; border: 1px solid var(--line); z-index: 0; }
+  .map.tall { height: 300px; }
+  .leaflet-container { background: #1a1f1d; font: 12px var(--ui); }
+  .leaflet-control-attribution { background: rgba(13, 16, 15, .72) !important; color: #93a09a !important; font-size: 10px; }
+  .leaflet-control-attribution a { color: #b8c4be !important; }
+  .recenter { position: absolute; right: 10px; bottom: 26px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(23, 27, 25, .92); color: var(--lime); font-size: 20px; line-height: 1; display: none; }
+  .recenter.show { display: block; }
+  .nomap { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; }
   canvas.route { width: 100%; height: 170px; display: block; background: var(--card); border: 1px solid var(--line); border-radius: 16px; margin-top: 12px; }
   .ctl { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
   .go { width: 100%; max-width: 360px; height: 72px; border-radius: 99px; border: 0; font-size: 22px; font-weight: 800; letter-spacing: .04em; }
@@ -96,10 +106,11 @@
   <a href="#/" data-tab="run"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="4" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 4 3 1M11 15l1-6"/></svg>Run</a>
   <a href="#/history" data-tab="history"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>History</a>
 </nav>
+<script src="lib/leaflet.js"></script>
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2600) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -160,7 +171,7 @@
 
   function onPos(p) {
     const c = p.coords, wall = Date.now(); gpsMsg = "";
-    fix = { acc: c.accuracy, at: wall };
+    fix = { acc: c.accuracy, at: wall, lat: c.latitude, lon: c.longitude };
     if (acquiring && c.accuracy <= GOODACC) begin();
     if (!live || live.state === "paused" || c.accuracy > MAXACC) { paint(); return; }
     const pt = [+c.latitude.toFixed(6), +c.longitude.toFixed(6), wall - live.start, Math.round(c.accuracy)];
@@ -260,6 +271,49 @@
     x.beginPath(); sm.forEach((p, i) => i ? x.lineTo(X(p[0]), Y(p[1])) : x.moveTo(X(p[0]), Y(p[1]))); x.strokeStyle = "#c8f560"; x.lineWidth = 2; x.stroke();
   }
 
+  /* ---------- map ---------- */
+  const HAS_MAP = typeof L !== "undefined";
+  const TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  function makeMap(el) {
+    const m = L.map(el, { zoomControl: false, preferCanvas: true });
+    L.tileLayer(TILE, { subdomains: "abcd", maxZoom: 19, attribution: ATTR }).addTo(m); m.attributionControl.setPrefix(false); return m;
+  }
+  let liveMap = null, liveLine = null, liveDot = null, liveStart = null, follow = true, mapCentered = false;
+  const dropLiveMap = () => { if (liveMap) { liveMap.remove(); liveMap = null; } };
+  function initLiveMap() {
+    dropLiveMap(); const el = $("#map"); if (!el || !HAS_MAP) return;
+    liveMap = makeMap(el); follow = true; mapCentered = false;
+    const last = runs[0] && runs[0].segs.flat()[0];
+    liveMap.setView(fix && fix.lat != null ? [fix.lat, fix.lon] : last ? [last[0], last[1]] : [14.5995, 120.9842], fix ? 16 : last ? 14 : 11);
+    liveLine = L.polyline([], { color: "#c8f560", weight: 5, opacity: .95 }).addTo(liveMap);
+    liveDot = L.circleMarker([0, 0], { radius: 8, color: "#0d100f", weight: 3, fillColor: "#c8f560", fillOpacity: 1 });
+    liveStart = L.circleMarker([0, 0], { radius: 6, color: "#0d100f", weight: 2, fillColor: "#ffffff", fillOpacity: 1 });
+    liveMap.on("dragstart", () => { follow = false; $(".recenter")?.classList.add("show"); });
+    updLiveMap();
+  }
+  function updLiveMap() {
+    if (!liveMap) return;
+    const segs = live ? live.segs.filter(s => s.length).map(s => s.map(p => [p[0], p[1]])) : [];
+    liveLine.setLatLngs(segs);
+    const first = segs[0] && segs[0][0];
+    if (first) { liveStart.setLatLng(first); if (!liveMap.hasLayer(liveStart)) liveStart.addTo(liveMap); } else if (liveMap.hasLayer(liveStart)) liveStart.remove();
+    if (fix && fix.lat != null && watchId != null) {
+      const pos = [fix.lat, fix.lon]; liveDot.setLatLng(pos); if (!liveMap.hasLayer(liveDot)) liveDot.addTo(liveMap);
+      if (follow) { if (!mapCentered) { liveMap.setView(pos, 17); mapCentered = true; } else liveMap.panTo(pos, { animate: true }); }
+    } else if (liveMap.hasLayer(liveDot)) liveDot.remove();
+  }
+  function detailMap(r) {
+    const el = $("#map"); if (!el || !HAS_MAP) return;
+    const pts = r.segs.flat(); if (pts.length < 2) { el.classList.add("nomap"); el.textContent = "No GPS route was recorded"; return; }
+    const m = makeMap(el), sp = pairSpeeds(r.segs), all = sp.flat().filter(v => v != null).sort((a, b) => a - b), lo = all[Math.floor(all.length * .1)] || 0, hi = all[Math.floor(all.length * .9)] || 1;
+    r.segs.forEach((sg, j) => { for (let i = 1; i < sg.length; i++) { const v = (sp[j][i] + (sp[j][i + 1] ?? sp[j][i]) + (sp[j][i - 1] ?? sp[j][i])) / 3; L.polyline([[sg[i - 1][0], sg[i - 1][1]], [sg[i][0], sg[i][1]]], { color: `hsl(${speedHue(v, lo, hi)} 90% 60%)`, weight: 5, opacity: .95 }).addTo(m); } });
+    const end = pts[pts.length - 1];
+    L.circleMarker([pts[0][0], pts[0][1]], { radius: 7, color: "#0d100f", weight: 2, fillColor: "#ffffff", fillOpacity: 1 }).addTo(m).bindTooltip("Start");
+    L.circleMarker([end[0], end[1]], { radius: 7, color: "#0d100f", weight: 2, fillColor: "#ff6b5b", fillOpacity: 1 }).addTo(m).bindTooltip("Finish");
+    m.fitBounds(L.latLngBounds(pts.map(p => [p[0], p[1]])), { padding: [24, 24], maxZoom: 17 });
+  }
+
   /* ---------- run screen ---------- */
   let lastState = "", routeAt = 0;
   function runView() {
@@ -273,7 +327,7 @@
         <div class="tile"><div class="k" id="t-avgk">Avg pace</div><div class="v num" id="t-avg">–:–</div></div>
         <div class="tile"><div class="k" id="t-lastk">Last ${UL()}</div><div class="v num" id="t-last">–</div></div>
       </div>
-      <canvas class="route" id="route"></canvas>
+      ${HAS_MAP ? `<div class="mapwrap"><div class="map" id="map"></div><button class="recenter" data-act="recenter" aria-label="Back to my position">◎</button></div>` : `<canvas class="route" id="route"></canvas>`}
       <div class="ctl" id="ctl"></div>
       <div id="tips"></div>`;
   }
@@ -302,7 +356,7 @@
         : `<button class="go pause" data-act="pause">PAUSE</button>`;
       $("#tips").innerHTML = st === "idle" ? `<div class="tip"><b>Keep Stride open while you run.</b> Phones pause GPS for web apps when the screen locks, so Stride keeps your screen awake during a run. Pop the phone in an armband or pocket with the screen on; if it does lock, the gap is joined with a straight line.</div>` : "";
     }
-    if (force || Date.now() - routeAt > 2000) { routeAt = Date.now(); drawRoute($("#route"), live ? live.segs : [], { live: true, mono: true }); }
+    if (force || Date.now() - routeAt > 1000) { routeAt = Date.now(); if (HAS_MAP) updLiveMap(); else drawRoute($("#route"), live ? live.segs : [], { live: true, mono: true }); }
     tabDot();
   }
   const tabDot = () => { const a = $('[data-tab="run"]'); if (!a) return; const has = !!(live && view !== "run"); if (has && !a.querySelector(".dot")) a.insertAdjacentHTML("beforeend", `<span class="dot"></span>`); if (!has) a.querySelector(".dot")?.remove(); };
@@ -327,7 +381,7 @@
     return `<a href="#/history" class="tiny muted">‹ History</a>
       <h1 style="margin-bottom:4px">${fmtDist(r.dist)} ${UL()}</h1><div class="muted small">${esc(fmtDate(r.start))}</div>
       <input class="note" id="note" placeholder="Name this run (e.g. Sunday long run)" value="${esc(r.note)}" style="margin-top:10px">
-      <canvas class="route" id="route" style="height:230px"></canvas>
+      ${HAS_MAP ? `<div class="mapwrap"><div class="map tall" id="map"></div></div>` : `<canvas class="route" id="route" style="height:230px"></canvas>`}
       <div class="legend"><span>slower</span><span class="g"></span><span>faster</span></div>
       <div class="grid">
         <div class="tile"><div class="k">Time</div><div class="v num">${fmtTime(r.dur)}</div></div>
@@ -353,18 +407,19 @@
     const h = location.hash.replace(/^#\/?/, "").split("/"), app = $("#app");
     view = h[0] === "history" ? "history" : h[0] === "r" ? "detail" : "run";
     $$(".tabsbar a").forEach(a => a.classList.toggle("on", a.dataset.tab === (view === "detail" ? "history" : view)));
-    if (view === "run") { app.innerHTML = runView(); lastState = ""; paint(true); }
+    dropLiveMap();
+    if (view === "run") { app.innerHTML = runView(); lastState = ""; initLiveMap(); paint(true); }
     else if (view === "history") { app.innerHTML = historyView(); tabDot(); }
     else {
       const r = runs.find(x => x.id === h[1]); if (!r) { location.replace("#/history"); return; }
       app.innerHTML = detailView(r); tabDot();
-      drawRoute($("#route"), r.segs, { empty: "No GPS route was recorded" }); drawChart($("#chart"), r.segs);
+      if (HAS_MAP) detailMap(r); else drawRoute($("#route"), r.segs, { empty: "No GPS route was recorded" }); drawChart($("#chart"), r.segs);
       $("#note").addEventListener("change", e => { r.note = e.target.value.trim().slice(0, 80); sv("stride-runs", runs); toast("Saved"); });
     }
     scrollTo(0, 0);
   }
   addEventListener("hashchange", render);
-  addEventListener("resize", () => { if (view === "run") paint(true); else if (view === "detail") render(); });
+  let rsT; addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { if (view === "run") { liveMap?.invalidateSize(); paint(true); } else if (view === "detail") drawChart($("#chart"), (runs.find(x => location.hash.endsWith(x.id)) || { segs: [] }).segs); }, 200); });
 
   /* ---------- sheets ---------- */
   const close = () => $$(".back").forEach(b => b.remove());
@@ -420,6 +475,7 @@
     if (a === "start") { primeVoice(); acquiring = true; startWatch(); wakeOn(); if (fix && fix.acc <= GOODACC && Date.now() - fix.at < 5000) begin(); else paint(true); }
     else if (a === "begin") { begin(); }
     else if (a === "cancel") { acquiring = false; stopWatch(); wakeOff(); paint(true); }
+    else if (a === "recenter") { follow = true; el.classList.remove("show"); if (fix && liveMap) liveMap.setView([fix.lat, fix.lon], Math.max(liveMap.getZoom(), 16)); }
     else if (a === "pause") pause();
     else if (a === "resume") resume();
     else if (a === "finish") finishSheet();
