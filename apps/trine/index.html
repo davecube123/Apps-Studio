@@ -125,7 +125,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "1";
+  const VER = "2";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
@@ -135,13 +135,8 @@
   S.pages = S.pages || {};
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
   const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX"];
-  const PARTS = [
-    { id: "ground", title: "Foundations", line: "Her desire, your agreements, the guest's dignity: the ground everything stands on." },
-    { id: "before", title: "Before", line: "Anticipation, meeting, the huddle and the slow first minutes." },
-    { id: "during", title: "During", line: "Lead as a host: attention, reading bodies, pacing and warm words." },
-    { id: "after", title: "After", line: "Care for both, the debrief, and the afterglow that keeps it alive." }
-  ];
-  let P = [], BY = {};
+  let PARTS = []; /* book titles come from the encrypted content */
+  let P = [], BY = {}, INTRO = {}, SCN = "";
 
   /* ---------- notes: a small, safe subset of HTML ---------- */
   const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
@@ -166,7 +161,7 @@
     const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5), t = P[day % P.length];
     const f = q.trim().toLowerCase(), hits = f ? P.filter(p => text(p).includes(f)) : [];
     return `<div class="row between"><div class="eyebrow">Trine</div><button class="tiny muted" data-act="settings">v${VER} · Settings</button></div>
-      <h1>Three, in harmony</h1><p class="ink2" style="margin:0">Lead it as a host: before, during and after, so both of them feel desired, safe and eager.</p>
+      <h1>${esc(INTRO.title || "")}</h1><p class="ink2" style="margin:0">${esc(INTRO.line || "")}</p>
       <input class="search" id="q" type="search" placeholder="Search: jealousy, first touch, aftercare…" value="${esc(q)}" autocomplete="off">
       ${f ? `<div class="card">${hits.map(prRow).join("") || `<p class="muted" style="margin:0;padding:10px 0">Nothing matches.</p>`}</div>`
         : `<div class="card" style="border-color:rgba(233,185,142,.35)"><div class="eyebrow">The signals · agree them out loud</div>
@@ -180,7 +175,7 @@
       <div class="roman" style="margin-top:14px">${esc(pt.title.toUpperCase())} · ${ROMAN[p.n]}</div><h1>${esc(p.title)}</h1>
       <p class="motto">“${esc(p.motto)}”</p>
       <p class="ess">${esc(p.essence)}</p>
-      <a class="tcard" href="#/s/${p.id}"><div class="tiny muted">A night, told</div><b>Rafa, Isa and Mara</b><div class="go">Read the scene ›</div></a>
+      <a class="tcard" href="#/s/${p.id}"><div class="tiny muted">A moment, told</div><b>${esc(SCN)}</b><div class="go">Read the scene ›</div></a>
       <h3>Say it</h3>
       <div class="card">${p.say.map(x => `<div class="say"><div class="m">${esc(x.moment)}</div><div class="l">“${esc(x.line)}”</div><div class="w">${esc(x.why)}</div></div>`).join("")}</div>
       <h3>Without words</h3>
@@ -198,9 +193,9 @@
   function viewScene(id) {
     const p = BY[id]; if (!p) return viewHome();
     return `<a href="#/p/${p.id}" class="tiny muted">‹ ${ROMAN[p.n]}. ${esc(p.title)}</a>
-      <div class="eyebrow" style="margin-top:14px">A night, told · ${esc(partOf(p).title)}</div><h1>${esc(p.title)}</h1>
+      <div class="eyebrow" style="margin-top:14px">A moment, told · ${esc(partOf(p).title)}</div><h1>${esc(p.title)}</h1>
       <div class="tale">${paras(p.scene)}</div>
-      <p class="tiny muted">Rafa, Isa and Mara are illustrative, not real people.</p>
+      <p class="tiny muted">An imagined moment, to show the principle at work.</p>
       <a class="tcard" href="#/p/${p.id}" style="margin-top:10px"><div class="tiny muted">The principle</div><b>${ROMAN[p.n]}. ${esc(p.title)}</b><div class="go" style="color:var(--gold)">Lines, moves and strategy ›</div></a>
       ${fab(p.id)}`;
   }
@@ -349,7 +344,7 @@
   addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
 
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  Vault.unlock().then(() => Vault.load("data/trine.enc.json")).then(d => { P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; unlocked = true; render(); setTimeout(() => showInstall(false), 4000); })
+  Vault.unlock().then(() => Vault.load("data/trine.enc.json")).then(d => { PARTS = d.parts || []; INTRO = d.intro || {}; SCN = d.sceneLabel || "The scene"; P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; unlocked = true; render(); setTimeout(() => showInstall(false), 4000); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Trine. Check your connection and reload.</p>`; });
 })();
 </script>
