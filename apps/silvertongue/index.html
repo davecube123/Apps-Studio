@@ -113,7 +113,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "9";
+  const VER = "10";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis: shown highlighted, never read as asterisks */
@@ -270,6 +270,7 @@
   function settingsSheet() {
     sheet(`<h2>Settings</h2>
       <button class="btn block" data-act="lock">🔒 Lock now</button>
+      <button class="btn block" data-act="quickpin" style="margin-top:8px">🔢 Quick PIN for this phone</button>
       <button class="btn block" data-act="adult" style="margin-top:8px;${S.adult ? "" : "color:#f08a98"}">${S.adult ? "Hide adult modules" : "Show adult modules (18+)"}</button>
       <button class="btn block" data-act="export" style="margin-top:8px">Back up my notebook</button>
       <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
@@ -306,6 +307,7 @@
     else if (a === "speak") speak(v);
     else if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/t/${id}`); }
     else if (a === "lock") Vault.lock();
+    else if (a === "quickpin") { close(); Vault.managePin(); }
     else if (a === "adult") {
       if (!S.adult) { if (!confirm("Show the adult modules?\n\nThey are frank lessons on sex talk, dirty talk and leading in bed, for consenting adults. Confirm you are 18 or older.")) return;
         try { await loadAdult(); } catch { return toast("Couldn't load them. Are you online?"); } S.adult = true; save(); setData(); close(); location.hash = "#/"; render(); toast("Adult modules unlocked 🌶"); }
