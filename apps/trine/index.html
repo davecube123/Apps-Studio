@@ -165,7 +165,7 @@
       <input class="search" id="q" type="search" placeholder="Search: jealousy, first touch, aftercare…" value="${esc(q)}" autocomplete="off">
       ${f ? `<div class="card">${hits.map(prRow).join("") || `<p class="muted" style="margin:0;padding:10px 0">Nothing matches.</p>`}</div>`
         : `<div class="card" style="border-color:rgba(233,185,142,.35)"><div class="eyebrow">The signals · agree them out loud</div>
-          <div class="small" style="margin-top:8px;line-height:1.9"><b style="color:#ff8d8d">Red</b> stop, for anyone, no questions · <b style="color:#f5c26b">Yellow</b> slow down<br><b>Two taps</b> on whoever is closest: silent stop · <b>One squeeze</b>: “you okay?”, one back: “yes”</div></div>
+          <div class="small" style="margin-top:8px;line-height:1.9"><b style="color:#8fd89a">Green</b> yes, more · <b style="color:#f5c26b">Yellow</b> slow down · <b style="color:#ff8d8d">Red</b> stop, for anyone, no questions<br><b>Two taps</b> on whoever is closest: silent stop · <b>One squeeze</b>: “you okay?”, one back: “yes”</div></div>
         <a class="today" href="#/p/${t.id}"><div class="eyebrow">Today's principle · ${ROMAN[t.n]}</div><div style="font:600 26px/1.15 var(--display);margin-top:6px">${esc(t.title)}</div><div class="m">${esc(t.motto)}</div></a>
         ${PARTS.map((pt, i) => { const L = P.filter(p => p.part === pt.id); return L.length ? `<div class="part"><div class="ph"><span class="roman">BOOK ${ROMAN[i + 1]}</span><h2>${esc(pt.title)}</h2></div><div class="pl">${esc(pt.line)}</div><div class="card" style="padding:2px 16px">${L.map(prRow).join("")}</div></div>` : ""; }).join("")}`}`;
   }
