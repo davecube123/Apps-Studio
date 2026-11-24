@@ -10,10 +10,9 @@ and spotting manipulation. Unlisted: reachable by its link only.
 - **Adult modules (18+), hidden by default:** Sex Talk & Dirty Talk, Command & Lead, and Proposing a Threesome (an honest conversation and a free answer, not a pitch; 27 techniques), consensual and frank but not graphic, with negotiation, check-ins and aftercare built in. Turned on in Settings after an 18+ confirmation; they live in `data/adult.json`, which is only downloaded once switched on.
 - **Lessons:** modules, then lessons, plus search. Each lesson is just the technique, how to do it and its examples; why it works, mistakes and sources fold away.
 - **Notes:** a floating ✎ Note button (bottom right) on every lesson opens that lesson's note, a clean notes-app page with a format bar just above the keyboard (bold, italic, bullet and numbered lists, indent) (typing "- " or "1. " starts a list). It saves as you type. The Notebook tab lists your notes, newest first, with search. Notes from older versions move onto their lesson.
-- **PIN lock:** 4-digit PIN stored only as a salted PBKDF2 hash; locks on open and after a minute
-  away, hides content in the app switcher, 30 s wait after 5 wrong tries, “Forgot?” erases.
+- **Encrypted, passcode-locked:** the lessons (`data/lessons.enc.json`, `data/adult.enc.json`) are AES-256-GCM encrypted with a key derived from the owner's 8-digit passcode (PBKDF2-SHA256, 600,000 rounds; `lib/vault.js`). Without the passcode the published files are unreadable. Asks on open and after a minute away, hides content in the app switcher, 30 s wait after 5 wrong tries.
 - Notebook backup/restore in Settings. Everything stays on the device.
 
-Content: researched and written for this app (`data/lessons.json`); all example lines are original.
+Content: researched and written for this app (encrypted in `data/*.enc.json`; plain sources are kept out of the repo, see `tools/vault_encrypt.py`); all example lines are original.
 Ethics: influence that works with people. Coercive tactics appear only in the Shields module, as
 things to recognise and counter.

@@ -1,7 +1,7 @@
 # Anchor
 
 A private mentor, planner and journal for a dominant in a consensual adult DD/lg dynamic (unlisted at the owner's
-request: not in the studio index or README table; noindex; optional PIN lock offered on first open).
+request: not in the studio index or README table; noindex; content encrypted with the owner's 8-digit passcode, AES-256-GCM via `lib/vault.js`, in `data/content.enc.json`).
 
 - **Today:** a daily nudge "from the old hand", today's rituals, the next lesson, the aftercare window after a
   scene (drop can come a day or two later), and a renegotiation reminder after 90 days.
