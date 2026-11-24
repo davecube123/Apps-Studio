@@ -125,7 +125,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "8";
+  const VER = "9";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
@@ -136,7 +136,29 @@
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
   const ROMAN = Array.from({ length: 100 }, (_, n) => { let r = "", x = n; for (const [v, sym] of [[90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]) while (x >= v) { r += sym; x -= v; } return r; });
   let PARTS = []; /* book titles come from the encrypted content */
-  let P = [], BY = {}, INTRO = {}, SCN = "";
+  let P = [], BY = {}, INTRO = {}, SCN = "", RAWD = null;
+  /* Names: the content ships with default names (d.names); your own names are kept on this phone only and
+     swapped in everywhere at display time, in one pass so names can be exchanged safely. Ids are never changed. */
+  const NAME_LABELS = { girlfriend: "Your partner", unicorn: "The woman you court", tonight: "The woman you meet on the night" };
+  const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  function rename(x, map, rx) {
+    if (typeof x === "string") return x.replace(rx, m => map[m]);
+    if (Array.isArray(x)) return x.map(v => rename(v, map, rx));
+    if (x && typeof x === "object") { const o = {}; for (const k in x) o[k] = k === "id" || k === "canon" || k === "names" ? x[k] : rename(x[k], map, rx); return o; }
+    return x;
+  }
+  function build() {
+    const D0 = RAWD.names || {}, mine = S.names || {}, map = {};
+    for (const k in D0) { const v = (mine[k] || "").trim(); if (v && v !== D0[k]) map[D0[k]] = v; }
+    const keys = Object.keys(map), d = keys.length ? rename(RAWD, map, new RegExp("\\b(" + keys.map(reEsc).join("|") + ")\\b", "g")) : RAWD;
+    PARTS = d.parts || []; INTRO = d.intro || {}; SCN = d.sceneLabel || "The scene"; P = d.principles.slice().sort((a, b) => a.n - b.n); BY = {}; P.forEach(p => BY[p.id] = p);
+  }
+  function namesSheet() {
+    const D0 = RAWD.names || {}, mine = S.names || {};
+    sheet(`<h2>Names</h2><p class="small muted" style="margin:0 0 6px">Change a name and it changes everywhere in Trine. Kept on this phone only; leave a box empty to use the default.</p>
+      ${Object.keys(D0).map(k => `<label class="small" style="display:block;margin-top:12px"><b>${esc(NAME_LABELS[k] || k)}</b><input class="search" style="margin-top:6px" data-name="${k}" value="${esc(mine[k] || "")}" placeholder="${esc(D0[k])}" autocomplete="off" maxlength="24"></label>`).join("")}
+      <button class="btn pri block" data-act="savenames" style="margin-top:16px">Save names</button>`);
+  }
 
   /* ---------- notes: a small, safe subset of HTML ---------- */
   const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
@@ -293,10 +315,11 @@
     sheet(`<h2>Settings</h2>
       <button class="btn block" data-act="lock">🔒 Lock now</button>
       <button class="btn block" data-act="quickpin" style="margin-top:8px">🔢 Quick PIN for this phone</button>
+      <button class="btn block" data-act="names" style="margin-top:8px">✏️ Names</button>
       <button class="btn block" data-act="export" style="margin-top:8px">Back up my notebook</button>
       <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
       ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:8px">Install Trine</button>`}
-      <p class="small muted" style="margin-top:14px">Your notes stay on this phone, behind your passcode. The principles and tales are original writing; quotations come from the historical sources named under each tale.</p>
+      <p class="small muted" style="margin-top:14px">Your notes stay on this phone, behind your passcode. The guide is original writing.</p>
       <div class="ver">Trine v${VER}</div>`);
     $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (d.app !== "trine" || !d.pages) throw 0;
       for (const [id, p0] of Object.entries(d.pages)) { const pg = { html: clean(p0.html), at: +p0.at || Date.now() }, cur = S.pages[id]; if (!plain(pg.html)) continue;
@@ -327,6 +350,8 @@
     else if (a === "settings") settingsSheet();
     else if (a === "lock") Vault.lock();
     else if (a === "quickpin") { close(); Vault.managePin(); }
+    else if (a === "names") namesSheet();
+    else if (a === "savenames") { const n = {}; $$("[data-name]").forEach(i => { const v = i.value.replace(/[<>]/g, "").trim(); if (v) n[i.dataset.name] = v; }); S.names = n; save(); build(); close(); render(); toast("Names updated everywhere"); }
     else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "trine", pages: S.pages })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "trine-notebook.json"; l.click(); }
     else if (a === "install") showInstall(true);
     else if (a === "notnow") { try { localStorage.setItem("trine-install-snooze", Date.now()); } catch {} close(); }
@@ -348,7 +373,7 @@
   addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
 
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  Vault.unlock().then(() => Vault.load("data/trine.enc.json")).then(d => { PARTS = d.parts || []; INTRO = d.intro || {}; SCN = d.sceneLabel || "The scene"; P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; unlocked = true; render(); setTimeout(() => showInstall(false), 4000); })
+  Vault.unlock().then(() => Vault.load("data/trine.enc.json")).then(d => { RAWD = d; build(); prevHash = location.hash; unlocked = true; render(); setTimeout(() => showInstall(false), 4000); })
     .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Trine. Check your connection and reload.</p>`; });
 })();
 </script>
