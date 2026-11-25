@@ -1,0 +1,61 @@
+name: Build Stride APK
+
+# Builds the Android app (native/stride wraps apps/stride) and publishes it as the
+# "stride-apk" release: https://github.com/davecube123/Apps-Studio/releases/download/stride-apk/stride.apk
+on:
+  push:
+    branches: [ccr-c08c890f-rxo296]
+    paths: ["apps/stride/**", "native/stride/**", ".github/workflows/stride-apk.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stride-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install and sync the web app into the Android project
+        working-directory: native/stride
+        run: |
+          npm ci
+          npm run sync
+
+      - name: Build the signed APK
+        working-directory: native/stride/android
+        run: |
+          VER=$(grep -oE 'const VER = "[0-9]+"' ../../../apps/stride/index.html | grep -oE '[0-9]+')
+          export STRIDE_VERSION_CODE=${{ github.run_number }}
+          export STRIDE_VERSION_NAME="$VER.${{ github.run_number }}"
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/stride.apk"
+          echo "STRIDE_VERSION_NAME=$STRIDE_VERSION_NAME" >> "$GITHUB_ENV"
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: stride-apk
+          name: Stride for Android
+          make_latest: false
+          body: |
+            Stride for Android, version ${{ env.STRIDE_VERSION_NAME }}.
+            Tracks runs and workouts with the screen locked (background GPS and spoken cues).
+            Download stride.apk on your Android phone, open it, and allow installing from your browser if asked.
+          files: stride.apk
+          fail_on_unmatched_files: true
