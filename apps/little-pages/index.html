@@ -1222,7 +1222,7 @@ document.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.
 /* ============================================================
    PWA: install + offline
    ============================================================ */
-const APP_VERSION = "3"; // keep in step with VERSION in sw.js
+const APP_VERSION = "4"; // keep in step with VERSION in sw.js
 let installEvent = null;
 const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);

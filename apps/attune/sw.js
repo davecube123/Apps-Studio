@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "attune-v2";
+const VERSION = "attune-v3";
 // All apps share one origin and one cache storage: only ever delete this app's own old caches.
 const OWN = "attune-v";
 // Every file the app needs offline. Add new files here.

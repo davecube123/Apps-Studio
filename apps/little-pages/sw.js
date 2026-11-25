@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "little-pages-v3";
+const VERSION = "little-pages-v4";
 // All apps share one origin and one cache storage: only ever delete this app's own old caches.
 const OWN = "little-pages-v";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png"];

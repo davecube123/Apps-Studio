@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "book-of-changes-v7";
+const VERSION = "book-of-changes-v8";
 // All apps share one origin and one cache storage: only ever delete this app's own old caches.
 const OWN = "book-of-changes-v";
 // Every file the app needs offline. Add new files here.
