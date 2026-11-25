@@ -577,9 +577,9 @@
       const devs = a.notes.map(n => (n[2] - Math.round(n[2])) * 100), inT = devs.filter(d => Math.abs(d) <= 20).length / devs.length, lean = avg(devs);
       f.pitch = { big: `${Math.round(inT * 100)}%`, sub: `of ${a.notes.length} held notes within 20 cents`, score: inT,
         tip: inT >= .8 ? "Your notes land well. Listen to the ends of phrases, where pitch tends to sag as the breath runs out."
-          : Math.abs(lean) > 8 ? `You lean ${lean < 0 ? "flat" : "sharp"}, about ${Math.round(Math.abs(lean))} cents on average. ${lean < 0 ? "Support the breath and aim each note from slightly above" : "Ease off; pushing for volume often drives pitch up"}. Sing the phrase slowly against the drone in Tune.`
+          : Math.abs(lean) > 8 ? `You lean ${lean < 0 ? "flat" : "sharp"}, about ${Math.round(Math.abs(lean))} cents on average (a cent is a hundredth of a semitone). ${lean < 0 ? "Support the breath and aim each note from slightly above" : "Ease off; pushing for volume often drives pitch up"}. Sing the phrase slowly against the drone in Tune.`
           : "Notes scatter around their targets. Slow the phrase down, sing it on one vowel against the drone, then record it again." };
-    } else f.pitch = { big: "–", sub: "not enough held notes", tip: "The pitch view follows a sung melody. Strummed chords alone don’t give it a line to measure; sing a phrase and try again." };
+    } else f.pitch = { big: "–", sub: "not enough held notes", tip: "The pitch view follows a sung melody. Strummed chords alone don’t give it a line to measure. Sing a phrase and try again." };
     if (a.bpm && a.tempo.length) {
       const tv = a.tempo.map(x => x[1]), first = avg(tv.slice(0, 2)), lastv = avg(tv.slice(-2)), drift = (lastv - first) / first * 100, wob = sd(tv) / a.bpm * 100;
       const steady = wob < 1.5 && Math.abs(drift) < 3 ? "Very steady" : wob < 3 && Math.abs(drift) < 6 ? "Fairly steady" : "Drifting";
@@ -667,7 +667,7 @@
     { id: "lock", name: "Lock in", goal: "Quarter notes, one strum on every click. Bury the click under your strum until you can’t hear it.", cfg: { bpm: 70, on: "all", sub: 1, gap: "0", swing: 50, ramp: null } },
     { id: "motion", name: "Constant motion", goal: "Eighth notes: down on the beat, up on the “and”. Keep the hand swinging even when you don’t hit the strings.", cfg: { bpm: 70, on: "all", sub: 2, gap: "0", swing: 50, ramp: null } },
     { id: "backbeat", name: "Backbeat", goal: "The click plays only 2 and 4, like a snare drum. You supply 1 and 3. Most popular music grooves from here.", cfg: { bpm: 80, on: "24", sub: 1, gap: "0", swing: 50, ramp: null } },
-    { id: "danny", name: "Danny’s Song", goal: "Backbeat with a folk strum: the click is your snare on 2 and 4, your hand keeps moving down-up on the eighths, accents on the backbeat. Starts easy and climbs 2 bpm every 4 bars; stop where it stays relaxed, and work toward the record’s feel. Add the song itself under Songs (your own lyrics and chords stay on this phone).", cfg: { bpm: 72, on: "24", sub: 2, gap: "0", swing: 50, ramp: { every: 4, step: 2, to: 116 } } },
+    { id: "danny", name: "Danny’s Song", goal: "Backbeat with a folk strum. The click is your snare drum on 2 and 4. Your hand keeps moving down-up on the eighths, with accents on the backbeat. It starts easy and climbs 2 bpm every 4 bars. Stop where it stays relaxed, and work toward the record’s feel. Add the song itself under Songs (your own lyrics and chords stay on this phone).", cfg: { bpm: 72, on: "24", sub: 2, gap: "0", swing: 50, ramp: { every: 4, step: 2, to: 116 } } },
     { id: "one", name: "Only the one", goal: "One click per bar. Hold beats 2, 3 and 4 yourself, and land the next 1 with it.", cfg: { bpm: 80, on: "1", sub: 1, gap: "0", swing: 50, ramp: null } },
     { id: "gap", name: "Gap click", goal: "Two bars of click, two bars of silence. Keep playing; when the click returns, are you still with it?", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/2", swing: 50, ramp: null } },
     { id: "gaplong", name: "Inner clock", goal: "Two bars on, six bars silent. The click becomes a check-in, not a crutch.", cfg: { bpm: 80, on: "all", sub: 1, gap: "2/6", swing: 50, ramp: null } },
@@ -1184,7 +1184,7 @@ on the line above them…">${esc(s.lyrics || "")}</textarea>
           <div class="seg"><button class="${!S.droneFifth ? "on" : ""}" data-act="dfifth" data-v="0">Root</button><button class="${S.droneFifth ? "on" : ""}" data-act="dfifth" data-v="1">Root + fifth</button></div></div>
         <button class="btn block ${drone.on ? "on" : "amber"}" data-act="drone" id="dronebtn" style="width:100%;margin-top:14px;min-height:50px">${drone.on ? "Stop the drone" : `Start the drone · ${NOTES[S.droneKey]}`}</button>
         <div class="srow" style="margin-top:12px"><span>Drone volume</span><input type="range" id="dvol" min="0.1" max="1" step="0.05" value="${S.droneVol}" style="width:46%"></div>
-        <p class="small muted">Choose the song’s key. Hold a long note on the root and listen: when you’re out of tune you hear a slow wobble (beating); when it stops, you’re there. Then sing the scale up and down, slowly, against it.</p></div></div>
+        <p class="small muted">Choose the song’s key. Hold a long note on the root (the home note of the key) and listen. When you’re out of tune, you hear a slow wobble, called beating. When it stops, you’re in tune. Then sing the scale up and down, slowly, against it.</p></div></div>
       <div class="sec"><div class="eyebrow">Metronome</div><div class="card">
         <div class="bpm"><button class="round" data-act="bpm" data-v="-1">−</button><div class="v num" id="bpmv">${S.bpm}<small>BPM</small></div><button class="round" data-act="bpm" data-v="1">+</button></div>
         <input type="range" id="bpmr" min="30" max="240" value="${S.bpm}" aria-label="Tempo">

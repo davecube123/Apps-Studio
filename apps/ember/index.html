@@ -156,7 +156,7 @@
     "Withdrawal symptoms (irritability, restlessness, hunger) are strongest in the first week and usually fade within a month.",
     "Your sense of taste and smell start improving within days of stopping. Notice your food.",
     "Brush your teeth right after meals. A clean mouth makes the after-meal cigarette less appealing.",
-    "Some apps and people call it “urge surfing”: notice where you feel the craving in your body, watch it rise and fall like a wave, without obeying it.",
+    "Some apps and people call it “urge surfing”. Notice where you feel the craving in your body. Watch it rise and fall like a wave, without obeying it.",
     "Each time you don't smoke when you want to, the link between the trigger and the cigarette weakens a little.",
     "Hands bored? A pen, a stress ball, a rubber band or your phone's notes app all work as stand-ins.",
     "Write your three biggest reasons for stopping on the Plan page. Read them when a craving hits.",
@@ -269,7 +269,7 @@
         ${P.mode === "reduce" ? `<label class="f"><span>Drop by one every</span><select data-plan="stepDays">${[2, 3, 4, 5, 7].map(d => `<option value="${d}" ${+P.stepDays === d ? "selected" : ""}>${d} days</option>`).join("")}</select></label>` : ""}
         ${P.mode === "date" ? `<label class="f"><span>Quit date</span><input type="date" data-plan="quitDate" value="${esc(P.quitDate)}" min="${dayKey(now() + DAY)}"></label>` : ""}
         ${P.mode !== "track" ? `<p class="small ink2" style="margin:12px 0 0">Today's budget: <b>${b ?? "–"}</b>${planEnd()}</p><button class="btn sm" data-act="restartplan" style="margin-top:10px">Restart the plan from today</button>` : ""}</div>
-      <div class="card"><h3>When you're ready to stop</h3><p class="small ink2" style="margin:6px 0 10px">Research finds cutting down first and then stopping works about as well as stopping in one go, as long as you do set a day to stop. Most people who succeed pick a date within a few weeks.</p>
+      <div class="card"><h3>When you're ready to stop</h3><p class="small ink2" style="margin:6px 0 10px">Research finds that cutting down first and then stopping works about as well as stopping in one go. The key is that you still set a day to stop. Most people who succeed pick a date within a few weeks.</p>
         ${quitMode() ? `<p class="small" style="color:var(--green)">You stopped on ${new Date(db.quitAt).toLocaleDateString()}.</p><button class="btn sm" data-act="unquit">Back to cutting down</button>` : `<button class="btn green block" data-act="quit">${ic("leaf")} I've stopped. Start my smoke-free counter</button>`}</div>
       <div class="card"><h3>My reasons</h3><textarea data-reasons rows="3" placeholder="Three reasons, in your words. Read them during a craving.">${esc(db.reasons || "")}</textarea></div>`;
   }
