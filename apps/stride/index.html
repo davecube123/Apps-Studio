@@ -190,6 +190,7 @@
   .seg { display: flex; background: var(--s2); border-radius: 12px; padding: 3px; }
   .seg button { flex: 1; border: 0; background: none; padding: 9px; border-radius: 9px; color: var(--muted); font-weight: 700; }
   .seg button.on { background: var(--ink); color: #0a0b0b; }
+  .vsel { background: var(--s2); border: 0; color: var(--ink); border-radius: 10px; padding: 9px 8px; font: inherit; font-size: 14px; font-weight: 600; }
   .opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
   .sw { width: 50px; height: 30px; border-radius: 99px; background: var(--s3); border: 0; position: relative; flex: none; transition: background .2s; }
   .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: left .18s; }
@@ -215,7 +216,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "5";
+  const VER = "6";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2600) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -223,7 +224,7 @@
   const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { toast("Storage is full. Export and delete some old runs."); return false; } };
 
   let runs = ld("stride-runs", []);
-  const set = Object.assign({ unit: "km", primary: "pace", voice: true, autoPause: false }, ld("stride-set", {}));
+  const set = Object.assign({ unit: "km", primary: "pace", voice: true, autoPause: false, vibe: true, ticks: true }, ld("stride-set", {}));
   const saveSet = () => sv("stride-set", set);
   let live = ld("stride-live", null);
 
@@ -247,7 +248,20 @@
   // In the Android build (native/stride), Capacitor plugins give GPS and speech that keep working with the screen locked.
   const CAP = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? window.Capacitor : null;
   const NP = CAP ? CAP.Plugins : {};
-  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+  // Vibration patterns (on, off, on, ... in ms). In the Android app a small native module plays them with
+  // alarm priority, so they work with the screen locked and on silent; the browser uses navigator.vibrate.
+  const VIBES = {
+    tap: ["One tap", [150]], long: ["One long", [800]], two: ["Two taps", [200, 160, 200]], three: ["Three quick", [140, 110, 140, 110, 140]],
+    twolong: ["Two long", [550, 280, 550]], wave: ["Long, short, long", [550, 180, 160, 180, 550]], four: ["Rapid four", [90, 70, 90, 70, 90, 70, 90]], none: ["None", []]
+  };
+  const VIBE_DEFAULT = { warm: "tap", fast: "three", steady: "two", easy: "long", walk: "twolong", cool: "wave" };
+  const DONE_VIBE = [400, 150, 400, 150, 900], TICK_VIBE = [70];
+  const vibeFor = k => (VIBES[(set.vib || {})[k] || VIBE_DEFAULT[k]] || VIBES.long)[1];
+  const buzz = (p, force) => {
+    if (!p || !p.length || (!force && set.vibe === false)) return;
+    const web = () => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+    if (CAP && NP.Buzz) NP.Buzz.pattern({ pattern: p }).catch(web); else web();
+  };
 
   /* ---------- voice ---------- */
   const say = text => {
@@ -300,7 +314,7 @@
     const now = Date.now(); acquiring = false;
     live = { id: String(now), start: now, segs: [[]], acc: 0, resumedAt: now, state: "running", dist: 0, cum: { km: [], mi: [] }, max: 0, lastE: 0, lastMoveAt: now, rej: 0 };
     const w = workouts.find(x => x.id === chosen);
-    if (w) { const st = flat(w); if (st.length) { live.wo = { id: w.id, name: w.name, steps: st, i: 0, at: 0, d0: 0, laps: [], cd: false, done: false }; say(`Go. ${w.name}. First, ${stepWords(st[0])}.`); buzz(300); } else say("Go"); }
+    if (w) { const st = flat(w); if (st.length) { live.wo = { id: w.id, name: w.name, steps: st, i: 0, at: 0, d0: 0, laps: [], cd: false, done: false }; say(`Go. ${w.name}. First, ${stepWords(st[0])}.`); buzz(vibeFor(st[0].k)); } else say("Go"); }
     else say("Go");
     persist(true); paint(true);
   }
@@ -392,14 +406,16 @@
   function nextStep(manual) {
     const w = live.wo, st = w.steps[w.i], el = elapsed();
     w.laps.push({ k: st.k, by: st.by, v: st.v, t: Math.round(el - w.at), d: Math.round(live.dist - w.d0), skip: manual || undefined });
-    w.i++; w.at = el; w.d0 = live.dist; w.cd = false;
-    if (w.i >= w.steps.length) { w.done = true; say("Workout complete. Great work. Keep going, or finish when you're ready."); buzz([400, 150, 400, 150, 400]); }
-    else { const n = w.steps[w.i]; say(`${n.r ? `${n.r} of ${n.of}. ` : ""}${stepWords(n)}.`); buzz(n.k === "fast" ? [200, 100, 200, 100, 200] : [400]); }
+    w.i++; w.at = el; w.d0 = live.dist; w.cd = false; w.tk = 4;
+    if (w.i >= w.steps.length) { w.done = true; say("Workout complete. Great work. Keep going, or finish when you're ready."); buzz(DONE_VIBE); }
+    else { const n = w.steps[w.i]; say(`${n.r ? `${n.r} of ${n.of}. ` : ""}${stepWords(n)}.`); buzz(vibeFor(n.k)); }
     persist(true);
   }
   function woTick() {
     const x = woState(); if (!x || live.state !== "running") return;
     if (x.st.by === "time" && !x.w.cd && x.left <= 3.6 && x.left > 0.5 && x.st.v >= 20) { x.w.cd = true; say("3, 2, 1"); }
+    // a short tick at 3, 2 and 1 seconds left, so you can feel the change coming
+    if (set.ticks && x.st.by === "time" && x.st.v >= 20) { const n = Math.ceil(x.left - 0.05); if (n >= 1 && n <= 3 && (x.w.tk == null || n < x.w.tk)) { x.w.tk = n; buzz(TICK_VIBE); } }
     if (x.left <= 0) nextStep(false);
   }
 
@@ -641,6 +657,7 @@
     saveW(); const y = scrollY; render(); scrollTo(0, y);
   }
   document.addEventListener("change", wEdit);
+  document.addEventListener("change", e => { const k = e.target.dataset && e.target.dataset.vk; if (!k) return; set.vib = Object.assign({}, set.vib, { [k]: e.target.value }); saveSet(); buzz(vibeFor(k), true); });
 
   /* ---------- activity (history) ---------- */
   const avgOf = r => r.dur > 0 ? r.dist / (r.dur / 1000) : 0;
@@ -727,6 +744,12 @@
       <div class="opt"><span>Units</span><div class="seg" style="width:160px"><button data-act="unit" data-v="km" class="${set.unit === "km" ? "on" : ""}">km</button><button data-act="unit" data-v="mi" class="${set.unit === "mi" ? "on" : ""}">miles</button></div></div>
       <div class="opt"><span>Big number shows</span><div class="seg" style="width:160px"><button data-act="prim" data-v="pace" class="${set.primary === "pace" ? "on" : ""}">pace</button><button data-act="prim" data-v="speed" class="${set.primary === "speed" ? "on" : ""}">speed</button></div></div>
       <div class="opt"><div><div>Voice cues</div><div class="tiny muted">Time and split every ${set.unit === "mi" ? "mile" : "kilometre"}, plus pause and resume</div></div><button class="sw ${set.voice ? "on" : ""}" data-act="tog" data-k="voice" aria-label="Voice cues"></button></div>
+      <h3 style="margin-top:20px">Vibration</h3>
+      <div class="opt"><div><div>Vibrate on step changes</div><div class="tiny muted">Each kind of step has its own pattern, so you can feel what's next</div></div><button class="sw ${set.vibe !== false ? "on" : ""}" data-act="tog" data-k="vibe" aria-label="Vibrate on step changes"></button></div>
+      <div class="opt"><div><div>Countdown ticks</div><div class="tiny muted">A short tick at 3, 2 and 1 seconds before a timed step ends</div></div><button class="sw ${set.ticks ? "on" : ""}" data-act="tog" data-k="ticks" aria-label="Countdown ticks"></button></div>
+      ${Object.keys(KINDS).map(k => `<div class="opt"><span style="display:flex;align-items:center;gap:10px;font-weight:650"><i style="width:10px;height:10px;border-radius:3px;background:${kCol(k)};display:inline-block"></i>${kName(k)}</span><span class="row" style="gap:8px"><select class="vsel" data-vk="${k}">${Object.entries(VIBES).map(([id, [nm]]) => `<option value="${id}"${((set.vib || {})[k] || VIBE_DEFAULT[k]) === id ? " selected" : ""}>${nm}</option>`).join("")}</select><button class="btn" data-act="tryvib" data-k="${k}" style="padding:9px 12px">Try</button></span></div>`).join("")}
+      <div class="opt"><span style="font-weight:650">Workout complete</span><button class="btn" data-act="tryvib" data-k="done" style="padding:9px 12px">Try</button></div>
+      <h3 style="margin-top:20px">Run</h3>
       <div class="opt"><div><div>Auto-pause</div><div class="tiny muted">Pauses the clock when you stop (traffic lights), resumes when you move</div></div><button class="sw ${set.autoPause ? "on" : ""}" data-act="tog" data-k="autoPause" aria-label="Auto-pause"></button></div>
       <button class="btn block" data-act="export">Back up my runs</button>
       <button class="btn block" data-act="import">Restore a backup</button>
@@ -793,6 +816,7 @@
     else if (a === "usew") { chosen = el.dataset.id; sv("stride-chosen", chosen); location.hash = "#/"; if (!live) toast("Workout selected. Tap Start when you're ready."); }
     else if (a === "dupw") { const w = workouts.find(x => x.id === el.dataset.id); if (w) { const c = JSON.parse(JSON.stringify(w)); c.id = "w-" + Date.now().toString(36); c.name = w.name + " (copy)"; workouts.push(c); saveW(); location.hash = `#/w/${c.id}`; } }
     else if (a === "delw") { if (confirm("Delete this workout?")) { workouts = workouts.filter(x => x.id !== el.dataset.id); if (chosen === el.dataset.id) { chosen = ""; sv("stride-chosen", ""); } saveW(); location.hash = "#/workouts"; } }
+    else if (a === "tryvib") buzz(el.dataset.k === "done" ? DONE_VIBE : vibeFor(el.dataset.k), true);
     else if (a === "pause") pause();
     else if (a === "resume") resume();
     else if (a === "finish") finishSheet();
