@@ -258,7 +258,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "7";
+  const VER = "8";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2600) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -308,6 +308,8 @@
   /* ---------- voice ---------- */
   const say = text => {
     if (!set.voice) return;
+    // Android app: the local Speak plugin ducks Spotify and other music while it talks; the community plugin is the fallback.
+    if (CAP && NP.Speak) { NP.Speak.speak({ text }).catch(() => NP.TextToSpeech && NP.TextToSpeech.speak({ text, lang: "en-GB", rate: 1.0 }).catch(() => {})); return; }
     if (CAP && NP.TextToSpeech) { NP.TextToSpeech.speak({ text, lang: "en-GB", rate: 1.0, category: "playback" }).catch(() => {}); return; }
     if (!("speechSynthesis" in window)) return;
     try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1; speechSynthesis.speak(u); } catch {}
