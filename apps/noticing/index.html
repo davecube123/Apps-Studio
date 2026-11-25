@@ -168,7 +168,7 @@
   </div></nav>
   <script>
   "use strict";
-  const APP_VERSION = "4", APP_DATE = "5 Nov 2026";
+  const APP_VERSION = "5", APP_DATE = "5 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
@@ -490,7 +490,7 @@
     const all = rated.filter(o => o.verdict === "right").length / rated.length, conf = rated.reduce((a, o) => a + o.conf, 0) / rated.length / 100, gap = Math.round((conf - all) * 100);
     return `<div class="calib">${rows}</div>
       <p class="small" style="margin-top:12px">${Math.abs(gap) <= 7 ? "Your confidence matches your accuracy well." : gap > 0 ? `You are about <b>${gap} points overconfident</b>: you feel surer than you turn out to be. Look for one more clue before deciding.` : `You are about <b>${-gap} points underconfident</b>: you are right more often than you think.`}</p>
-      <p class="small muted">Each bar is how often you were right (of how many) at that confidence; the tick is how sure you said you were. Well calibrated means they meet.</p>`;
+      <p class="small muted">Each bar shows how often you were right at that level of confidence (and out of how many). The tick shows how sure you said you were. When they meet, you are well calibrated: your confidence matches your results.</p>`;
   }
   function viewProgress() {
     let streak = 0; for (let i = 0; ; i++) { const d = new Date(); d.setDate(d.getDate() - i); if (practised(dayKey(d))) streak++; else if (i > 0) break; else continue; if (i > 3650) break; }
@@ -502,7 +502,7 @@
       <div class="card"><div class="row between"><span class="eyebrow">Spot the change</span><span class="small muted">level ${db.level.change}</span></div>${spark("change")}</div>
       <div class="card"><div class="eyebrow" style="margin-bottom:8px">Your deductions</div>${calibration()}</div>
       <div class="sect"><span class="eyebrow">About</span><div class="card prose">
-        <p>Noticing more is a skill, and like any skill it grows with practice and feedback, mostly practice in the real world. The daily mission sends your attention outward; the drills give you a score; the journal tells you how far to trust your deductions.</p>
+        <p>Noticing more is a skill, and like any skill it grows with practice and feedback, mostly practice in the real world. The daily mission sends your attention outward. The drills give you a score. The journal tells you how far to trust your deductions.</p>
         <p>Observe kindly: look, don’t stare, and keep your guesses about people to yourself and your journal.</p>
         <div class="seg" style="margin-top:12px">${[["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button class="${db.settings.theme === k ? "on" : ""}" data-act="theme" data-v="${k}">${l}</button>`).join("")}</div>
         ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:12px">Install on this phone</button>`}

@@ -498,7 +498,7 @@
 
   /* ---------- Storage (on this device only) ---------- */
   // Shown at the bottom of Today and Settings. Keep in step with VERSION in sw.js.
-  const APP_VERSION = "9", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "10", APP_DATE = "26 Oct 2026";
   const versionTag = () => `<p class="center small muted" style="margin-top:22px;opacity:.75">My I Ching · version ${APP_VERSION} · ${APP_DATE}</p>`;
   const KEY = "my-i-ching-v1";
   const fresh = () => ({ v: 1, book: { title: "My Book of Changes", author: "", preface: "", ch: {} }, readings: [], cards: {}, newDay: {}, days: [], draft: null, settings: { theme: "auto" } });
@@ -1354,12 +1354,12 @@
   }
   const SCIENCE = [
     ["Writing every text in your own words", "Information you generate yourself is remembered far better than information you read. Here the book starts blank, and you are its author.", "Generation effect: Slamecka & Graf, 1978; meta-analysis Bertsch et al., 2007"],
-    ["\"How it speaks to my life now\"", "Linking material to yourself is one of the strongest memory encoders known, and it turns symbols into lived understanding.", "Self-reference effect: Rogers, Kuiper & Kirker, 1977; meta-analysis Symons & Johnson, 1997"],
+    ["\"How it speaks to my life now\"", "Linking what you learn to your own life is one of the strongest known ways to remember it. It also turns symbols into something you understand from experience.", "Self-reference effect: Rogers, Kuiper & Kirker, 1977; meta-analysis Symons & Johnson, 1997"],
     ["Practice cards with recall before reveal", "Trying to remember strengthens memory more than rereading does, even when you fail.", "Testing effect: Roediger & Karpicke, 2006; Bjork, 1994 (desirable difficulties)"],
-    ["Cards return after 1, 3, 7, 16, 35 and 90 days", "Expanding gaps between reviews keep learning durable for the least effort. It's a Leitner box system.", "Spacing effect: Cepeda et al., 2006; Leitner, 1972"],
+    ["Cards return after 1, 3, 7, 16, 35 and 90 days", "Growing gaps between reviews make learning last, for the least effort. It's a Leitner box system: a card you get right waits longer before it comes back.", "Spacing effect: Cepeda et al., 2006; Leitner, 1972"],
     ["Interleaved practice", "Mixing card types and hexagrams helps you tell similar figures apart.", "Interleaving: Rohrer & Taylor, 2007"],
     ["Learning hexagrams through trigrams", "64 figures become 8 meaningful chunks in pairs. The trigram map and the build-the-figure cards rely on this.", "Chunking: Miller, 1956; Chase & Simon, 1973. Dual coding (image + word): Paivio, 1971"],
-    ["Question and first impression written before analysis", "A record of what you asked and expected, made before events unfold, lets you look back honestly instead of remembering selectively.", "Confirmation bias: Nickerson, 1998; hindsight bias: Fischhoff, 1975"],
+    ["Question and first impression written before analysis", "Write down what you asked and expected before events unfold. Then you can look back honestly, instead of remembering only the parts that fit.", "Confirmation bias: Nickerson, 1998; hindsight bias: Fischhoff, 1975"],
     ["Reflective writing about your situation", "Putting experience into structured words helps you make sense of it and lowers stress.", "Expressive writing: Pennebaker & Beall, 1986; Pennebaker, 1997"],
     ["\"When ___, I will ___\"", "Plans in an if-then form make it far more likely that an attitude becomes an action.", "Implementation intentions: Gollwitzer, 1999; meta-analysis Gollwitzer & Sheeran, 2006"],
     ["Look back after days or weeks", "Reflecting on experience improves later performance. The loop goes: experience, reflect, conceptualise, try again.", "Di Stefano, Gino, Pisano & Staats, 2014; Kolb, 1984"],

@@ -246,7 +246,7 @@
   <nav class="tabs" id="tabs" hidden></nav>
   <script>
   "use strict";
-  const APP_VERSION = "15", APP_DATE = "12 Nov 2026";
+  const APP_VERSION = "16", APP_DATE = "12 Nov 2026";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 864e5, uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -332,9 +332,9 @@
   const LESSONS = [
     { id: "what", t: "Ano ang pinagdadaanan niya?", m: 3, body: [
       "Ang psychosis ay kondisyon kung saan nahihirapan ang utak na paghiwalayin kung ano ang totoo at kung ano ang galing sa sariling isip. Hindi ito kahinaan ng loob, hindi ito katamaran, at hindi niya ito pinili.",
-      "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations), o matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagmamanman sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
+      "Karaniwang may tatlong uri ng sintomas. Una, ang mga “dagdag”: nakakarinig ng boses na wala naman (hallucinations). O kaya, matinding paniniwala na hindi totoo, gaya ng may sumusunod o nagmamanman sa kanya (delusions). Pangalawa, ang mga “bawas”: nawawalan ng gana, lumalayo sa tao, parang walang emosyon, tumitigil sa mga dating gusto. Pangatlo, hirap mag-focus at mag-isip nang maayos.",
       "Kaya maaaring tumigil siya sa pagtugtog. Hindi dahil ayaw na niya sa musika; ang “bawas” na sintomas mismo ang kumukuha ng gana at lakas. Hindi ito masosolusyonan ng pagpilit, pero bumabalik ito sa tamang gamutan at panahon.",
-      "Ang mga pagsabog ng galit, gaya ng pagtumba ng upuan o pagbasag ng cellphone, ay kadalasang galing sa takot at sobrang stress ng nararanasan niya, lalo na kung pakiramdam niya ay may banta sa kanya. Seryoso pa rin ito, pero tanda ito na kailangan na niya ng tulong, hindi ng sermon." ],
+      "Ang mga pagsabog ng galit, gaya ng pagtumba ng upuan o pagbasag ng cellphone, ay kadalasang galing sa takot at sobrang stress na nararanasan niya. Lalo itong nangyayari kapag pakiramdam niya ay may banta sa kanya. Seryoso pa rin ito, pero tanda ito na kailangan na niya ng tulong, hindi ng sermon." ],
       key: "Hindi siya ang problema. Ang kondisyon ang problema, at kasama ninyo siya sa paglaban dito." },
     { id: "insight", t: "Bakit sinasabi niyang okay lang siya", m: 3, body: [
       "Isa sa pinakamahirap: maraming taong may psychosis ang talagang hindi nakakakita na may sakit sila. Ito ay tinatawag na anosognosia o lack of insight, at bahagi ito ng kondisyon mismo, dahil sa paraan ng paggana ng utak. Sa pananaliksik, mga kalahati ng may schizophrenia ang nakakaranas nito.",
@@ -347,11 +347,11 @@
       "Hindi kailangang hintayin na pumayag siya bago kayo kumilos. Puwedeng kayo muna, ang girlfriend o pamilya, ang kumonsulta sa psychiatrist para humingi ng gabay kung paano siya madadala. Tingnan ang “Tulong” tab." ],
       key: "Ang pinakamahalagang magagawa ninyo ngayon: tulungan siyang makarating sa psychiatrist." },
     { id: "treatment", t: "Kapag nagsimula na ang gamutan", m: 3, body: [
-      "Karaniwang antipsychotic na gamot ang ibibigay. Kadalasan ilang araw hanggang ilang linggo bago makita ang epekto; madalas na unang gumaganda ang tulog at pagiging kalmado, bago ang mga boses o hinala.",
-      "May mga side effect na dapat sabihin sa doktor, sa halip na basta itigil ang gamot: antok, pagtaas ng gana at timbang, pagkabalisa o hindi mapakali (akathisia), paninigas o panginginig. Kadalasan naaayos ito sa pagpapalit ng dosis o ng gamot.",
+      "Karaniwang antipsychotic na gamot ang ibibigay. Kadalasan ilang araw hanggang ilang linggo bago makita ang epekto. Madalas na unang gumaganda ang tulog at pagiging kalmado, bago ang mga boses o hinala.",
+      "May mga side effect na dapat sabihin sa doktor. Huwag basta itigil ang gamot. Kabilang dito ang antok, pagtaas ng gana at timbang, pagkabalisa o hindi mapakali (akathisia), paninigas o panginginig. Kadalasan naaayos ito sa pagpapalit ng dosis o ng gamot.",
       "Ang pinakamadalas na dahilan ng pagbabalik ng sintomas ay ang paghinto ng gamot. Kung nahihirapan siyang uminom araw-araw, itanong sa doktor ang long-acting injection: iniksyon kada ilang linggo, kaya hindi na kailangang tandaan araw-araw.",
       "Hindi lang gamot: nakakatulong din ang therapy (CBT for psychosis), mga session para sa pamilya, at unti-unting pagbabalik sa routine, trabaho at musika. Itanong sa doktor kung ano ang mayroon sa inyong lugar.",
-      "Paano tumulong nang hindi nagbabantay: pag-usapan kung paano niya gustong maalala (alarm, pillbox), at kumustahin ang pakiramdam niya sa gamot, hindi lang kung uminom na siya." ],
+      "Paano tumulong nang hindi nagbabantay: pag-usapan kung paano niya gustong maalala ang gamot (alarm, pillbox). Kumustahin din ang pakiramdam niya sa gamot, hindi lang kung uminom na siya." ],
       key: "Ang tanong ay hindi \u201cuminom ka na ba?\u201d kundi \u201ckumusta ang pakiramdam mo sa gamot?\u201d" },
     { id: "worse", t: "Ano ang nagpapalala", m: 2, body: [
       "Kulang sa tulog: madalas ito ang unang senyales at nagpapalala rin ng hinala at boses. Ang tulog ay mahalagang bantayan.",
@@ -360,38 +360,38 @@
       "Biglaang paghinto ng gamot (kapag nagsimula na siya): isa ito sa pinakamadalas na dahilan ng pagbabalik ng sintomas." ],
       key: "Tulog, mahinahong araw, at kalmadong bahay: tatlong bagay na kayang tulungan ng pamilya araw-araw." },
     { id: "home", t: "Ang kalmadong bahay: ano ang sinasabi ng research", m: 3, body: [
-      "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Sa pagsusuri ng 30 pag-aaral (2021), halos dinodoble ng madalas na batikos ang tsansang bumalik ito, at ang init at pagtanggap (warmth) ay nagpapababa nito nang malaki. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
-      "Ang nakakatulong: mahinahong boses, maikli at malinaw na pananalita, papuri sa maliliit na hakbang, at pagbibigay ng espasyo kapag kailangan niya. Ang mga pamilyang natuto tungkol sa kondisyon at sa ganitong paraan ng pakikitungo ay may mas kaunting pagbabalik ng sintomas at pagkaka-ospital; ito ay family psychoeducation, isa sa pinakamatibay na ebidensya sa larangang ito.",
+      "Matagal nang pinag-aaralan ang tinatawag na “expressed emotion” sa pamilya. Paulit-ulit ang resulta: kapag maraming batikos, galit, o sobrang pakikialam ang pamilya, mas madalas bumabalik ang sintomas. Sa pagsusuri ng 30 pag-aaral (2021), halos dinodoble ng madalas na batikos ang tsansang bumalik ito. Ang init at pagtanggap (warmth) naman ay nagpapababa nito nang malaki. Hindi ito paninisi sa pamilya; natural ang mga reaksyong ito kapag takot at pagod ka.",
+      "Ang nakakatulong: mahinahong boses, maikli at malinaw na pananalita, papuri sa maliliit na hakbang, at pagbibigay ng espasyo kapag kailangan niya. Ang mga pamilyang natuto tungkol sa kondisyon at sa ganitong paraan ng pakikitungo ay may mas kaunting pagbabalik ng sintomas at pagkaka-ospital. Tinatawag itong family psychoeducation (pag-aaral ng pamilya tungkol sa kondisyon). Isa ito sa pinakamatibay na ebidensya sa larangang ito.",
       "Hindi ibig sabihin na wala nang hangganan. Puwede kayong magsabi ng malinaw na limitasyon (“Hindi okay ang magbasag ng gamit”), nang mahinahon at walang pang-iinsulto." ],
       key: "Mahinahon, maikli, mainit, at may malinaw na limitasyon." },
     { id: "words", t: "Ang mga salitang ginagamit natin", m: 2, body: [
-      "Hindi siya ang diagnosis niya. Siya pa rin ang kaibigang musikero, ang anak, ang kasintahan. Ang pananaliksik sa mga taong bagong nadiagnose ay nagpapakita na ang paraan ng pagbanggit ng label ay nakakaapekto sa tingin nila sa sarili, at ang kahihiyan sa sarili (self-stigma) ay humaharang sa paggaling.",
+      "Hindi siya ang diagnosis niya. Siya pa rin ang kaibigang musikero, ang anak, ang kasintahan. Ayon sa pananaliksik sa mga taong bagong nadiagnose, ang paraan ng pagbanggit ng label ay nakakaapekto sa tingin nila sa sarili. Ang kahihiyan sa sarili (self-stigma) naman ay humaharang sa paggaling.",
       "Kaya sa bahay, pag-usapan ang mga bagay na mahalaga sa kanya: tulog, pagod, stress, ang musika, ang mga plano niya. Hindi kailangang laging banggitin ang “sakit” o ang pangalan ng kondisyon. Sa doktor at sa kanya ang usapang iyon, kapag handa siya.",
       "Sa ibang tao, sapat na ang “nagpapagamot siya” o “nagpapahinga muna siya.” Kanya ang kuwento; siya ang magpapasya kung kanino ito ibabahagi. Sa mga pamilyang Pilipino, ang hiya ay isa sa pinakamalaking dahilan kung bakit naaantala ang pagpapatingin. Ang pag-iingat sa privacy niya ay paraan para hindi siya mahiyang magpagamot.",
       "Iwasan ang mga salitang tulad ng “baliw,” “sira,” o “may topak,” kahit pabiro, at pakiusapan ang iba na iwasan din ang mga ito." ],
       key: "Pag-usapan ang tao, hindi ang label. Kanya ang kuwento." },
     { id: "safety", t: "Tungkol sa galit at kaligtasan", m: 3, body: [
       "Karamihan ng taong may psychosis ay hindi marahas; mas madalas pa silang maging biktima. Pero tumataas ang panganib kapag hindi nagagamot, kapag puyat, at kapag sobrang takot siya. Ang pagtumba ng upuan at pagbasag ng phone ay seryosong senyales na kailangan na ng tulong.",
-      "Kapag galit o takot siya: bigyan siya ng espasyo, huwag harangan ang daan niya palabas, huwag hawakan o pigilan nang pisikal, magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
+      "Kapag galit o takot siya: bigyan siya ng espasyo, at huwag harangan ang daan niya palabas. Huwag siyang hawakan o pigilan nang pisikal. Magsalita nang mahina at mabagal, at huwag makipagtalo. Kayo rin: siguraduhing may daan kayo palabas.",
       "Itago ang mga bagay na maaaring makasakit (kutsilyo, maraming gamot, matutulis na bagay). Kung may banta sa buhay niya o ng iba, tumawag sa 911 o dalhin siya sa emergency room. Hindi ito pagtataksil sa kanya; ito ay pagmamahal." ],
       key: "Kaligtasan muna ng lahat, pati siya." },
     { id: "suicide", t: "Kung naiisip niyang saktan ang sarili", m: 3, body: [
       "Mas mataas ang panganib ng pagpapakamatay sa mga taong may psychosis, lalo na sa mga unang taon ng sakit at pagkalabas ng ospital. Hindi ito para takutin kayo; para alam ninyo ang hahanapin.",
-      "Mga senyales: pagsasalita tungkol sa kamatayan o pagiging pabigat (\u201cmas mabuti kung wala na ako\u201d), pamimigay ng mga gamit, biglang pagiging kalmado pagkatapos ng matinding lungkot, paghahanap ng paraan, mga boses na nag-uutos na saktan ang sarili, at matinding hiya o kawalan ng pag-asa.",
+      "Mga senyales: pagsasalita tungkol sa kamatayan o pagiging pabigat (\u201cmas mabuti kung wala na ako\u201d), pamimigay ng mga gamit, o biglang pagiging kalmado pagkatapos ng matinding lungkot. Bantayan din ang paghahanap ng paraan, mga boses na nag-uutos na saktan ang sarili, at matinding hiya o kawalan ng pag-asa.",
       "Itanong nang diretso: \u201cNaiisip mo bang patayin ang sarili mo?\u201d Ipinapakita ng pananaliksik na ang pagtatanong ay hindi nagtatanim ng ideya. Sa halip, nagbibigay ito ng ginhawa at ng daan para humingi ng tulong.",
-      "Kung oo ang sagot: manatili sa tabi niya, alisin ang mga bagay na puwedeng gamitin (maraming gamot, kutsilyo, lubid, pesticide), at tumawag agad sa NCMH 1553 o 911, o dalhin siya sa emergency room. Huwag mangakong ililihim ito." ],
+      "Kung oo ang sagot: manatili sa tabi niya. Alisin ang mga bagay na puwedeng gamitin (maraming gamot, kutsilyo, lubid, pesticide). Tumawag agad sa NCMH 1553 o 911, o dalhin siya sa emergency room. Huwag mangakong ililihim ito." ],
       key: "Ang pagtatanong nang diretso ay pag-aalaga, hindi panganib." },
     { id: "faith", t: "Pananampalataya, hiya, at ang sasabihin ng iba", m: 2, body: [
       "Sa ating kultura, minsan iniisip na ito ay sinapian, kulam, o kahinaan ng pananampalataya. Igalang ang paniniwala ng pamilya; ang dasal at komunidad ay malaking suporta. Pero hindi ito kapalit ng gamutan; magkasama dapat.",
       "Kung sasali kayo sa isang simbahan o faith community: malaking tulong ang small group, sabay na pagdarasal, at pagkanta. Puwedeng ipaalam sa isang pastor o leader na pinagkakatiwalaan ninyo, kung papayag siya. Ang pananaliksik ay nagpapakita na ang suporta ng komunidad ng pananampalataya ay nakakatulong sa paggaling, lalo na kapag sinusuportahan din nito ang gamutan.",
-      "Isang paalala: kung ang mga tema ng relihiyon ay nagiging nakakatakot sa kanya (takot sa parusa o sa masasamang espiritu, o pakiramdam na may espesyal siyang misyon), banggitin ito sa doktor nang mahinahon. Hindi ito pagkontra sa pananampalataya niya; bahagi lang ito ng pag-aalaga. May mga Awit sa app na ito (sa “Para sa ’yo”) na pinili para sa kapayapaan at pahinga.",
+      "Isang paalala: minsan nagiging nakakatakot sa kanya ang mga tema ng relihiyon. Halimbawa, takot sa parusa o sa masasamang espiritu, o pakiramdam na may espesyal siyang misyon. Kung ganito, banggitin ito sa doktor nang mahinahon. Hindi ito pagkontra sa pananampalataya niya; bahagi lang ito ng pag-aalaga. May mga Awit sa app na ito (sa “Para sa ’yo”) na pinili para sa kapayapaan at pahinga.",
       "Ang hiya (“ano ang sasabihin ng kapitbahay”) ay madalas na dahilan kung bakit naaantala ang pagpapatingin. Ang psychosis ay medikal na kondisyon tulad ng diabetes o hika. Walang dapat ikahiya sa pagpapagamot.",
       "May batas tayo, ang Mental Health Act (RA 11036), na nagbibigay ng karapatan sa maayos at makataong pangangalaga." ],
       key: "Pananampalataya at gamutan: magkasama, hindi magkalaban." },
     { id: "recovery", t: "May pag-asa: ang paggaling", m: 2, body: [
       "Maraming taong nagkaroon ng unang episode ng psychosis ang bumubuti nang husto, lalo na kung maaga ang gamutan at may suportadong pamilya. Marami ang nakakabalik sa trabaho, pag-aaral, at sa mga gusto nila, kasama ang musika.",
       "Hindi diretso ang daan; may magagandang linggo at mahihirap na linggo. Ang mahalaga ay ang direksyon, hindi ang bilis.",
-      "Ang musika ay maaaring maging malaking bahagi ng paggaling niya. May pananaliksik (Cochrane review) na ang music therapy, kasabay ng karaniwang gamutan, ay nakakatulong sa pangkalahatang kalagayan, sa mga “bawas” na sintomas, at sa pakikisalamuha. Pero sa tamang panahon at walang pressure." ],
+      "Ang musika ay maaaring maging malaking bahagi ng paggaling niya. Ayon sa isang Cochrane review (malaking pagsusuri ng maraming pag-aaral), nakakatulong ang music therapy kasabay ng karaniwang gamutan. Nakakatulong ito sa pangkalahatang kalagayan, sa mga “bawas” na sintomas, at sa pakikisalamuha. Pero sa tamang panahon at walang pressure." ],
       key: "Hindi ito ang katapusan ng kuwento niya. Isa itong kabanata." },
     { id: "family", t: "Para sa pamilya niyang hindi pa nakakaintindi", m: 2, share: true, body: [
       "Normal na hindi agad maintindihan ng pamilya. Madalas ang unang reaksyon ay galit, hiya, o \u201cnag-iinarte lang.\u201d Ang kailangan nila ay simpleng paliwanag, hindi debate.",
@@ -424,7 +424,7 @@
     { id: "notsick", t: "“Wala akong sakit!”", sit: "Ayaw niyang tanggapin na may problema, at nagagalit kapag binabanggit.",
       avoid: ["“May sakit ka, tanggapin mo na.”", "Pagbabasa ng listahan ng sintomas niya.", "Paulit-ulit na pagbanggit ng diagnosis."],
       say: ["“Okay, hindi natin kailangang pag-usapan ang tawag diyan. Pero napansin kong hirap kang matulog. Totoo ba?”", "“Ano ang gusto mong mabago sa buhay mo ngayon?”", "“Nami-miss mo ba ang pagtugtog? Ano sa tingin mo ang pumipigil?”"],
-      why: "Ayon sa LEAP, ang pagtutok sa mga layunin niya (tulog, stress, musika) ay mas nagbubukas ng daan sa tulong kaysa sa pagpilit na tanggapin ang diagnosis." },
+      why: "Ayon sa LEAP, mas nagbubukas ng daan sa tulong ang pagtutok sa mga layunin niya (tulog, stress, musika). Mas mabisa ito kaysa sa pagpilit na tanggapin niya ang diagnosis." },
     { id: "refuse", t: "Ayaw magpatingin sa doktor", sit: "Tumatanggi siya sa psychiatrist o sa anumang “doktor sa utak.”",
       avoid: ["“Baliw ka kaya kailangan mo ng psychiatrist.”", "Panlilinlang (“pupunta lang tayo sa mall,” pero sa ospital pala). Sinisira nito ang tiwala sa susunod.", "Ultimatum habang nasa krisis."],
       say: ["“Mukhang pagod na pagod ka at hirap kang matulog. May doktor na makakatulong diyan. Sasamahan kita.”", "“Hindi mo kailangang magdesisyon ngayon. Pag-isipan mo lang, at sabihin mo kung handa ka na.”", "“Kahit para sa akin lang, puwede mo bang subukan kahit isang beses? Kung ayaw mo pagkatapos, pag-uusapan natin ulit.”"],
@@ -440,7 +440,7 @@
     { id: "suicide", t: "Nagsasalita tungkol sa kamatayan o pagpapakamatay", sit: "Sinasabi niyang pagod na siya sa buhay, pabigat siya, o mas mabuti kung wala na siya.",
       avoid: ["\u201cHuwag kang magsalita nang ganyan.\u201d (Pinapatahimik siya.)", "Pagsesermon tungkol sa kasalanan o sa pamilya.", "Pag-iwan sa kanya nang mag-isa, o pangakong ililihim mo ito."],
       say: ["\u201cSeryoso ako sa tanong na \u2019to: naiisip mo bang patayin ang sarili mo?\u201d", "\u201cSalamat at sinabi mo sa akin. Hindi kita iiwan. Hahanap tayo ng tulong ngayon.\u201d", "\u201cTatawag tayo sa NCMH ngayon, magkasama.\u201d"],
-      why: "Ang diretsong tanong ay hindi nagtatanim ng ideya. Kung oo ang sagot o may plano siya: manatili sa tabi niya, alisin ang mga mapanganib na bagay, at tumawag sa NCMH 1553 o 911, o pumunta sa emergency room.", danger: true },
+      why: "Ang diretsong tanong ay hindi nagtatanim ng ideya. Kung oo ang sagot o may plano siya: manatili sa tabi niya at alisin ang mga mapanganib na bagay. Tumawag sa NCMH 1553 o 911, o pumunta sa emergency room.", danger: true },
     { id: "after", t: "Pagkatapos ng isang insidente", sit: "Gaya ng pagtumba ng upuan sa bar o pagbasag ng cellphone. Kalmado na siya ngayon.",
       avoid: ["Pagbanggit nito sa harap ng ibang tao, o pagpapahiya.", "\u201cTingnan mo ang ginawa mo!\u201d habang sariwa pa.", "Pagpapanggap na walang nangyari."],
       say: ["\u201cKahapon, mukhang sobrang bigat ng naramdaman mo. Ano ang pinagdaanan mo noon?\u201d", "\u201cHindi kita hinuhusgahan. Gusto ko lang maintindihan para matulungan kita.\u201d", "\u201cAno ang makakatulong para hindi na umabot sa ganoon?\u201d"],
@@ -727,8 +727,8 @@
   }
   const fundsRaised = () => db.funds.gifts.reduce((a, g) => a + (+g.amt || 0), 0);
   const AID = [
-    ["cal", "b-teal", "PhilHealth: mental health package", "May outpatient mental health package ang PhilHealth: mga ₱9,000 bawat taon para sa konsulta, hanggang 12 follow-up, at mga gamot, sa mga accredited na pasilidad (₱16,000 para sa specialty package). Itanong sa clinic kung accredited sila, at kung may co-payment."],
-    ["leaf", "b-sage", "DOH: libreng gamot (MAP-MH)", "Ang Medicine Access Program for Mental Health ng DOH ay nagbibigay ng libreng psychiatric na gamot sa mga access site, gaya ng ilang government hospital at rural health unit (RHU). Kailangan ng updated na reseta. Nag-iiba ang supply; tumawag muna sa RHU o city health office."],
+    ["cal", "b-teal", "PhilHealth: mental health package", "May outpatient mental health package ang PhilHealth para sa konsulta, hanggang 12 follow-up, at mga gamot. Mga ₱9,000 ito bawat taon (₱16,000 para sa specialty package), sa mga accredited na pasilidad. Itanong sa clinic kung accredited sila, at kung may co-payment."],
+    ["leaf", "b-sage", "DOH: libreng gamot (MAP-MH)", "Ang Medicine Access Program for Mental Health ng DOH ay nagbibigay ng libreng psychiatric na gamot. Makukuha ito sa mga access site, gaya ng ilang government hospital at rural health unit (RHU). Kailangan ng updated na reseta. Nag-iiba ang supply; tumawag muna sa RHU o city health office."],
     ["home", "b-sky", "Malasakit Center", "Nasa mga government hospital. Isang desk para sa tulong ng DOH, PCSO, DSWD at PhilHealth. Madalas guarantee letter ang ibinibigay: pangako ng ahensya na sila ang magbabayad sa ospital o botika."],
     ["hand", "b-peach", "DSWD AICS", "Assistance to Individuals in Crisis Situation: tulong medikal, cash o guarantee letter, depende sa halaga at pondo. Puwedeng sa DSWD office, o sa Malasakit Center."],
     ["heart", "b-rose", "PCSO Medical Access Program", "Guarantee letter para sa gamot o gamutan, hindi cash. Karaniwang hinihingi: application form, medical abstract, reseta o quotation, at ID ng pasyente at ng kinatawan."],
@@ -934,9 +934,9 @@
       <div class="sec"><div class="eyebrow">Ang paraan ng app</div><div class="card small" style="line-height:1.6">Inuuna ng app ang tao at ang relasyon, hindi ang sakit. Sa harap: maliliit na paraan para maging malapit sa kanya. Isang pindot lang ang mga aralin, ang plano at ang mga numero. Malinaw pa rin ang impormasyon sa loob ng mga aralin, dahil ang malinaw na kaalaman ang tumutulong sa pamilya. Para lang ito sa girlfriend niya; walang bahagi ng app na para sa kanya mismo o para sa pamilya niya.</div></div>
       <div class="sec"><div class="eyebrow">Saan nakabatay</div><div class="card small" style="line-height:1.6"><ul class="tight">
         <li><b>Family interventions:</b> malamang na nagpapagaan ng pasanin ng pamilya, at maaaring magpababa ng pagbabalik ng sintomas (Cochrane review: Chien et al., 2024; mga naunang review ni Pharoah et al.). Ang behavioural family therapy (Falloon) ay nagtuturo ng mahinahong komunikasyon at magkasamang magagandang gawain.</li>
-        <li><b>Expressed emotion at warmth:</b> sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
-        <li><b>Label at self-stigma:</b> ang paraan ng pagbanggit ng diagnosis ay nakakaapekto sa tingin ng tao sa sarili; ang self-stigma ay humaharang sa paggaling (pag-aaral sa first-episode psychosis, 2023; review sa self-stigma).</li>
-        <li><b>Pananampalataya:</b> ang suporta ng faith community ay kaugnay ng mas magandang paggaling; ang mga talata ay mula sa aklat ng Mga Awit (Ang Biblia, 1905, at World English Bible; parehong public domain), pinili para sa kapayapaan at pahinga.</li>
+        <li><b>Expressed emotion at warmth:</b> ang “expressed emotion” ay ang dami ng batikos at galit sa bahay. Sa 30 pag-aaral, ang madalas na batikos ay kaugnay ng mas madalas na pagbabalik, at ang init at pagtanggap ay nagpoprotekta (meta-analysis: Ma et al., 2021; O’Driscoll et al., 2019; Butzlaff &amp; Hooley, 1998). Dito galing ang pang-araw-araw na “paraan para maging malapit.”</li>
+        <li><b>Label at self-stigma:</b> ang paraan ng pagbanggit ng diagnosis ay nakakaapekto sa tingin ng tao sa sarili. Ang self-stigma (kahihiyan sa sarili) ay humaharang sa paggaling (pag-aaral sa first-episode psychosis, 2023; review sa self-stigma).</li>
+        <li><b>Pananampalataya:</b> ang suporta ng faith community ay kaugnay ng mas magandang paggaling. Ang mga talata ay mula sa aklat ng Mga Awit (Ang Biblia, 1905, at World English Bible; parehong public domain), pinili para sa kapayapaan at pahinga.</li>
         <li><b>Mga pamilyang Pilipino:</b> ang hiya at stigma ay malalaking hadlang sa pagpapatingin; ang suporta ng pamilya ang pinakamalaking tulong (systematic review ng Filipino help-seeking, 2020). Kaya may Private mode at mga mensaheng hindi binabanggit ang diagnosis.</li>
         <li><b>LEAP</b> (Listen, Empathize, Agree, Partner): paraan ng pakikipag-usap sa taong hindi naniniwalang may sakit (Xavier Amador). Malawak na ginagamit; mas limitado ang ebidensya mula sa trials.</li>
         <li><b>Duration of untreated psychosis:</b> mas maagang gamutan, mas magandang paggaling (hal. Marshall et al., 2005; Penttilä et al., 2014).</li>
@@ -947,7 +947,7 @@
         <li><b>Early warning signs at relapse plans:</b> karaniwang may personal na pattern ng senyales bago lumala, madalas kasama ang tulog (Birchwood et al.).</li>
         <li><b>Gamot:</b> ang paghinto ng antipsychotic ang pinakamadalas na dahilan ng pagbabalik; ang long-acting injections ay opsyon para sa iba.</li>
         <li><b>Self-management apps</b> gaya ng FOCUS, Actissist at Horyzons: nakakatulong ang ganitong mga tool kasama ng gamutan.</li></ul></div></div>
-      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang mga numero sa El Nido at Palawan ay mula sa DOH, DSWD, PhilHealth at mga directory; ang ilan ay galing sa mas lumang listahan, kaya tumawag muna. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
+      <div class="sec"><div class="eyebrow">Mga numero</div><div class="card small">Ang NCMH Crisis Hotline (1553 at mobile numbers) at 911 ay na-verify noong Nobyembre 2026. Ang mga numero sa El Nido at Palawan ay mula sa DOH, DSWD, PhilHealth at mga directory. Ang ilan ay galing sa mas lumang listahan, kaya tumawag muna. Ang detalye ng NCMH outpatient ay galing sa secondary sources; tumawag muna para kumpirmahin.</div></div>
       <p class="small muted center" style="margin-top:24px">Kasama · version ${APP_VERSION} · ${APP_DATE}<br>Fonts: Fraunces at Inter (SIL Open Font License)</p>`;
   }
 

@@ -1125,10 +1125,10 @@ function scienceSheet() {
   const items = [
     ["A plan for when and where", "Deciding in advance “after X, I will read” roughly doubles follow-through compared with good intentions alone. That's why your plan is tied to something you already do.", "Gollwitzer & Sheeran (2006), meta-analysis of 94 studies on implementation intentions."],
     ["Start tiny", "A goal small enough to do on a bad day keeps the habit alive. “Just one page” lowers the barrier to starting, and starting is the hard part.", "Fogg (2019), Tiny Habits."],
-    ["66 days, and missing one is fine", "In a study of everyday habits, automaticity took a median of 66 days to plateau, and missing a single day did not meaningfully set people back. Hence the habit journey and a streak that forgives one rest day.", "Lally, van Jaarsveld, Potts & Wardle (2010), European Journal of Social Psychology."],
+    ["66 days, and missing one is fine", "In a study of everyday habits, a new habit took a median of 66 days to become automatic (done without thinking). Missing a single day did not really set people back. Hence the habit journey and a streak that forgives one rest day.", "Lally, van Jaarsveld, Potts & Wardle (2010), European Journal of Social Psychology."],
     ["No all-or-nothing", "When people “break” a strict rule they often give up entirely (the “what-the-hell” effect). A forgiving streak avoids that trap.", "Polivy & Herman (1985) on rule-breaking and disinhibition."],
     ["Seeing the finish line", "People speed up as a goal gets closer. Your daily ring and “X min left in chapter” make the finish line visible and the next step feel small.", "Kivetz, Urminsky & Zheng (2006), the goal-gradient effect."],
-    ["Tracking progress", "Monitoring progress toward a goal reliably improves the odds of reaching it, especially when the progress is recorded.", "Harkin et al. (2016), Psychological Bulletin, meta-analysis of 138 studies."],
+    ["Tracking progress", "Checking your progress toward a goal reliably raises the odds of reaching it, especially when you write the progress down.", "Harkin et al. (2016), Psychological Bulletin, meta-analysis of 138 studies."],
     ["Fresh starts", "New weeks, new months and comebacks feel like a clean slate, and people are more likely to act on goals then. You'll get a nudge on those days.", "Dai, Milkman & Riis (2014), the fresh-start effect."],
     ["Make it a treat", "Pairing a “should” with a “want” (like reading with a favourite drink) increases how often people do it.", "Milkman, Minson & Volpp (2014), temptation bundling."],
     ["Recall to remember", "Retrieving what you've learned, even briefly, improves long-term memory more than re-reading. Hence the one-line note after each session.", "Roediger & Karpicke (2006), the testing effect."],
@@ -1222,7 +1222,7 @@ document.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.
 /* ============================================================
    PWA: install + offline
    ============================================================ */
-const APP_VERSION = "3"; // keep in step with VERSION in sw.js
+const APP_VERSION = "4"; // keep in step with VERSION in sw.js
 let installEvent = null;
 const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 const isIOS = /iphone|ipad|ipod/i.test(UA), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|Messenger|Instagram|; wv\)/i.test(UA);
