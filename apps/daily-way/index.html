@@ -197,7 +197,7 @@
      editions: the app tells you where to read and keeps what you
      capture, privately, on this device.
      ===================================================================== */
-  const APP_VERSION = "6", APP_DATE = "26 Oct 2026";
+  const APP_VERSION = "7", APP_DATE = "26 Oct 2026";
   const DAY = 864e5, $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const today0 = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };

@@ -95,7 +95,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "4";
+  const VER = "5";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* the rendition never shows Chinese characters (a few slipped into the English as glosses) */

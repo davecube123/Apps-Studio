@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Apps Studio</title>
+  <meta name="theme-color" content="#16151a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Apps Studio">
   <style>
     :root { --bg: #fdf8f0; --fg: #222; --card: #fff; --accent: #ff5e5b; --muted: #777; }
     @media (prefers-color-scheme: dark) {
@@ -23,12 +30,20 @@
     .emoji { font-size: 2rem; }
     .card h2 { font-size: 1.1rem; margin: .5rem 0 .25rem; }
     .card p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .card { position: relative; }
+    .card .off { position: absolute; top: 12px; right: 14px; font-size: .75rem; color: #3fb37f; font-weight: 600; }
+    .offline { background: var(--card); border-radius: 14px; padding: 1rem 1.25rem; margin: 0 0 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .offline .t { flex: 1; min-width: 220px; color: var(--muted); font-size: .95rem; }
+    .offline .t b { color: var(--fg); }
+    .offline button { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: .7rem 1rem; background: var(--accent); color: #fff; cursor: pointer; }
+    .offline button:disabled { opacity: .6; cursor: default; }
   </style>
 </head>
 <body>
   <main>
     <h1>🧪 Apps Studio</h1>
     <p class="tag">Random, quirky, and probably unnecessary apps.</p>
+    <div class="offline" id="offline" hidden><div class="t" id="offt"></div><button id="offb">Save all apps for offline</button></div>
     <div class="grid" id="grid"></div>
   </main>
   <script>
@@ -93,11 +108,60 @@
       const a = document.createElement("a");
       a.className = "card";
       a.href = app.path;
-      a.innerHTML = `<div class="emoji"></div><h2></h2><p></p>`;
+      a.innerHTML = `<span class="off" hidden>✓ Offline</span><div class="emoji"></div><h2></h2><p></p>`;
       a.querySelector(".emoji").textContent = app.emoji;
       a.querySelector("h2").textContent = app.name;
       a.querySelector("p").textContent = app.blurb;
       grid.appendChild(a);
+    }
+
+    // Offline: the hub keeps itself cached, and can install every app's own service worker in one go,
+    // so each app opens without a connection even if it was never opened here before.
+    if ("serviceWorker" in navigator) {
+      const box = document.getElementById("offline"), txt = document.getElementById("offt"), btn = document.getElementById("offb");
+      const scopeOf = p => new URL(p, location.href).href;
+      async function savedCount() {
+        let n = 0;
+        for (const app of APPS) {
+          const reg = await navigator.serviceWorker.getRegistration(app.path).catch(() => null);
+          const ok = !!(reg && reg.scope === scopeOf(app.path) && (reg.active || reg.waiting || reg.installing));
+          const card = [...grid.children].find(c => c.getAttribute("href") === app.path);
+          if (card) card.querySelector(".off").hidden = !ok;
+          if (ok) n++;
+        }
+        return n;
+      }
+      async function show() {
+        const n = await savedCount(); box.hidden = false;
+        if (n === APPS.length) { txt.innerHTML = `<b>All ${n} apps are saved for offline.</b> They open without a connection and update themselves when you're online.`; btn.textContent = "Check for updates"; }
+        else { txt.innerHTML = `<b>${n} of ${APPS.length} apps are saved for offline.</b> Save them all (about 15 MB) so every app opens without a connection.`; btn.textContent = "Save all apps for offline"; }
+        btn.disabled = !navigator.onLine;
+        if (!navigator.onLine) txt.innerHTML += " Connect to the internet to save or update.";
+      }
+      const ready = reg => new Promise(res => {
+        const w = reg.installing || reg.waiting; if (!w) return res();
+        const t = setTimeout(res, 30000);
+        w.addEventListener("statechange", () => { if (w.state === "activated" || w.state === "redundant") { clearTimeout(t); res(); } });
+      });
+      async function saveAll(quiet) {
+        btn.disabled = true; let i = 0, failed = 0;
+        for (const app of APPS) {
+          i++; if (!quiet) txt.innerHTML = `<b>Saving ${i} of ${APPS.length}:</b> ${app.name}…`;
+          try { const reg = await navigator.serviceWorker.register(app.path + "sw.js", { scope: app.path }); await reg.update().catch(() => {}); await ready(reg); }
+          catch { failed++; }
+        }
+        try { localStorage.setItem("hub-offline", "1"); } catch {}
+        await show();
+        if (failed && !quiet) txt.innerHTML += ` (${failed} couldn't be saved; try again later.)`;
+      }
+      btn.addEventListener("click", () => saveAll(false));
+      addEventListener("online", show); addEventListener("offline", show);
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+      show().then(() => {
+        // Once saved, keep every app fresh in the background on each visit.
+        let on = false; try { on = localStorage.getItem("hub-offline") === "1"; } catch {}
+        if (on && navigator.onLine) setTimeout(() => saveAll(true), 3000);
+      });
     }
   </script>
 </body>
