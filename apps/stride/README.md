@@ -17,7 +17,7 @@ Runs are stored only on the phone (`localStorage`).
 ## Android app
 
 `native/stride/` wraps this folder with Capacitor so runs and workouts keep tracking and talking with the screen
-locked (background GPS foreground service, native text-to-speech, and a small local `Buzz` plugin that plays vibration patterns with alarm priority). It is built and published by
+locked (background GPS foreground service, native text-to-speech, a small local `Buzz` plugin that plays vibration patterns with alarm priority, and a local `Speak` plugin that ducks Spotify and other music while voice cues play). It is built and published by
 `.github/workflows/stride-apk.yml` as the `stride-apk` release:
 https://github.com/davecube123/Apps-Studio/releases/download/stride-apk/stride.apk
 The same `index.html` detects the app (`window.Capacitor`) and switches to the native plugins.

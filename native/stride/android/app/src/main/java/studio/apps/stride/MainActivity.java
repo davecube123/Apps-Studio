@@ -7,7 +7,8 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        registerPlugin(BuzzPlugin.class); // local plugin: vibration patterns for workout cues
+        registerPlugin(BuzzPlugin.class);  // local plugin: vibration patterns for workout cues
+        registerPlugin(SpeakPlugin.class); // local plugin: voice cues that duck Spotify and other music
         super.onCreate(savedInstanceState);
     }
 
