@@ -50,6 +50,32 @@
   .recenter { position: absolute; right: 10px; bottom: 26px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(23, 27, 25, .92); color: var(--lime); font-size: 20px; line-height: 1; display: none; }
   .recenter.show { display: block; }
   .nomap { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; }
+  .wo { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-top: 14px; border-left: 5px solid var(--kc, var(--lime)); }
+  .wo .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+  .wo .nm { font-size: 22px; font-weight: 800; color: var(--kc, var(--lime)); margin-top: 2px; }
+  .wo .rem { font-size: 40px; font-weight: 800; line-height: 1.1; }
+  .wo .bar { height: 6px; border-radius: 4px; background: #2a312d; margin: 8px 0 6px; overflow: hidden; }
+  .wo .bar i { display: block; height: 100%; background: var(--kc, var(--lime)); width: 0; }
+  .wo .nx { font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .wo .nx button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 10px; padding: 4px 10px; font-size: 13px; }
+  .pick { display: flex; justify-content: center; margin-top: 4px; }
+  .pick button { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 7px 14px; font-size: 14px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick button b { color: var(--lime); }
+  .wcard { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+  .wcard b { font-size: 17px; } .wcard .s { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .strip { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; gap: 2px; }
+  .strip i { display: block; min-width: 3px; }
+  .step { display: grid; grid-template-columns: 1fr 64px 64px 26px 26px; gap: 6px; align-items: center; padding: 8px 10px; background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--kc); border-radius: 12px; margin-bottom: 8px; }
+  .step select, .step input, .grp input { background: #222826; border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 8px 6px; font: inherit; font-size: 15px; width: 100%; min-width: 0; }
+  .step .x, .grp .x { background: none; border: 0; color: var(--muted); font-size: 18px; padding: 0; }
+  .grp { border: 1px dashed rgba(200, 245, 96, .45); border-radius: 14px; padding: 10px 10px 4px; margin-bottom: 10px; }
+  .grp .gh { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 15px; }
+  .grp .gh input { width: 64px; }
+  .addrow { display: flex; gap: 8px; margin: 4px 0 10px; }
+  .addrow button { flex: 1; background: none; border: 1px dashed var(--line); color: var(--muted); border-radius: 10px; padding: 8px; font-size: 14px; }
+  .lap { display: grid; grid-template-columns: 1fr 56px 62px 56px; gap: 6px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; align-items: center; }
+  .lap:last-child { border-bottom: 0; }
+  .lap .k { display: flex; align-items: center; gap: 8px; } .lap .k i { width: 8px; height: 8px; border-radius: 50%; background: var(--kc); flex: none; }
   canvas.route { width: 100%; height: 170px; display: block; background: var(--card); border: 1px solid var(--line); border-radius: 16px; margin-top: 12px; }
   .ctl { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
   .go { width: 100%; max-width: 360px; height: 72px; border-radius: 99px; border: 0; font-size: 22px; font-weight: 800; letter-spacing: .04em; }
@@ -104,13 +130,14 @@
 <main id="app"></main>
 <nav class="tabsbar">
   <a href="#/" data-tab="run"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="4" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 4 3 1M11 15l1-6"/></svg>Run</a>
+  <a href="#/workouts" data-tab="workouts"><svg viewBox="0 0 24 24"><path d="M4 18h3V9H4zM10.5 18h3V5h-3zM17 18h3v-6h-3z"/></svg>Workouts</a>
   <a href="#/history" data-tab="history"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>History</a>
 </nav>
 <script src="lib/leaflet.js"></script>
 <script>
 (() => {
   "use strict";
-  const VER = "3";
+  const VER = "4";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2600) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -121,6 +148,8 @@
   const set = Object.assign({ unit: "km", primary: "pace", voice: true, autoPause: false }, ld("stride-set", {}));
   const saveSet = () => sv("stride-set", set);
   let live = ld("stride-live", null);
+
+  const APK = "https://github.com/davecube123/Apps-Studio/releases/download/stride-apk/stride.apk";
 
   /* ---------- units and formatting ---------- */
   const GOODACC = 25, MAXACC = 40, MAXSPD = 12; // metres, metres, m/s (43 km/h)
@@ -136,13 +165,24 @@
   const unitWord = (k, n) => k === "mi" ? (n === 1 ? "mile" : "miles") : (n === 1 ? "kilometre" : "kilometres");
   const fmtDate = t => new Date(t).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
+  /* ---------- native (Android app) ---------- */
+  // In the Android build (native/stride), Capacitor plugins give GPS and speech that keep working with the screen locked.
+  const CAP = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? window.Capacitor : null;
+  const NP = CAP ? CAP.Plugins : {};
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+
   /* ---------- voice ---------- */
-  const say = text => { if (!set.voice || !("speechSynthesis" in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1; speechSynthesis.speak(u); } catch {} };
+  const say = text => {
+    if (!set.voice) return;
+    if (CAP && NP.TextToSpeech) { NP.TextToSpeech.speak({ text, lang: "en-GB", rate: 1.0, category: "playback" }).catch(() => {}); return; }
+    if (!("speechSynthesis" in window)) return;
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1; speechSynthesis.speak(u); } catch {}
+  };
   const primeVoice = () => { try { if ("speechSynthesis" in window) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch {} };
 
   /* ---------- wake lock ---------- */
   let wake = null;
-  const wakeOn = async () => { try { if ("wakeLock" in navigator && !wake && document.visibilityState === "visible") { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch {} };
+  const wakeOn = async () => { if (CAP) return; try { if ("wakeLock" in navigator && !wake && document.visibilityState === "visible") { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch {} };
   const wakeOff = () => { try { wake && wake.release(); } catch {} wake = null; };
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && (live || acquiring)) { wakeOn(); paint(true); } else if (live) persist(true); });
 
@@ -150,11 +190,26 @@
   let watchId = null, fix = null, acquiring = false, gpsMsg = "", saveAt = 0;
   function startWatch() {
     if (watchId != null) return;
+    if (CAP && NP.BackgroundGeolocation) {
+      gpsMsg = ""; watchId = "pending";
+      const go = () => NP.BackgroundGeolocation.addWatcher({ backgroundTitle: "Stride is recording your run", backgroundMessage: "GPS and voice cues keep going with the screen off.", requestPermissions: true, stale: false, distanceFilter: 0 }, (loc, err) => {
+        if (err) {
+          if (err.code === "NOT_AUTHORIZED") { gpsMsg = "Stride needs location permission. Allow it (Precise, While using the app) in Settings, then tap Start again."; const id = watchId; watchId = null; acquiring = false; if (id && id !== "pending") NP.BackgroundGeolocation.removeWatcher({ id }).catch(() => {}); if (confirm("Stride needs your location to track runs. Open settings now?")) NP.BackgroundGeolocation.openSettings(); }
+          paint(true); return;
+        }
+        if (loc) onPos({ coords: { latitude: loc.latitude, longitude: loc.longitude, accuracy: loc.accuracy, speed: loc.speed }, timestamp: loc.time });
+      }).then(id => { if (watchId === "pending") watchId = id; else NP.BackgroundGeolocation.removeWatcher({ id }).catch(() => {}); });
+      (NP.LocalNotifications ? NP.LocalNotifications.requestPermissions().catch(() => {}) : Promise.resolve()).then(go);
+      return;
+    }
     if (!("geolocation" in navigator)) { gpsMsg = "This browser can't use GPS."; paint(); return; }
     gpsMsg = "";
     watchId = navigator.geolocation.watchPosition(onPos, onErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
-  const stopWatch = () => { if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; fix = null; };
+  const stopWatch = () => {
+    if (watchId != null) { if (CAP && NP.BackgroundGeolocation) { if (watchId !== "pending") NP.BackgroundGeolocation.removeWatcher({ id: watchId }).catch(() => {}); } else navigator.geolocation.clearWatch(watchId); }
+    watchId = null; fix = null;
+  };
   function onErr(e) {
     if (e.code === 1) { gpsMsg = "Location is blocked. Allow location for this site (and Precise location on iPhone) in your settings, then tap Start again."; stopWatch(); acquiring = false; }
     else if (e.code === 2) gpsMsg = "No GPS signal yet. Step outside, away from tall buildings.";
@@ -166,10 +221,14 @@
   function begin() {
     const now = Date.now(); acquiring = false;
     live = { id: String(now), start: now, segs: [[]], acc: 0, resumedAt: now, state: "running", dist: 0, cum: { km: [], mi: [] }, max: 0, lastE: 0, lastMoveAt: now, rej: 0 };
-    persist(true); say("Go"); paint(true);
+    const w = workouts.find(x => x.id === chosen);
+    if (w) { const st = flat(w); if (st.length) { live.wo = { id: w.id, name: w.name, steps: st, i: 0, at: 0, d0: 0, laps: [], cd: false, done: false }; say(`Go. ${w.name}. First, ${stepWords(st[0])}.`); buzz(300); } else say("Go"); }
+    else say("Go");
+    persist(true); paint(true);
   }
 
   function onPos(p) {
+    woTick();
     const c = p.coords, wall = Date.now(); gpsMsg = "";
     fix = { acc: c.accuracy, at: wall, lat: c.latitude, lon: c.longitude };
     if (acquiring && c.accuracy <= GOODACC) begin();
@@ -216,13 +275,65 @@
     return { mps: d / span, span };
   }
 
+  /* ---------- workouts ---------- */
+  const KINDS = { warm: ["Warm up", "#ffb547"], fast: ["Fast", "#ff6b5b"], steady: ["Steady", "#c8f560"], easy: ["Easy", "#5fd3a0"], walk: ["Walk", "#9aa7a1"], cool: ["Cool down", "#6fb7ff"] };
+  const kName = k => (KINDS[k] || KINDS.steady)[0], kCol = k => (KINDS[k] || KINDS.steady)[1];
+  const UNITS = { sec: ["sec", 1, "time"], min: ["min", 60, "time"], m: ["m", 1, "dist"], km: ["km", 1000, "dist"] };
+  const stepBy = st => UNITS[st.u][2], stepV = st => st.n * UNITS[st.u][1];
+  const S = (k, n, u) => ({ k, n, u }), REP = (n, steps) => ({ rep: n, steps });
+  const SEED = [
+    { id: "w-3020", name: "30/2 intervals", steps: [S("warm", 5, "min"), REP(6, [S("fast", 30, "sec"), S("easy", 2, "min")]), S("cool", 5, "min")] },
+    { id: "w-runwalk", name: "Run-walk starter", steps: [S("walk", 5, "min"), REP(8, [S("steady", 1, "min"), S("walk", 90, "sec")]), S("walk", 5, "min")] },
+    { id: "w-pyramid", name: "Pyramid", steps: [S("warm", 10, "min"), S("fast", 1, "min"), S("easy", 1, "min"), S("fast", 2, "min"), S("easy", 2, "min"), S("fast", 3, "min"), S("easy", 2, "min"), S("fast", 2, "min"), S("easy", 1, "min"), S("fast", 1, "min"), S("cool", 5, "min")] },
+    { id: "w-400", name: "400 m repeats", steps: [S("warm", 10, "min"), REP(6, [S("fast", 400, "m"), S("walk", 90, "sec")]), S("cool", 10, "min")] },
+    { id: "w-tempo", name: "Tempo run", steps: [S("warm", 10, "min"), S("steady", 20, "min"), S("cool", 10, "min")] }
+  ];
+  let workouts = ld("stride-workouts", null); if (!Array.isArray(workouts)) { workouts = JSON.parse(JSON.stringify(SEED)); sv("stride-workouts", workouts); }
+  const saveW = () => sv("stride-workouts", workouts);
+  let chosen = ld("stride-chosen", ""); if (chosen && !workouts.some(w => w.id === chosen)) chosen = "";
+  function flat(w) {
+    const out = [];
+    w.steps.forEach(x => { if (x.rep) { for (let r = 1; r <= x.rep; r++) x.steps.forEach(st => out.push({ k: st.k, by: stepBy(st), v: stepV(st), r, of: x.rep })); } else out.push({ k: x.k, by: stepBy(x), v: stepV(x) }); });
+    return out.filter(x => x.v > 0);
+  }
+  const amtWords = st => {
+    if (st.by === "dist") return st.v >= 1000 ? `${+(st.v / 1000).toFixed(2)} kilometre${st.v === 1000 ? "" : "s"}` : `${Math.round(st.v)} metres`;
+    const m = Math.floor(st.v / 60), sec = Math.round(st.v % 60);
+    return [m && `${m} minute${m > 1 ? "s" : ""}`, sec && `${sec} seconds`].filter(Boolean).join(" ");
+  };
+  const stepWords = st => `${kName(st.k)}, ${amtWords(st)}`;
+  const amtShort = st => st.by === "dist" ? (st.v >= 1000 ? `${+(st.v / 1000).toFixed(2)} km` : `${Math.round(st.v)} m`) : fmtTime(st.v * 1000);
+  const wSummary = w => { const st = flat(w); let t = 0, d = 0; st.forEach(x => x.by === "time" ? t += x.v : d += x.v); return [t && `${Math.round(t / 60)} min`, d && `${+(d / 1000).toFixed(2)} km`].filter(Boolean).join(" + ") + ` · ${st.length} steps`; };
+  const strip = w => { const st = flat(w), tot = st.reduce((s, x) => s + (x.by === "time" ? x.v : x.v / 3.3), 0) || 1; return `<div class="strip">${st.map(x => `<i style="flex:${(x.by === "time" ? x.v : x.v / 3.3) / tot};background:${kCol(x.k)}"></i>`).join("")}</div>`; };
+  function woState() {
+    const w = live && live.wo; if (!w || w.done) return null;
+    const st = w.steps[w.i], el = elapsed();
+    const done = st.by === "time" ? (el - w.at) / 1000 : live.dist - w.d0, left = Math.max(0, st.v - done);
+    return { w, st, left, frac: Math.min(1, done / st.v) };
+  }
+  function nextStep(manual) {
+    const w = live.wo, st = w.steps[w.i], el = elapsed();
+    w.laps.push({ k: st.k, by: st.by, v: st.v, t: Math.round(el - w.at), d: Math.round(live.dist - w.d0), skip: manual || undefined });
+    w.i++; w.at = el; w.d0 = live.dist; w.cd = false;
+    if (w.i >= w.steps.length) { w.done = true; say("Workout complete. Great work. Keep going, or finish when you're ready."); buzz([400, 150, 400, 150, 400]); }
+    else { const n = w.steps[w.i]; say(`${n.r ? `${n.r} of ${n.of}. ` : ""}${stepWords(n)}.`); buzz(n.k === "fast" ? [200, 100, 200, 100, 200] : [400]); }
+    persist(true);
+  }
+  function woTick() {
+    const x = woState(); if (!x || live.state !== "running") return;
+    if (x.st.by === "time" && !x.w.cd && x.left <= 3.6 && x.left > 0.5 && x.st.v >= 20) { x.w.cd = true; say("3, 2, 1"); }
+    if (x.left <= 0) nextStep(false);
+  }
+
   function pause() { if (!live) return; const now = Date.now(); if (live.state === "running") live.acc += now - live.resumedAt; live.state = "paused"; say("Paused"); persist(true); paint(true); }
   function resume() { if (!live) return; live.state = "running"; live.resumedAt = Date.now(); live.segs.push([]); live.lastE = elapsed(); live.lastMoveAt = Date.now(); say("Resumed"); persist(true); paint(true); }
   const thin = seg => { const o = []; for (const p of seg) if (!o.length || hav(o[o.length - 1], p) >= 5) o.push(p.slice(0, 3)); const l = seg[seg.length - 1]; if (l && o.length && o[o.length - 1][2] !== l[2]) o.push(l.slice(0, 3)); return o; };
   function finish(save) {
     if (!live) return;
     if (live.state === "running") live.acc += Date.now() - live.resumedAt;
+    if (live.wo && !live.wo.done) { const w = live.wo, st = w.steps[w.i], t = Math.round(live.acc - w.at); if (t > 2000) w.laps.push({ k: st.k, by: st.by, v: st.v, t, d: Math.round(live.dist - w.d0), part: true }); }
     const r = { id: live.id, start: live.start, dur: Math.round(live.acc), dist: Math.round(live.dist * 10) / 10, max: live.max, cum: live.cum, segs: live.segs.map(thin).filter(s => s.length), note: "" };
+    if (live.wo) r.wo = { name: live.wo.name, laps: live.wo.laps };
     live = null; try { localStorage.removeItem("stride-live"); } catch {}
     stopWatch(); wakeOff(); close();
     if (save) { runs.unshift(r); sv("stride-runs", runs); say(`Run saved. ${fmtDist(r.dist)} ${unitWord(set.unit, 2)} in ${spoken(r.dur)}.`); location.hash = `#/r/${r.id}`; }
@@ -234,6 +345,7 @@
       const now = Date.now();
       if (now - live.lastMoveAt > 10000 && now - live.resumedAt > 10000) { live.acc += Math.max(0, live.lastMoveAt - live.resumedAt); live.state = "auto"; say("Auto paused"); persist(true); paint(true); }
     }
+    if (live) woTick();
     if (live || acquiring) paint();
   }, 500);
 
@@ -321,6 +433,7 @@
       <div class="big" data-act="swap" title="Tap to switch pace and speed"><div class="v num" id="bigv">–:–</div><div class="l" id="bigl"></div></div>
       <div class="sub num" id="subv"></div>
       <div class="state" id="state"></div>
+      <div id="wo"></div>
       <div class="grid">
         <div class="tile"><div class="k">Time</div><div class="v num" id="t-time">0:00</div></div>
         <div class="tile"><div class="k">Distance</div><div class="v num"><span id="t-dist">0.00</span><small>${UL()}</small></div></div>
@@ -347,6 +460,7 @@
     $("#t-avg").textContent = pace ? fmtPace(avg) : fmtSpd(avg);
     const cum = live ? live.cum[set.unit] : []; $("#t-last").textContent = cum.length ? fmtTime(cum[cum.length - 1] - (cum[cum.length - 2] || 0)) : "–";
     const st = acquiring ? "acq" : live ? live.state : "idle";
+    paintWo(st);
     $("#state").textContent = gpsMsg || (st === "acq" ? (fix && !stale ? `Waiting for a sharper fix (±${Math.round(fix.acc)} m)…` : "Finding GPS…") : st === "paused" ? "Paused" : st === "auto" ? "Auto-paused: start moving to resume" : "");
     if (force || st !== lastState) {
       lastState = st;
@@ -354,12 +468,70 @@
         : st === "acq" ? `<div style="text-align:center;width:100%"><button class="go start" data-act="begin">START NOW</button><br><button class="link" data-act="cancel">Cancel</button></div>`
         : st === "paused" ? `<button class="go resume half" data-act="resume">RESUME</button><button class="go finish half" data-act="finish">FINISH</button>`
         : `<button class="go pause" data-act="pause">PAUSE</button>`;
-      $("#tips").innerHTML = st === "idle" ? `<div class="tip"><b>Keep Stride open while you run.</b> Phones pause GPS for web apps when the screen locks, so Stride keeps your screen awake during a run. Pop the phone in an armband or pocket with the screen on; if it does lock, the gap is joined with a straight line.</div>` : "";
+      $("#tips").innerHTML = st !== "idle" ? "" : CAP ? `<div class="tip"><b>Lock your phone and run.</b> Stride keeps tracking and talking with the screen off; you'll see a "Stride is recording" notification while it does.</div>`
+        : `<div class="tip"><b>Keep Stride open while you run.</b> Phones pause GPS for web apps when the screen locks, so Stride keeps your screen awake during a run. If it does lock, the gap is joined with a straight line. For runs with the screen locked, get the <a href="${APK}" style="color:var(--lime)">Android app</a>.</div>`;
     }
     if (force || Date.now() - routeAt > 1000) { routeAt = Date.now(); if (HAS_MAP) updLiveMap(); else drawRoute($("#route"), live ? live.segs : [], { live: true, mono: true }); }
     tabDot();
   }
+  let woKey = "";
+  function paintWo(st) {
+    const box = $("#wo"); if (!box) return;
+    if (st === "idle" || st === "acq") {
+      const w = workouts.find(x => x.id === chosen), k = "pick" + chosen;
+      if (woKey !== k) { woKey = k; box.innerHTML = `<div class="pick"><button data-act="pickwo">${w ? `Workout: <b>${esc(w.name)}</b>` : `Free run · <b>choose a workout</b>`} ▾</button></div>`; }
+      return;
+    }
+    const w = live && live.wo;
+    if (!w) { if (woKey !== "none") { woKey = "none"; box.innerHTML = ""; } return; }
+    if (w.done) { if (woKey !== "done") { woKey = "done"; box.innerHTML = `<div class="wo"><div class="top"><span>${esc(w.name)}</span><span>Complete</span></div><div class="nm">Workout complete ✓</div><div class="nx"><span>Keep going, or finish when you're ready.</span></div></div>`; } return; }
+    const x = woState(), s0 = x.st, nx = w.steps[w.i + 1], k = "s" + w.i;
+    if (woKey !== k) {
+      woKey = k;
+      box.innerHTML = `<div class="wo" style="--kc:${kCol(s0.k)}"><div class="top"><span>${esc(w.name)}</span><span>Step ${w.i + 1} of ${w.steps.length}${s0.r ? ` · ${s0.r}/${s0.of}` : ""}</span></div>
+        <div class="row between" style="align-items:flex-end"><div><div class="nm">${kName(s0.k)}</div><div class="tiny muted">${amtShort(s0)}</div></div><div class="rem num" id="worem"></div></div>
+        <div class="bar"><i id="wobar"></i></div>
+        <div class="nx"><span>${nx ? `Next: ${kName(nx.k)} ${amtShort(nx)}` : "Last step"}</span><button data-act="skipstep">Skip ›</button></div></div>`;
+    }
+    $("#worem").textContent = s0.by === "time" ? fmtTime(Math.ceil(x.left) * 1000) : (x.left >= 1000 ? `${(x.left / 1000).toFixed(2)} km` : `${Math.round(x.left)} m`);
+    $("#wobar").style.width = (x.frac * 100).toFixed(1) + "%";
+  }
   const tabDot = () => { const a = $('[data-tab="run"]'); if (!a) return; const has = !!(live && view !== "run"); if (has && !a.querySelector(".dot")) a.insertAdjacentHTML("beforeend", `<span class="dot"></span>`); if (!has) a.querySelector(".dot")?.remove(); };
+
+  /* ---------- workout list and editor ---------- */
+  function workoutsView() {
+    return `<h1>Workouts</h1><p class="muted small" style="margin-top:-6px">Design a session once: Stride counts down each step and tells you when to change, with the screen on or off.</p>
+      ${workouts.map(w => `<a class="wcard" href="#/w/${w.id}"><div class="row between"><b>${esc(w.name)}</b>${w.id === chosen ? `<span class="tiny" style="color:var(--lime)">Selected</span>` : `<span class="chev muted">›</span>`}</div><div class="s">${esc(wSummary(w))}</div>${strip(w)}</a>`).join("")}
+      <button class="btn pri block" data-act="neww">+ New workout</button>`;
+  }
+  const kindSel = (k, path) => `<select data-path="${path}" data-f="k">${Object.entries(KINDS).map(([id, [nm]]) => `<option value="${id}"${id === k ? " selected" : ""}>${nm}</option>`).join("")}</select>`;
+  const unitSel = (u, path) => `<select data-path="${path}" data-f="u">${Object.keys(UNITS).map(id => `<option value="${id}"${id === u ? " selected" : ""}>${UNITS[id][0]}</option>`).join("")}</select>`;
+  const stepRow = (st, path) => `<div class="step" style="--kc:${kCol(st.k)}">${kindSel(st.k, path)}<input type="number" inputmode="decimal" min="0" step="any" value="${st.n}" data-path="${path}" data-f="n" aria-label="Amount">${unitSel(st.u, path)}<button class="x" data-act="upstep" data-path="${path}" aria-label="Move up">↑</button><button class="x" data-act="delstep" data-path="${path}" aria-label="Remove">✕</button></div>`;
+  function editorView(w) {
+    return `<a href="#/workouts" class="tiny muted">‹ Workouts</a>
+      <input class="note" id="wname" value="${esc(w.name)}" placeholder="Workout name" style="font-size:20px;font-weight:700;margin-top:8px">
+      <div class="muted small" style="margin:8px 0 2px">${esc(wSummary(w))}</div>${strip(w)}
+      <h3>Steps</h3>
+      ${w.steps.map((x, i) => x.rep ? `<div class="grp"><div class="gh">Repeat <input type="number" inputmode="numeric" min="1" value="${x.rep}" data-path="${i}" data-f="rep"> times<button class="x" data-act="upstep" data-path="${i}" style="margin-left:auto" aria-label="Move block up">↑</button><button class="x" data-act="delstep" data-path="${i}" aria-label="Remove block">✕</button></div>
+          ${x.steps.map((st, j) => stepRow(st, i + "." + j)).join("")}<div class="addrow"><button data-act="addstep" data-path="${i}">+ Step in this block</button></div></div>` : stepRow(x, String(i))).join("")}
+      <div class="addrow"><button data-act="addstep" data-path="">+ Step</button><button data-act="addrep">+ Repeat block</button></div>
+      <button class="btn pri block" data-act="usew" data-id="${w.id}">${w.id === chosen ? "Selected ✓ Go to Run" : "Use this workout"}</button>
+      <button class="btn block" data-act="dupw" data-id="${w.id}">Duplicate</button>
+      <button class="btn block danger" data-act="delw" data-id="${w.id}">Delete workout</button>
+      <p class="tiny muted" style="margin-top:12px">Time steps count moving time, so pausing pauses the step. Distance steps use GPS distance. Tap Skip during a run to move on early.</p>`;
+  }
+  let editing = null;
+  const at = (w, path) => { const [i, j] = String(path).split(".").map(Number); return j == null || Number.isNaN(j) ? [w.steps, i] : [w.steps[i].steps, j]; };
+  function wEdit(ev) {
+    const el = ev.target; if (!editing || !el.dataset || !el.dataset.f) return;
+    const [arr, k] = at(editing, el.dataset.path), f = el.dataset.f, x = arr[k];
+    if (f === "rep") x.rep = Math.max(1, Math.min(50, Math.round(+el.value || 1)));
+    else if (f === "n") x.n = Math.max(0, +el.value || 0);
+    else if (f === "u") { const was = UNITS[x.u][2]; x.u = el.value; if (UNITS[x.u][2] !== was) x.n = x.u === "km" ? 1 : x.u === "m" ? 400 : x.u === "min" ? 1 : 30; }
+    else x[f] = el.value;
+    saveW(); const y = scrollY; render(); scrollTo(0, y);
+  }
+  document.addEventListener("change", wEdit);
 
   /* ---------- history ---------- */
   const avgOf = r => r.dur > 0 ? r.dist / (r.dur / 1000) : 0;
@@ -371,7 +543,7 @@
     return `<h1>History</h1>
       <div class="tot">${[["This week", W], ["This month", M], ["All time", A]].map(([k, f]) => `<div class="tile"><div class="k">${k}</div><div class="v num">${fmtDist(sum(f))}<small>${UL()}</small></div><div class="tiny muted">${cnt(f)} run${cnt(f) === 1 ? "" : "s"}</div></div>`).join("")}</div>
       <h3>Runs</h3>
-      ${runs.length ? `<div class="card">${runs.map(r => `<a class="run" href="#/r/${r.id}"><div class="d num">${fmtDist(r.dist)}<small> ${UL()}</small></div><div style="min-width:0"><div class="small">${esc(r.note || fmtDate(r.start))}</div><div class="tiny muted num">${fmtTime(r.dur)} · ${fmtPace(avgOf(r))} /${UL()} · ${fmtSpd(avgOf(r))} ${SL()}${r.note ? " · " + esc(fmtDate(r.start)) : ""}</div></div><span class="chev">›</span></a>`).join("")}</div>`
+      ${runs.length ? `<div class="card">${runs.map(r => `<a class="run" href="#/r/${r.id}"><div class="d num">${fmtDist(r.dist)}<small> ${UL()}</small></div><div style="min-width:0"><div class="small">${esc(r.note || fmtDate(r.start))}</div><div class="tiny muted num">${r.wo ? esc(r.wo.name) + " · " : ""}${fmtTime(r.dur)} · ${fmtPace(avgOf(r))} /${UL()} · ${fmtSpd(avgOf(r))} ${SL()}${r.note ? " · " + esc(fmtDate(r.start)) : ""}</div></div><span class="chev">›</span></a>`).join("")}</div>`
         : `<p class="muted">No runs yet. Tap Run, then Start, and your runs will gather here.</p>`}`;
   }
   function detailView(r) {
@@ -391,6 +563,7 @@
         <div class="tile"><div class="k">Best ${UL()}</div><div class="v num">${best ? fmtTime(best) : "–"}</div></div>
         <div class="tile"><div class="k">Distance</div><div class="v num">${fmtDist(r.dist)}<small>${UL()}</small></div></div>
       </div>
+      ${r.wo && r.wo.laps.length ? `<h3>Workout: ${esc(r.wo.name)}</h3><div class="card">${r.wo.laps.map(l => `<div class="lap num" style="--kc:${kCol(l.k)}"><span class="k"><i></i>${kName(l.k)}${l.part ? " (part)" : l.skip ? " (skipped)" : ""}</span><span>${fmtTime(l.t)}</span><span>${l.d >= 1000 ? (l.d / 1000).toFixed(2) + " km" : l.d + " m"}</span><span class="muted">${fmtPace(l.t > 0 ? l.d / (l.t / 1000) : 0)}</span></div>`).join("")}</div><div class="tiny muted" style="margin-top:6px">Each step: time, distance and pace per ${UL()}.</div>` : ""}
       <h3>Splits</h3>
       ${splits.length || restD > 1 ? `<div class="card">${splits.map((s, i) => `<div class="split num${s === best && splits.length > 1 ? " best" : ""}"><span class="muted">${i + 1}</span><div class="bar" style="width:${Math.max(8, 100 * (best / s))}%"></div><span>${fmtTime(s)}</span><span class="muted tiny">${fmtSpd(U() / (s / 1000))}</span></div>`).join("")}
         ${restD > 1 ? `<div class="split part num"><span class="muted tiny">${(restD / U()).toFixed(2)}</span><div class="bar" style="width:${Math.max(8, 100 * ((best || restT / (restD / U())) / (restT / (restD / U()))))}%"></div><span>${fmtTime(restT)}</span><span class="muted tiny">${fmtSpd(restD / Math.max(1, restT / 1000))}</span></div>` : ""}</div>
@@ -405,11 +578,18 @@
   let view = "run";
   function render() {
     const h = location.hash.replace(/^#\/?/, "").split("/"), app = $("#app");
-    view = h[0] === "history" ? "history" : h[0] === "r" ? "detail" : "run";
-    $$(".tabsbar a").forEach(a => a.classList.toggle("on", a.dataset.tab === (view === "detail" ? "history" : view)));
+    view = h[0] === "history" ? "history" : h[0] === "r" ? "detail" : h[0] === "workouts" ? "workouts" : h[0] === "w" ? "editor" : "run";
+    $$(".tabsbar a").forEach(a => a.classList.toggle("on", a.dataset.tab === (view === "detail" ? "history" : view === "editor" ? "workouts" : view)));
+    editing = null; woKey = "";
     dropLiveMap();
     if (view === "run") { app.innerHTML = runView(); lastState = ""; initLiveMap(); paint(true); }
     else if (view === "history") { app.innerHTML = historyView(); tabDot(); }
+    else if (view === "workouts") { app.innerHTML = workoutsView(); tabDot(); }
+    else if (view === "editor") {
+      const w = workouts.find(x => x.id === h[1]); if (!w) { location.replace("#/workouts"); return; }
+      editing = w; app.innerHTML = editorView(w); tabDot();
+      $("#wname").addEventListener("change", e => { w.name = e.target.value.trim().slice(0, 60) || "Workout"; saveW(); });
+    }
     else {
       const r = runs.find(x => x.id === h[1]); if (!r) { location.replace("#/history"); return; }
       app.innerHTML = detailView(r); tabDot();
@@ -432,8 +612,9 @@
       <div class="opt"><div><div>Auto-pause</div><div class="tiny muted">Pauses the clock when you stop (traffic lights), resumes when you move</div></div><button class="sw ${set.autoPause ? "on" : ""}" data-act="tog" data-k="autoPause" aria-label="Auto-pause"></button></div>
       <button class="btn block" data-act="export">Back up my runs</button>
       <button class="btn block" data-act="import">Restore a backup</button>
-      ${isStandalone() ? "" : `<button class="btn pri block" data-act="install">Install Stride</button>`}
-      <p class="tiny muted" style="text-align:center;margin-top:14px">Stride v${VER} · your runs stay on this phone</p>`);
+      ${CAP || isStandalone() ? "" : `<button class="btn pri block" data-act="install">Install Stride</button>`}
+      ${CAP ? "" : `<a class="btn block" href="${APK}">Get the Android app (runs with the screen locked)</a>`}
+      <p class="tiny muted" style="text-align:center;margin-top:14px">Stride v${VER}${CAP ? " (Android app)" : ""} · your runs stay on this phone</p>`);
   }
   function finishSheet() {
     const el = elapsed(), avg = el > 1000 ? live.dist / (el / 1000) : 0;
@@ -442,7 +623,11 @@
       <button class="btn block" data-act="keep">Keep going</button>
       <button class="btn block danger" data-act="discard">Discard</button>`);
   }
-  function download(name, text, type) {
+  async function download(name, text, type) {
+    if (CAP && NP.Filesystem && NP.Share) {
+      try { const f = await NP.Filesystem.writeFile({ path: name, data: text, directory: "CACHE", encoding: "utf8" }); await NP.Share.share({ title: name, url: f.uri, dialogTitle: "Save or send " + name }); } catch (e) { if (!/cancel/i.test(String(e && e.message))) toast("Couldn't share the file"); }
+      return;
+    }
     const file = new File([text], name, { type });
     if (navigator.canShare && navigator.canShare({ files: [file] }) && /iphone|ipad|android/i.test(navigator.userAgent)) { navigator.share({ files: [file] }).catch(() => {}); return; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
@@ -476,6 +661,20 @@
     else if (a === "begin") { begin(); }
     else if (a === "cancel") { acquiring = false; stopWatch(); wakeOff(); paint(true); }
     else if (a === "recenter") { follow = true; el.classList.remove("show"); if (fix && liveMap) liveMap.setView([fix.lat, fix.lon], Math.max(liveMap.getZoom(), 16)); }
+    else if (a === "pickwo") sheet(`<h2>Choose a workout</h2>
+        <button class="btn block" data-act="choose" data-id="">${!chosen ? "✓ " : ""}Free run (no workout)</button>
+        ${workouts.map(w => `<button class="btn block" data-act="choose" data-id="${w.id}" style="flex-direction:column;align-items:stretch;text-align:left"><span>${w.id === chosen ? "✓ " : ""}${esc(w.name)}</span><span class="tiny muted" style="font-weight:400">${esc(wSummary(w))}</span>${strip(w)}</button>`).join("")}
+        <a class="btn block" href="#/workouts" style="background:none">Edit or create workouts ›</a>`);
+    else if (a === "choose") { chosen = el.dataset.id; sv("stride-chosen", chosen); close(); woKey = ""; paint(true); }
+    else if (a === "skipstep") { if (live && live.wo && !live.wo.done) { nextStep(true); woKey = ""; paint(true); } }
+    else if (a === "neww") { const w = { id: "w-" + Date.now().toString(36), name: "My workout", steps: [S("warm", 5, "min"), REP(4, [S("fast", 1, "min"), S("easy", 2, "min")]), S("cool", 5, "min")] }; workouts.push(w); saveW(); location.hash = `#/w/${w.id}`; }
+    else if (a === "addstep") { const p = el.dataset.path; (p === "" ? editing.steps : editing.steps[+p].steps).push(S("easy", 1, "min")); saveW(); const y = scrollY; render(); scrollTo(0, y); }
+    else if (a === "addrep") { editing.steps.push(REP(4, [S("fast", 30, "sec"), S("easy", 1, "min")])); saveW(); const y = scrollY; render(); scrollTo(0, y); }
+    else if (a === "upstep") { const [arr, k] = at(editing, el.dataset.path); if (k > 0) { [arr[k - 1], arr[k]] = [arr[k], arr[k - 1]]; saveW(); const y = scrollY; render(); scrollTo(0, y); } }
+    else if (a === "delstep") { const [arr, k] = at(editing, el.dataset.path); arr.splice(k, 1); editing.steps = editing.steps.filter(x => !x.rep || x.steps.length); saveW(); const y = scrollY; render(); scrollTo(0, y); }
+    else if (a === "usew") { chosen = el.dataset.id; sv("stride-chosen", chosen); location.hash = "#/"; if (!live) toast("Workout selected. Tap Start when you're ready."); }
+    else if (a === "dupw") { const w = workouts.find(x => x.id === el.dataset.id); if (w) { const c = JSON.parse(JSON.stringify(w)); c.id = "w-" + Date.now().toString(36); c.name = w.name + " (copy)"; workouts.push(c); saveW(); location.hash = `#/w/${c.id}`; } }
+    else if (a === "delw") { if (confirm("Delete this workout?")) { workouts = workouts.filter(x => x.id !== el.dataset.id); if (chosen === el.dataset.id) { chosen = ""; sv("stride-chosen", ""); } saveW(); location.hash = "#/workouts"; } }
     else if (a === "pause") pause();
     else if (a === "resume") resume();
     else if (a === "finish") finishSheet();
@@ -488,8 +687,9 @@
     else if (a === "tog") { set[el.dataset.k] = !set[el.dataset.k]; saveSet(); el.classList.toggle("on", set[el.dataset.k]); }
     else if (a === "gpx") { const r = runs.find(x => x.id === el.dataset.id); if (r) download(`stride-${new Date(r.start).toISOString().slice(0, 10)}.gpx`, gpx(r), "application/gpx+xml"); }
     else if (a === "del") { if (confirm("Delete this run?")) { runs = runs.filter(x => x.id !== el.dataset.id); sv("stride-runs", runs); location.hash = "#/history"; } }
-    else if (a === "export") download(`stride-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "stride", v: 1, runs }), "application/json");
-    else if (a === "import") { const i = document.createElement("input"); i.type = "file"; i.accept = ".json,application/json"; i.onchange = async () => { try { const d = JSON.parse(await i.files[0].text()); if (d.app !== "stride" || !Array.isArray(d.runs)) throw 0; const have = new Set(runs.map(r => r.id)); let n = 0; d.runs.forEach(r => { if (r && r.id && !have.has(r.id) && Array.isArray(r.segs)) { runs.push(r); n++; } }); runs.sort((x, y) => y.start - x.start); sv("stride-runs", runs); close(); render(); toast(`Restored ${n} run${n === 1 ? "" : "s"}`); } catch { toast("That isn't a Stride backup"); } }; i.click(); }
+    else if (a === "export") download(`stride-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "stride", v: 2, runs, workouts }), "application/json");
+    else if (a === "import") { const i = document.createElement("input"); i.type = "file"; i.accept = ".json,application/json"; i.onchange = async () => { try { const d = JSON.parse(await i.files[0].text()); if (d.app !== "stride" || !Array.isArray(d.runs)) throw 0; const have = new Set(runs.map(r => r.id)); let n = 0; d.runs.forEach(r => { if (r && r.id && !have.has(r.id) && Array.isArray(r.segs)) { runs.push(r); n++; } });
+          if (Array.isArray(d.workouts)) { const hw = new Set(workouts.map(w => w.id)); d.workouts.forEach(w => { if (w && w.id && !hw.has(w.id) && Array.isArray(w.steps)) workouts.push(w); }); saveW(); } runs.sort((x, y) => y.start - x.start); sv("stride-runs", runs); close(); render(); toast(`Restored ${n} run${n === 1 ? "" : "s"}`); } catch { toast("That isn't a Stride backup"); } }; i.click(); }
     else if (a === "install") showInstall(true);
     else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
     else if (a === "notnow") { try { localStorage.setItem("stride-install-snooze", String(Date.now())); } catch {} close(); }
@@ -499,8 +699,10 @@
   /* ---------- start ---------- */
   if (live) { if (live.state === "acquiring") live = null; else { startWatch(); wakeOn(); setTimeout(() => toast("Your run is still going"), 300); } }
   render();
-  setTimeout(() => showInstall(false), 6000);
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  if (!CAP) {
+    setTimeout(() => showInstall(false), 6000);
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
 })();
 </script>
 </body>

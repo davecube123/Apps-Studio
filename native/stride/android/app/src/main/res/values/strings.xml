@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Stride</string>
+    <string name="title_activity_main">Stride</string>
+    <string name="package_name">studio.apps.stride</string>
+    <string name="custom_url_scheme">studio.apps.stride</string>
+    <!-- Background GPS notification (capacitor-community/background-geolocation) -->
+    <string name="capacitor_background_geolocation_notification_icon">ic_stat_stride</string>
+    <string name="capacitor_background_geolocation_notification_color">#C8F560</string>
+</resources>

@@ -1,0 +1,22 @@
+{
+  "name": "stride-android",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Android wrapper for the Stride PWA (apps/stride), adding background GPS and spoken cues with the screen locked.",
+  "scripts": {
+    "copy-web": "rm -rf www && mkdir -p www && cp -R ../../apps/stride/. www/ && rm -f www/README.md",
+    "sync": "npm run copy-web && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor-community/background-geolocation": "1.3.2",
+    "@capacitor-community/text-to-speech": "6.1.0",
+    "@capacitor/android": "7.6.10",
+    "@capacitor/core": "7.6.10",
+    "@capacitor/filesystem": "7.1.9",
+    "@capacitor/local-notifications": "7.0.7",
+    "@capacitor/share": "7.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.10"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "appId": "studio.apps.stride",
+  "appName": "Stride",
+  "webDir": "www",
+  "android": {
+    "useLegacyBridge": true,
+    "backgroundColor": "#0d100f"
+  }
+}
