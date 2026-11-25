@@ -58,6 +58,48 @@
   .brandmark { font-weight: 900; letter-spacing: -.03em; font-size: 17px; display: inline-flex; align-items: center; gap: 7px; }
   .brandmark i { width: 9px; height: 9px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); }
   .recenter { position: absolute; right: 14px; bottom: 22px; z-index: 1000; display: none; color: var(--lime); }
+  main.flush { position: relative; }
+  .runtop { position: absolute; top: calc(12px + env(safe-area-inset-top)); left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; z-index: 1200; }
+  body.running .runtop { position: fixed; max-width: 532px; margin: 0 auto; }
+  .modesw { display: inline-flex; padding: 4px; border-radius: 99px; gap: 2px; }
+  .modesw button { border: 0; background: none; color: var(--ink2); height: 32px; padding: 0 13px; border-radius: 99px; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 750; transition: background .2s, color .2s; }
+  .modesw button.on { background: var(--lime); color: var(--lime-ink); }
+  .modesw svg { width: 16px; height: 16px; stroke-width: 2.4; }
+
+  /* full stats view */
+  body.m-stats .hero { display: none; }
+  body.m-stats .panel { padding-top: calc(66px + env(safe-area-inset-top)); }
+  body.m-stats .metric { margin-top: 26px; }
+  body.m-stats .metric .val { font-size: clamp(100px, 31vw, 156px); }
+  body.m-stats .stats { margin-top: 30px; }
+  body.m-stats .stat .v { font-size: 32px; }
+
+  /* full map view, stats on a card */
+  body.m-map .hero { position: fixed; inset: 0; height: auto; min-height: 0; max-height: none; z-index: 0; }
+  body.m-map .hero .map { border-radius: 0; }
+  body.m-map .hero .fade { display: none; }
+  body.m-map .recenter { bottom: auto; top: calc(64px + env(safe-area-inset-top)); }
+  body.m-map .panel { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); max-width: 540px; margin: 0 auto; z-index: 1100; padding: 12px 14px 12px;
+    border-radius: 28px; background: rgba(13, 15, 16, .88); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); border: 1px solid rgba(255, 255, 255, .08); box-shadow: 0 -8px 40px rgba(0, 0, 0, .45); }
+  body.m-map .statepill { margin: 0 auto 8px; }
+  body.m-map .wo { margin: 0 0 4px; padding: 10px 12px 9px; background: rgba(255, 255, 255, .045); border-radius: 18px; }
+  body.m-map .wo .top { display: none; }
+  body.m-map .wo .nm { font-size: 18px; } body.m-map .wo .rem { font-size: 30px; }
+  body.m-map .wo .bar { margin: 6px 0 6px; height: 5px; }
+  body.m-map .wo .nx { font-size: 12.5px; } body.m-map .wo .nx button { padding: 4px 12px; font-size: 12.5px; }
+  body.m-map .wo .row > div > .tiny { display: none; }
+  body.m-map .metric { margin-top: 6px; display: flex; align-items: baseline; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  body.m-map .metric .val { font-size: 54px; }
+  body.m-map .metric .lbl { margin-top: 0; font-size: 11px; }
+  body.m-map .metric .sub { display: none; }
+  body.m-map .stats { margin: 8px 0 0; }
+  body.m-map .stat .v { font-size: 21px; } body.m-map .stat .v small { font-size: 11px; }
+  body.m-map .stat .k { font-size: 10px; }
+  body.m-map .lastsplit, body.m-map #tips { display: none; }
+  body.m-map .ctl { margin: 12px 0 0; gap: 20px; }
+  body.m-map .cbtn { font-size: 0; gap: 0; }
+  body.m-map .cbtn .c { width: 58px; height: 58px; }
+  body.m-map .cbtn svg { width: 24px; height: 24px; }
   .recenter.show { display: inline-flex; }
   .map.dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.95); }
   .leaflet-container { background: #15191a; font: 11px var(--ui); }
@@ -216,7 +258,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "6";
+  const VER = "7";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const toast = (m, ms = 2600) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
@@ -224,7 +266,7 @@
   const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { toast("Storage is full. Export and delete some old runs."); return false; } };
 
   let runs = ld("stride-runs", []);
-  const set = Object.assign({ unit: "km", primary: "pace", voice: true, autoPause: false, vibe: true, ticks: true }, ld("stride-set", {}));
+  const set = Object.assign({ unit: "km", primary: "pace", voice: true, autoPause: false, vibe: true, ticks: true, runView: "stats" }, ld("stride-set", {}));
   const saveSet = () => sv("stride-set", set);
   let live = ld("stride-live", null);
 
@@ -501,6 +543,12 @@
     setTimeout(() => liveMap && liveMap.invalidateSize(), 400);
     updLiveMap();
   }
+  // Keep you centred in the part of the map you can see (above the stats card in map view).
+  function centerOn(pos, zoom, animate) {
+    const z = zoom ?? liveMap.getZoom(), card = document.body.classList.contains("m-map") ? ($(".panel")?.offsetHeight || 0) : 0;
+    const target = card ? liveMap.unproject(liveMap.project(pos, z).add([0, card / 2]), z) : pos;
+    if (zoom != null || !animate) liveMap.setView(target, z, { animate: !!animate }); else liveMap.panTo(target, { animate: true });
+  }
   function updLiveMap() {
     if (!liveMap) return;
     const segs = live ? live.segs.filter(s => s.length).map(s => s.map(p => [p[0], p[1]])) : [];
@@ -509,7 +557,7 @@
     if (first) { liveStart.setLatLng(first); if (!liveMap.hasLayer(liveStart)) liveStart.addTo(liveMap); } else if (liveMap.hasLayer(liveStart)) liveStart.remove();
     if (fix && fix.lat != null && watchId != null) {
       const pos = [fix.lat, fix.lon]; liveDot.setLatLng(pos); if (!liveMap.hasLayer(liveDot)) liveDot.addTo(liveMap);
-      if (follow) { if (!mapCentered) { liveMap.setView(pos, 17); mapCentered = true; } else liveMap.panTo(pos, { animate: true }); }
+      if (follow) { if (!mapCentered) { centerOn(pos, 17); mapCentered = true; } else centerOn(pos, null, true); }
     } else if (liveMap.hasLayer(liveDot)) liveDot.remove();
   }
   function detailMap(r) {
@@ -532,6 +580,8 @@
     pause: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>`,
     stop: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>`,
     bolt: `<svg class="i" viewBox="0 0 24 24"><path d="M3 12h2.5l2-5 3.5 10 3-7 2 4H21"/></svg>`,
+    stats: `<svg class="i" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>`,
+    map: `<svg class="i" viewBox="0 0 24 24"><path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>`,
     run: `<svg class="i" viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="2"/><path d="M7.5 21l2.8-6.2 3 2.6V22M5.5 12.5l3.2-3.8 4.3.9 2.6 3.6 3.4.8M10.3 14.8l1.4-6.1"/></svg>`
   };
   const runName = r => { const h = new Date(r.start).getHours(); return h < 5 ? "Night run" : h < 12 ? "Morning run" : h < 17 ? "Afternoon run" : h < 21 ? "Evening run" : "Night run"; };
@@ -540,8 +590,8 @@
   /* ---------- run screen ---------- */
   let lastState = "", routeAt = 0;
   function runView() {
-    return `<div class="hero" id="hero">${HAS_MAP ? `<div class="map" id="map"></div>` : `<div class="map"><canvas class="route" id="route"></canvas></div>`}<div class="fade"></div>
-        <div class="topbar"><span class="brandmark glass pillb"><i></i>Stride</span><span class="row" style="gap:8px"><span id="gps" class="pillb glass"><i class="gdot"></i><span>GPS off</span></span><button class="iconb glass" data-act="settings" aria-label="Settings">${I.gear}</button></span></div>
+    return `<div class="runtop"><span class="brandmark glass pillb idle-only"><i></i>Stride</span><span class="modesw glass active-only" role="tablist" aria-label="View"><button data-act="mode" data-v="stats" role="tab">${I.stats}Stats</button><button data-act="mode" data-v="map" role="tab">${I.map}Map</button></span><span class="row" style="gap:8px"><span id="gps" class="pillb glass"><i class="gdot"></i><span>GPS off</span></span><button class="iconb glass" data-act="settings" aria-label="Settings">${I.gear}</button></span></div>
+      <div class="hero" id="hero">${HAS_MAP ? `<div class="map" id="map"></div>` : `<div class="map"><canvas class="route" id="route"></canvas></div>`}<div class="fade"></div>
         <button class="iconb glass recenter" data-act="recenter" aria-label="Back to my position">${I.loc}</button>
         <div class="ttl idle-only"><div class="eyebrow">${esc(new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" }))}</div><h1>Ready to run?</h1></div></div>
       <div class="panel">
@@ -587,7 +637,7 @@
       const app = $("#app"); app.classList.toggle("is-idle", idle); document.body.classList.toggle("running", !idle);
       $$(".active-only").forEach(e => e.style.display = idle ? "none" : "");
       $$(".idle-only").forEach(e => e.style.display = idle ? "" : "none");
-      $("#hero").classList.toggle("short", !idle);
+      applyMode(idle);
       if (wasIdle !== idle) setTimeout(() => liveMap && liveMap.invalidateSize(), 380);
       $("#ctl").innerHTML = st === "idle" ? `<button class="cbtn go" data-act="start"><span class="c">START</span></button>`
         : st === "acq" ? `<div style="text-align:center"><button class="cbtn go" data-act="begin"><span class="c">GO</span></button><br><button class="link" data-act="cancel">Cancel</button></div>`
@@ -598,6 +648,13 @@
     }
     if (force || Date.now() - routeAt > 1000) { routeAt = Date.now(); if (HAS_MAP) updLiveMap(); else drawRoute($("#route"), live ? live.segs : [], { live: true, mono: true }); }
     tabDot();
+  }
+  // Two views while running: full stats (no map), or a full-screen map with a compact stats card.
+  function applyMode(idle) {
+    const b = document.body, map = !idle && set.runView === "map";
+    b.classList.toggle("m-map", map); b.classList.toggle("m-stats", !idle && !map);
+    $$(".modesw button").forEach(x => x.classList.toggle("on", x.dataset.v === (map ? "map" : "stats")));
+    if (map && liveMap) setTimeout(() => { liveMap.invalidateSize(); if (follow && fix && fix.lat != null) centerOn([fix.lat, fix.lon], Math.max(liveMap.getZoom(), 16)); }, 60);
   }
   let woKey = "";
   function paintWo(st) {
@@ -715,7 +772,7 @@
     view = h[0] === "history" ? "history" : h[0] === "r" ? "detail" : h[0] === "workouts" ? "workouts" : h[0] === "w" ? "editor" : "run";
     $$(".tabsbar a").forEach(a => a.classList.toggle("on", a.dataset.tab === (view === "detail" ? "history" : view === "editor" ? "workouts" : view)));
     editing = null; woKey = "";
-    dropLiveMap(); document.body.classList.remove("running");
+    dropLiveMap(); ["running", "m-map", "m-stats"].forEach(c => document.body.classList.toggle(c, false));
     app.className = view === "run" || view === "detail" ? "flush" : "";
     if (view === "run") { app.innerHTML = runView(); lastState = ""; initLiveMap(); paint(true); }
     else if (view === "history") { app.innerHTML = historyView(); tabDot(); $$("canvas[data-thumb]").forEach(c => { const r = runs.find(x => x.id === c.dataset.thumb); if (r) drawRoute(c, r.segs, { mono: true, thumb: true, empty: " " }); }); }
@@ -801,7 +858,7 @@
     if (a === "start") { primeVoice(); acquiring = true; startWatch(); wakeOn(); if (fix && fix.acc <= GOODACC && Date.now() - fix.at < 5000) begin(); else paint(true); }
     else if (a === "begin") { begin(); }
     else if (a === "cancel") { acquiring = false; stopWatch(); wakeOff(); paint(true); }
-    else if (a === "recenter") { follow = true; el.classList.remove("show"); if (fix && liveMap) liveMap.setView([fix.lat, fix.lon], Math.max(liveMap.getZoom(), 16)); }
+    else if (a === "recenter") { follow = true; el.classList.remove("show"); if (fix && liveMap) centerOn([fix.lat, fix.lon], Math.max(liveMap.getZoom(), 16)); }
     else if (a === "pickwo") sheet(`<h2>Choose a workout</h2>
         <button class="btn block" data-act="choose" data-id="">${!chosen ? "✓ " : ""}Free run (no workout)</button>
         ${workouts.map(w => `<button class="btn block" data-act="choose" data-id="${w.id}" style="flex-direction:column;align-items:stretch;text-align:left"><span>${w.id === chosen ? "✓ " : ""}${esc(w.name)}</span><span class="tiny muted" style="font-weight:400">${esc(wSummary(w))}</span>${strip(w)}</button>`).join("")}
@@ -817,6 +874,7 @@
     else if (a === "dupw") { const w = workouts.find(x => x.id === el.dataset.id); if (w) { const c = JSON.parse(JSON.stringify(w)); c.id = "w-" + Date.now().toString(36); c.name = w.name + " (copy)"; workouts.push(c); saveW(); location.hash = `#/w/${c.id}`; } }
     else if (a === "delw") { if (confirm("Delete this workout?")) { workouts = workouts.filter(x => x.id !== el.dataset.id); if (chosen === el.dataset.id) { chosen = ""; sv("stride-chosen", ""); } saveW(); location.hash = "#/workouts"; } }
     else if (a === "tryvib") buzz(el.dataset.k === "done" ? DONE_VIBE : vibeFor(el.dataset.k), true);
+    else if (a === "mode") { set.runView = el.dataset.v; saveSet(); applyMode(!live); }
     else if (a === "pause") pause();
     else if (a === "resume") resume();
     else if (a === "finish") finishSheet();
