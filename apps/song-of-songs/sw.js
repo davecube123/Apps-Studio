@@ -1,5 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "song-of-songs-v3";
+const VERSION = "song-of-songs-v4";
+// All apps share one origin and one cache storage: only ever delete this app's own old caches.
+const OWN = "song-of-songs-v";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./data/song.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/cormorant-garamond-latin-wght-normal.woff2", "./fonts/cormorant-garamond-latin-wght-italic.woff2", "./fonts/cormorant-garamond-latin-ext-wght-normal.woff2", "./fonts/cormorant-garamond-latin-ext-wght-italic.woff2", "./fonts/eb-garamond-latin-wght-normal.woff2", "./fonts/eb-garamond-latin-wght-italic.woff2", "./fonts/eb-garamond-latin-ext-wght-normal.woff2", "./fonts/eb-garamond-latin-ext-wght-italic.woff2", "./fonts/frank-ruhl-libre-hebrew-wght-normal.woff2"];
 
@@ -10,7 +12,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(OWN) && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

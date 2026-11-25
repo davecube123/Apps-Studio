@@ -6,6 +6,10 @@ No roadmap, no theme. If it sounds fun, it goes here.
 Every app is a **PWA** (Progressive Web App) served by **GitHub Pages**, so you can open it
 on your phone and install it to your home screen, where it works offline.
 
+The hub page (the site root) is installable too and opens offline. Its **Save all apps for offline** button installs
+every listed app's offline copy at once (about 15 MB), so each app opens without a connection even if it was never
+opened before; saved apps keep themselves up to date whenever you visit the hub online.
+
 ## Layout
 
 ```

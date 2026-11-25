@@ -1,5 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "commonplace-v15";
+const VERSION = "commonplace-v16";
+// All apps share one origin and one cache storage: only ever delete this app's own old caches.
+const OWN = "commonplace-v";
 // The dictionary lives in its own cache, kept across app updates (it is large and rarely changes).
 const DICT_CACHE = "commonplace-dict-v1";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/newsreader.woff2", "./fonts/newsreader-italic.woff2", "./data/sample-tao-te-ching.json"];
@@ -13,7 +15,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== DICT_CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(OWN) && k !== VERSION && k !== DICT_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

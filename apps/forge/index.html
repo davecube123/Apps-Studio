@@ -158,7 +158,7 @@
   const haptic = (p = 8) => { try { navigator.vibrate?.(p); } catch (e) {} };
 
   /* Everything stays on this device. */
-  const KEY = "forge", VER = "2";
+  const KEY = "forge", VER = "3";
   const db = Object.assign({ xp: 0, tier: 3, lessons: {}, quiz: {}, missions: {}, habits: {}, days: {}, reports: [], kegel: [], plan: {}, field: null },
     (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };

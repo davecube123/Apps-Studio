@@ -1,5 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "silvertongue-v10";
+const VERSION = "silvertongue-v11";
+// All apps share one origin and one cache storage: only ever delete this app's own old caches.
+const OWN = "silvertongue-v";
 // Every file the app needs offline. Add new files here.
 const SHELL = ["./", "./index.html", "./lib/vault.js", "./data/vault.json", "./data/lessons.enc.json", "./data/adult.enc.json", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2"];
 
@@ -10,7 +12,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(OWN) && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

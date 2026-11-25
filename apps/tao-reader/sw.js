@@ -1,5 +1,7 @@
 // Offline support. Bump VERSION whenever app files change so phones pick up the update.
-const VERSION = "tao-reader-v6";
+const VERSION = "tao-reader-v7";
+// All apps share one origin and one cache storage: only ever delete this app's own old caches.
+const OWN = "tao-reader-v";
 const SHELL = [
   "./",
   "./index.html",
@@ -26,7 +28,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(OWN) && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
