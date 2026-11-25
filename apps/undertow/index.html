@@ -21,7 +21,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
   html, body { margin: 0; color: var(--ink); font: 16px/1.55 var(--sans); background: var(--bg); }
-  body { min-height: 100vh; background: radial-gradient(120% 55% at 50% -12%, #4a1a12 0%, rgba(18, 12, 20, 0) 70%), var(--bg); }
+  body { min-height: 100vh; background: radial-gradient(120% 55% at 50% -12%, #4a1a12 0%, rgba(19, 11, 10, 0) 70%), var(--bg); }
   a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
   main { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 100px); }
   h1 { font: 600 34px/1.1 var(--display); margin: 4px 0 6px; }
@@ -38,7 +38,7 @@
   .roman { font: 600 13px var(--display); letter-spacing: .12em; color: var(--gold); }
 
   /* home */
-  .today { display: block; margin-top: 14px; padding: 18px; border-radius: 20px; background: linear-gradient(150deg, #3b1c45, #20121a 70%); border: 1px solid rgba(224, 185, 116, .25); }
+  .today { display: block; margin-top: 14px; padding: 18px; border-radius: 20px; background: linear-gradient(150deg, #4a2016, #1f1210 70%); border: 1px solid rgba(242, 178, 126, .25); }
   .today .m { font: 400 17px/1.5 var(--read); margin-top: 8px; color: var(--ink2); }
   .part { margin-top: 26px; } .part .ph { display: flex; align-items: baseline; gap: 10px; } .part .ph h2 { font: 600 25px var(--display); margin: 0; }
   .part .pl { font-size: 14px; color: var(--muted); margin: 2px 0 6px; }
@@ -139,7 +139,7 @@
   let P = [], BY = {}, INTRO = {}, SCN = "", RAWD = null;
   /* Names: the content ships with default names (d.names); your own names are kept on this phone only and
      swapped in everywhere at display time, in one pass so names can be exchanged safely. Ids are never changed. */
-  const NAME_LABELS = { girlfriend: "Your partner", unicorn: "The woman you court", tonight: "The woman you meet on the night" };
+  const NAME_LABELS = {};
   const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   function rename(x, map, rx) {
     if (typeof x === "string") return x.replace(rx, m => map[m]);
@@ -184,10 +184,10 @@
     const f = q.trim().toLowerCase(), hits = f ? P.filter(p => text(p).includes(f)) : [];
     return `<div class="row between"><div class="eyebrow">Undertow</div><button class="tiny muted" data-act="settings">v${VER} · Settings</button></div>
       <h1>${esc(INTRO.title || "")}</h1><p class="ink2" style="margin:0">${esc(INTRO.line || "")}</p>
-      <input class="search" id="q" type="search" placeholder="Search: jealousy, first touch, aftercare…" value="${esc(q)}" autocomplete="off">
+      <input class="search" id="q" type="search" placeholder="Search: eyes, the almost, first touch…" value="${esc(q)}" autocomplete="off">
       ${f ? `<div class="card">${hits.map(prRow).join("") || `<p class="muted" style="margin:0;padding:10px 0">Nothing matches.</p>`}</div>`
-        : `<div class="card" style="border-color:rgba(233,185,142,.35)"><div class="eyebrow">The signals · agree them out loud</div>
-          <div class="small" style="margin-top:8px;line-height:1.9"><b style="color:#8fd89a">Green</b> yes, more · <b style="color:#f5c26b">Yellow</b> slow down · <b style="color:#ff8d8d">Red</b> stop, for anyone, no questions<br><b>Two taps</b> on whoever is closest: silent stop · <b>One squeeze</b>: “you okay?”, one back: “yes”</div></div>
+        : `<div class="card" style="border-color:rgba(242,178,126,.35)"><div class="eyebrow">Read her, always</div>
+          <div class="small" style="margin-top:8px;line-height:1.8"><b style="color:#8fd89a">Green</b> she leans in, holds your eyes, touches back: carry on<br><b style="color:#f5c26b">Yellow</b> shorter answers, angled away, a polite laugh: ease off<br><b style="color:#ff8d8d">Red</b> she pulls away, goes quiet, says no or not now: stop warmly, no second try tonight</div></div>
         <a class="today" href="#/p/${t.id}"><div class="eyebrow">Today's principle · ${ROMAN[t.n]}</div><div style="font:600 26px/1.15 var(--display);margin-top:6px">${esc(t.title)}</div><div class="m">${esc(t.motto)}</div></a>
         ${PARTS.map((pt, i) => { const L = P.filter(p => p.part === pt.id); return L.length ? `<div class="part"><div class="ph"><span class="roman">BOOK ${ROMAN[i + 1]}</span><h2>${esc(pt.title)}</h2></div><div class="pl">${esc(pt.line)}</div><div class="card" style="padding:2px 16px">${L.map(prRow).join("")}</div></div>` : ""; }).join("")}`}`;
   }
@@ -227,7 +227,7 @@
   function viewLines() {
     const f = tq.trim().toLowerCase();
     return `<div class="eyebrow">Undertow</div><h1>Lines</h1><p class="ink2" style="margin:0">Every line to say, by moment. Search for the moment you're in.</p>
-      <input class="search" id="tq" type="search" placeholder="Search: hesitates, after, first touch…" value="${esc(tq)}" autocomplete="off">
+      <input class="search" id="tq" type="search" placeholder="Search: hesitates, the doorstep, after…" value="${esc(tq)}" autocomplete="off">
       ${PARTS.map(pt => { const L = P.filter(p => p.part === pt.id).flatMap(p => p.say.concat((p.messages || []).map(m => Object.assign({}, m, { moment: "by message · " + m.moment }))).map(x => ({ p, x }))).filter(({ p, x }) => !f || (x.moment + " " + x.line + " " + p.title).toLowerCase().includes(f));
         return L.length ? `<h3>${esc(pt.title)}</h3><div class="card">${L.map(({ p, x }) => `<a class="say" href="#/p/${p.id}" style="display:block"><div class="m">${esc(x.moment)} · ${ROMAN[p.n]}</div><div class="l">“${esc(x.line)}”</div></a>`).join("")}</div>` : ""; }).join("") || `<p class="muted">No line matches.</p>`}`;
   }
