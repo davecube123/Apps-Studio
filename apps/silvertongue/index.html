@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Silvertongue</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Techniques of the spoken word with many examples, and a private notebook page for every lesson.">
 <meta name="theme-color" content="#121216">
 <link rel="manifest" href="manifest.webmanifest">
@@ -119,7 +120,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "13";
+  const VER = "14";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis: shown highlighted, never read as asterisks */
