@@ -29,6 +29,12 @@
   p { margin: 0 0 10px; }
   .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 14px; }
   .eyebrow { font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+  .today { display: block; margin-top: 14px; padding: 16px 18px; border-radius: 18px; background: linear-gradient(150deg, rgba(220, 185, 111, .16), rgba(220, 185, 111, .03) 70%), var(--card); border: 1px solid rgba(220, 185, 111, .32); color: inherit; text-decoration: none; }
+  .today .t { font: 600 25px/1.15 var(--display); margin-top: 6px; }
+  .today .s { color: var(--silver); font-size: 15px; margin-top: 4px; }
+  .today .ex { margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--gold); font: italic 18px/1.35 var(--display); color: #f1e6c8; }
+  .today .ft { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; }
+  .today .go { color: var(--gold); font-weight: 600; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 4px 16px; margin-top: 12px; }
   .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card2); font-weight: 650; font-size: 15px; }
@@ -113,7 +119,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "12";
+  const VER = "13";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* *word* in a line = spoken emphasis: shown highlighted, never read as asterisks */
@@ -155,12 +161,25 @@
   /* ---------- views ---------- */
   let q = "";
   const lessonRow = t => `<a class="li" href="#/t/${t.id}"><div style="min-width:0"><b>${esc(t.name)}</b><div class="s">${esc(t.summary)}</div></div>${hasNote(t.id) ? `<span class="pen" title="Has notes">✎</span>` : `<span class="chev">›</span>`}</a>`;
+  // Lesson of the day: a different lesson each day, cycling through every lesson before repeating.
+  function lessonOfDay() {
+    if (!ALL.length) return null;
+    const d = new Date(), day = Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
+    const n = ALL.length, step = [7, 11, 13, 17, 19, 23, 29, 31].find(k => n % k) || 1;
+    return ALL[(day * step) % n];
+  }
+  function todayCard() {
+    const t = lessonOfDay(); if (!t) return "";
+    const m = modOf(t), ex = (t.examples || []).find(x => x.better);
+    return `<a class="today" href="#/t/${t.id}"><div class="eyebrow">Lesson of the day</div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.summary)}</div>
+      ${ex ? `<div class="ex">“${esc(ex.better)}”</div>` : ""}<div class="ft"><span class="muted">${m ? `${m.icon} ${esc(m.title)}` : ""}${hasNote(t.id) ? " · ✎ you have notes" : ""}</span><span class="go">Read it ›</span></div></a>`;
+  }
   function viewHome() {
     const f = q.trim().toLowerCase(), hits = f ? ALL.filter(t => (t.name + " " + t.aka + " " + t.summary).toLowerCase().includes(f)) : [];
     return `<div class="row between"><div class="eyebrow">Silvertongue</div><button class="small muted" data-act="settings" style="font-size:12px">v${VER} · Settings</button></div><h1>Lessons</h1>
       <input class="search" id="q" type="search" placeholder="Find a technique: pause, tease, story…" value="${esc(q)}" autocomplete="off">
       ${f ? `<div class="card">${hits.map(lessonRow).join("") || `<p class="muted" style="padding:12px 0;margin:0">Nothing matches.</p>`}</div>`
-        : D.modules.map(m => `<a class="mod" href="#/m/${m.id}"><div class="ic">${m.icon}</div><div style="flex:1;min-width:0"><b>${esc(m.title)}${m.adult ? `<span class="tag18">18+</span>` : ""}</b><div class="small muted">${m.techniques.length} lessons${m.techniques.some(t => hasNote(t.id)) ? ` · ${m.techniques.filter(t => hasNote(t.id)).length} with notes` : ""}</div></div><span class="chev">›</span></a>`).join("")}
+        : todayCard() + D.modules.map(m => `<a class="mod" href="#/m/${m.id}"><div class="ic">${m.icon}</div><div style="flex:1;min-width:0"><b>${esc(m.title)}${m.adult ? `<span class="tag18">18+</span>` : ""}</b><div class="small muted">${m.techniques.length} lessons${m.techniques.some(t => hasNote(t.id)) ? ` · ${m.techniques.filter(t => hasNote(t.id)).length} with notes` : ""}</div></div><span class="chev">›</span></a>`).join("")}
       <div class="ver">Silvertongue v${VER}</div>`;
   }
   function viewModule(id) {
