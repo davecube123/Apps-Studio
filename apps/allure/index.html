@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Allure</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Thirty deep principles of seduction, each taught through tales and history, with your own notebook.">
 <meta name="theme-color" content="#140a0e">
 <link rel="manifest" href="manifest.webmanifest">
@@ -119,7 +120,7 @@
 <script>
 (() => {
   "use strict";
-  const VER = "9";
+  const VER = "10";
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
