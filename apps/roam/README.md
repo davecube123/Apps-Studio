@@ -1,6 +1,6 @@
 # Roam
 
-A minimal travel companion, starting with Thailand: a map, a few great places, and your trip.
+A minimal travel companion for Thailand and the Philippines: a map, a few great places, and your trip. Switch countries in Basics; each country keeps its own trip, notes and plan.
 
 - **Map:** an interactive map (Leaflet, drawn by the app from Natural Earth country shapes and 77 province boundaries (geoBoundaries / OpenStreetMap, every island included) softly tinted by region, with English town and province
   labels that appear as you zoom in: no tiles, works offline) with each place as a round photo pin; tap for a preview
@@ -45,3 +45,53 @@ Fonts: Fraunces, Inter (SIL OFL). Everything you add stays on the device.
 
 - `COUNTRY-GUIDE.md` is the checklist for adding a country (what places to cover, fields, self-checks) and lists the
   remaining Thailand gaps (Isaan, Trang islands, Nan, Kanchanaburi town).
+
+## The Philippines (added November 2026)
+
+`data/philippines.json` follows the same shape as `thailand.json` (prices are in pesos; the price key is still
+`thb`, which the app reads as "amount in local currency"). 33 places in 7 regions (Metro Manila, Northern Luzon,
+Southern Luzon, Palawan, Central Visayas, Western Visayas, Mindanao), 26 base towns, 61 routes, 84 events (December 2026
+to February 2028; estimated dates are flagged), Wish I'd known, Filipino phrases and a packing list. Country-specific
+settings (map files, time zone, hubs, labels, phrases) live under `cfg`. Many fares and fees are listed in `verify`:
+re-check them before relying on them.
+
+Map: `data/geo-ph.json` (Natural Earth 1:10m country shapes, public domain) and `data/provinces-ph.json`
+(geoBoundaries PHL ADM2, OpenStreetMap contributors, ODbL; simplified; towns from Natural Earth populated places).
+
+### Photo credits (Wikimedia Commons)
+
+| Place | File | Author | Licence |
+|---|---|---|---|
+| Intramuros | [File:Intramuros, Manila, Philippines.jpg](https://commons.wikimedia.org/wiki/File:Intramuros,_Manila,_Philippines.jpg) | Ray in Manila (via Flickr) | CC BY 2.0 (to confirm) |
+| Binondo food crawl | [File:Binondo Church Facade.jpg](https://commons.wikimedia.org/wiki/File:Binondo_Church_Facade.jpg) | Lawrence Ruiz | CC BY-SA 4.0 |
+| Poblacion, Makati nightlife | [File:Makati Poblacion skyscrapers, Makati Avenue (Makati; 06-20-2021).jpg](https://commons.wikimedia.org/wiki/File:Makati_Poblacion_skyscrapers,_Makati_Avenue_(Makati%3B_06-20-2021).jpg) | Patrickroque01 | CC BY-SA 4.0 |
+| Banaue Rice Terraces | [File:Rice Terraces Banaue.jpg](https://commons.wikimedia.org/wiki/File:Rice_Terraces_Banaue.jpg) | Magalhães | Public domain |
+| Batad | [File:Banaue Philippines Batad-Rice-Terraces-02.jpg](https://commons.wikimedia.org/wiki/File:Banaue_Philippines_Batad-Rice-Terraces-02.jpg) | CEphoto, Uwe Aranas | CC BY-SA 4.0 |
+| Sagada | [File:Hanging Coffins of Sagada.jpg](https://commons.wikimedia.org/wiki/File:Hanging_Coffins_of_Sagada.jpg) | Andrewhaimerl | CC BY-SA 4.0 |
+| Vigan heritage town | [File:Calle Crisologo in Broad Daylight.jpg](https://commons.wikimedia.org/wiki/File:Calle_Crisologo_in_Broad_Daylight.jpg) | Tubanismo | CC BY-SA 4.0 |
+| Baguio | [File:Burnham Park - lake (Baguio, Benguet)(2018-02-25).jpg](https://commons.wikimedia.org/wiki/File:Burnham_Park_-_lake_(Baguio,_Benguet)(2018-02-25).jpg) | Patrick Roque (Patrickroque01) | CC BY-SA 4.0 (to confirm) |
+| Taal Volcano from Tagaytay | [File:Taal Volcano.jpg](https://commons.wikimedia.org/wiki/File:Taal_Volcano.jpg) | Roberto Verzo (via Flickr) | CC BY 2.0 |
+| Puerto Galera | [File:PH - Puerto Galera - White Beach - from sea 2.jpg](https://commons.wikimedia.org/wiki/File:PH_-_Puerto_Galera_-_White_Beach_-_from_sea_2.jpg) | Eugene Alvin Villar (seav) | CC BY-SA 4.0 |
+| Mayon Volcano | [File:Mayon Volcano as of March 2020.jpg](https://commons.wikimedia.org/wiki/File:Mayon_Volcano_as_of_March_2020.jpg) | Marisa Mercado | CC BY-SA 4.0 |
+| Donsol whale sharks | [File:Donsol - panoramio.jpg](https://commons.wikimedia.org/wiki/File:Donsol_-_panoramio.jpg) | jackylim (via Panoramio) | CC BY-SA 3.0 |
+| El Nido and Bacuit Bay | [File:Island lagoon in Bacuit Bay, El Nido, Palawan, Philippines.jpg](https://commons.wikimedia.org/wiki/File:Island_lagoon_in_Bacuit_Bay,_El_Nido,_Palawan,_Philippines.jpg) | Vyacheslav Argenberg | CC BY 4.0 |
+| Coron | [File:Kayangan Lake, Coron Island.jpg](https://commons.wikimedia.org/wiki/File:Kayangan_Lake,_Coron_Island.jpg) | Lyndon Aguila (Lyndon21) | CC BY-SA 4.0 |
+| Puerto Princesa Underground River | [File:Puerto Princesa Underground River.jpg](https://commons.wikimedia.org/wiki/File:Puerto_Princesa_Underground_River.jpg) | Mike Gonzalez (TheCoffee) | CC BY-SA 3.0 |
+| Port Barton | [File:Port Barton, Boats, Palawan, Philippines.jpg](https://commons.wikimedia.org/wiki/File:Port_Barton,_Boats,_Palawan,_Philippines.jpg) | Vyacheslav Argenberg | CC BY 4.0 |
+| Cebu City heritage | [File:Magellan's Cross in Cebu.jpg](https://commons.wikimedia.org/wiki/File:Magellan's_Cross_in_Cebu.jpg) | Carlo Joseph Moskito | CC BY-SA 4.0 |
+| Kawasan Falls | [File:Badian Kawasan Falls Cebu.jpg](https://commons.wikimedia.org/wiki/File:Badian_Kawasan_Falls_Cebu.jpg) | Shemlongakit | CC BY-SA 4.0 |
+| Moalboal sardine run | [File:White Beach Moalboal.JPG](https://commons.wikimedia.org/wiki/File:White_Beach_Moalboal.JPG) | Lindstrm | CC BY-SA 3.0 |
+| Malapascua | [File:Malapascua (island), Bounty Beach, Philippines.jpg](https://commons.wikimedia.org/wiki/File:Malapascua_(island),_Bounty_Beach,_Philippines.jpg) | Vyacheslav Argenberg | CC BY 4.0 |
+| Bantayan Island | [File:Sugar Beach Bantayan.jpg](https://commons.wikimedia.org/wiki/File:Sugar_Beach_Bantayan.jpg) | Mike Gonzalez (TheCoffee) | CC BY-SA 3.0 |
+| Chocolate Hills | [File:Chocolate Hills - edit.jpg](https://commons.wikimedia.org/wiki/File:Chocolate_Hills_-_edit.jpg) | Ramir Borja; derivative work by MrPanyGoff | CC BY-SA 3.0 |
+| Panglao | [File:Alona Beach, Panglao.jpg](https://commons.wikimedia.org/wiki/File:Alona_Beach,_Panglao.jpg) | Marife.altabano | CC BY-SA 4.0 |
+| Siquijor | [File:Salagdoong Beach Siquijor-Daylight.jpg](https://commons.wikimedia.org/wiki/File:Salagdoong_Beach_Siquijor-Daylight.jpg) | Genpasaporte2 | CC BY-SA 4.0 |
+| Apo Island | [File:Apo Island east.jpg](https://commons.wikimedia.org/wiki/File:Apo_Island_east.jpg) | Mike Gonzalez (TheCoffee) | CC BY-SA 3.0 |
+| Boracay | [File:Boracay White Beach.png](https://commons.wikimedia.org/wiki/File:Boracay_White_Beach.png) | Jhun Sacapano | CC BY-SA 4.0 |
+| Iloilo City and the Miagao church | [File:Miagao Church Facade Closeup.JPG](https://commons.wikimedia.org/wiki/File:Miagao_Church_Facade_Closeup.JPG) | Retdar | CC BY-SA 4.0 |
+| Guimaras | [File:Beach and islands of Taklong Island Guimaras.jpg](https://commons.wikimedia.org/wiki/File:Beach_and_islands_of_Taklong_Island_Guimaras.jpg) | Iloilo Wanderer | CC BY-SA 3.0 (to confirm) |
+| Siargao | [File:The calm sea of cloud 9 siargao island philippines.jpg](https://commons.wikimedia.org/wiki/File:The_calm_sea_of_cloud_9_siargao_island_philippines.jpg) | Aneesah Mariam | CC BY-SA 4.0 |
+| Camiguin | [File:Camiguin White Island.jpg](https://commons.wikimedia.org/wiki/File:Camiguin_White_Island.jpg) | Theglennpalacio | CC BY-SA 4.0 |
+| Davao City | [File:People's Park, Davao City, Philippines (1 May 2010).jpg](https://commons.wikimedia.org/wiki/File:People's_Park,_Davao_City,_Philippines_(1_May_2010).jpg) | Robert Ryan U. Ong | CC BY-SA 3.0 |
+| Philippine Eagle Center | [File:Pithecophaga jefferyi -Philippine Eagle Center, Davao City, Philippines-8a.jpg](https://commons.wikimedia.org/wiki/File:Pithecophaga_jefferyi_-Philippine_Eagle_Center,_Davao_City,_Philippines-8a.jpg) | Constantine Agustin (via Flickr) | CC BY-SA 2.0 |
+| San Juan, La Union surf town | [File:Surfing Capital of the Northern Philippines.jpg](https://commons.wikimedia.org/wiki/File:Surfing_Capital_of_the_Northern_Philippines.jpg) | Emman Asuncion Foronda | CC BY-SA 4.0 |
