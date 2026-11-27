@@ -1,9 +1,9 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "anchor-v17";
+const VERSION = "anchor-v18";
 // All apps share one origin and one cache storage: only ever delete this app's own old caches.
 const OWN = "anchor-v";
 // Every file the app needs offline. Add new files here.
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./fonts/fraunces-latin-soft-normal.woff2", "./fonts/inter-latin-wght-normal.woff2", "./lib/vault.js", "./data/vault.json", "./data/content.enc.json"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./lib/vault.js", "./data/vault.json", "./data/anchor.enc.json", "./fonts/cormorant-garamond-latin-400-normal.woff2", "./fonts/cormorant-garamond-latin-400-italic.woff2", "./fonts/cormorant-garamond-latin-600-normal.woff2", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -17,25 +17,17 @@ self.addEventListener("activate", e => {
   );
 });
 
-// The app itself (the page and the tales) comes from the network when online, so a fix shows the first time
-// it is opened; the stored copy is used only offline. Icons and the manifest are served from cache.
+// Serve from cache instantly, refresh in the background (same-origin only).
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  const isPage = e.request.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith(".html") || url.pathname.endsWith(".json");
-  if (isPage) {
-    e.respondWith(
-      fetch(e.request, { cache: "no-cache" }).then(res => {
-        if (res.ok) caches.open(VERSION).then(c => c.put(e.request, res.clone()));
-        return res;
-      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match("./index.html")))
-    );
-    return;
-  }
   e.respondWith(
     caches.open(VERSION).then(async cache => {
       const cached = await cache.match(e.request, { ignoreSearch: true });
-      const fresh = fetch(e.request).then(res => { if (res.ok) cache.put(e.request, res.clone()); return res; }).catch(() => cached);
+      const fresh = fetch(e.request).then(res => {
+        if (res.ok) cache.put(e.request, res.clone());
+        return res;
+      }).catch(() => cached);
       return cached || fresh;
     })
   );
