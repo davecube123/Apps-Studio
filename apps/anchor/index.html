@@ -60,6 +60,11 @@
     .mod { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 20px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); min-height: 120px; position: relative; overflow: hidden; }
     .mod b { font: 560 18px/1.15 var(--display); } .mod small { color: var(--ink2); font-size: 12.5px; }
     .mod .bar { position: absolute; left: 0; bottom: 0; height: 4px; background: currentColor; opacity: .8; }
+    .motto { font: italic 500 20px/1.45 var(--display); color: var(--gold); margin: 0 2px 14px; }
+    .essence p { font: 400 18.5px/1.55 var(--display); } .scene p { font: 400 16.5px/1.6 var(--display); color: var(--ink2); }
+    .tech { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); } .tech:first-child { border-top: 0; }
+    .light { width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex: none; } .light.g { background: var(--green); } .light.y { background: var(--amber); } .light.r { background: #e2766f; }
+    details.more { margin-top: 22px; } details.more summary { cursor: pointer; display: inline-flex; gap: 8px; align-items: center; font: 650 14px var(--sans); color: var(--gold); list-style: none; } details.more summary::-webkit-details-marker { display: none; }
     .lesson-card { min-height: 250px; display: flex; flex-direction: column; justify-content: center; padding: 26px 22px; }
     .lesson-card p { font: 400 20px/1.55 var(--display); margin: 0; }
     .pips { display: flex; gap: 6px; margin: 14px 0; } .pips i { flex: 1; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); } .pips i.on { background: var(--gold); }
@@ -155,7 +160,7 @@
     details.how summary::-webkit-details-marker { display: none; }
     details.how ol { margin: 10px 0 8px; padding-left: 22px; font: 400 15.5px/1.5 var(--sans); } details.how ol li { margin: 6px 0; }
     .sayline { font: italic 500 16.5px/1.5 var(--display); border-left: 3px solid var(--gold); padding: 2px 0 2px 12px; margin: 10px 0; color: var(--ink); }
-    .step .num { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(217,178,111,.16); color: var(--gold); font: 700 14px var(--sans); }
+    .step .num, .tech .num { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(217,178,111,.16); color: var(--gold); font: 700 14px var(--sans); }
     .step b { font: 600 16.5px var(--sans); }
     ul.field { margin: 8px 0 0; padding-left: 18px; } ul.field li { margin: 6px 0; color: var(--ink2); }
     .loading { padding: 90px 0; text-align: center; color: var(--muted); }
@@ -179,7 +184,7 @@
   const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
 
   /* Everything stays on this device. */
-  const KEY = "anchor", VER = "16";
+  const KEY = "anchor", VER = "17";
   const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
     aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
     rules: [], rituals: [], ritualLog: {}, rewards: [], profile: { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] }, modes: null, protHome: [], protPublic: [], protEx: "", stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
@@ -309,7 +314,7 @@
     return `<div class="top">${backLink("#/stories", "Stories")}<span class="tag ${STK[x.kind]?.[1] || "m"}">${STK[x.kind]?.[0] || ""}</span></div><h1 style="margin:6px 2px 10px;font-size:29px">${esc(x.title)}</h1>
       <div class="card lesson-card">${esc(x.text).split(/\n+/).map(p => `<p>${p}</p>`).join("")}</div>
       <div class="card"><div class="eyebrow" style="color:var(--gold)">What it shows</div><p style="margin:8px 0 0;font-weight:600">${esc(x.shows)}</p></div>
-      ${l ? `<a class="item" href="#/l/${l.id}/0">${modIc(l.module)}<div class="grow"><div class="t">${esc(l.title)}</div><div class="m">The lesson behind it</div></div>${ic("chev")}</a>` : ""}
+      ${l ? `<a class="item" href="#/l/${l.id}">${modIc(l.module)}<div class="grow"><div class="t">${esc(l.title)}</div><div class="m">The lesson behind it</div></div>${ic("chev")}</a>` : ""}
       ${g ? `<a class="item" href="#/g/${g.id}">${modIc("foundations")}<div class="grow"><div class="t">${esc(g.title)}</div><div class="m">Step-by-step guide</div></div>${ic("chev")}</a>` : ""}
       <p class="small muted center" style="margin-top:14px">A composite story, not one real couple’s account.</p>`;
   }
@@ -398,7 +403,7 @@
     if (db.notes && v !== "note") { const n0 = db.notes.length; db.notes = db.notes.filter(n => (n.title.trim() || plain(n.html)) && !n.fresh); if (db.notes.length !== n0) save(); } /* drop empty notes, and template notes never edited */
     let html;
     if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
-    else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a, +b || 0);
+    else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a);
     else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
     else if (v === "journal") html = viewJournal(a); else if (v === "search") html = viewSearch(); else if (v === "note") html = viewNote(a); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings(); else if (v === "examples") html = viewExamples(); else if (v === "stories") html = viewStories(); else if (v === "story") html = viewStory(a);
     else html = viewToday();
@@ -457,7 +462,7 @@
       ${(() => { const D = dueToday(); if (!D.length) return `<a class="item" href="#/her/rhythm" style="margin-top:12px">${modIc("care")}<div class="grow"><div class="t">Set up your rhythm</div><div class="m">Daily, weekly and monthly. A beginner template is ready.</div></div>${ic("chev")}</a>`;
         const n = D.filter(isDone).length; return `<div class="sec"><div class="row between" style="margin:0 4px 10px"><div class="eyebrow">Today’s rhythm</div><a class="small" href="#/her/rhythm" style="color:var(--muted);text-decoration:none">${n}/${D.length} · edit</a></div><div class="card" style="padding:6px 18px">${D.map(it => `<div class="row"><button class="check${isDone(it) ? " on" : ""}" data-act="rdone" data-v="${it.id}" data-k="${it.kind}" data-key="${it.key}" style="flex:1"><span class="box">${isDone(it) ? ic("check") : ""}</span><span class="lbl grow">${esc(it.text)}${it.kind !== "daily" ? ` <span class="tag ${it.kind === "weekly" ? "y" : "m"}">${it.kind}</span>` : ""}</span></button>${it.guide && guide(it.guide) ? `<a class="iconbtn" href="#/g/${it.guide}" aria-label="How to">${ic("list")}</a>` : ""}</div>`).join("")}</div></div>`; })()}
       ${(() => { const G = db.rules.filter(r => r.target); if (!G.length) return ""; return `<div class="sec"><div class="row between" style="margin:0 4px 10px"><div class="eyebrow">Her goals this week</div><a class="small" href="#/her/rules" style="color:var(--muted);text-decoration:none">rules</a></div><div class="card" style="padding:10px 16px">${G.map(r => `<div style="padding:6px 0"><div style="font-weight:600">${esc(r.text)}</div>${goalRow(r)}</div>`).join("")}</div></div>`; })()}
-      <div class="sec"><div class="eyebrow">Learn today</div><a class="item" href="#/l/${next.id}/0">${modIc(next.module)}<div class="grow"><div class="t">${esc(next.title)}</div><div class="m">${esc(next.hook)}</div></div>${ic("chev")}</a></div>
+      <div class="sec"><div class="eyebrow">Learn today</div><a class="item" href="#/l/${next.id}">${modIc(next.module)}<div class="grow"><div class="t">${esc(next.title)}</div><div class="m">${esc(next.motto || next.hook)}</div></div>${ic("chev")}</a></div>
       <div class="sec"><div class="eyebrow">The dynamic</div>
         <a class="item" href="#/before">${modIc("scenes")}<div class="grow"><div class="t">Before a scene</div><div class="m">The two-minute check</div></div>${ic("chev")}</a>
         <a class="item" href="#/her/limits">${modIc("negotiation")}<div class="grow"><div class="t">Her yes / maybe / no</div><div class="m">${yes ? `${yes} yeses` : "Not filled in yet"}${neg != null ? ` · negotiated ${neg} days ago` : ""}</div></div>${ic("chev")}</a>
@@ -468,7 +473,8 @@
   /* ---------- Learn ---------- */
   function viewLearn() {
     const r = C.lessons.filter(l => db.lessons[l.id]).length;
-    return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons. Short, practical, from someone who has made the mistakes so you don’t have to.</p>
+    return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons in ${Object.keys(MODS).filter(k => byMod(k).length).length} books. One page each: the idea, a scene, techniques, words to say and this week’s practice.</p>
+      ${(o => `<a class="card" href="#/l/${o.id}" style="display:block;text-decoration:none;color:inherit;margin-bottom:14px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">Lesson of the day · ${esc(MODS[o.module][0])}</div><div style="font:600 21px/1.3 var(--display);margin-top:8px">${esc(o.title)}</div><p class="muted" style="margin:6px 0 0">${esc(o.motto || o.hook)}</p></a>`)(lessonOfDay())}
       ${(C.guides || []).length ? `<div class="row" style="gap:10px;margin-bottom:14px"><a class="btn gold" href="#/start" style="flex:1">${ic("list")} Step-by-step guides</a><a class="btn" href="#/words">${ic("book")} Glossary</a></div>
       <div class="row" style="gap:10px;margin:-4px 0 14px"><a class="btn" href="#/examples" style="flex:1">${ic("plus")} Examples</a><a class="btn" href="#/stories" style="flex:1">${ic("chat")} Stories</a></div>` : ""}
       ${SECTIONS.map(([sid, title, mods]) => { const mine = sid === "daddy" ? prof().titles.includes("Daddy") : sid === "master" ? prof().titles.includes("Master") : false;
@@ -479,19 +485,31 @@
   function viewModule(m) {
     const [n, , , sub] = MODS[m] || []; if (!n) { location.hash = "#/learn"; return ""; }
     return `<div class="top">${backLink("#/learn", "Learn")}</div><div class="row" style="gap:14px;margin:6px 2px 18px">${modIc(m, 54)}<div><h1 style="font-size:29px">${n}</h1><div class="muted small">${sub}</div></div></div>
-      ${byMod(m).map(l => `<a class="item" href="#/l/${l.id}/0"><span class="dot${db.lessons[l.id] ? " on" : ""}">${db.lessons[l.id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(l.title)}</div><div class="m">${esc(l.hook)}</div></div>${ic("chev")}</a>`).join("")}`;
+      ${byMod(m).map(l => `<a class="item" href="#/l/${l.id}"><span class="dot${db.lessons[l.id] ? " on" : ""}">${db.lessons[l.id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(l.title)}</div><div class="m">${esc(l.hook)}</div></div>${ic("chev")}</a>`).join("")}`;
   }
-  function viewLesson(id, i) {
+  function viewLesson(id) {
     const l = C.lessons.find(x => x.id === id); if (!l) { location.hash = "#/learn"; return ""; }
-    const n = l.cards.length, base = `#/l/${l.id}`;
-    const head = `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}</div><h2 style="margin:4px 2px 0">${esc(l.title)}</h2><div class="pips">${[...l.cards, 0].map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}</div>`;
-    if (i < n) return head + `<div class="card lesson-card"><p>${esc(l.cards[i])}</p></div><div class="row" style="gap:10px;margin-top:14px">${i ? `<a class="btn" href="${base}/${i - 1}">${ic("back")}</a>` : ""}<a class="btn gold" href="${base}/${i + 1}" style="flex:1">Next ${ic("chev")}</a></div>`;
-    return head + `<div class="card keep">“${esc(l.remember)}”</div>
-      <div class="card"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p>${howBox(howPractice(l.id), true)}</div>
-      <div class="card"><div class="eyebrow">Ask</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.ask)}</p></div>
+    const ls = byMod(l.module), k = ls.indexOf(l), prev = ls[k - 1], nxt = ls[k + 1];
+    const sec = (t, body, col) => `<div class="sec"><div class="eyebrow"${col ? ` style="color:${col}"` : ""}>${t}</div>${body}</div>`;
+    const old = !l.essence;
+    return `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}<span class="small muted">${k + 1} of ${ls.length}</span></div>
+      <h1 style="margin:6px 2px 8px;font-size:29px">${esc(l.title)}</h1>
+      ${l.motto ? `<p class="motto">“${esc(l.motto)}”</p>` : ""}
+      ${old ? l.cards.map(c => `<div class="card"><p style="margin:0">${esc(c)}</p></div>`).join("") : `<div class="card essence"><p style="margin:0">${esc(l.essence)}</p></div>`}
+      ${l.scene ? sec("The scene", `<div class="card scene"><p style="margin:0">${esc(l.scene)}</p></div>`) : ""}
+      ${(l.techniques || []).length ? sec("Techniques", `<div class="card" style="padding:6px 18px">${l.techniques.map((t, j) => `<div class="tech"><span class="num">${j + 1}</span><div class="grow"><b>${esc(t.name)}</b><div style="margin-top:3px">${esc(t.how)}</div></div></div>`).join("")}</div>`, "var(--gold)") : ""}
+      ${(l.say || []).length ? sec("Words to say", l.say.map(x => `<div class="card" style="padding:14px 18px;margin-top:8px"><div class="small muted">When ${esc(x.moment)}</div><p class="sayline" style="margin:6px 0">${esc(x.line)}</p><div class="small" style="color:var(--ink2)">${esc(x.why)}</div></div>`).join("")) : ""}
+      <div class="card" style="margin-top:22px"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p>${howBox(howPractice(l.id))}</div>
+      ${(l.watch || []).length === 3 ? sec("Watch for", `<div class="card" style="padding:6px 18px">${l.watch.map((w, j) => `<div class="tech"><span class="light ${["g", "y", "r"][j]}"></span><div class="grow">${esc(w)}</div></div>`).join("")}</div>`) : ""}
+      ${l.why ? `<details class="card more"><summary>${ic("book")} Why it works</summary><p style="margin:10px 0 0">${esc(l.why)}</p></details>` : ""}
+      ${l.shadow ? `<div class="warnbox" style="margin-top:12px"><b>The shadow.</b> ${esc(l.shadow)}</div>` : ""}
+      <div class="card" style="margin-top:12px"><div class="eyebrow">Ask her</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.ask)}</p></div>
+      <div class="card keep">“${esc(l.remember)}”</div>
       ${(C.stories || []).filter(x => x.lesson === l.id).map(x => `<a class="item" href="#/story/${x.id}">${modIc(l.module, 36)}<div class="grow"><div class="t">A story: ${esc(x.title)}</div><div class="m">${esc(x.shows)}</div></div>${ic("chev")}</a>`).join("")}
-      <button class="btn gold block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${ic("check")} ${db.lessons[l.id] ? "Done" : "Understood"}</button>`;
+      <button class="btn gold block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${ic("check")} ${db.lessons[l.id] ? "Done" : "Understood"}</button>
+      <div class="row" style="gap:10px;margin-top:10px">${prev ? `<a class="btn" href="#/l/${prev.id}" style="flex:1">${ic("back")} ${esc(prev.title)}</a>` : ""}${nxt ? `<a class="btn" href="#/l/${nxt.id}" style="flex:1">${esc(nxt.title)} ${ic("chev")}</a>` : ""}</div>`;
   }
+  const lessonOfDay = () => C.lessons[Math.floor(Date.now() / DAY) % C.lessons.length];
 
   /* ---------- Her: limits, safewords, aftercare, little space, rules, rituals, rewards, consequences, scenes ---------- */
   const listEditor = (key, title, ph, why) => `<div class="card">${(db[key] ||= []).length ? db[key].map(r => `<div class="rule"><div class="grow"${key === "rules" ? ` data-act="redit" data-v="${r.id}" style="cursor:pointer"` : ""}><div>${esc(r.text)}</div>${r.why ? `<div class="w">${esc(r.why)}</div>` : ""}${key === "rules" && r.target ? goalRow(r) : ""}${r.agreed === false ? `<div class="w" style="color:var(--amber)">Not yet agreed with her</div>` : ""}</div>${key === "rules" ? `<button class="iconbtn" data-act="settarget" data-v="${r.id}" aria-label="Weekly goal" title="Weekly goal">${ic("clock")}</button>` : ""}<button class="iconbtn" data-act="del" data-k="${key}" data-v="${r.id}" aria-label="Delete">${ic("x")}</button></div>`).join("") : `<p class="muted small" style="margin:0">None yet.</p>`}
@@ -781,7 +799,7 @@
     (db.notes || []).filter(n => !n.trashed).forEach(n => { const t = n.title + " " + plain(n.html); if (hit(t)) out.push(["Note", n.title || "Untitled", plain(n.html).slice(0, 80), `#/note/${n.id}`]); });
     db.debriefs.forEach(d => { const t = [d.title, d.good, d.change, d.hers, d.me].join(" "); if (hit(t)) out.push(["Debrief", d.title || "Entry", (d.good || d.change || "").slice(0, 80), "#/journal/debriefs"]); });
     (C.guides || []).forEach(g => { const t = g.title + " " + g.why + " " + g.steps.map(x => x.h + " " + x.d + " " + (x.say || "")).join(" "); if (hit(t)) out.push(["Guide", g.title, g.why, `#/g/${g.id}`]); });
-    C.lessons.forEach(l => { const t = l.title + " " + l.hook + " " + l.cards.join(" ") + " " + l.practice; if (hit(t)) out.push(["Lesson", l.title, l.hook, `#/l/${l.id}/0`]); });
+    C.lessons.forEach(l => { const t = [l.title, l.hook, l.motto, l.essence, l.scene, l.practice, l.why, l.shadow, ...(l.cards || []), ...(l.techniques || []).map(x => x.name + " " + x.how), ...(l.say || []).map(x => x.line), ...(l.watch || [])].filter(Boolean).join(" "); if (hit(t)) out.push(["Lesson", l.title, l.hook, `#/l/${l.id}`]); });
     (C.glossary || []).forEach(x => { if (hit(x.t + " " + x.d)) out.push(["Word", x.t, x.d, "#/words"]); });
     return out.slice(0, 60);
   }

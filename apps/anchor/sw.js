@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever app files change so installed copies update.
-const VERSION = "anchor-v16";
+const VERSION = "anchor-v17";
 // All apps share one origin and one cache storage: only ever delete this app's own old caches.
 const OWN = "anchor-v";
 // Every file the app needs offline. Add new files here.
