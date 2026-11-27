@@ -1,1048 +1,358 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Anchor</title>
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Notes and planning.">
-  <meta name="theme-color" content="#0e1120">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Anchor">
-  <style>
-    @font-face { font-family: "Fraunces"; src: url(fonts/fraunces-latin-soft-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
-    @font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
-    :root {
-      --bg: #0e1120; --card: #171b2d; --card2: #1d2238; --ink: #eee8f2; --ink2: #c3bccf; --muted: #8c869c;
-      --line: rgba(220,210,255,.08); --line2: rgba(220,210,255,.16);
-      --gold: #d9b26f; --blush: #ec9fb6; --teal: #7cc6b8; --violet: #a99bf2; --red: #ef7c7c; --amber: #f0c36a; --green: #7fcf9a;
-      --e1: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
-      --display: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, sans-serif;
-      --spring: cubic-bezier(.2,.9,.25,1.15); --r: 22px; color-scheme: dark;
-    }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; background: radial-gradient(120% 60% at 50% -10%, #1f2340 0%, var(--bg) 55%) fixed, var(--bg); color: var(--ink); font: 400 16.5px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
-    #main { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 110px); }
-    h1, h2, h3 { font-family: var(--display); font-weight: 560; letter-spacing: -.012em; margin: 0; line-height: 1.14; font-variation-settings: "SOFT" 100; }
-    h1 { font-size: 33px; } h2 { font-size: 24px; } h3 { font-size: 19px; }
-    p { margin: 0 0 10px; } a { color: var(--gold); }
-    .muted { color: var(--muted); } .small { font-size: 13.5px; } .center { text-align: center; }
-    .eyebrow { font: 700 11px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-    .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; } .grow { flex: 1; min-width: 0; } .wrap { flex-wrap: wrap; }
-    .card { background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--e1); }
-    .card + .card { margin-top: 12px; }
-    .sec { margin-top: 24px; } .sec > .eyebrow { margin: 0 4px 10px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card2); color: var(--ink); font: 650 15px var(--sans); cursor: pointer; text-decoration: none; transition: transform .15s; white-space: nowrap; }
-    .btn:active { transform: scale(.96); }
-    .btn.gold { background: linear-gradient(135deg, #e7c98d, var(--gold)); color: #1d1608; border: 0; box-shadow: 0 6px 24px rgba(217,178,111,.25); }
-    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink2); }
-    .btn.block { display: flex; width: 100%; } .btn.sm { min-height: 36px; padding: 6px 13px; font-size: 13.5px; }
-    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-    .view.enter { animation: rise .35s var(--spring) both; }
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-    @keyframes fade { from { opacity: 0; } }
-    @keyframes sheetup { from { transform: translateY(100%); } }
-    .top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-bottom: 4px; }
-    .back { display: inline-flex; align-items: center; gap: 4px; color: var(--ink2); text-decoration: none; font: 600 15px var(--sans); padding: 8px 2px; }
-    .iconbtn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink2); text-decoration: none; background: transparent; border: 0; cursor: pointer; }
-    .ic { width: 42px; height: 42px; border-radius: 14px; flex: none; display: grid; place-items: center; }
-    a.item, button.item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px; font: inherit; text-align: left; cursor: pointer; }
-    .item + .item { margin-top: 8px; }
-    .item .t { font: 600 15.5px/1.3 var(--sans); } .item .m { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-    .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; border: 2px solid var(--line2); }
-    .dot.on { background: var(--teal); border-color: var(--teal); color: #0d2420; }
-    .prompt { font: 500 21px/1.45 var(--display); }
-    .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mod { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 20px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); min-height: 120px; position: relative; overflow: hidden; }
-    .mod b { font: 560 18px/1.15 var(--display); } .mod small { color: var(--ink2); font-size: 12.5px; }
-    .mod .bar { position: absolute; left: 0; bottom: 0; height: 4px; background: currentColor; opacity: .8; }
-    .motto { font: italic 500 20px/1.45 var(--display); color: var(--gold); margin: 0 2px 14px; }
-    .essence p { font: 400 18.5px/1.55 var(--display); } .scene p { font: 400 16.5px/1.6 var(--display); color: var(--ink2); }
-    .tech { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); } .tech:first-child { border-top: 0; }
-    .light { width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex: none; } .light.g { background: var(--green); } .light.y { background: var(--amber); } .light.r { background: #e2766f; }
-    details.more { margin-top: 22px; } details.more summary { cursor: pointer; display: inline-flex; gap: 8px; align-items: center; font: 650 14px var(--sans); color: var(--gold); list-style: none; } details.more summary::-webkit-details-marker { display: none; }
-    .lesson-card { min-height: 250px; display: flex; flex-direction: column; justify-content: center; padding: 26px 22px; }
-    .lesson-card p { font: 400 20px/1.55 var(--display); margin: 0; }
-    .pips { display: flex; gap: 6px; margin: 14px 0; } .pips i { flex: 1; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); } .pips i.on { background: var(--gold); }
-    .keep { text-align: center; font: italic 500 21px/1.4 var(--display); color: var(--gold); padding: 22px 18px; }
-    /* yes/maybe/no */
-    .ymn { display: flex; gap: 4px; flex: none; }
-    .ymn button { width: 38px; height: 34px; border-radius: 10px; border: 1px solid var(--line2); background: transparent; color: var(--muted); font: 700 12.5px var(--sans); cursor: pointer; }
-    .ymn button.y.on { background: var(--green); border-color: var(--green); color: #0c2014; }
-    .ymn button.m.on { background: var(--amber); border-color: var(--amber); color: #2a1e05; }
-    .ymn button.n.on { background: var(--red); border-color: var(--red); color: #2a0b0b; }
-    .limit { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-    .limit:last-child { border-bottom: 0; } .limit .grow { font-size: 15px; }
-    .tag { display: inline-block; font: 700 11px var(--sans); padding: 3px 8px; border-radius: 999px; }
-    .tag.y { background: rgba(127,207,154,.16); color: var(--green); } .tag.m { background: rgba(240,195,106,.16); color: var(--amber); } .tag.n { background: rgba(239,124,124,.16); color: var(--red); }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--ink2); font: 600 13px var(--sans); cursor: pointer; }
-    .chip.on { background: var(--gold); border-color: var(--gold); color: #1d1608; }
-    .chip:disabled { opacity: .35; cursor: not-allowed; }
-    .chip.warn { border-color: var(--amber); color: var(--amber); }
-    textarea, input[type=text], input[type=date] { width: 100%; font: 400 16px/1.45 var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: var(--ink); }
-    textarea { min-height: 80px; resize: vertical; }
-    label.f { display: block; margin-top: 14px; } label.f > span { display: block; font: 650 12.5px var(--sans); color: var(--ink2); margin-bottom: 6px; }
-    .check { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); cursor: pointer; width: 100%; background: none; border-left: 0; border-right: 0; border-top: 0; color: var(--ink); font: inherit; text-align: left; }
-    .check:last-child { border-bottom: 0; }
-    .check .box { width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--line2); flex: none; display: grid; place-items: center; color: #0d2420; }
-    .check.on .box { background: var(--teal); border-color: var(--teal); }
-    .check.on .lbl { color: var(--muted); }
-    .note { padding: 12px 0; border-bottom: 1px solid var(--line); } .note:last-child { border-bottom: 0; }
-    .warnbox { border-radius: 16px; padding: 12px 14px; background: rgba(240,195,106,.1); border: 1px solid rgba(240,195,106,.35); color: var(--ink); font-size: 14.5px; }
-    .rule { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); } .rule:last-child { border-bottom: 0; }
-    .rule .w { font-size: 13px; color: var(--muted); margin-top: 2px; }
-    nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 40; display: flex; gap: 2px; padding: 6px; border-radius: 999px; background: rgba(23,27,45,.9); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--line2); box-shadow: 0 10px 40px rgba(0,0,0,.5); width: min(440px, calc(100% - 24px)); }
-    nav.tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 999px; text-decoration: none; color: var(--muted); font: 650 11px var(--sans); }
-    nav.tabs a.on { color: var(--ink); background: rgba(217,178,111,.15); } nav.tabs a.on .i { color: var(--gold); }
-    nav.tabs[hidden] { display: none; }
-    .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 999px; font: 650 14px var(--sans); animation: rise .3s var(--spring) both; max-width: calc(100% - 40px); text-align: center; }
-    .sheet-back { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
-    .sheet { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 28px 28px 0 0; padding: 12px 20px calc(env(safe-area-inset-bottom) + 18px); animation: sheetup .45s var(--spring) both; }
-    .sheet .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line2); margin: 0 auto 18px; }
-    ol.steps { padding-left: 22px; margin: 0 0 12px; } ol.steps li { margin: 9px 0; }
-    /* lock */
-    .lock { text-align: center; padding: 60px 8px 0; }
-    .pindots { display: flex; gap: 18px; justify-content: center; margin: 30px 0; }
-    .pindots i { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--gold); } .pindots i.on { background: var(--gold); }
-    .keypad { display: grid; grid-template-columns: repeat(3, 74px); gap: 16px 24px; justify-content: center; }
-    .keypad button { width: 74px; height: 74px; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); color: var(--ink); font: 500 27px var(--sans); cursor: pointer; display: grid; place-items: center; }
-    .keypad button:active { background: var(--card2); }
-    .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
-    .cons { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 54px; margin-top: 12px; }
-    .cons div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; } .cons i { display: block; width: 100%; border-radius: 4px; } .cons span { font: 600 10px var(--sans); color: var(--muted); }
-    .seg { display: flex; background: var(--card); border: 1px solid var(--line2); border-radius: 999px; padding: 4px; gap: 4px; }
-    .seg a { flex: 1; text-align: center; padding: 9px 8px; border-radius: 999px; font: 650 13.5px var(--sans); color: var(--ink2); text-decoration: none; }
-    .seg a.on { background: var(--gold); color: #1d1608; }
-    .toolbar { position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 5; display: flex; align-items: center; gap: 2px; overflow-x: auto; padding: 5px; border-radius: 14px; background: var(--card2); border: 1px solid var(--line2); scrollbar-width: none; box-shadow: var(--e1); }
-    .toolbar::-webkit-scrollbar { display: none; }
-    .tb-btn { flex: none; width: 40px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: var(--ink2); cursor: pointer; display: grid; place-items: center; }
-    .tb-btn .i { width: 20px; height: 20px; } .tb-btn.on { background: rgba(217,178,111,.18); color: var(--gold); } .tb-btn.dim { opacity: .35; }
-    .tb-sep { flex: none; width: 1px; height: 22px; background: var(--line2); margin: 0 4px; }
-    .note-body { min-height: 46vh; margin-top: 10px; padding: 16px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line); font: 400 17px/1.65 var(--sans); outline: none; overflow-wrap: anywhere; caret-color: var(--gold); }
-    .note-body:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; white-space: pre-wrap; }
-    .note-body > * { margin: 0 0 .55em; } .note-body > :first-child { margin-top: 0; }
-    .note-body h1 { font: 600 1.5em/1.2 var(--display); margin: 1em 0 .4em; } .note-body h2 { font: 600 1.2em/1.3 var(--display); margin: .9em 0 .35em; } .note-body h3 { font-size: 1.05em; font-weight: 700; color: var(--ink2); }
-    .note-body blockquote { margin: .8em 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--gold); color: var(--ink2); font-style: italic; }
-    .note-body hr { margin: 1.4em 0; border: 0; border-top: 1px solid var(--line2); } .note-body mark { background: rgba(240,195,106,.35); color: inherit; border-radius: 3px; padding: 0 1px; }
-    .note-body ul, .note-body ol { padding-left: 1.5em; } .note-body li { margin: .15em 0; } .note-body li::marker { color: var(--muted); }
-    .note-body ul.checklist { list-style: none; padding-left: 0; } .note-body ul.checklist > li { position: relative; padding-left: 32px; min-height: 1.65em; }
-    .note-body ul.checklist > li::before { content: ""; position: absolute; left: 2px; top: .2em; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line2); box-sizing: border-box; cursor: pointer; }
-    .note-body ul.checklist > li.checked { color: var(--muted); text-decoration: line-through; } .note-body ul.checklist > li.checked::before { background: var(--teal); border-color: var(--teal); }
-    .note-body ul.checklist > li.checked::after { content: ""; position: absolute; left: 9px; top: calc(.2em + 4px); width: 5px; height: 10px; border: solid #0d2420; border-width: 0 2.2px 2.2px 0; transform: rotate(45deg); pointer-events: none; }
-    .note-body ul.checklist ul.checklist { padding-left: 4px; margin-top: .15em; } .note-body li > ul, .note-body li > ol { margin: .15em 0 0; } .note-body li.checked > ul, .note-body li.checked > ol { color: var(--ink); text-decoration: none; }
-    .seg a { white-space: nowrap; }
-    .chain { display: grid; grid-template-columns: repeat(14, 1fr); gap: 0; margin-top: 8px; }
-    .cc { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
-    .cc i { width: 100%; height: 16px; display: flex; justify-content: center; } .cc i::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line2); box-sizing: border-box; }
-    .cc.on i { background: transparent; } .cc.on i::before { background: var(--gold); border-color: var(--gold); }
-    .cc.on.jl i { background: linear-gradient(90deg, rgba(217,178,111,.45) 50%, transparent 50%) center / 100% 4px no-repeat; } .cc.on.jr i { background: linear-gradient(90deg, transparent 50%, rgba(217,178,111,.45) 50%) center / 100% 4px no-repeat; }
-    .cc.on.jl.jr i { background: linear-gradient(rgba(217,178,111,.45), rgba(217,178,111,.45)) center / 100% 4px no-repeat; }
-    .cc span { font: 600 9px var(--sans); color: var(--muted); }
-    .calgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .calgrid .wd { text-align: center; font: 700 11px var(--sans); color: var(--muted); padding: 4px 0; }
-    .cal { aspect-ratio: 1 / 1.05; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 0; }
-    .cal b { font: 600 14px var(--sans); } .cal.today { border-color: var(--gold); } .cal.sel { background: rgba(217,178,111,.18); }
-    .cal .dots { display: flex; gap: 2px; min-height: 6px; } .cal .dots i, .lg { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-    .lg { margin-right: 5px; vertical-align: 1px; }
-    .d-scene { background: var(--amber); } .d-debrief { background: var(--violet); } .d-checkin { background: var(--teal); } .d-note { background: var(--blush); } .d-rhythm { background: var(--gold); }
-    .stars { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; font-size: 28px; line-height: 1; color: var(--line2); } .stars .on { color: var(--gold); text-shadow: 0 0 12px rgba(217,178,111,.45); }
-    .goalrow { display: flex; align-items: center; gap: 3px; margin-top: 8px; }
-    .gd { width: 25px; height: 25px; flex: none; border-radius: 50%; border: 1.5px solid var(--line2); background: transparent; color: var(--muted); font: 700 11px var(--sans); cursor: pointer; padding: 0; }
-    .gd.on { background: var(--gold); border-color: var(--gold); color: #1a1420; } .gd.today { border-color: var(--gold); } .gd[disabled] { opacity: .35; }
-    .gc { font: 700 13px var(--sans); color: var(--muted); margin-left: 6px; white-space: nowrap; } .gc.met { color: var(--green); }
-    details.how { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
-    details.how summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 650 14px var(--sans); color: var(--gold); list-style: none; }
-    details.how summary::-webkit-details-marker { display: none; }
-    details.how ol { margin: 10px 0 8px; padding-left: 22px; font: 400 15.5px/1.5 var(--sans); } details.how ol li { margin: 6px 0; }
-    .sayline { font: italic 500 16.5px/1.5 var(--display); border-left: 3px solid var(--gold); padding: 2px 0 2px 12px; margin: 10px 0; color: var(--ink); }
-    .step .num, .tech .num { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(217,178,111,.16); color: var(--gold); font: 700 14px var(--sans); }
-    .step b { font: 600 16.5px var(--sans); }
-    ul.field { margin: 8px 0 0; padding-left: 18px; } ul.field li { margin: 6px 0; color: var(--ink2); }
-    .loading { padding: 90px 0; text-align: center; color: var(--muted); }
-    @media (max-width: 380px) { h1 { font-size: 28px; } .lesson-card p { font-size: 18.5px; } .ymn button { width: 33px; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Anchor</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Thirty principles of dominance, with the Daddy and Master wings, each taught through tales, with your own notes.">
+<meta name="theme-color" content="#0e1120">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Anchor">
+<style>
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+  :root { --bg: #0e1120; --card: #171b2e; --card2: #1f2440; --ink: #eee8f2; --ink2: #dcd6e8; --muted: #9d97b0; --line: rgba(215, 210, 255, .1);
+    --gold: #d9b26f; --rose: #9db4e0; --display: "Cormorant", Georgia, serif; --read: "Noto Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; color: var(--ink); font: 16px/1.55 var(--sans); background: var(--bg); }
+  body { min-height: 100vh; background: radial-gradient(120% 55% at 50% -12%, #262d52 0%, rgba(14, 17, 32, 0) 70%), var(--bg); }
+  a { color: inherit; text-decoration: none; } button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  main { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 100px); }
+  h1 { font: 600 34px/1.1 var(--display); margin: 4px 0 6px; }
+  h3 { font: 700 11.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 28px 0 10px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); } .ink2 { color: var(--ink2); } .small { font-size: 14px; } .tiny { font-size: 12.5px; }
+  .eyebrow { font: 700 11px var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .row { display: flex; align-items: center; gap: 10px; } .between { justify-content: space-between; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card2); font-weight: 650; font-size: 15px; }
+  .btn.pri { background: linear-gradient(135deg, #f1d9a6, var(--gold)); color: #1d1206; border: 0; } .btn.block { display: flex; width: 100%; }
+  .search { width: 100%; font: 16px var(--sans); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); outline: none; margin: 10px 0 2px; }
+  .search:focus { border-color: var(--gold); }
+  .roman { font: 600 13px var(--display); letter-spacing: .12em; color: var(--gold); }
+
+  /* home */
+  .today { display: block; margin-top: 14px; padding: 18px; border-radius: 20px; background: linear-gradient(150deg, #3a1726, #171b2e 70%); border: 1px solid rgba(224, 185, 116, .25); }
+  .today .m { font: 400 17px/1.5 var(--read); margin-top: 8px; color: var(--ink2); }
+  .part { margin-top: 26px; } .part .ph { display: flex; align-items: baseline; gap: 10px; } .part .ph h2 { font: 600 25px var(--display); margin: 0; }
+  .part .pl { font-size: 14px; color: var(--muted); margin: 2px 0 6px; }
+  .pr { display: flex; gap: 12px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
+  .pr:first-child { border-top: 0; }
+  .pr .n { font: 600 18px var(--display); color: var(--gold); width: 28px; flex: none; text-align: center; }
+  .pr b { font: 600 17px/1.3 var(--read); display: block; } .pr .s { font-size: 14.5px; color: var(--ink2); margin-top: 2px; }
+  .pr .pen { margin-left: auto; color: var(--gold); flex: none; } .chev { margin-left: auto; color: var(--muted); flex: none; font-size: 20px; }
+
+  /* principle */
+  .motto { font: 400 19px/1.5 var(--read); margin: 12px 0 0; color: var(--gold); }
+  .ess { font: 400 17px/1.7 var(--read); color: var(--ink); margin-top: 14px; }
+  .tcard { display: block; padding: 16px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); margin-top: 10px; position: relative; overflow: hidden; }
+  .tcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--rose); }
+  .tcard b { font: 600 18px/1.3 var(--read); display: block; } .tcard .meta { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .tcard .go { font-size: 13.5px; font-weight: 700; color: var(--rose); margin-top: 8px; }
+  details.depth { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 4px 16px; }
+  details.depth summary { list-style: none; cursor: pointer; padding: 12px 0; font-weight: 700; color: var(--ink2); } details.depth summary::-webkit-details-marker { display: none; }
+  details.depth p { font: 400 16.5px/1.7 var(--read); color: var(--ink2); }
+  ul.practice { list-style: none; padding: 0; margin: 0; } ul.practice li { position: relative; padding: 10px 0 10px 26px; border-top: 1px solid var(--line); color: var(--ink); }
+  ul.practice li:first-child { border-top: 0; } ul.practice li::before { content: "✦"; position: absolute; left: 2px; top: 10px; color: var(--gold); font-size: 13px; }
+  .shadow { border-left: 3px solid #7d5560; padding: 4px 0 4px 14px; color: var(--ink2); margin-top: 10px; font-size: 16px; }
+  .nav2 { display: flex; gap: 10px; margin-top: 24px; } .nav2 a { flex: 1; padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); min-width: 0; }
+  .nav2 a b { font: 600 15px/1.3 var(--read); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* tale */
+  .tale { font: 400 18px/1.75 var(--read); color: var(--ink); margin-top: 18px; }
+  .tale p { margin: 0 0 16px; } .tale p:first-child::first-letter { font-size: 3.1em; float: left; line-height: .9; padding: 6px 8px 0 0; color: var(--gold); font-weight: 600; }
+  .mv { padding: 12px 0; border-bottom: 1px solid var(--line); } .mv:last-child { border-bottom: 0; }
+  .mv .m { font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--rose); }
+  .mv .l { font: 17px/1.5 var(--read); color: var(--ink); margin-top: 4px; }
+  .reveal { margin-top: 10px; padding: 16px; border-radius: 18px; background: linear-gradient(150deg, #262b48, #171b2e); border: 1px solid rgba(234, 132, 150, .25); }
+  .reveal .h { font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
+  .reveal p { margin: 6px 0 0; font: 400 17px/1.6 var(--read); }
+  .src { font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+  .ti { display: block; padding: 12px 0; border-top: 1px solid var(--line); } .ti:first-child { border-top: 0; }
+  .ti b { font: 600 16.5px/1.3 var(--read); display: block; } .ti .meta { font-size: 13px; color: var(--muted); }
+  .snippet { font: 400 15px/1.5 var(--read); color: var(--ink2); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* floating note button and note editor */
+  .fab { position: fixed; z-index: 25; right: max(16px, calc(50% - 314px)); bottom: calc(env(safe-area-inset-bottom) + 78px); display: flex; align-items: center; gap: 8px; padding: 13px 18px 13px 15px; border-radius: 999px;
+    background: linear-gradient(135deg, #f1d9a6, var(--gold)); color: #1d1206; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+  .fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .fab .has { width: 7px; height: 7px; border-radius: 50%; background: #1d1206; }
+  .editor { position: fixed; left: 0; right: 0; top: 0; height: 100%; z-index: 70; background: var(--bg); display: flex; flex-direction: column; animation: up .2s ease; }
+  .ed-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 10px) 12px 8px; max-width: 660px; width: 100%; margin: 0 auto; flex: none; }
+  .ed-top .done { color: var(--gold); font-weight: 700; font-size: 16px; padding: 6px 8px; }
+  .ed-tools { order: 3; flex: none; display: flex; gap: 6px; padding: 8px max(12px, calc(50% - 318px)) calc(8px + var(--kb-safe, env(safe-area-inset-bottom))); width: 100%; border-top: 1px solid var(--line); background: #1c1016; }
+  .ed-tools button { min-width: 44px; height: 38px; padding: 0 10px; border-radius: 10px; background: var(--card2); border: 1px solid var(--line); color: var(--ink2); display: grid; place-items: center; font-weight: 700; }
+  .ed-tools button.on { background: var(--gold); color: #1d1206; border-color: var(--gold); }
+  .ed-tools svg { width: 20px; height: 20px; fill: currentColor; }
+  .ed-scroll { flex: 1; min-height: 0; overflow-y: auto; order: 2; }
+  .ed-wrap { max-width: 660px; margin: 0 auto; padding: 16px 18px 40px; }
+  .ed-title { font: 600 28px/1.15 var(--display); margin: 0; }
+  .ed-when { font-size: 12.5px; color: var(--muted); margin: 4px 0 14px; }
+  .ed { position: relative; outline: none; min-height: 40vh; font: 18px/1.65 var(--sans); color: var(--ink); word-wrap: break-word; caret-color: var(--gold); }
+  .ed ul, .ed ol { margin: 4px 0; padding-left: 26px; } .ed li { margin: 3px 0; } .ed li::marker { color: var(--gold); } .ed ol li::marker { font-weight: 700; }
+  .ed b, .ed strong { color: #fff; }
+
+  nav.tabsbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); background: rgba(18, 14, 11, .94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+  nav.tabsbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 14px; font: 650 12px var(--sans); color: var(--muted); }
+  nav.tabsbar a.on { color: var(--gold); } nav.tabsbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .back { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: min(600px, 100%); max-height: 90vh; overflow-y: auto; background: var(--card); border-radius: 22px 22px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px); animation: up .25s ease; }
+  .sheet h2 { font: 600 25px var(--display); margin: 0 0 8px; }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+  .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); transform: translateX(-50%); background: var(--gold); color: #1d1206; padding: 10px 16px; border-radius: 999px; font-weight: 650; font-size: 14px; max-width: 90vw; text-align: center; }
+  .ic2 { display: inline-block; width: 20px; height: 20px; vertical-align: -5px; fill: none; stroke: var(--gold); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .dots3 { display: inline-block; padding: 0 6px; border-radius: 999px; background: var(--card2); font: 600 11px/20px sans-serif; letter-spacing: 1px; }
+  ol.isteps { padding-left: 20px; } ol.isteps li { margin: 7px 0; }
+  .ver { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+</style>
 </head>
 <body>
-  <main id="main"><div class="loading">…</div></main>
-  <nav class="tabs" id="tabs" hidden></nav>
+<main id="app"><p class="muted" style="text-align:center;margin-top:40vh">…</p></main>
+<nav class="tabsbar">
+  <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M12 3c2 3 5 4.5 5 9a5 5 0 0 1-10 0c0-4.5 3-6 5-9z"/><path d="M12 21v-4"/></svg>Principles</a>
+  <a href="#/tales" data-tab="tales"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Tales</a>
+  <a href="#/notebook" data-tab="notebook"><svg viewBox="0 0 24 24"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h6M10 12h6M10 16h4"/></svg>Notebook</a>
+</nav>
 <script src="lib/vault.js"></script>
 <script>
 (() => {
   "use strict";
-  const $ = s => document.querySelector(s);
-  const DAY = 864e5;
+  const VER = "18";
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
-  const dstr = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
-  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const toast = (m, ms = 2300) => { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const paras = s => String(s || "").split(/\n\s*\n|\n/).filter(x => x.trim()).map(x => `<p>${esc(x.trim())}</p>`).join("");
+  const toast = (m, ms = 2200) => { $$(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms); };
+  const KEY = "anchor-book";
+  let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { S = {}; }
+  S.pages = S.pages || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX"];
+  const PARTS = [
+    { id: "ground", title: "The Ground of Authority", line: "Where your authority comes from, and how you keep it: trust, attention, calm and command of yourself." },
+    { id: "covenant", title: "The Covenant of Consent", line: "Her yes, the sacred signals, the edges of the exchange and the courage to renegotiate." },
+    { id: "structure", title: "Structure and Discipline", line: "Rules, rituals, rewards and correction that steady her and never shrink her." },
+    { id: "scenes", title: "Scenes and Aftercare", line: "Build the scene before it begins, read her as it unfolds, hold her after and repair what breaks." },
+    { id: "desire", title: "Desire and Anticipation", line: "Adult to adult: waiting, her pleasure, intensity with care and the stories you play together." },
+    { id: "daddy", title: "The Daddy Wing", line: "Authority as care. Little space held gently, always non-sexual, and a Daddy who grows her." },
+    { id: "master", title: "The Master Wing", line: "Service given as a gift, protocol that makes the ordinary sacred, and the duties of the one who receives." }
+  ];
+  let P = [], BY = {};
 
-  /* Everything stays on this device. */
-  const KEY = "anchor", VER = "17";
-  const db = Object.assign({ lessons: {}, limits: {}, limitNotes: {}, negotiated: null, safe: { stop: "Red", slow: "Yellow", go: "Green", signal: "Drop a held object, or three taps" },
-    aftercare: [], aftercareNote: "", mine: "", little: { comfort: "", favourites: "", bedtime: "", signs: "", out: "" },
-    rules: [], rituals: [], ritualLog: {}, rewards: [], profile: { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] }, modes: null, protHome: [], protPublic: [], protEx: "", stars: { n: 0, goal: 10, reward: "", log: [], earned: [] }, conseq: [], scenes: [], debriefs: [], checkins: [], pin: null, pinAsked: false },
-    (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+  /* ---------- notes: a small, safe subset of HTML ---------- */
+  const OK_TAGS = new Set(["DIV", "P", "BR", "UL", "OL", "LI", "B", "STRONG", "I", "EM", "U"]);
+  function clean(html) {
+    const t = document.createElement("template"); t.innerHTML = html || "";
+    (function walk(node) { [...node.childNodes].forEach(c => { if (c.nodeType === 3) return; if (c.nodeType !== 1) return c.remove();
+      if (/^(SCRIPT|STYLE|IFRAME|OBJECT|SVG|IMG|VIDEO|AUDIO|TEMPLATE)$/.test(c.tagName)) return c.remove(); walk(c);
+      if (!OK_TAGS.has(c.tagName)) { c.replaceWith(...c.childNodes); return; } [...c.attributes].forEach(x => c.removeAttribute(x.name)); }); })(t.content);
+    return t.innerHTML;
+  }
+  const plain = html => { const t = document.createElement("template"); t.innerHTML = String(html || "").replace(/<\/(li|div|p)>|<br\s*\/?>/gi, "$&\n"); return t.content.textContent.replace(/ /g, " ").replace(/\n{2,}/g, "\n").trim(); };
+  const hasNote = id => !!(S.pages[id] && plain(S.pages[id].html));
+  const when = at => new Date(at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  const fab = id => `<div style="height:70px"></div><a class="fab" href="#/p/${id}/notes" aria-label="Notes on this principle"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>${hasNote(id) ? "My note<span class=\"has\"></span>" : "Note"}</a>`;
+  const partOf = p => PARTS.find(x => x.id === p.part) || PARTS[0];
 
-  const P = {
-    anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v13M7.5 10.5h9M4.5 13.5c0 4 3.4 6.5 7.5 6.5s7.5-2.5 7.5-6.5"/>',
-    book: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15.5H5.5A1.5 1.5 0 0 0 4 21z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15.5h5.5c.8 0 1.5.7 1.5 1.5z"/>',
-    cup: '<path d="M5 9.5h11v4.5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3.5c0 1.5 1 1.5 1 3M12 3.5c0 1.5 1 1.5 1 3"/>',
-    gavel: '<path d="M13.5 4.5l6 6M11 7l6 6M12.2 5.8l-4.4 4.4M18.2 11.8l-4.4 4.4M10 12l-6.5 6.5"/><path d="M14 20.5h7"/>',
-    flame: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.6 2.7-5.6 4-8.8.6 2 1.7 3 2.7 3.6.3-2.4 1.2-4.4 2.8-6.1.3 3.5 3.5 5.9 3.5 10.6 0 4-2.7 6.9-6.5 6.9z"/>',
-    heart: '<path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
-    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 5.5 15.5 12 9 18.5"/>', back: '<path d="M15 5.5 8.5 12l6.5 6.5"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>', shield: '<path d="M12 3.5 19 6v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/>', list: '<path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
-    moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>', star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/>',
-    scale: '<path d="M12 4v16M6 20h12M5 8h14M7.5 8 4.5 14a3 3 0 0 0 6 0zM16.5 8l-3 6a3 3 0 0 0 6 0z"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
-    blanket: '<path d="M4 8.5c2.5-2 5.5-2 8 0s5.5 2 8 0v9c-2.5 2-5.5 2-8 0s-5.5-2-8 0z"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
-    chat: '<path d="M4.5 5.5h15v10h-9l-4 3.5v-3.5h-2z"/>', search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', upload: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>', share: '<path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/>' };
-  const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n] || ""}</svg>`;
-  /* The core is dominance; Daddy and Master are its wings; adult time sits alongside. Names can be overridden by content.json "structure". */
-  const MODS = {
-    foundations: ["Foundations of dominance", "anchor", "#d9b26f", "What dominance is, and where authority comes from"], negotiation: ["Consent and negotiation", "scale", "#7cc6b8", "Limits, safewords, check-ins"],
-    presence: ["Presence and authority", "spark", "#a99bf2", "Voice, decisiveness, reading her"], structure: ["Structure", "list", "#e8b27a", "Rules, rituals, praise, rewards"],
-    discipline: ["Discipline", "gavel", "#e0a46a", "Reinforcement and correction"], scenes: ["Scenes", "star", "#f0c36a", "Shape, planning, safety"],
-    aftercare: ["Aftercare and repair", "blanket", "#7fcf9a", "Landing, drop, repair"], self: ["Your own care", "shield", "#8fb8ef", "Dom drop, limits, growth"],
-    daddy: ["The Daddy wing", "heart", "#ec9fb6", "Nurture, protection, little space"], master: ["The Master wing", "cup", "#c9a27e", "Service, protocol, standards"],
-    pleasure: ["Her pleasure", "heart", "#ff8fa3", "Adult time: her body, her orgasm"], anticipation: ["Anticipation", "spark", "#ff9a6a", "Adult time: the slow burn, tease, words"], adultplay: ["Adult play", "flame", "#e88a6a", "Adult time: rough, bound, roles, three"] };
-  const MODS_ALIAS = { care: MODS.structure, service: MODS.master };
-  const SECTIONS = [["core", "The core: dominance", ["foundations", "negotiation", "presence", "structure", "discipline", "scenes", "aftercare", "self"]], ["daddy", "Wing: Daddy", ["daddy"]], ["master", "Wing: Master", ["master"]], ["adult", "Adult time", ["pleasure", "anticipation", "adultplay"]]];
-  const INTROS = { core: "Everything starts here. Dominance is authority she gives you, held with consent, steadiness and care. Both wings stand on it.", daddy: "Nurture as dominance: protection, comfort, bedtime, little space. Always non-sexual.", master: "Service as dominance: standards, protocol, training and ownership, always between adults.", adult: "Her body and adult play, adult to adult only, never in or near little space." };
-  const modIc = (m, s = 42) => { const [, i, col] = MODS[m] || MODS_ALIAS[m] || MODS.foundations; return `<span class="ic" style="width:${s}px;height:${s}px;background:${col}22;color:${col}">${ic(i)}</span>`; };
-
-  /* Yes / maybe / no list. Little space is kept non-sexual here, as many couples do. */
-  const ACTS = [
-    ["Care & structure", ["Rules from me", "Daily rituals (morning, bedtime)", "Check-in texts during the day", "Praise and pet names", "Calling me Daddy", "Rewards", "Agreed consequences (early bedtime, a chore, a written reflection)", "Being looked after (meals, water, bedtime)", "Little-space play (non-sexual: stuffies, colouring, cartoons)", "Reports or a journal for me"]],
-    ["Service (she cares for you)", ["Daily acts of service (coffee, clothes, a bath)", "Fixed service rituals (morning, homecoming, evening)", "Calling me Master at home", "Kneeling to greet me or serve (if comfortable)", "Discreet service in public (my drink, my coat)", "Being trained in how I like things", "Sexual service (adult time only)"]],
-    ["Discipline (non-sexual, agreed in advance)", ["A star chart or points", "Reminders and warnings before any consequence", "Corner time", "Disciplinary spanking (hand only)", "Maintenance or reminder spankings", "Funishment (playful, not real correction)", "Bratting and being tamed (play)"]],
-    ["Power & protocol", ["Kneeling or sitting at my feet", "Asking permission for small things", "Orders by text", "Service tasks", "Posture or presentation positions", "Formal protocol in private", "Subtle protocol in public"]],
-    ["Restraint & sensation", ["Blindfold", "Hand restraints (cuffs)", "Rope bondage", "Being held down", "Hand spanking", "Paddle", "Flogger", "Marks that fade in a day", "Marks that last longer", "Temperature play (ice, warm)", "Tickling"]],
-    ["Words", ["Praise", "Commands", "Teasing", "Degradation (negotiated words only)", "Dirty talk", "Being made to ask or beg"]],
-    ["Rough and bound (adult time)", ["Rough play: grabbing, pinning, being held down", "Hair pulling", "Biting", "Scratching", "Spanking during sex", "Cuffs during sex", "Rope during sex", "Being gagged (with a non-verbal signal)"]],
-    ["Roles and more (adult time)", ["Role play: strangers at a bar, boss and employee, captor and captive (adults only)", "Consensual non-consent role play (advanced: later, if ever)", "Threesome with another woman", "Watching or being watched with a third"]],
-    ["Adult play (never in little space)", ["Being pleasured with hands", "Being pleasured with mouth", "A vibrator", "Orgasm control or denial", "Toys", "Being undressed by me", "Photos or video", "Other role play (adult scenarios)"]],
-    ["Firm no for everyone (high risk)", ["Breath play or anything on the neck"]] ];
-  const AFTER = ["Cuddles", "Water", "A snack", "A blanket", "Quiet", "Words of reassurance", "Her stuffie", "Some space", "A shower or bath together", "A check-in the next day"];
-
-  /* A four-week beginner path through the guides, in a sensible order. */
-  let PATH = [
-    ["Week 1 · Talk and agree", ["first-talk", "the-list", "safewords", "tone"]],
-    ["Week 2 · Daily structure", ["bedtime", "morning", "rituals-text", "praise"]],
-    ["Week 3 · Rules and care", ["first-rules", "wellbeing-plan", "rewards", "consequences", "little-evening", "her-bad-day"]],
-    ["Week 4 · First scene and after", ["first-scene", "aftercare-first", "next-day", "debrief", "safeword-used", "mistake", "weekly"]],
-    ["Service · Rituals and modes", ["service-rituals", "modes-and-cues"]],
-    ["Discipline · Rewards and correction", ["reward-chart", "correction-ladder", "discipline-spanking"]],
-    ["Adult time · Her pleasure", ["learn-her", "her-orgasm"]],
-    ["Adult time · Rough, bound, roles, three", ["rough-sex", "bondage-sex", "roleplay", "threesome-couple"]] ];
-  /* Rhythm: daily, weekly and monthly. Old "rituals" become daily rhythm items.
-     Monthly items appear on Today at weekends and in the month's last week, until done. */
-  const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const TEMPLATE = {
-    daily: [["Good-morning message", "morning"], ["Midday check-in text", "rituals-text"], ["Bedtime ritual", "bedtime"], ["Two minutes: how did I lead today?", ""]],
-    weekly: [["Weekly check-in conversation", 0, "weekly"], ["Little-space evening (non-sexual)", 3, "little-evening"], ["Connection or date night", 5, ""], ["Plan next week’s rhythm", 0, ""]],
-    monthly: [["Go through her yes / maybe / no list again", "the-list"], ["Review rules and rituals: keep, change, drop", "first-rules"], ["Something just for you (your own care)", ""]] };
-  /* Weekly goals: a rule can carry a target (times a week). Week starts Monday. */
-  const weekStart = (t = Date.now()) => { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return +d; };
-  const weekDays = () => [...Array(7)].map((_, i) => dayKey(weekStart() + i * 864e5 + 3600e3 * 3));
-  const goalCount = r => weekDays().filter(k => (r.log || {})[k]).length;
-  const goalRow = r => { const W = weekDays(), today = dayKey(), n = goalCount(r);
-    return `<div class="goalrow">${W.map((k, i) => `<button class="gd${(r.log || {})[k] ? " on" : ""}${k === today ? " today" : ""}" data-act="goalday" data-v="${r.id}" data-key="${k}" ${k > today ? "disabled" : ""} aria-label="${k}">${"MTWTFSS"[i]}</button>`).join("")}<span class="gc${n >= r.target ? " met" : ""}">${n}/${r.target}${n >= r.target ? " ✓" : ""}</span></div>`; };
-  /* ---------- Examples (from data/content.json "examples") ---------- */
-  const EXT = { protocol: "Protocol", rules: "Rules", anticipation: "Anticipation (adult)", rhythm: "Rhythm", rewards: "Rewards", conseq: "Consequences", praise: "Praise", texts: "Check-in texts", little: "Little space" };
-  const RCAT = { body: "Body and movement", mind: "Mind and calm", sleep: "Sleep", care: "Self-care", connection: "Connection", safety: "Safety", growth: "Growth", home: "Home and routine", little: "Little space", protocol: "Protocol", service: "Service" };
-  let exTab = "rules";
-  const exBtn = (k, label) => C.examples ? `<button class="btn sm" data-act="exsheet" data-v="${k}" style="margin:0 2px 14px">${ic("plus")} ${label}</button>` : "";
-  const exHave = (k, t) => { const L = k === "rules" ? db.rules : k === "rewards" ? db.rewards : k === "conseq" ? db.conseq : k === "rhythm" ? [...rh().daily, ...rh().weekly, ...rh().monthly] : []; return L.some(x => x.text === t); };
-  function exList(k) {
-    const E = C.examples || {}, add = (i, t) => exHave(k, t) ? `<span class="tag y" style="flex:none">Added</span>` : `<button class="btn sm gold" data-act="exadd" data-v="${k}" data-i="${i}" style="flex:none">${ic("plus")}</button>`;
-    const copy = t => `<button class="iconbtn" data-act="excopy" data-t="${esc(t)}" aria-label="Copy" style="flex:none">${ic("share")}</button>`;
-    const group = (arr, keyf, names) => { const g = {}; arr.forEach((x, i) => (g[keyf(x)] ||= []).push([x, i])); return Object.entries(g).map(([c, xs]) => `<div class="eyebrow" style="margin:16px 4px 6px">${esc(names ? names[c] || c : c)}</div>${xs.map(([x, i]) => row(x, i)).join("")}`).join(""); };
-    let row;
-    if (k === "rules") { row = (x, i) => `<div class="card" style="padding:12px 14px;margin-top:8px"><div class="row" style="align-items:flex-start"><div class="grow"><b>${esc(x.text)}</b>${x.target ? ` <span class="tag m">${x.target}× a week</span>` : ""}<div class="small muted">${esc(x.why)}</div>${x.how ? `<div class="small" style="margin-top:4px">${esc(x.how)}</div>` : ""}${x.src ? `<div class="small" style="color:var(--gold);margin-top:2px">${esc(x.src)}</div>` : ""}</div>${add(i, x.text)}</div></div>`; return group(E.rules || [], x => x.cat, RCAT); }
-    if (k === "rewards") { row = (x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.text)}${x.kind === "adult" ? ` <span class="tag n">adult time</span>` : x.kind === "little" ? ` <span class="tag m">little</span>` : ""}</div>${add(i, x.text)}</div>`; return group(E.rewards || [], x => x.size, { small: "Small, any day", medium: "Medium", big: "Big, now and then" }); }
-    if (k === "conseq") { row = (x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.text)}<div class="m">${esc(x.note || "")}</div></div>${add(i, x.text)}</div>`; return `<div class="warnbox" style="margin-top:6px">Only with her agreement, made in advance. Added consequences start as “not yet agreed”.</div>` + (E.consequences || []).map(row).join(""); }
-    if (k === "rhythm") { const R = E.rhythm || {}; return ["daily", "weekly", "monthly"].map(p => `<div class="eyebrow" style="margin:16px 4px 6px">${p[0].toUpperCase() + p.slice(1)}</div>` + (R[p] || []).map((x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x[0])}${p === "weekly" ? `<div class="m">${WD[x[1]]}</div>` : ""}</div>${exHave("rhythm", x[0]) ? `<span class="tag y" style="flex:none">Added</span>` : `<button class="btn sm gold" data-act="exadd" data-v="rhythm-${p}" data-i="${i}" style="flex:none">${ic("plus")}</button>`}</div>`).join("")).join(""); }
-    if (k === "praise") { row = ([x]) => ""; return (E.praise || []).map(x => `<div class="item" style="padding:10px 14px"><div class="grow"><div class="m">${esc(x.when)}</div><div style="font:italic 500 16px/1.45 var(--display)">“${esc(x.say)}”</div></div>${copy(x.say)}</div>`).join(""); }
-    if (k === "texts") { row = (x) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.say)}</div>${copy(x.say)}</div>`; const g = {}; (E.texts || []).forEach(x => (g[x.when] ||= []).push(x)); return Object.entries(g).map(([w, xs]) => `<div class="eyebrow" style="margin:16px 4px 6px">${esc(w)}</div>${xs.map(row).join("")}`).join(""); }
-    if (k === "anticipation") { const A = E.anticipation || {}, g = {}; (A.texts || []).forEach(x => (g[x.when] ||= []).push(x));
-      return `<div class="warnbox" style="margin-top:6px">Adult time only, never in little space. Keep the chat locked and previews off, and nothing she could not handle at work.</div>`
-        + Object.entries(g).map(([w, xs]) => `<div class="eyebrow" style="margin:16px 4px 6px">Messages · ${esc(w)}</div>${xs.map(x => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.say)}</div>${copy(x.say)}</div>`).join("")}`).join("")
-        + ((A.instructions || []).length ? `<div class="eyebrow" style="margin:16px 4px 6px">Small instructions for her day</div>` + A.instructions.map(x => { const t = typeof x === "string" ? x : x.text || x.say; return `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div>${copy(t)}</div>`; }).join("") : ""); }
-    if (k === "protocol") { const PR = E.protocol || {}; return ["home", "public"].map(w => `<div class="eyebrow" style="margin:16px 4px 6px">${w === "home" ? "At home" : "In public (discreet)"}</div>` + (PR[w] || []).map((t, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div>${(db[w === "home" ? "protHome" : "protPublic"] || []).some(x => x.text === t) ? `<span class="tag y" style="flex:none">Added</span>` : `<button class="btn sm gold" data-act="exadd" data-v="prot-${w}" data-i="${i}" style="flex:none">${ic("plus")}</button>`}</div>`).join("")).join("") + ((PR.exceptions || []).length ? `<div class="eyebrow" style="margin:16px 4px 6px">Exceptions to agree</div>` + PR.exceptions.map(t => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(t)}</div></div>`).join("") : ""); }
-    if (k === "little") { row = (x, i) => `<div class="item" style="padding:10px 14px"><div class="grow">${esc(x.text)}</div><button class="btn sm" data-act="exadd" data-v="little" data-i="${i}" style="flex:none">${ic("plus")}</button></div>`; return `<p class="small muted" style="margin:6px 4px">Tap + to add an idea to her Comforts list. All non-sexual.</p>` + group(E.little || [], x => x.kind, { comfort: "Comfort", play: "Play", bedtime: "Bedtime", outing: "Outings", care: "Being looked after" }); }
-    return "";
+  /* ---------- views ---------- */
+  let q = "";
+  const prRow = p => `<a class="pr" href="#/p/${p.id}"><span class="n">${ROMAN[p.n]}</span><div style="min-width:0"><b>${esc(p.title)}</b><div class="s">${esc(p.motto)}</div></div>${hasNote(p.id) ? `<span class="pen">✎</span>` : `<span class="chev">›</span>`}</a>`;
+  function viewHome() {
+    const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5), t = P[day % P.length];
+    const f = q.trim().toLowerCase(), hits = f ? P.filter(p => [p.title, p.motto, p.essence, p.depth, ...(p.techniques || []).map(x => x.name + " " + x.how), ...p.tales.map(x => x.title + " " + x.who)].join(" ").toLowerCase().includes(f)) : [];
+    return `<div class="row between"><div class="eyebrow">Anchor</div><button class="tiny muted" data-act="settings">v${VER} · Settings</button></div>
+      <h1>The way of the anchor</h1><p class="ink2" style="margin:0">Thirty principles of dominance, from the ground of authority to the Daddy and Master wings, each taught by the tales that reveal it.</p>
+      <input class="search" id="q" type="search" placeholder="Search: aftercare, protocol, Shackleton…" value="${esc(q)}" autocomplete="off">
+      ${f ? `<div class="card">${hits.map(prRow).join("") || `<p class="muted" style="margin:0;padding:10px 0">Nothing matches.</p>`}</div>`
+        : `<a class="today" href="#/p/${t.id}"><div class="eyebrow">Today's principle · ${ROMAN[t.n]}</div><div style="font:600 26px/1.15 var(--display);margin-top:6px">${esc(t.title)}</div><div class="m">${esc(t.motto)}</div><div class="tiny muted" style="margin-top:8px">With ${esc(t.tales.map(x => x.who).join(", and "))}</div></a>
+        ${PARTS.map((pt, i) => { const L = P.filter(p => p.part === pt.id); return L.length ? `<div class="part"><div class="ph"><span class="roman">BOOK ${ROMAN[i + 1]}</span><h2>${esc(pt.title)}</h2></div><div class="pl">${esc(pt.line)}</div><div class="card" style="padding:2px 16px">${L.map(prRow).join("")}</div></div>` : ""; }).join("")}`}`;
   }
-  function exSheet(k) {
-    exTab = k; $(".sheet-back")?.remove();
-    const back = document.createElement("div"); back.className = "sheet-back";
-    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><h2>Examples: ${EXT[k]}</h2><p class="small muted" style="margin:4px 0 0">Ideas to start from. Choose with her, change the words to fit you both.</p><div id="exbody">${exList(k)}</div><button class="btn ghost block" data-act="closesheet" style="margin-top:12px">Done</button></div>`;
-    back.addEventListener("click", e => { if (e.target === back) { back.remove(); render(); } }); document.body.appendChild(back);
+  function viewPrinciple(id) {
+    const p = BY[id]; if (!p) return viewHome(); const i = P.indexOf(p), pv = P[i - 1], nx = P[i + 1], pt = partOf(p);
+    return `<a href="#/" class="tiny muted">‹ ${esc(pt.title)}</a>
+      <div class="roman" style="margin-top:14px">PRINCIPLE ${ROMAN[p.n]}</div><h1>${esc(p.title)}</h1>
+      <p class="motto">“${esc(p.motto)}”</p>
+      <p class="ess">${esc(p.essence)}</p>
+      ${(p.techniques || []).length ? `<h3>The techniques</h3><div class="card">${p.techniques.map(x => `<div class="mv"><div class="m">${esc(x.name)}</div><div class="l">${esc(x.how)}</div></div>`).join("")}</div>` : ""}
+      <h3>The tales</h3>
+      ${p.tales.map((t, k) => `<a class="tcard" href="#/t/${p.id}/${k}"><b>${esc(t.title)}</b><div class="meta">${esc(t.who)} · ${esc(t.where)}, ${esc(t.when)}</div><div class="go">Read the tale ›</div></a>`).join("")}
+      <details class="depth"><summary>The deeper why: psychology, philosophy and the community’s wisdom ›</summary>${paras(p.depth)}</details>
+      <h3>Live it this week</h3>
+      <div class="card"><ul class="practice">${p.practice.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <h3>The shadow</h3>
+      <div class="shadow">${esc(p.shadow)}</div>
+      <div class="nav2">${pv ? `<a href="#/p/${pv.id}"><span class="tiny muted">‹ ${ROMAN[pv.n]}</span><b>${esc(pv.title)}</b></a>` : "<span style='flex:1'></span>"}${nx ? `<a href="#/p/${nx.id}" style="text-align:right"><span class="tiny muted">${ROMAN[nx.n]} ›</span><b>${esc(nx.title)}</b></a>` : "<span style='flex:1'></span>"}</div>
+      ${fab(p.id)}`;
   }
-  function exAdd(k, i, el) {
-    const E = C.examples;
-    if (k === "rules") { const x = E.rules[i]; db.rules.push({ id: uid(), text: x.text, why: x.you_why || x.why, how: x.you_how || x.how || "", out: x.you_out || "", ...(x.target ? { target: x.target, log: {} } : {}) }); }
-    else if (k === "rewards") db.rewards.push({ id: uid(), text: E.rewards[i].text });
-    else if (k === "conseq") db.conseq.push({ id: uid(), text: E.consequences[i].text, agreed: false });
-    else if (k.startsWith("rhythm-")) { const p = k.slice(7), x = E.rhythm[p][i]; rh()[p].push({ id: uid(), text: x[0], ...(p === "weekly" ? { day: x[1], guide: x[2] || "" } : { guide: x[1] || "" }) }); }
-    else if (k.startsWith("prot-")) { const w = k.slice(5), key = w === "home" ? "protHome" : "protPublic"; (db[key] ||= []).push({ id: uid(), text: E.protocol[w][i] }); }
-    else if (k === "little") { const x = E.little[i]; db.little.comfort = (db.little.comfort ? db.little.comfort.trim() + "\n" : "") + x.text; }
-    save(); toast("Added"); const b = $("#exbody"); if (b) { const y = b.closest(".sheet").scrollTop; b.innerHTML = exList(k.startsWith("rhythm") ? "rhythm" : k.startsWith("prot-") ? "protocol" : k); b.closest(".sheet").scrollTop = y; }
+  function viewTale(id, k) {
+    const p = BY[id]; if (!p) return viewHome(); k = +k || 0; const t = p.tales[k]; if (!t) return viewPrinciple(id); const other = p.tales[1 - k];
+    return `<a href="#/p/${p.id}" class="tiny muted">‹ ${ROMAN[p.n]}. ${esc(p.title)}</a>
+      <div class="eyebrow" style="margin-top:14px">A tale of ${esc(p.title.toLowerCase())}</div><h1>${esc(t.title)}</h1>
+      <div class="small muted">${esc(t.who)} · ${esc(t.where)}, ${esc(t.when)}</div>
+      <div class="tale">${paras(t.tale)}</div>
+      <div class="reveal"><div class="h">What it reveals</div><p>${esc(t.reveals)}</p></div>
+      <div class="src">Source: ${esc(t.source)}</div>
+      ${other ? `<h3>The other tale</h3><a class="tcard" href="#/t/${p.id}/${1 - k}"><b>${esc(other.title)}</b><div class="meta">${esc(other.who)} · ${esc(other.when)}</div><div class="go">Read it ›</div></a>` : ""}
+      <a class="tcard" href="#/p/${p.id}" style="margin-top:10px"><div class="tiny muted">The principle</div><b>${ROMAN[p.n]}. ${esc(p.title)}</b><div class="go" style="color:var(--gold)">Practice and shadow ›</div></a>
+      ${fab(p.id)}`;
   }
-  function viewExamples() {
-    const ks = Object.keys(EXT);
-    return `<div class="top">${backLink("#/learn", "Learn")}</div><h1 style="margin:6px 2px 6px">Examples</h1><p class="muted" style="margin:0 2px 12px">Hundreds of starting points. Add with + or copy the words.</p>
-      <div class="chips">${ks.map(k => `<button class="chip${exTab === k ? " on" : ""}" data-act="extabp" data-v="${k}">${EXT[k]}</button>`).join("")}</div><div id="exbody">${exList(exTab)}</div>`;
+  let tq = "";
+  function viewTales() {
+    const f = tq.trim().toLowerCase();
+    const rows = P.flatMap(p => p.tales.map((t, k) => ({ p, t, k }))).filter(x => !f || [x.t.title, x.t.who, x.t.where, x.t.when, x.p.title].join(" ").toLowerCase().includes(f));
+    return `<div class="eyebrow">Anchor</div><h1>Tales</h1><p class="ink2" style="margin:0">${P.length * 2} stories from history, myth and literature.</p>
+      <input class="search" id="tq" type="search" placeholder="Search: aftercare, protocol, Shackleton…" value="${esc(tq)}" autocomplete="off">
+      ${f ? `<div class="card">${rows.map(r => `<a class="ti" href="#/t/${r.p.id}/${r.k}"><b>${esc(r.t.title)}</b><div class="meta">${esc(r.t.who)} · ${esc(r.t.when)} · ${ROMAN[r.p.n]}. ${esc(r.p.title)}</div></a>`).join("") || `<p class="muted" style="margin:0">Nothing matches.</p>`}</div>`
+        : PARTS.map(pt => { const L = rows.filter(r => r.p.part === pt.id); return L.length ? `<h3>${esc(pt.title)}</h3><div class="card">${L.map(r => `<a class="ti" href="#/t/${r.p.id}/${r.k}"><b>${esc(r.t.title)}</b><div class="meta">${esc(r.t.who)} · ${esc(r.t.when)} · ${ROMAN[r.p.n]}. ${esc(r.p.title)}</div></a>`).join("")}</div>` : ""; }).join("")}`;
   }
-  /* ---------- Stories (composites) ---------- */
-  const STK = { "went-well": ["Went well", "y"], "went-wrong": ["Went wrong", "n"], "turned-around": ["Turned around", "m"] };
-  function viewStories() {
-    const S = C.stories || [], byM = {}; S.forEach(x => { const l = C.lessons.find(y => y.id === x.lesson); (byM[l ? l.module : "foundations"] ||= []).push(x); });
-    return `<div class="top">${backLink("#/learn", "Learn")}</div><h1 style="margin:6px 2px 6px">Stories</h1>
-      <div class="warnbox" style="margin-bottom:6px">These are composites: realistic stories built from experiences people commonly share, with names and details changed or invented. None is one real couple’s account.</div>
-      ${Object.keys(MODS).filter(m => byM[m]).map(m => `<div class="sec"><div class="eyebrow">${MODS[m][0]}</div>${byM[m].map(x => `<a class="item" href="#/story/${x.id}">${modIc(m, 36)}<div class="grow"><div class="t">${esc(x.title)}</div><div class="m">${esc(x.shows)}</div></div><span class="tag ${STK[x.kind]?.[1] || "m"}" style="flex:none">${STK[x.kind]?.[0] || ""}</span></a>`).join("")}</div>`).join("")}`;
-  }
-  function viewStory(id) {
-    const x = (C.stories || []).find(s => s.id === id); if (!x) return `<p>Not found.</p>`; const l = C.lessons.find(y => y.id === x.lesson), g = x.guide && guide(x.guide);
-    return `<div class="top">${backLink("#/stories", "Stories")}<span class="tag ${STK[x.kind]?.[1] || "m"}">${STK[x.kind]?.[0] || ""}</span></div><h1 style="margin:6px 2px 10px;font-size:29px">${esc(x.title)}</h1>
-      <div class="card lesson-card">${esc(x.text).split(/\n+/).map(p => `<p>${p}</p>`).join("")}</div>
-      <div class="card"><div class="eyebrow" style="color:var(--gold)">What it shows</div><p style="margin:8px 0 0;font-weight:600">${esc(x.shows)}</p></div>
-      ${l ? `<a class="item" href="#/l/${l.id}">${modIc(l.module)}<div class="grow"><div class="t">${esc(l.title)}</div><div class="m">The lesson behind it</div></div>${ic("chev")}</a>` : ""}
-      ${g ? `<a class="item" href="#/g/${g.id}">${modIc("foundations")}<div class="grow"><div class="t">${esc(g.title)}</div><div class="m">Step-by-step guide</div></div>${ic("chev")}</a>` : ""}
-      <p class="small muted center" style="margin-top:14px">A composite story, not one real couple’s account.</p>`;
-  }
-  /* ---------- Profile, modes, protocol ---------- */
-  const prof = () => (db.profile ||= { titles: ["Daddy"], short: "D", pet: "", roles: ["little"] });
-  const MODES0 = () => [{ id: "little", name: "Little space", cue: "", win: "", wout: "", inside: "" }, { id: "service", name: "Service", cue: "", win: "", wout: "", inside: "" }, { id: "adult", name: "Adult time", cue: "", win: "", wout: "", inside: "" }];
-  const modes = () => (db.modes ||= MODES0());
-  function rulesMessage() {
-    const P = prof(), pet = P.pet || "sweetheart", R = db.rules, S = db.stars || {};
-    const lines = [`Hi ${pet} 🤍`, "", `I’ve been thinking about how I can take even better care of you${P.roles.includes("servant") ? ", and how to make space for the part of you that loves taking care of me" : ""}. So I wrote a few rules I’d love us to try. This is a draft, not an order: read it, tell me what you’d change, and nothing starts until we’ve agreed together.`, ""];
-    R.forEach((r, i) => { lines.push(`*${i + 1}. ${r.text}*${r.target && !/\d|once|twice|week/i.test(r.text) ? ` (${r.target}× a week)` : ""}`); if (r.why) lines.push(`_Why:_ ${r.why}`); if (r.how) lines.push(`_How:_ ${r.how}`); lines.push(`_If you can’t:_ ${r.out || "on days you’re sick, hurting or exhausted, tell me. Resting counts as taking care of yourself."}`); lines.push(""); });
-    if (S.reward) lines.push(`*What you get:* every rule you keep earns a star. At ${S.goal || 10} stars, ${S.reward}. And always, a very proud ${P.titles[0] || "Daddy"}.`, "");
-    lines.push("*What these rules are not:* never about your weight or how you look, and never a test you can fail. If a rule stops feeling good, we change it. You can say so any time.", "");
-    lines.push("Let’s try them for two weeks, then sit down together and decide what to keep, change or drop.", "", "Tell me what you think. I love looking after you.");
-    return lines.join("\n");
-  }
-  function ruleSheet(id) {
-    const r = db.rules.find(x => x.id === id); if (!r) return; const back = document.createElement("div"); back.className = "sheet-back";
-    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><h2>Edit rule</h2><p class="small muted" style="margin:4px 0 0">Write it to her, as “you”. This is the wording that goes into the message.</p>
-      <label class="f"><span>The rule</span><input type="text" id="re-text" value="${esc(r.text)}"></label>
-      <label class="f"><span>Why it helps her</span><textarea id="re-why" style="min-height:60px" placeholder="e.g. you sleep better and have more energy on the days you move">${esc(r.why || "")}</textarea></label>
-      <label class="f"><span>How (how she lets you know, how you help)</span><textarea id="re-how" style="min-height:60px" placeholder="e.g. send 💪 in our group when you’re done">${esc(r.how || "")}</textarea></label>
-      <label class="f"><span>If she can’t</span><textarea id="re-out" style="min-height:60px" placeholder="e.g. if you’re sick, on your period or exhausted, rest is the right choice. Just tell me.">${esc(r.out || "")}</textarea></label>
-      <label class="f"><span>Weekly goal</span><select id="re-target">${[0, 1, 2, 3, 4, 5, 6, 7].map(n => `<option value="${n}" ${(r.target || 0) === n ? "selected" : ""}>${n ? n + "× a week" : "no count"}</option>`).join("")}</select></label>
-      <button class="btn gold block" data-act="resave" data-v="${r.id}" style="margin-top:14px">Save</button><button class="btn ghost block" data-act="closesheet">Cancel</button></div>`;
-    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
-  }
-  function sendSheet() {
-    const t = rulesMessage(), back = document.createElement("div"); back.className = "sheet-back";
-    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><h2>Send her the rules</h2><p class="small muted" style="margin:4px 0 10px">WhatsApp formatting: *bold*, _italic_. Read it through: rules added from the examples may talk about her as “her”. Tap a rule on the Rules page to reword it to her as “you”, or edit here before sending.</p>
-      <textarea id="rmsg" style="min-height:300px;font-size:14px">${esc(t)}</textarea>
-      <div class="row" style="gap:8px;margin-top:10px"><button class="btn gold" data-act="rmcopy" style="flex:1">${ic("share")} Copy</button><button class="btn" data-act="rmwa" style="flex:1">Open WhatsApp</button></div>
-      <button class="btn ghost block" data-act="closesheet" style="margin-top:6px">Close</button></div>`;
-    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
-  }
-  const rh = () => (db.rhythm ||= { daily: (db.rituals || []).map(r => ({ id: r.id, text: r.text })), weekly: [], monthly: [] });
-  const monthKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}`; };
-  function dueToday() {
-    const R = rh(), wd = new Date().getDay(), mk = monthKey();
-    return [...R.daily.map(x => ({ ...x, kind: "daily", key: dayKey() })), ...R.weekly.filter(x => +x.day === wd).map(x => ({ ...x, kind: "weekly", key: dayKey() })),
-      ...(((n, last) => wd === 0 || wd === 6 || n.getDate() > last - 7)(new Date(), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) ? R.monthly : []).filter(x => !(db.monthLog?.[mk] || {})[x.id]).map(x => ({ ...x, kind: "monthly", key: mk }))];
-  }
-  const isDone = it => it.kind === "monthly" ? !!(db.monthLog?.[it.key] || {})[it.id] : !!(db.ritualLog[it.key] || {})[it.id];
-  let C = null;
-  const byMod = m => C.lessons.filter(l => l.module === m);
-
-  /* ---------- PIN lock: a privacy curtain, not encryption ---------- */
-  const pinHash = pin => String([..."anchor:" + pin].reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 7));
-  /* Unlock survives a refresh: the moment of last activity is kept for this browser tab only (sessionStorage),
-     and the app locks once it has been away longer than the chosen time (db.lockMin; 0 = only when closed). */
-  const SKEY = "anchor-unlocked";
-  const lockMs = () => (db.lockMin ?? 5) * 60000;
-  const stamp = () => { try { sessionStorage.setItem(SKEY, String(Date.now())); } catch (e) {} };
-  let unlocked = (() => { try { const t = +sessionStorage.getItem(SKEY); return !!t && (lockMs() === 0 || Date.now() - t < lockMs()); } catch (e) { return false; } })(), pinBuf = "", pinFirst = "", hiddenAt = 0;
-  const locked = () => false; /* the Vault (lib/vault.js) now guards the app; the old PIN is retired */
-  addEventListener("pagehide", () => { if (unlocked) stamp(); });
-  addEventListener("visibilitychange", () => { if (document.hidden) { hiddenAt = Date.now(); if (unlocked) stamp(); } else if (db.pin && unlocked && lockMs() > 0 && Date.now() - hiddenAt > lockMs()) { unlocked = false; pinBuf = ""; try { sessionStorage.removeItem(SKEY); } catch (e) {} render(); } });
-  const keypad = (msg, sub) => `<div class="lock"><div class="eyebrow">Anchor</div><h1 style="margin-top:8px">${msg}</h1><p class="muted" style="margin:6px 0 0">${sub}</p>
-    <div class="pindots">${[0, 1, 2, 3].map(i => `<i class="${i < pinBuf.length ? "on" : ""}"></i>`).join("")}</div>
-    <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"].map(k => k === "" ? "<span></span>" : `<button data-act="pinkey" data-v="${k}" aria-label="${k === "del" ? "Delete" : k}">${k === "del" ? ic("back") : k}</button>`).join("")}</div></div>`;
-  function viewLock() { return keypad("Enter PIN", "") + `<div class="center" style="margin-top:20px"><button class="linkbtn small" data-act="pinforgot">Forgot the PIN?</button></div>${verLine()}`; }
-  const verLine = () => `<p class="small muted center" style="margin-top:28px;opacity:.7">Anchor · v${VER}</p>`;
-  function viewPinSet() {
-    const first = !db.pinAsked;
-    return `${first ? "" : `<div class="top">${backLink("#/settings", "Settings")}</div>`}` + keypad(pinFirst ? "Repeat the PIN" : "Choose a 4-digit PIN", pinFirst ? "To be sure." : "The app will ask for it when it opens, and after 5 minutes away (you can change this in Settings).")
-      + (first ? `<div class="center" style="margin-top:18px"><button class="linkbtn small" data-act="pinskip">Skip for now</button></div>` : "") + verLine();
-  }
-  function pinKey(k) {
-    if (k === "del") pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) pinBuf += k;
-    if (pinBuf.length < 4) return render();
-    const e = pinBuf; pinBuf = "";
-    if (locked()) { if (pinHash(e) === db.pin) { unlocked = true; stamp(); } else toast("Wrong PIN"); return render(); }
-    if (!pinFirst) { pinFirst = e; return render(); }
-    if (e !== pinFirst) { pinFirst = ""; toast("They didn’t match. Try again."); return render(); }
-    db.pin = pinHash(e); db.pinAsked = true; pinFirst = ""; unlocked = true; stamp(); save(); toast("PIN set"); location.hash = "#/"; render();
+  let nq = "";
+  function viewNotebook() {
+    const f = nq.trim().toLowerCase();
+    const all = Object.entries(S.pages).map(([id, pg]) => [id, pg, plain(pg.html)]).filter(([id, , tx]) => BY[id] && tx);
+    const L = all.filter(([id, , tx]) => !f || (BY[id].title + " " + tx).toLowerCase().includes(f)).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
+    return `<div class="eyebrow">Anchor</div><h1>Notebook</h1>
+      ${all.length ? `<input class="search" id="nq" type="search" placeholder="Search your notes" value="${esc(nq)}" autocomplete="off">
+        <div class="card">${L.map(([id, pg, tx]) => `<a class="ti" href="#/p/${id}/notes"><div class="row between"><b>${ROMAN[BY[id].n]}. ${esc(BY[id].title)}</b><span class="tiny muted" style="flex:none">${when(pg.at)}</span></div><div class="snippet">${esc(tx.split("\n").slice(0, 3).join(" · "))}</div></a>`).join("") || `<p class="muted" style="margin:0">No notes match.</p>`}</div>`
+      : `<div class="card"><p class="ink2" style="margin:0">Every principle has its own page in your notebook. Open a principle or one of its tales and tap <b>✎ Note</b> at the bottom right: what struck you, how it shows up in your life, what you will try.</p></div>`}`;
   }
 
-  /* ---------- Routing ---------- */
-  let lastHash = "";
-  const route = () => { const p = (location.hash || "#/").slice(2).split("/"); return { v: p[0] || "today", a: p[1], b: p[2] }; };
-  const backLink = (href, label) => `<a class="back" href="${href}">${ic("back")}${label}</a>`;
+  /* ---------- router ---------- */
+  function route() { const h = location.hash.replace(/^#\/?/, "").split("/"); return { v: h[0] || "home", a: h[1] || "", b: h[2] || "" }; }
   function render() {
-    if (!C) return;
-    const { v, a, b } = route(), h = location.hash || "#/", nav = h !== lastHash;
-    if (db.notes) { const t0 = db.notes.length; db.notes = db.notes.filter(n => !n.trashed || Date.now() - n.trashed < 30 * DAY); if (db.notes.length !== t0) save(); }
-    if (db.notes && v !== "note") { const n0 = db.notes.length; db.notes = db.notes.filter(n => (n.title.trim() || plain(n.html)) && !n.fresh); if (db.notes.length !== n0) save(); } /* drop empty notes, and template notes never edited */
-    let html;
-    if (locked()) html = viewLock(); else if (!db.pinAsked || v === "pin") html = viewPinSet();
-    else if (v === "learn") html = a ? viewModule(a) : viewLearn(); else if (v === "l") html = viewLesson(a);
-    else if (v === "her") html = viewHer(a); else if (v === "scene") html = viewScene(a); else if (v === "before") html = viewBefore();
-    else if (v === "journal") html = viewJournal(a); else if (v === "search") html = viewSearch(); else if (v === "note") html = viewNote(a); else if (v === "g") html = viewGuide(a); else if (v === "start") html = viewStart(); else if (v === "words") html = viewWords(); else if (v === "debrief") html = viewDebrief(a); else if (v === "settings") html = viewSettings(); else if (v === "examples") html = viewExamples(); else if (v === "stories") html = viewStories(); else if (v === "story") html = viewStory(a);
-    else html = viewToday();
-    $("#main").innerHTML = `<div class="view${nav ? " enter" : ""}">${html}</div>`;
-    const t = $("#tabs"); t.hidden = locked() || !db.pinAsked || v === "pin";
-    const cur = { l: "learn", g: "learn", start: "today", words: "learn", examples: "learn", stories: "learn", story: "learn", scene: "her", before: "her", debrief: "journal", note: "journal", search: "today", settings: "today" }[v] || v;
-    t.innerHTML = [["today", "anchor", "Today"], ["learn", "book", "Learn"], ["her", "heart", "Her"], ["journal", "pen", "Journal"]].map(([k, i, l]) => `<a href="#/${k === "today" ? "" : k}" class="${cur === k ? "on" : ""}">${ic(i)}${l}</a>`).join("");
-    if (nav) scrollTo(0, 0); lastHash = h;
+    if (!P.length || !unlocked) return; const { v, a, b } = route();
+    const html = ({ home: viewHome, p: () => viewPrinciple(a), t: () => viewTale(a, b), tales: viewTales, notebook: viewNotebook }[v] || viewHome)();
+    $("#app").innerHTML = html + (v === "home" ? `<div class="ver">Anchor v${VER}</div>` : "");
+    const tab = v === "tales" || v === "t" ? "tales" : v === "notebook" ? "notebook" : "home";
+    $$("nav.tabsbar a").forEach(x => x.classList.toggle("on", x.dataset.tab === tab));
+    if (v === "p" && b === "notes" && BY[a]) openEditor(a); else closeEditor();
   }
-  addEventListener("hashchange", render);
-
-  /* ---------- Beginner how-tos ---------- */
-  const howPrompt = t => (C.howto?.prompts || []).find(h => h.text === t);
-  const howPractice = id => (C.howto?.practice || []).find(h => h.lesson === id);
-  const guide = id => (C.guides || []).find(g => g.id === id);
-  const howBox = (h, open) => !h ? "" : `<details class="how"${open ? " open" : ""}><summary>${ic("list")} How to do this</summary><ol>${h.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
-    ${h.say ? `<p class="sayline">${esc(h.say)}</p>` : ""}${h.guide && guide(h.guide) ? `<a class="btn sm" href="#/g/${h.guide}">Full guide: ${esc(guide(h.guide).title)} ${ic("chev")}</a>` : ""}</details>`;
-  const pathDone = () => PATH.flatMap(([, ids]) => ids).filter(id => db.guides?.[id]).length;
-  const pathTotal = () => PATH.flatMap(([, ids]) => ids).filter(id => guide(id)).length;
-  function viewStart() {
-    const d = pathDone(), t = pathTotal();
-    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 6px">Start here</h1>
-      <p class="muted" style="margin:0 2px 14px">A four-week path for a new dominant. One or two guides a few times a week. Do each one for real with her, then tick it. ${d} of ${t} done.</p>
-      ${PATH.map(([wk, ids]) => `<div class="sec"><div class="eyebrow">${wk}</div>${ids.filter(guide).map(id => { const g = guide(id); return `<a class="item" href="#/g/${id}"><span class="dot${db.guides?.[id] ? " on" : ""}">${db.guides?.[id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(g.title)}</div><div class="m">${esc(g.time || "")}${g.time ? " · " : ""}${esc(g.why)}</div></div>${ic("chev")}</a>`; }).join("")}</div>`).join("")}
-      <a class="btn block" href="#/words" style="margin-top:20px">${ic("book")} Words you’ll hear: the glossary</a>`;
-  }
-  function viewGuide(id) {
-    const g = guide(id); if (!g) { location.hash = "#/start"; return ""; }
-    return `<div class="top">${backLink("#/start", "Start here")}</div><h1 style="margin:6px 2px 8px;font-size:29px">${esc(g.title)}</h1>
-      ${g.time ? `<div class="small" style="margin:0 2px 8px;color:var(--gold)">${ic("clock")} ${esc(g.time)}</div>` : ""}<p class="muted" style="margin:0 2px 14px">${esc(g.why)}</p>
-      ${(g.prepare || []).length ? `<div class="card"><div class="eyebrow" style="color:var(--gold)">Have ready</div><ul class="field">${g.prepare.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-      <div class="sec"><div class="eyebrow">Step by step</div>${g.steps.map((st, i) => `<div class="card step"><div class="row" style="gap:12px;align-items:flex-start"><span class="num">${i + 1}</span><div class="grow"><b>${esc(st.h)}</b><p style="margin:6px 0 0">${esc(st.d)}</p>${st.say ? `<p class="sayline">${esc(st.say)}</p>` : ""}</div></div></div>`).join("")}</div>
-      <div class="sec"><div class="eyebrow" style="color:var(--amber)">Beginner mistakes</div><div class="card"><ul class="field">${g.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div>
-      <div class="card" style="border-color:rgba(127,207,154,.35)"><div class="eyebrow" style="color:var(--green)">How you know it went well</div><p style="margin:8px 0 0">${esc(g.good)}</p></div>
-      <button class="btn gold block" data-act="guidedone" data-v="${g.id}" style="margin-top:16px">${ic("check")} ${db.guides?.[g.id] ? "Done" : "I did this"}</button>`;
-  }
-  function viewWords() {
-    const G = [...(C.glossary || [])].sort((a, b) => a.t.localeCompare(b.t));
-    return `<div class="top">${backLink("#/learn", "Learn")}</div><h1 style="margin:6px 2px 14px">Glossary</h1>
-      <input type="text" id="gq" placeholder="Search a word" autocomplete="off"><div class="card" style="margin-top:12px;padding:4px 18px" id="glist">${G.map(x => `<div class="note gw"><b>${esc(x.t)}</b><div class="small" style="margin-top:3px;color:var(--ink2)">${esc(x.d)}</div></div>`).join("")}</div>`;
-  }
-
-  /* ---------- Today ---------- */
-  function viewToday() {
-    const d = Math.floor(Date.now() / DAY), prompt = C.prompts[d % C.prompts.length];
-    const next = C.lessons.find(l => !db.lessons[l.id]) || C.lessons[d % C.lessons.length];
-    
-    const recent = db.scenes.filter(s => s.at && s.at > Date.now() - 3 * DAY && !s.followed);
-    const neg = db.negotiated ? Math.floor((Date.now() - db.negotiated) / DAY) : null;
-    const yes = Object.values(db.limits).filter(x => x === "y").length;
-    return `<div class="top"><div class="eyebrow">Anchor</div><div class="row" style="gap:0"><a class="iconbtn" href="#/search" aria-label="Search">${ic("search")}</a><a class="iconbtn" href="#/settings" aria-label="Settings">${ic("gear")}</a></div></div>
-      <div class="card" style="margin-top:6px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">From the old hand</div><p class="prompt" style="margin:10px 0 0">${esc(prompt)}</p>${howBox(howPrompt(prompt))}</div>
-      ${(C.guides || []).length && pathDone() < pathTotal() ? `<a class="item" href="#/start" style="margin-top:12px;border-color:rgba(217,178,111,.4)">${modIc("foundations")}<div class="grow"><div class="t">Start here: your first four weeks</div><div class="m">${pathDone()} of ${pathTotal()} steps · step by step, with words to say</div></div>${ic("chev")}</a>` : ""}
-      ${recent.map(s => `<div class="card" style="border-color:rgba(127,207,154,.4)"><div class="eyebrow" style="color:var(--green)">Aftercare window</div><p style="margin:8px 0 10px">Your scene “${esc(s.title || "untitled")}” ${(h => h < 1 ? "ended just now" : h < 48 ? `was ${h} hour${h === 1 ? "" : "s"} ago` : `was ${Math.round(h / 24)} days ago`)(Math.round((Date.now() - s.at) / 36e5))}. Drop can come a day or two later. Check in with her today, gently.</p>
-        <div class="row" style="gap:8px"><button class="btn sm gold" data-act="followed" data-v="${s.id}">${ic("check")} I checked in</button><a class="btn sm" href="#/debrief/${s.id}">Debrief</a></div></div>`).join("")}
-      ${(() => { const D = dueToday(); if (!D.length) return `<a class="item" href="#/her/rhythm" style="margin-top:12px">${modIc("care")}<div class="grow"><div class="t">Set up your rhythm</div><div class="m">Daily, weekly and monthly. A beginner template is ready.</div></div>${ic("chev")}</a>`;
-        const n = D.filter(isDone).length; return `<div class="sec"><div class="row between" style="margin:0 4px 10px"><div class="eyebrow">Today’s rhythm</div><a class="small" href="#/her/rhythm" style="color:var(--muted);text-decoration:none">${n}/${D.length} · edit</a></div><div class="card" style="padding:6px 18px">${D.map(it => `<div class="row"><button class="check${isDone(it) ? " on" : ""}" data-act="rdone" data-v="${it.id}" data-k="${it.kind}" data-key="${it.key}" style="flex:1"><span class="box">${isDone(it) ? ic("check") : ""}</span><span class="lbl grow">${esc(it.text)}${it.kind !== "daily" ? ` <span class="tag ${it.kind === "weekly" ? "y" : "m"}">${it.kind}</span>` : ""}</span></button>${it.guide && guide(it.guide) ? `<a class="iconbtn" href="#/g/${it.guide}" aria-label="How to">${ic("list")}</a>` : ""}</div>`).join("")}</div></div>`; })()}
-      ${(() => { const G = db.rules.filter(r => r.target); if (!G.length) return ""; return `<div class="sec"><div class="row between" style="margin:0 4px 10px"><div class="eyebrow">Her goals this week</div><a class="small" href="#/her/rules" style="color:var(--muted);text-decoration:none">rules</a></div><div class="card" style="padding:10px 16px">${G.map(r => `<div style="padding:6px 0"><div style="font-weight:600">${esc(r.text)}</div>${goalRow(r)}</div>`).join("")}</div></div>`; })()}
-      <div class="sec"><div class="eyebrow">Learn today</div><a class="item" href="#/l/${next.id}">${modIc(next.module)}<div class="grow"><div class="t">${esc(next.title)}</div><div class="m">${esc(next.motto || next.hook)}</div></div>${ic("chev")}</a></div>
-      <div class="sec"><div class="eyebrow">The dynamic</div>
-        <a class="item" href="#/before">${modIc("scenes")}<div class="grow"><div class="t">Before a scene</div><div class="m">The two-minute check</div></div>${ic("chev")}</a>
-        <a class="item" href="#/her/limits">${modIc("negotiation")}<div class="grow"><div class="t">Her yes / maybe / no</div><div class="m">${yes ? `${yes} yeses` : "Not filled in yet"}${neg != null ? ` · negotiated ${neg} days ago` : ""}</div></div>${ic("chev")}</a>
-        ${neg != null && neg > 90 ? `<div class="warnbox" style="margin-top:10px">It has been ${neg} days since you last went through her list together. People change; renegotiate.</div>` : ""}</div>
-      ${isStandalone() ? "" : `<button class="item" data-act="installsheet" style="margin-top:22px">${modIc("self")}<div class="grow"><div class="t">Install on your phone</div><div class="m">Opens in one tap, behind your PIN.</div></div></button>`}`;
-  }
-
-  /* ---------- Learn ---------- */
-  function viewLearn() {
-    const r = C.lessons.filter(l => db.lessons[l.id]).length;
-    return `<h1 style="margin:8px 2px 6px">Learn</h1><p class="muted" style="margin:0 2px 16px">${r} of ${C.lessons.length} lessons in ${Object.keys(MODS).filter(k => byMod(k).length).length} books. One page each: the idea, a scene, techniques, words to say and this week’s practice.</p>
-      ${(o => `<a class="card" href="#/l/${o.id}" style="display:block;text-decoration:none;color:inherit;margin-bottom:14px;background:radial-gradient(120% 140% at 100% 0%, rgba(217,178,111,.18), transparent 55%), linear-gradient(180deg, var(--card2), var(--card))"><div class="eyebrow" style="color:var(--gold)">Lesson of the day · ${esc(MODS[o.module][0])}</div><div style="font:600 21px/1.3 var(--display);margin-top:8px">${esc(o.title)}</div><p class="muted" style="margin:6px 0 0">${esc(o.motto || o.hook)}</p></a>`)(lessonOfDay())}
-      ${(C.guides || []).length ? `<div class="row" style="gap:10px;margin-bottom:14px"><a class="btn gold" href="#/start" style="flex:1">${ic("list")} Step-by-step guides</a><a class="btn" href="#/words">${ic("book")} Glossary</a></div>
-      <div class="row" style="gap:10px;margin:-4px 0 14px"><a class="btn" href="#/examples" style="flex:1">${ic("plus")} Examples</a><a class="btn" href="#/stories" style="flex:1">${ic("chat")} Stories</a></div>` : ""}
-      ${SECTIONS.map(([sid, title, mods]) => { const mine = sid === "daddy" ? prof().titles.includes("Daddy") : sid === "master" ? prof().titles.includes("Master") : false;
-        return `<div class="sec"><div class="row between" style="margin:0 4px 4px"><div class="eyebrow">${title}</div>${mine ? `<span class="tag y">your wing</span>` : ""}</div><p class="small muted" style="margin:0 4px 10px">${esc(INTROS[sid] || "")}</p>
-        <div class="mods">${mods.filter(k => MODS[k] && byMod(k).length).map(k => { const [n, i, col, sub] = MODS[k], ls = byMod(k), d = ls.filter(l => db.lessons[l.id]).length;
-          return `<a class="mod" href="#/learn/${k}" style="background:linear-gradient(160deg, ${col}24, var(--card) 60%);color:${col}">${ic(i)}<div><b style="color:var(--ink)">${n}</b><br><small>${sub}</small></div><small style="color:var(--muted)">${d}/${ls.length}</small><span class="bar" style="width:${ls.length ? d / ls.length * 100 : 0}%"></span></a>`; }).join("")}</div></div>`; }).join("")}`;
-  }
-  function viewModule(m) {
-    const [n, , , sub] = MODS[m] || []; if (!n) { location.hash = "#/learn"; return ""; }
-    return `<div class="top">${backLink("#/learn", "Learn")}</div><div class="row" style="gap:14px;margin:6px 2px 18px">${modIc(m, 54)}<div><h1 style="font-size:29px">${n}</h1><div class="muted small">${sub}</div></div></div>
-      ${byMod(m).map(l => `<a class="item" href="#/l/${l.id}"><span class="dot${db.lessons[l.id] ? " on" : ""}">${db.lessons[l.id] ? ic("check") : ""}</span><div class="grow"><div class="t">${esc(l.title)}</div><div class="m">${esc(l.hook)}</div></div>${ic("chev")}</a>`).join("")}`;
-  }
-  function viewLesson(id) {
-    const l = C.lessons.find(x => x.id === id); if (!l) { location.hash = "#/learn"; return ""; }
-    const ls = byMod(l.module), k = ls.indexOf(l), prev = ls[k - 1], nxt = ls[k + 1];
-    const sec = (t, body, col) => `<div class="sec"><div class="eyebrow"${col ? ` style="color:${col}"` : ""}>${t}</div>${body}</div>`;
-    const old = !l.essence;
-    return `<div class="top">${backLink(`#/learn/${l.module}`, MODS[l.module][0])}<span class="small muted">${k + 1} of ${ls.length}</span></div>
-      <h1 style="margin:6px 2px 8px;font-size:29px">${esc(l.title)}</h1>
-      ${l.motto ? `<p class="motto">“${esc(l.motto)}”</p>` : ""}
-      ${old ? l.cards.map(c => `<div class="card"><p style="margin:0">${esc(c)}</p></div>`).join("") : `<div class="card essence"><p style="margin:0">${esc(l.essence)}</p></div>`}
-      ${l.scene ? sec("The scene", `<div class="card scene"><p style="margin:0">${esc(l.scene)}</p></div>`) : ""}
-      ${(l.techniques || []).length ? sec("Techniques", `<div class="card" style="padding:6px 18px">${l.techniques.map((t, j) => `<div class="tech"><span class="num">${j + 1}</span><div class="grow"><b>${esc(t.name)}</b><div style="margin-top:3px">${esc(t.how)}</div></div></div>`).join("")}</div>`, "var(--gold)") : ""}
-      ${(l.say || []).length ? sec("Words to say", l.say.map(x => `<div class="card" style="padding:14px 18px;margin-top:8px"><div class="small muted">${esc(x.moment.charAt(0).toUpperCase() + x.moment.slice(1))}</div><p class="sayline" style="margin:6px 0">${esc(x.line)}</p><div class="small" style="color:var(--ink2)">${esc(x.why)}</div></div>`).join("")) : ""}
-      <div class="card" style="margin-top:22px"><div class="eyebrow" style="color:var(--gold)">This week</div><p style="margin:8px 0 0;font-weight:600">${esc(l.practice)}</p>${howBox(howPractice(l.id))}</div>
-      ${(l.watch || []).length === 3 ? sec("Watch for", `<div class="card" style="padding:6px 18px">${l.watch.map((w, j) => `<div class="tech"><span class="light ${["g", "y", "r"][j]}"></span><div class="grow">${esc(w)}</div></div>`).join("")}</div>`) : ""}
-      ${l.why ? `<details class="card more"><summary>${ic("book")} Why it works</summary><p style="margin:10px 0 0">${esc(l.why)}</p></details>` : ""}
-      ${l.shadow ? `<div class="warnbox" style="margin-top:12px"><b>The shadow.</b> ${esc(l.shadow)}</div>` : ""}
-      <div class="card" style="margin-top:12px"><div class="eyebrow">Ask her</div><p style="margin:8px 0 0;font:italic 500 17px/1.5 var(--display)">${esc(l.ask)}</p></div>
-      <div class="card keep">“${esc(l.remember)}”</div>
-      ${(C.stories || []).filter(x => x.lesson === l.id).map(x => `<a class="item" href="#/story/${x.id}">${modIc(l.module, 36)}<div class="grow"><div class="t">A story: ${esc(x.title)}</div><div class="m">${esc(x.shows)}</div></div>${ic("chev")}</a>`).join("")}
-      <button class="btn gold block" data-act="lessondone" data-v="${l.id}" style="margin-top:16px">${ic("check")} ${db.lessons[l.id] ? "Done" : "Understood"}</button>
-      <div class="row" style="gap:10px;margin-top:10px">${prev ? `<a class="btn" href="#/l/${prev.id}" style="flex:1">${ic("back")} ${esc(prev.title)}</a>` : ""}${nxt ? `<a class="btn" href="#/l/${nxt.id}" style="flex:1">${esc(nxt.title)} ${ic("chev")}</a>` : ""}</div>`;
-  }
-  const lessonOfDay = () => C.lessons[Math.floor(Date.now() / DAY) % C.lessons.length];
-
-  /* ---------- Her: limits, safewords, aftercare, little space, rules, rituals, rewards, consequences, scenes ---------- */
-  const listEditor = (key, title, ph, why) => `<div class="card">${(db[key] ||= []).length ? db[key].map(r => `<div class="rule"><div class="grow"${key === "rules" ? ` data-act="redit" data-v="${r.id}" style="cursor:pointer"` : ""}><div>${esc(r.text)}</div>${r.why ? `<div class="w">${esc(r.why)}</div>` : ""}${key === "rules" && r.target ? goalRow(r) : ""}${r.agreed === false ? `<div class="w" style="color:var(--amber)">Not yet agreed with her</div>` : ""}</div>${key === "rules" ? `<button class="iconbtn" data-act="settarget" data-v="${r.id}" aria-label="Weekly goal" title="Weekly goal">${ic("clock")}</button>` : ""}<button class="iconbtn" data-act="del" data-k="${key}" data-v="${r.id}" aria-label="Delete">${ic("x")}</button></div>`).join("") : `<p class="muted small" style="margin:0">None yet.</p>`}
-    <input type="text" id="new-${key}" placeholder="${esc(ph)}" style="margin-top:12px">${why ? `<input type="text" id="why-${key}" placeholder="${esc(why)}" style="margin-top:8px">` : ""}
-    <button class="btn block" data-act="add" data-k="${key}" style="margin-top:10px">${ic("plus")} Add</button></div>`;
-  function viewHer(sec) {
-    const nav = (href, icn, mod, t, m) => `<a class="item" href="${href}">${modIc(mod)}<div class="grow"><div class="t">${t}</div><div class="m">${m}</div></div>${ic("chev")}</a>`;
-    if (!sec) { const yes = Object.values(db.limits).filter(x => x === "y").length, no = Object.values(db.limits).filter(x => x === "n").length;
-      const g = (t, x) => `<div class="sec" style="margin-top:20px"><div class="eyebrow" style="margin:0 4px 2px">${t}</div>${x}</div>`, P = prof();
-      return `<h1 style="margin:8px 2px 6px">Her</h1><p class="muted" style="margin:0 2px 6px">What you have agreed together, in one place. Fill it in with her, not about her.</p>`
-        + g("Agreements", nav("#/her/limits", "scale", "negotiation", "Yes / maybe / no", `${yes} yes · ${no} no`) + nav("#/her/safe", "shield", "negotiation", "Safewords and signals", `${esc(db.safe.stop)} stops everything`) + nav("#/her/after", "blanket", "aftercare", "Aftercare she needs", db.aftercare.length ? db.aftercare.slice(0, 3).join(", ") : "Not set") + nav("#/her/checkin", "chat", "foundations", "Check-in questions", "Weekly, ten minutes"))
-        + g("Structure", nav("#/her/rules", "list", "structure", "Rules", `${db.rules.length} rule${db.rules.length === 1 ? "" : "s"}${db.rules.some(r => r.target) ? " · weekly goals" : ""}`) + nav("#/her/rhythm", "moon", "structure", "Rhythm", `${rh().daily.length} daily · ${rh().weekly.length} weekly · ${rh().monthly.length} monthly`) + nav("#/her/stars", "star", "discipline", "Star chart", `${(db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }).n} of ${db.stars.goal} stars${db.stars.reward ? " · " + esc(db.stars.reward) : ""}`) + nav("#/her/rewards", "star", "discipline", "Rewards and consequences", `${db.rewards.length} rewards · ${db.conseq.length} consequences`))
-        + g("Authority in daily life", nav("#/her/modes", "cup", "presence", "Modes and cues", modes().filter(m => m.cue).map(m => `${m.name}: ${m.cue}`).join(" · ") || "Little space, service, adult time") + nav("#/her/protocol", "list", "presence", "Protocol", `${(db.protHome || []).length} at home · ${(db.protPublic || []).length} in public`))
-        + (P.titles.includes("Daddy") || P.roles.includes("little") ? g("Daddy wing", nav("#/her/little", "heart", "daddy", "Her little space", "Comforts, bedtime, signs")) : "")
-        + (P.titles.includes("Master") || P.roles.includes("servant") ? g("Master wing", nav("#/learn/master", "cup", "master", "Service and standards", "Her service rituals live in Rules and Protocol; the lessons are here")) : "")
-        + g("Scenes", nav("#/scene/new", "star", "scenes", "Plan a scene", `${db.scenes.length} planned`)); }
-    const head = (t, sub) => `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${t}</h1>${sub ? `<p class="muted" style="margin:0 2px 14px">${sub}</p>` : ""}`;
-    const gl = id => guide(id) ? `<a class="btn sm" href="#/g/${id}" style="margin:0 2px 14px">${ic("list")} How to do this: ${esc(guide(id).title)}</a>` : "";
-    if (sec === "limits") return head("Yes / maybe / no", "Go through it together. Maybe means talk first, never “maybe in the moment”. Anything unmarked is a no until discussed.")
-      + gl("the-list") + `${ACTS.map(([cat, items]) => `<div class="sec"><div class="eyebrow">${cat}</div><div class="card" style="padding:4px 16px">${items.map(it => { const v = db.limits[it] || (cat.startsWith("Firm no") ? "n" : "");
-          return `<div class="limit"><span class="grow">${esc(it)}</span>${cat.startsWith("Firm no") ? `<span class="tag n">No</span>` : `<span class="ymn">${["y", "m", "n"].map(x => `<button class="${x}${v === x ? " on" : ""}" data-act="lim" data-v="${esc(it)}" data-x="${x}">${x === "y" ? "Yes" : x === "m" ? "?" : "No"}</button>`).join("")}</span>`}</div>`; }).join("")}</div></div>`).join("")}
-        <label class="f"><span>Notes from the conversation</span><textarea data-f="limitNote" placeholder="Details, conditions, things to revisit.">${esc(db.limitNote || "")}</textarea></label>
-        <button class="btn gold block" data-act="negotiated" style="margin-top:14px">${ic("check")} We went through this together today</button>
-        ${db.negotiated ? `<p class="small muted center" style="margin-top:8px">Last negotiated ${dstr(db.negotiated)}</p>` : ""}`;
-    if (sec === "safe") return head("Safewords and signals", "Agree them out loud, and use them in a low-stakes moment so they feel normal. Honour them instantly, without sulking.")
-      + gl("safewords") + `<div class="card">${[["stop", "Stop everything"], ["slow", "Slow down / check in"], ["go", "All good, more"], ["signal", "Non-verbal signal (when she can’t speak)"]].map(([k, l]) => `<label class="f" style="margin-top:${k === "stop" ? 0 : 14}px"><span>${l}</span><input type="text" data-safe="${k}" value="${esc(db.safe[k])}"></label>`).join("")}</div>
-        <div class="warnbox" style="margin-top:12px">A safeword is never a failure. Thank her for using it, then care for her first and talk later.</div>`;
-    if (sec === "after") return head("Aftercare she needs", "Ask her, then watch what actually helps. Needs change with the scene and the day.")
-      + gl("aftercare-first") + `<div class="card"><div class="chips">${AFTER.map(a => `<button class="chip${db.aftercare.includes(a) ? " on" : ""}" data-act="ac" data-v="${esc(a)}">${a}</button>`).join("")}</div>
-        <label class="f"><span>Details</span><textarea data-f="aftercareNote" placeholder="e.g. likes to be wrapped up and talked to softly; needs a text the next afternoon.">${esc(db.aftercareNote)}</textarea></label></div>
-        <label class="f"><span>What you need afterwards (your own aftercare)</span><textarea data-f="mine" placeholder="Quiet, a walk, to hear that she’s okay, to write it down.">${esc(db.mine)}</textarea></label>`;
-    if (sec === "little") return head("Her little space", "Little space here is rest, play and being looked after. Keep it non-sexual, and keep adult play for when she is fully herself.")
-      + gl("little-evening") + exBtn("little", "Little-space ideas") + `<div class="card">${[["comfort", "Comforts", "Her stuffie’s name, a blanket, a cartoon, colouring"], ["favourites", "Favourite things", "Snacks, songs, games"], ["bedtime", "Bedtime routine", "e.g. brush teeth, story, stuffie, lights at 11"], ["signs", "Signs she’s slipping into little space", "Voice changes, wants to be held, gets giggly"], ["out", "What pulls her out (and how to bring her back gently)", "Work calls, stress, being rushed"]].map(([k, l, ph], i) => `<label class="f" style="${i ? "" : "margin-top:0"}"><span>${l}</span><textarea data-little="${k}" placeholder="${ph}" style="min-height:64px">${esc(db.little[k])}</textarea></label>`).join("")}</div>`;
-    if (sec === "rules") return head("Rules", "Few, clear, and each with a reason that serves her. Five good rules beat twenty you can’t keep track of.")
-      + gl("first-rules") + (db.rules.length > 6 ? `<div class="warnbox" style="margin-bottom:12px">${db.rules.length} rules. Can you hold all of them consistently? An unenforced rule teaches that rules don’t matter.</div>` : "")
-      + exBtn("rules", "Example rules") + (db.rules.length ? `<button class="btn sm gold" data-act="sendrules" style="margin:0 2px 14px">${ic("share")} Send her the rules</button>` : "") + listEditor("rules", "Rules", "e.g. Water bottle finished by 6 pm", "Why it helps her (e.g. she forgets to drink and gets headaches)")
-      + `<p class="small muted" style="margin:8px 4px 0">Want to count it each week, like “work out 3 times a week”? Add it, then set the weekly goal: <select id="goalpick" style="width:auto;display:inline-block;padding:4px 8px">${[0, 1, 2, 3, 4, 5, 6, 7].map(n => `<option value="${n}">${n ? n + "× a week" : "no count"}</option>`).join("")}</select> applies to the next rule you add.</p>`;
-    if (sec === "rituals") { location.hash = "#/her/rhythm"; return ""; }
-    if (sec === "rhythm") { const R = rh(), empty = !R.daily.length && !R.weekly.length && !R.monthly.length;
-      const days = [...Array(14)].map((_, i) => { const t = Date.now() - (13 - i) * DAY, k = dayKey(t), wd = new Date(t).getDay(); const due = R.daily.length + R.weekly.filter(x => +x.day === wd).length; const d = Object.values(db.ritualLog[k] || {}).filter(Boolean).length; return [due ? Math.min(1, d / due) : null, WD[wd][0]]; });
-      const chain = x => { const cells = [...Array(14)].map((_, i) => { const t = Date.now() - (13 - i) * DAY, k = dayKey(t); return [k, !!(db.ritualLog[k] || {})[x.id], WD[new Date(t).getDay()][0]]; });
-        let st = 0; for (let i = 13; i >= 0; i--) { if (cells[i][1]) st++; else if (i === 13) continue; else break; }
-        return `<div class="chain">${cells.map(([k, on, l], i) => `<button class="cc${on ? " on" : ""}${on && cells[i - 1]?.[1] ? " jl" : ""}${on && cells[i + 1]?.[1] ? " jr" : ""}" data-act="cell" data-v="${x.id}" data-key="${k}" aria-label="${k}: ${on ? "done" : "not done"}"><i></i><span>${l}</span></button>`).join("")}</div>${st > 1 ? `<div class="w" style="color:var(--gold)">${st} days in a row</div>` : ""}`; };
-      const row = (kind, x) => `<div class="rule"><div class="grow"><div>${esc(x.text)}</div>${kind === "daily" ? chain(x) : ""}<div class="w">${kind === "weekly" ? `Every ${WD[+x.day]}` : kind === "monthly" ? "Once a month" : "Every day"}${x.guide && guide(x.guide) ? ` · <a href="#/g/${x.guide}">how to</a>` : ""}</div></div><button class="iconbtn" data-act="rdel" data-k="${kind}" data-v="${x.id}" aria-label="Delete">${ic("x")}</button></div>`;
-      return head("Rhythm", "The small things you do reliably are the dynamic. Few and steady beats many and patchy. Her bad days always come first.") + exBtn("rhythm", "Example rhythm items")
-      + (empty ? `<div class="card" style="border-color:rgba(217,178,111,.4)"><div class="eyebrow" style="color:var(--gold)">Beginner template</div><p class="small" style="margin:8px 0 10px">Daily: good-morning message, a midday check-in text, the bedtime ritual, two minutes of reflection for you. Weekly: a check-in conversation (Sun), a little-space evening (Wed), a connection night (Fri), planning the week (Sun). Monthly: her list again, a review of rules and rituals, something for you.</p>
-          <button class="btn gold block" data-act="template">${ic("check")} Use this template</button><p class="small muted" style="margin:8px 0 0">Change anything afterwards. Agree the daily ones with her first.</p></div>`
-        : `<div class="card"><div class="eyebrow">Last 14 days</div><div class="cons">${days.map(([f, l]) => `<div><i style="opacity:${f == null ? .12 : .25 + f * .75};background:${f == null ? "var(--line2)" : "var(--gold)"};height:${f == null ? 6 : 8 + f * 26}px"></i><span>${l}</span></div>`).join("")}</div><p class="small muted" style="margin:8px 0 0">Brighter means more of the day’s rhythm kept. Missed days are information, not failure.</p></div>`)
-      + `<div class="sec"><div class="eyebrow">Daily</div><div class="card">${R.daily.map(x => row("daily", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
-          <div class="row" style="gap:8px;margin-top:12px"><input type="text" id="rh-daily" placeholder="e.g. Good-night text at 10:30"><button class="btn sm" data-act="radd" data-k="daily">${ic("plus")}</button></div></div></div>
-        <div class="sec"><div class="eyebrow">Weekly</div><div class="card">${R.weekly.map(x => row("weekly", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
-          <input type="text" id="rh-weekly" placeholder="e.g. Pancake breakfast together" style="margin-top:12px"><div class="chips" style="margin-top:8px">${WD.map((d, i) => `<button class="chip${wday === i ? " on" : ""}" data-act="rwd" data-v="${i}">${d}</button>`).join("")}</div>
-          <button class="btn sm block" data-act="radd" data-k="weekly" style="margin-top:10px">${ic("plus")} Add weekly</button></div></div>
-        <div class="sec"><div class="eyebrow">Monthly</div><div class="card">${R.monthly.map(x => row("monthly", x)).join("") || `<p class="muted small" style="margin:0">None yet.</p>`}
-          <div class="row" style="gap:8px;margin-top:12px"><input type="text" id="rh-monthly" placeholder="e.g. A whole day out together"><button class="btn sm" data-act="radd" data-k="monthly">${ic("plus")}</button></div></div></div>
-        <div class="card small" style="margin-top:16px"><b>How rhythm works for beginners.</b> Start with two daily items for the first two weeks, then add a third. Agree each one with her, out of role. If one keeps slipping, make it smaller rather than scolding yourself or her. On her bad days, drop everything except care.</div>`; }
-    if (sec === "stars") { const S = db.stars ||= { n: 0, goal: 10, reward: "", log: [], earned: [] }, full = S.n >= S.goal;
-      const quick = [...db.rules.map(r => r.text), ...rh().daily.map(r => r.text)].slice(0, 8);
-      return head("Star chart", "Catch her doing well and say so. A star is praise she can see. Stars are never taken away: correction lives elsewhere.")
-        + gl("reward-chart") + `<div class="card center"><div class="stars">${[...Array(S.goal)].map((_, i) => `<span class="${i < S.n ? "on" : ""}">★</span>`).join("")}</div>
-          <div style="font:600 30px var(--display);margin-top:10px">${S.n} of ${S.goal}</div><div class="small muted">${S.reward ? `Reward: ${esc(S.reward)}` : "Choose the reward below, together."}</div>
-          ${full ? `<button class="btn gold block" data-act="starredeem" style="margin-top:14px">${ic("check")} She earned it: ${esc(S.reward || "her reward")}</button>` : ""}</div>
-        <div class="card"><div class="eyebrow">Give a star</div><input type="text" id="starwhy" placeholder="What for? Be specific: “went to bed on time without a reminder”" style="margin-top:10px">
-          ${quick.length ? `<div class="chips" style="margin-top:8px">${quick.map(q => `<button class="chip" data-act="starwhy" data-v="${esc(q)}">${esc(q.length > 34 ? q.slice(0, 33) + "…" : q)}</button>`).join("")}</div>` : ""}
-          <button class="btn gold block" data-act="stargive" style="margin-top:10px">★ Give her a star</button><p class="small muted" style="margin:8px 0 0">Tell her too, in words, the moment it happens. The star is the reminder; your praise is the reward.</p></div>
-        <div class="card"><div class="eyebrow">Goal and reward</div><div class="row" style="gap:8px;margin-top:10px"><label class="small muted">Stars</label>${[5, 7, 10, 15, 20].map(g => `<button class="chip${S.goal === g ? " on" : ""}" data-act="stargoal" data-v="${g}">${g}</button>`).join("")}</div>
-          <input type="text" data-f="stars.reward" value="${esc(S.reward)}" placeholder="e.g. A day out of her choosing" style="margin-top:10px">
-          ${db.rewards.length ? `<div class="chips" style="margin-top:8px">${db.rewards.map(r => `<button class="chip" data-act="starrew" data-v="${esc(r.text)}">${esc(r.text)}</button>`).join("")}</div>` : `<p class="small muted" style="margin:8px 0 0">Add rewards to your <a href="#/her/rewards">reward list</a> and pick one here.</p>`}
-          ${db.rewards.length ? `<button class="btn sm" data-act="starsurprise" style="margin-top:12px">🎁 Suggest a surprise reward</button><p class="small muted" style="margin:6px 0 0">Now and then, give a small unexpected reward. Surprises keep it alive longer than a fixed prize.</p>` : ""}</div>
-        ${S.log.length ? `<div class="sec"><div class="eyebrow">Recent stars</div><div class="card" style="padding:6px 16px">${S.log.slice(-12).reverse().map(l => `<div class="note"><span style="color:var(--gold)">★</span> ${esc(l.why || "A star")} <span class="small muted">· ${dstr(l.at)}</span></div>`).join("")}</div><button class="linkbtn small" data-act="starundo" style="margin:8px 4px">Undo the last star (a mistake, not a punishment)</button></div>` : ""}
-        ${S.earned.length ? `<div class="sec"><div class="eyebrow">Rewards earned</div>${S.earned.slice(-6).reverse().map(e => `<div class="item"><div class="grow"><div class="t">${esc(e.reward || "Reward")}</div><div class="m">${dstr(e.at)}</div></div></div>`).join("")}</div>` : ""}`; }
-    if (sec === "modes") { const M = modes();
-      return head("Modes and cues", "Each mode has its own cue, words in and out, and what you have agreed happens inside. Agree it beforehand, as adults. Nothing new is added while she is in a mode.")
-        + gl("modes-and-cues") + M.map((m, i) => `<div class="card"><div class="row between"><h3 style="margin:0">${esc(m.name)}</h3><span class="tag ${m.id === "adult" ? "n" : m.id === "service" ? "m" : "y"}">${m.id === "little" ? "non-sexual" : m.id === "service" ? "she cares for you" : "adults only"}</span></div>
-          ${[["cue", "Cue (the item or signal)", m.id === "little" ? "e.g. her stuffie, a bracelet, a hoodie" : m.id === "service" ? "e.g. an apron, a ribbon, a word" : "e.g. a choker, worn loose"], ["win", "Words in", m.id === "little" ? "e.g. “There. Daddy’s got everything now.”" : m.id === "service" ? "e.g. “Show me how you’ll take care of me today.”" : "e.g. “Tonight you’re mine.”"], ["wout", "Words out", m.id === "little" ? "e.g. “Thank you. Welcome back.”" : m.id === "service" ? "e.g. “Thank you, that was perfect. You’re off duty.”" : "e.g. “Come here. Let me look after you now.”"], ["inside", "What is agreed inside", m.id === "little" ? "e.g. I decide dinner and bedtime, she asks before snacks, no phone, colouring and cartoons. Nothing sexual." : m.id === "service" ? "e.g. she makes my coffee, lays out my clothes, kneels to greet me if she wants; I thank her for each thing." : "e.g. only from her yes list; choker off before sleep; aftercare after."]].map(([k, l, ph]) => `<label class="f"><span>${l}</span><textarea data-mode="${i}:${k}" placeholder="${esc(ph)}" style="min-height:${k === "inside" ? 80 : 46}px">${esc(m[k] || "")}</textarea></label>`).join("")}</div>`).join("")
-        + `<div class="warnbox" style="margin-top:12px">Never two cues at once: one comes off, a pause and water, then the next. She keeps her safeword in every mode and can step out any time. A choker is a symbol only: loose (two fingers), easy clasp, never pulled or held, nothing attached, off before sleep and rough play.</div>`; }
-    if (sec === "protocol") return head("Protocol", `How she addresses you and small rituals of respect. Discreet in public: other people should hear nothing unusual.`)
-      + exBtn("protocol", "Example protocols") + `<div class="sec" style="margin-top:6px"><div class="eyebrow">At home</div>${listEditor("protHome", "At home", `e.g. She calls me ${esc(prof().titles.join(" or "))}`, "")}</div>
-        <div class="sec"><div class="eyebrow">In public</div>${listEditor("protPublic", "In public", `e.g. She calls me “${esc(prof().short || "D")}”`, "")}</div>
-        <div class="sec"><div class="eyebrow">Exceptions</div><label class="f" style="margin-top:0"><textarea data-f="protEx" placeholder="e.g. At work, with family, at the doctor’s, in an emergency, or whenever she needs to be her adult self, she uses my name, and that is never a slip. She can suspend protocol for a day by saying so." style="min-height:90px">${esc(db.protEx || "")}</textarea></label></div>`;
-    if (sec === "rewards") return head("Rewards and consequences", "")
-      + `${gl("rewards")}${gl("consequences")}${exBtn("rewards", "Example rewards")}${exBtn("conseq", "Example consequences")}<div class="sec" style="margin-top:6px"><div class="eyebrow">Rewards</div>${listEditor("rewards", "Rewards", "e.g. Pancake breakfast, choosing the movie", "")}</div>
-        <div class="sec"><div class="eyebrow">Consequences</div><div class="warnbox" style="margin-bottom:10px">Agreed with her in advance. Proportional. Given calmly, never in anger. Never withholding food, sleep, safety, care or affection. Never something she has marked No.</div>
-        ${listEditor("conseq", "Consequences", "e.g. Early bedtime, a short written reflection, phone off for the evening", "")}
-        <p class="small muted" style="margin-top:8px">New consequences are marked “not yet agreed” until you tick them with her.</p>
-        ${db.conseq.filter(c => c.agreed === false).map(c => `<button class="btn sm" data-act="agree" data-v="${c.id}" style="margin:6px 6px 0 0">${ic("check")} She agreed: ${esc(c.text)}</button>`).join("")}</div>`;
-    if (sec === "checkin") { const Q = C.checkin || []; return head("Check-in questions", "Once a week, out of role, over coffee. Ask two or three, listen more than you talk.")
-      + gl("weekly") + `<div class="card" style="padding:4px 18px">${Q.map(q => `<div class="note">${esc(q)}</div>`).join("")}</div>
-        <label class="f"><span>What she said this week</span><textarea id="cin" placeholder="Her words, as close as you can."></textarea></label><button class="btn gold block" data-act="savecheckin" style="margin-top:10px">${ic("check")} Save check-in</button>
-        ${db.checkins.length ? `<div class="sec"><div class="eyebrow">Earlier check-ins</div><div class="card" style="padding:4px 18px">${[...db.checkins].reverse().map(c => `<div class="note"><div class="small muted">${dstr(c.at)}</div><div style="white-space:pre-wrap">${esc(c.text)}</div></div>`).join("")}</div></div>` : ""}`; }
-    location.hash = "#/her"; return "";
-  }
-
-  /* ---------- Scenes: built only from her yes list ---------- */
-  let sdraft = null, wday = new Date().getDay();
-  function viewScene(id) {
-    if (id === "new" || !sdraft || sdraft.id !== id) sdraft = id === "new" ? { id: uid(), title: "", intent: "", acts: [], kit: [], notes: "" } : JSON.parse(JSON.stringify(db.scenes.find(s => s.id === id) || { id: uid(), acts: [], kit: [] }));
-    if (id === "new") history.replaceState(null, "", `#/scene/${sdraft.id}`);
-    const all = ACTS.flatMap(([, it]) => it).filter(it => !it.startsWith("Breath"));
-    const KIT = ["Safety shears", "Water", "Blanket", "Snack", "Her stuffie for after", "Phone off", "Lube and condoms if relevant", "First-aid basics"];
-    const saved = db.scenes.some(s => s.id === sdraft.id);
-    return `<div class="top">${backLink("#/her", "Her")}</div><h1 style="margin:6px 2px 6px;font-size:29px">${saved ? "Scene" : "Plan a scene"}</h1><p class="muted" style="margin:0 2px 14px">Only what she said yes to. Maybe means ask her first, before the day.</p>${guide("first-scene") ? `<a class="btn sm" href="#/g/first-scene" style="margin:0 2px 14px">${ic("list")} New to this? Your first simple scene, step by step</a>` : ""}
-      <div class="card"><label class="f" style="margin-top:0"><span>Name</span><input type="text" data-s="title" value="${esc(sdraft.title)}" placeholder="e.g. Friday, slow and close"></label>
-        <label class="f"><span>The intent (what you want her to feel)</span><textarea data-s="intent" placeholder="Held, safe, a little teased, very proud of herself.">${esc(sdraft.intent)}</textarea></label></div>
-      <div class="sec"><div class="eyebrow">What’s in it</div><div class="card"><div class="chips">${all.map(it => { const v = db.limits[it]; return `<button class="chip${sdraft.acts.includes(it) ? " on" : ""}${v === "m" ? " warn" : ""}" data-act="sact" data-v="${esc(it)}" ${v === "y" || v === "m" ? "" : "disabled"}>${esc(it)}${v === "m" ? " ?" : ""}</button>`; }).join("")}</div>
-        <p class="small muted" style="margin:10px 0 0">Greyed out: not a yes on her list yet. Amber: a maybe, so talk to her first.</p></div></div>
-      ${sdraft.acts.some(a => db.limits[a] === "m") ? `<div class="warnbox" style="margin-top:12px">This plan includes a maybe. Ask her about it before the day, out of role, and only keep it if she says yes.</div>` : ""}
-      <div class="sec"><div class="eyebrow">Safewords for this scene</div><div class="card small"><b style="color:var(--red)">${esc(db.safe.stop)}</b> stops everything · <b style="color:var(--amber)">${esc(db.safe.slow)}</b> slows down · <b style="color:var(--green)">${esc(db.safe.go)}</b> all good<br><span class="muted">Signal: ${esc(db.safe.signal)}</span></div></div>
-      <div class="sec"><div class="eyebrow">Kit</div><div class="card" style="padding:6px 18px">${KIT.map(k => `<button class="check${sdraft.kit.includes(k) ? " on" : ""}" data-act="skit" data-v="${esc(k)}"><span class="box">${sdraft.kit.includes(k) ? ic("check") : ""}</span><span class="lbl">${k}</span></button>`).join("")}</div></div>
-      <div class="sec"><div class="eyebrow">Aftercare plan</div><div class="card small">${db.aftercare.length ? esc(db.aftercare.join(", ")) : `<a href="#/her/after">Set her aftercare needs</a>`}${db.aftercareNote ? `<br><span class="muted">${esc(db.aftercareNote)}</span>` : ""}</div></div>
-      <label class="f"><span>Notes</span><textarea data-s="notes" placeholder="Shape: how it opens, builds, lands.">${esc(sdraft.notes)}</textarea></label>
-      <button class="btn gold block" data-act="savescene" style="margin-top:16px">${ic("check")} Save plan</button>
-      ${saved ? `<button class="btn block" data-act="scenedone" data-v="${sdraft.id}" style="margin-top:8px">${ic("clock")} It happened: start the aftercare window</button><button class="btn ghost block" data-act="delscene" data-v="${sdraft.id}" style="margin-top:4px;color:var(--red)">Delete plan</button>` : ""}
-      ${db.scenes.length ? `<div class="sec"><div class="eyebrow">Your plans</div>${db.scenes.map(s => `<a class="item" href="#/scene/${s.id}">${modIc("scenes", 36)}<div class="grow"><div class="t">${esc(s.title || "Untitled")}</div><div class="m">${s.at ? `Happened ${dstr(s.at)}` : "Planned"} · ${s.acts.length} elements</div></div>${ic("chev")}</a>`).join("")}</div>` : ""}`;
-  }
-  function viewBefore() {
-    const B = ["We are both sober enough to consent clearly", "She’s had a normal day: no illness, no big news, eaten", "Tonight’s plan uses only her yeses", "Safewords said out loud just now", "Safety shears, water and blanket within reach", "Time and privacy: nothing to rush", "I am calm, not playing out frustration", "Aftercare is planned, and I’ll check in tomorrow"];
-    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 6px;font-size:29px">Before a scene</h1><p class="muted" style="margin:0 2px 14px">Two minutes. If any line is a no, change the plan or wait. That is what competence looks like.</p>
-      <div class="card" style="padding:6px 18px">${B.map((b, i) => `<button class="check" data-act="tog"><span class="box"></span><span class="lbl">${b}</span></button>`).join("")}</div>
-      <a class="btn gold block" href="#/scene/new" style="margin-top:14px">Plan the scene</a>${guide("safeword-used") ? `<a class="btn block" href="#/g/safeword-used" style="margin-top:8px">If she uses her safeword: what to do</a>` : ""}`;
-  }
-
-  /* ---------- Journal ---------- */
-  /* ---------- Notes: the Almanac editor (ported from davecube123/notebook, js/views/editor.js) ----------
-     contenteditable + toolbar + markdown shortcuts + nested checklists. Sub-tasks tick with their parent. */
-  const NOTE_TAGS = ["Her likes", "Scene ideas", "Little space", "To try", "Fantasies", "Other"];
-  let ntag = "", nq = "";
-  const plain = h => { const d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<(\/?(?:p|div|li|h1|h2|h3|blockquote|pre|br|hr)\b[^>]*)>/gi, " <$1> "); return (d.textContent || "").replace(/\s+/g, " ").trim(); };
-  const ALLOWED = new Set(["P", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "H1", "H2", "H3", "UL", "OL", "LI", "BLOCKQUOTE", "PRE", "CODE", "MARK", "HR", "DIV"]);
-  function sanitize(html) {
-    /* notes from v6 used ul.checks / li.done: read them as Almanac's checklist / checked */
-    html = String(html || "").replace(/class="checks"/g, 'class="checklist"').replace(/class="done"/g, 'class="checked"');
-    const doc = new DOMParser().parseFromString(`<body>${html}</body>`, "text/html");
-    const walk = node => { [...node.childNodes].forEach(ch => {
-      if (ch.nodeType === 3) return; if (ch.nodeType !== 1) { ch.remove(); return; }
-      walk(ch);
-      if (["SCRIPT", "STYLE", "IFRAME", "OBJECT", "TEMPLATE", "META", "LINK"].includes(ch.tagName)) { ch.remove(); return; }
-      if (!ALLOWED.has(ch.tagName)) { if (/^(SECTION|ARTICLE|HEADER|FOOTER|TABLE|TR|H4|H5|H6)$/.test(ch.tagName)) { const q = doc.createElement("p"); q.append(...ch.childNodes); ch.replaceWith(q); } else ch.replaceWith(...ch.childNodes); return; }
-      const keep = ch.tagName === "UL" && ch.classList.contains("checklist") ? "checklist" : ch.tagName === "LI" && ch.classList.contains("checked") ? "checked" : "";
-      [...ch.attributes].forEach(a => ch.removeAttribute(a.name)); if (keep) ch.className = keep; }); };
-    walk(doc.body); return doc.body.innerHTML;
-  }
-  const topBlock = (ed, n) => { if (!n || n === ed) return null; while (n && n.parentNode !== ed) n = n.parentNode; return n && n.nodeType === 1 ? n : null; };
-  const caretNode = () => { const x = getSelection(); return x.rangeCount ? x.getRangeAt(0).startContainer : null; };
-  const placeCaretIn = (el, atEnd = true) => { const r = document.createRange(); r.selectNodeContents(el); r.collapse(!atEnd); const x = getSelection(); x.removeAllRanges(); x.addRange(r); };
-  function selectedBlocks(ed) { const x = getSelection(); if (!x.rangeCount) return []; const r = x.getRangeAt(0), a = topBlock(ed, r.startContainer), b = topBlock(ed, r.endContainer); if (!a) return []; const out = [a]; let n = a; while (n !== b && n.nextElementSibling) { n = n.nextElementSibling; out.push(n); } return out; }
-  function retag(el, tag) { const n = document.createElement(tag); while (el.firstChild) n.append(el.firstChild); if (!n.childNodes.length) n.append(document.createElement("br")); el.replaceWith(n); return n; }
-  function ensureBlock(ed) { const n = caretNode(); if (n && (n === ed || n.parentNode === ed) && !topBlock(ed, n)) document.execCommand("formatBlock", false, "p"); }
-  function toggleBlock(ed, tag) {
-    const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0).cloneRange() : null; ensureBlock(ed);
-    const blocks = selectedBlocks(ed); if (!blocks.length) { document.execCommand("formatBlock", false, tag); return; }
-    const allSame = blocks.every(b => b.tagName === tag.toUpperCase()); let last;
-    blocks.forEach(b => { if (/^(UL|OL|HR)$/.test(b.tagName)) return; last = retag(b, allSame ? "p" : tag); });
-    try { if (r && ed.contains(r.startContainer)) { x.removeAllRanges(); x.addRange(r); } else if (last) placeCaretIn(last); } catch (e) { if (last) placeCaretIn(last); }
-  }
-  const closestIn = (ed, sel) => { let n = caretNode(); if (n?.nodeType === 3) n = n.parentNode; const el = n?.closest?.(sel); return el && ed.contains(el) ? el : null; };
-  function toggleChecklist(ed) {
-    const ul = closestIn(ed, "ul, ol");
-    if (ul && ul.tagName === "UL" && ul.classList.contains("checklist")) { document.execCommand("insertUnorderedList"); return; }
-    if (ul && ul.tagName === "UL") { ul.classList.add("checklist"); return; }
-    document.execCommand("insertUnorderedList"); closestIn(ed, "ul")?.classList.add("checklist");
-  }
-  function keepCaret(fn) { const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0) : null, sv = r && [r.startContainer, r.startOffset, r.endContainer, r.endOffset]; fn(); if (!sv) return; try { const nr = document.createRange(); nr.setStart(sv[0], sv[1]); nr.setEnd(sv[2], sv[3]); x.removeAllRanges(); x.addRange(nr); } catch (e) {} }
-  const sameListAs = l => { const n = document.createElement(l.tagName); if (l.classList.contains("checklist")) n.className = "checklist"; return n; };
-  const subListOf = li => [...li.children].reverse().find(c => c.tagName === "UL" || c.tagName === "OL") || null;
-  function indentItem(li) { const prev = li.previousElementSibling; if (!prev || prev.tagName !== "LI") return false; const list = li.parentElement;
-    keepCaret(() => { let sub = subListOf(prev); if (!sub || sub.tagName !== list.tagName || sub.classList.contains("checklist") !== list.classList.contains("checklist")) { sub = sameListAs(list); prev.append(sub); } sub.append(li); }); return true; }
-  function outdentItem(li, ed) { const list = li.parentElement, pli = list.parentElement; if (!pli || pli.tagName !== "LI" || !ed.contains(pli)) return false;
-    keepCaret(() => { const after = []; for (let n = li.nextElementSibling; n; n = n.nextElementSibling) after.push(n); if (after.length) { let sub = subListOf(li); if (!sub) { sub = sameListAs(list); li.append(sub); } sub.append(...after); } pli.after(li); if (!list.children.length) list.remove(); }); return true; }
-  const isNested = (li, ed) => { const g = li.parentElement?.parentElement; return !!g && g.tagName === "LI" && ed.contains(g); };
-  function toggleList(ed, ordered) { const cl = closestIn(ed, "ul.checklist"); if (cl && !ordered) { cl.classList.remove("checklist"); return; } document.execCommand(ordered ? "insertOrderedList" : "insertUnorderedList"); }
-  function toggleMark(ed) { const m = closestIn(ed, "mark"); if (m) { m.replaceWith(...m.childNodes); return; } const x = getSelection(); if (!x.rangeCount || x.isCollapsed) { toast("Select some text to highlight"); return; } const r = x.getRangeAt(0), mk = document.createElement("mark"); mk.append(r.extractContents()); r.insertNode(mk); const nr = document.createRange(); nr.selectNodeContents(mk); x.removeAllRanges(); x.addRange(nr); }
-  function makeList(block, tag, cls = "") { const list = document.createElement(tag); if (cls) list.className = cls; const li = document.createElement("li"); li.append(document.createElement("br")); list.append(li); block.replaceWith(list); placeCaretIn(li, false); return li; }
-  const SHORTCUTS = [[/^#$/, ed => toggleBlock(ed, "h1")], [/^##$/, ed => toggleBlock(ed, "h2")], [/^###$/, ed => toggleBlock(ed, "h3")],
-    [/^[-*•]$/, (ed, b) => makeList(b, "ul")], [/^1[.)]$/, (ed, b) => makeList(b, "ol")], [/^\[ ?\]$/, (ed, b) => makeList(b, "ul", "checklist")],
-    [/^\[x\]$/i, (ed, b) => makeList(b, "ul", "checklist").classList.add("checked")], [/^>$/, ed => toggleBlock(ed, "blockquote")], [/^(---|\*\*\*)$/, () => document.execCommand("insertHorizontalRule")]];
-  function normalizeEd(ed) { ed.querySelectorAll(":scope > p").forEach(q => { if (q.querySelector(":scope > ul, :scope > ol, :scope > blockquote, :scope > pre, :scope > h1, :scope > h2, :scope > h3, :scope > hr")) { const x = getSelection(), r = x.rangeCount ? x.getRangeAt(0).cloneRange() : null; q.replaceWith(...q.childNodes); if (r) try { x.removeAllRanges(); x.addRange(r); } catch (e) {} } }); }
-  function tryShortcut(ed) { ensureBlock(ed); const block = topBlock(ed, caretNode()); if (!block || !/^(P|DIV)$/.test(block.tagName)) return false; const txt = block.textContent.replace(/ /g, " "); if (!txt.endsWith(" ")) return false; const key = txt.slice(0, -1);
-    for (const [re, fn] of SHORTCUTS) if (re.test(key)) { block.innerHTML = "<br>"; placeCaretIn(block, false); fn(ed, block); normalizeEd(ed); return true; } return false; }
-  const TI = { checklist: '<rect x="3" y="4" width="6" height="6" rx="1.5"/><path d="m4.5 7 1 1 2-2M13 7h8M3 15.5h6v.5M13 17h8"/><rect x="3" y="14" width="6" height="6" rx="1.5"/>',
-    list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>', olist: '<path d="M10 6h10M10 12h10M10 18h10M4 4.5h1.5V9M4 9h3M4 14.5a1.5 1.5 0 0 1 3 .3c0 1-3 2.2-3 3.7h3"/>',
-    indent: '<path d="M10 6h10M10 12h10M10 18h10M4 9l3 3-3 3"/>', outdent: '<path d="M10 6h10M10 12h10M10 18h10M7 9l-3 3 3 3"/>', quote: '<path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/>',
-    bold: '<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>', italic: '<path d="M19 4h-9M14 20H5M15 4 9 20"/>', underline: '<path d="M6 4v7a6 6 0 0 0 12 0V4M4 21h16"/>',
-    strike: '<path d="M16 5.5A4 4 0 0 0 12 4c-2.5 0-4.5 1.3-4.5 3.5 0 1.5.8 2.5 2.5 3.2M4 12h16M8 18.5A4.5 4.5 0 0 0 12 20c2.6 0 4.5-1.4 4.5-3.6 0-.9-.3-1.7-.9-2.4"/>',
-    highlight: '<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>', h1: '<path d="M4 6v12M12 6v12M4 12h8M17 10l3-2v10"/>',
-    h2: '<path d="M4 6v12M12 6v12M4 12h8M16 10a2 2 0 1 1 4 .5c0 1.5-4 4-4 7.5h4"/>', divider: '<path d="M3 12h18"/><path d="M8 7h8M8 17h8" opacity=".4"/>', clear: '<path d="M4 7V5h16v2M9 19h6M12 5l-2 14M3 3l18 18"/>',
-    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>', redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/>' };
-  const TOOLS = [["checklist", "Checklist"], ["list", "Bulleted list"], ["olist", "Numbered list"], ["indent", "Nest under the item above (Tab)"], ["outdent", "Move out a level (Shift+Tab)"], ["quote", "Quote"], "|",
-    ["bold", "Bold"], ["italic", "Italic"], ["underline", "Underline"], ["strike", "Strikethrough"], ["highlight", "Highlight"], "|", ["h1", "Heading"], ["h2", "Subheading"], ["divider", "Divider"], "|", ["clear", "Clear formatting"], ["undo", "Undo"], ["redo", "Redo"]];
-  const toolbarHTML = () => TOOLS.map(t => t === "|" ? '<span class="tb-sep"></span>' : `<button type="button" class="tb-btn" data-cmd="${t[0]}" title="${t[1]}" aria-label="${t[1]}"><svg class="i" viewBox="0 0 24 24">${TI[t[0]]}</svg></button>`).join("");
-  function runCmd(ed, cmd) {
-    ed.focus();
-    switch (cmd) {
-      case "h1": case "h2": return toggleBlock(ed, cmd); case "quote": return toggleBlock(ed, "blockquote");
-      case "bold": case "italic": case "underline": return document.execCommand(cmd); case "strike": return document.execCommand("strikeThrough");
-      case "highlight": return toggleMark(ed); case "checklist": return toggleChecklist(ed); case "list": return toggleList(ed, false); case "olist": return toggleList(ed, true);
-      case "indent": case "outdent": { const li = closestIn(ed, "li"); if (!li) return toast("Put the cursor in a list item first"); if (!(cmd === "indent" ? indentItem(li) : outdentItem(li, ed))) toast(cmd === "indent" ? "Nothing above to nest under" : "Already at the top level"); return; }
-      case "divider": return document.execCommand("insertHorizontalRule");
-      case "clear": document.execCommand("removeFormat"); selectedBlocks(ed).forEach(b => { if (/^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(b.tagName)) retag(b, "p"); }); return;
-      case "undo": return document.execCommand("undo"); case "redo": return document.execCommand("redo");
-    }
-  }
-  function updateToolbar(ed) {
-    const tb = $(".toolbar"); if (!tb) return; const is = sel => !!closestIn(ed, sel), tag = topBlock(ed, caretNode())?.tagName;
-    const st = { h1: tag === "H1", h2: tag === "H2", quote: tag === "BLOCKQUOTE", bold: document.queryCommandState("bold"), italic: document.queryCommandState("italic"), underline: is("u"), strike: is("s, strike, del"), checklist: is("ul.checklist"), list: is("ul:not(.checklist)"), olist: is("ol"), highlight: is("mark") };
-    const li = closestIn(ed, "li");
-    tb.querySelector("[data-cmd=indent]")?.classList.toggle("dim", !li?.previousElementSibling); tb.querySelector("[data-cmd=outdent]")?.classList.toggle("dim", !li || !isNested(li, ed));
-    tb.querySelectorAll("[data-cmd]").forEach(b => b.classList.toggle("on", !!st[b.dataset.cmd]));
-  }
-  function viewJournal(tab) {
-    const notesTab = tab !== "debriefs" && tab !== "calendar";
-    const seg = `<div class="seg" style="margin:0 0 16px"><a href="#/journal" class="${notesTab ? "on" : ""}">Notes · ${(db.notes || []).filter(n => !n.trashed).length}</a><a href="#/journal/debriefs" class="${tab === "debriefs" ? "on" : ""}">Debriefs · ${db.debriefs.length}</a><a href="#/journal/calendar" class="${tab === "calendar" ? "on" : ""}">Calendar</a></div>`;
-    if (tab === "calendar") return `<h1 style="margin:8px 2px 14px">Journal</h1>` + seg + viewCalendar();
-    if (!notesTab) return `<h1 style="margin:8px 2px 14px">Journal</h1>` + seg + viewDebriefs();
-    const trash = ntag === "Trash", N = (db.notes || []).filter(n => (trash ? n.trashed : !n.trashed) && (trash || !ntag || n.tag === ntag) && (!nq || (n.title + " " + plain(n.html)).toLowerCase().includes(nq.toLowerCase()))).sort((a, b) => (b.pin - a.pin) || b.at - a.at);
-    return `<div class="row between" style="margin:8px 2px 14px"><h1>Journal</h1><button class="btn gold sm" data-act="tplsheet">${ic("plus")} Note</button></div>` + seg
-      + `<input type="text" id="nq" placeholder="Search notes" value="${esc(nq)}" autocomplete="off">
-      <div class="chips" style="margin:10px 0 4px">${["", ...NOTE_TAGS, "Trash"].map(t => `<button class="chip${ntag === t ? " on" : ""}" data-act="ntag" data-v="${t}">${t === "Trash" ? `🗑 Trash${(db.notes || []).some(n => n.trashed) ? ` · ${(db.notes || []).filter(n => n.trashed).length}` : ""}` : t || "All"}</button>`).join("")}</div>
-      <div id="nlist" style="margin-top:10px">${trash && N.length ? `<p class="small muted" style="margin:0 4px 10px">Deleted notes stay here for 30 days. <button class="linkbtn" data-act="emptytrash">Empty trash</button></p>` : ""}${N.length ? N.map(n => trash ? `<div class="item"><div class="grow"><div class="t">${esc(n.title || "Untitled")}</div><div class="m">Deleted ${dstr(n.trashed)} · ${esc(plain(n.html).slice(0, 60))}</div></div><button class="btn sm" data-act="restore" data-v="${n.id}">Restore</button></div>` : `<a class="item" href="#/note/${n.id}"><div class="grow"><div class="t">${n.pin ? "📌 " : ""}${esc(n.title || "Untitled")}</div><div class="m">${n.tag ? `${esc(n.tag)} · ` : ""}${dstr(n.at)} · ${esc(plain(n.html).slice(0, 70))}</div></div>${ic("chev")}</a>`).join("")
-        : `<div class="card"><p style="margin:0">${(db.notes || []).length ? "No notes match." : "Notes for anything: what she likes, scene ideas, things to try, words that land. Tap Note to start."}</p></div>`}</div>`;
-  }
-  /* Note templates, as in Almanac: each built-in has a purpose and "Why it works" with sources. */
-  const h3 = (t, body = "<p><br></p>") => `<h3>${t}</h3>${body}`;
-  const items = (n, cls = "") => `<ul${cls ? ` class="${cls}"` : ""}>${"<li><br></li>".repeat(n)}</ul>`;
-  const TPL = [
-    { id: "scene", name: "Scene plan", tag: "Scene ideas", purpose: "Plan a scene from her yes list, with its shape, safety and aftercare.",
-      html: () => h3("What I want her to feel") + h3("From her yes list (check it first)", items(3)) + h3("Shape: opening, build, peak, landing", "<ol><li><br></li><li><br></li><li><br></li><li><br></li></ol>") + h3("Safewords and signal said out loud", items(1, "checklist")) + h3("Kit within reach", "<ul class=\"checklist\"><li>Safety shears</li><li>Water</li><li>Blanket</li></ul>") + h3("Aftercare plan") + h3("Next-day check-in", items(1, "checklist")),
-      why: [["Planning with explicit negotiation, safewords and aftercare is the core of risk-aware consensual practice in the kink community.", "RACK and the 4Cs (Williams et al., 2014); The New Topping Book (Easton & Hardy)"], ["Turning an intention into a concrete plan makes follow-through much more likely.", "Gollwitzer & Sheeran (2006), meta-analysis"]] },
-    { id: "negotiation", name: "Negotiation notes", tag: "Her likes", purpose: "Write down what you agreed, out of role, so nothing depends on memory.",
-      html: () => h3("Date and how we both felt going in") + h3("Yes", items(2)) + h3("Maybe (talk again before trying)", items(2)) + h3("No / hard limits", items(2)) + h3("Safewords and signal") + h3("Anything about her health, mood or week to keep in mind") + h3("When we will revisit this"),
-      why: [["Explicit, ongoing negotiation is the foundation of consensual BDSM practice; consent can be revisited and withdrawn at any time.", "Williams et al. (2014), the 4Cs; community practice"], ["Talking openly about sex is linked with higher sexual and relationship satisfaction.", "Mallory, Stanton & Handy (2019), meta-analysis"]] },
-    { id: "debrief", name: "Scene debrief", tag: "Other", purpose: "What happened, what worked, what to change, in her words and yours.",
-      html: () => h3("What happened") + h3("What went well", items(2)) + h3("What to change next time", items(2)) + h3("Her words (asked out of role)") + h3("How I feel now (dom drop is real)") + h3("One thing to do differently", items(1, "checklist")),
-      why: [["Structured debriefs (what happened, why, what next) improve later performance by about 20 to 25 percent.", "Tannenbaum & Cerasoli (2013), meta-analysis, Human Factors"], ["Debriefing after a scene is standard aftercare practice and helps catch sub drop early.", "Community practice; The New Topping Book (Easton & Hardy)"]] },
-    { id: "weekly", name: "Weekly review of the dynamic", tag: "Other", purpose: "Look back at the week together and set next week’s rhythm.",
-      html: () => h3("What felt good this week") + h3("What slipped, and why") + h3("What she asked for") + h3("Rules and rituals: keep, change, drop", items(2)) + h3("Next week", items(3, "checklist")) + h3("If-then plan: “If [moment], then I will [action]”"),
-      why: [["Writing down progress toward a goal makes reaching it more likely.", "Harkin et al. (2016), meta-analysis, Psychological Bulletin"], ["If-then plans have a medium-to-large effect on actually doing what you intend.", "Gollwitzer & Sheeran (2006)"]] },
-    { id: "map", name: "Her map", tag: "Her likes", purpose: "What she loves, what she doesn’t, and what helps her, kept up to date.",
-      html: () => h3("Things she loves", items(3)) + h3("Things she doesn’t like, or that upset her", items(2)) + h3("Words and names she likes") + h3("Signs she’s enjoying it / signs to slow down") + h3("What helps her after (aftercare)") + h3("Her comforts on a bad day"),
-      why: [["Partners who know and act on each other’s preferences report more satisfaction; asking and praise are linked with more orgasms for women.", "Frederick et al. (2018); Mallory et al. (2019)"]] },
-    { id: "ideas", name: "Fantasies and ideas", tag: "Fantasies", purpose: "Collect ideas to bring to a negotiation, not to spring on her.",
-      html: () => h3("Idea") + h3("Where it came from (hers, mine, both)") + h3("What appeals about it") + h3("Risks and how we’d handle them") + h3("Status", "<ul class=\"checklist\"><li>Talked about it</li><li>On her yes list</li><li>Tried it</li></ul>"),
-      why: [["Fantasies are common and varied, and sharing them is linked with closeness; acting on one is a separate, negotiated choice.", "Lehmiller (2018), Tell Me What You Want"]] },
-    { id: "little", name: "Little-space ideas", tag: "Little space", purpose: "Non-sexual ideas for rest, play and comfort.",
-      html: () => h3("Comfort things", items(3)) + h3("Play and activities", items(3)) + h3("Bedtime and routines") + h3("Gentle ways to bring her back out"),
-      why: [["Predictable, caring routines build a sense of safety and trust.", "Community practice in DD/lg; general attachment research"]] },
-    { id: "repair", name: "When I got it wrong", tag: "Other", purpose: "A repair note: own it, understand it, make it right.",
-      html: () => h3("What happened, plainly") + h3("How it affected her") + h3("What I’ll say to her") + h3("What I’ll change", items(2, "checklist")) + h3("Do I need outside help (a kink-aware therapist)?"),
-      why: [["Owning a mistake and repairing it is a core skill in healthy relationships and in consensual kink.", "Community practice; Gottman’s research on repair attempts"]] },
-    { id: "daily", name: "My daily note", tag: "Other", purpose: "Two minutes for you: a plan, a feeling, three good moments.",
-      html: () => h3("If-then plan for today: “If [moment], then I will [action]”") + h3("How I feel, in a word or two") + h3("Three good moments with her today", "<ol><li><br></li><li><br></li><li><br></li></ol>") + h3("Tomorrow", items(2, "checklist")),
-      why: [["If-then plans make follow-through much more likely.", "Gollwitzer & Sheeran (2006)"], ["Putting a feeling into words calms the brain’s alarm response.", "Lieberman et al. (2007), Psychological Science"], ["Writing three good things each evening raised happiness for months.", "Seligman et al. (2005), American Psychologist"]] } ];
-  const userTpls = () => (db.tpls || []);
-  function tplSheet() {
-    const back = document.createElement("div"); back.className = "sheet-back";
-    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><h2>New note</h2>
-      <button class="item" data-act="newnote" data-v="" style="margin-top:12px">${modIc("foundations")}<div class="grow"><div class="t">Blank note</div></div></button>
-      ${userTpls().length ? `<div class="eyebrow" style="margin:16px 4px 8px">My templates</div>${userTpls().map(t => `<div class="row" style="gap:6px"><button class="item" data-act="newnote" data-v="u:${t.id}" style="flex:1">${modIc("care")}<div class="grow"><div class="t">${esc(t.title || "Untitled")}</div></div></button><button class="iconbtn" data-act="deltpl" data-v="${t.id}" aria-label="Delete template">${ic("x")}</button></div>`).join("")}` : ""}
-      <div class="eyebrow" style="margin:16px 4px 8px">Templates</div>${TPL.map(t => `<div class="card" style="padding:12px 14px;margin-top:8px"><div class="row"><div class="grow"><b>${esc(t.name)}</b><div class="small muted">${esc(t.purpose)}</div></div><button class="btn gold sm" data-act="newnote" data-v="${t.id}">Use</button></div>
-        <details class="how" style="margin-top:8px;padding-top:8px"><summary>Why it works</summary><ul class="field">${t.why.map(([c, src]) => `<li>${esc(c)} <span style="color:var(--gold)">${esc(src)}</span></li>`).join("")}</ul></details></div>`).join("")}</div>`;
-    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
-  }
-  function newNote(tid) {
-    db.notes ||= []; let n = { id: uid(), title: "", html: "", tag: "", pin: 0, at: Date.now() };
-    if (tid.startsWith("u:")) { const u = userTpls().find(t => t.id === tid.slice(2)); if (u) Object.assign(n, { title: u.title, html: u.html, tag: u.tag || "" }); }
-    else { const t = TPL.find(x => x.id === tid); if (t) Object.assign(n, { title: `${t.name} · ${new Date().toLocaleDateString(undefined, { day: "numeric", month: "short" })}`, html: t.html(), tag: t.tag, tpl: t.id, fresh: true }); }
-    db.notes.push(n); save(); $(".sheet-back")?.remove(); location.hash = `#/note/${n.id}`;
-  }
-  let nedit = null;
-  function viewNote(id) {
-    db.notes ||= [];
-    if (id === "new") { setTimeout(tplSheet, 0); location.hash = "#/journal"; return ""; }
-    nedit = db.notes.find(n => n.id === id && !n.trashed);
-    if (!nedit) { location.hash = "#/journal"; return ""; }
-    return `<div class="top">${backLink("#/journal", "Journal")}<span class="small muted" id="nsaved">Saved</span></div>
-      <input type="text" id="ntitle" value="${esc(nedit.title)}" placeholder="Title" style="font:600 22px var(--display);border:0;background:transparent;padding:6px 2px">
-      <div class="chips" style="margin:6px 0 12px">${NOTE_TAGS.map(t => `<button class="chip${nedit.tag === t ? " on" : ""}" data-act="nsettag" data-v="${t}">${t}</button>`).join("")}</div>
-      <div class="toolbar" role="toolbar" aria-label="Formatting">${toolbarHTML()}</div>
-      <div class="editor note-body" id="ned" contenteditable="true" spellcheck="true" data-placeholder="Start writing. Type  [ ]  for a checklist,  -  for bullets,  1.  for numbers,  >  for a quote,  #  for a heading.">${sanitize(nedit.html)}</div>
-      <div class="row" style="gap:8px;margin-top:14px"><button class="btn sm" data-act="npin">${nedit.pin ? "Unpin" : "📌 Pin to top"}</button><span class="grow"></span><button class="btn sm" data-act="savetpl">Save as template</button><button class="btn ghost sm" data-act="ndel" style="color:var(--red)">Delete</button></div>
-      <p class="small muted" style="margin-top:10px">Edited ${dstr(nedit.at)}. Tap a box to tick it (sub-tasks tick too). Tab nests a list item.</p>`;
-  }
-  let gq = "";
-  function searchResults(q) {
-    const w = q.toLowerCase().split(/\s+/).filter(Boolean); if (!w.length) return [];
-    const hit = t => w.every(x => t.toLowerCase().includes(x)), out = [];
-    (db.notes || []).filter(n => !n.trashed).forEach(n => { const t = n.title + " " + plain(n.html); if (hit(t)) out.push(["Note", n.title || "Untitled", plain(n.html).slice(0, 80), `#/note/${n.id}`]); });
-    db.debriefs.forEach(d => { const t = [d.title, d.good, d.change, d.hers, d.me].join(" "); if (hit(t)) out.push(["Debrief", d.title || "Entry", (d.good || d.change || "").slice(0, 80), "#/journal/debriefs"]); });
-    (C.guides || []).forEach(g => { const t = g.title + " " + g.why + " " + g.steps.map(x => x.h + " " + x.d + " " + (x.say || "")).join(" "); if (hit(t)) out.push(["Guide", g.title, g.why, `#/g/${g.id}`]); });
-    C.lessons.forEach(l => { const t = [l.title, l.hook, l.motto, l.essence, l.scene, l.practice, l.why, l.shadow, ...(l.cards || []), ...(l.techniques || []).map(x => x.name + " " + x.how), ...(l.say || []).map(x => x.line), ...(l.watch || [])].filter(Boolean).join(" "); if (hit(t)) out.push(["Lesson", l.title, l.hook, `#/l/${l.id}`]); });
-    (C.glossary || []).forEach(x => { if (hit(x.t + " " + x.d)) out.push(["Word", x.t, x.d, "#/words"]); });
-    return out.slice(0, 60);
-  }
-  const resultsHTML = q => { const R = searchResults(q); return !q.trim() ? `<p class="muted small" style="margin:6px 4px">Search everything: your notes and debriefs, the lessons, the guides and the glossary.</p>` : R.length ? R.map(([k, t, m, h]) => `<a class="item" href="${h}"><span class="tag ${k === "Note" || k === "Debrief" ? "y" : "m"}" style="flex:none">${k}</span><div class="grow"><div class="t">${esc(t)}</div><div class="m">${esc(m)}</div></div>${ic("chev")}</a>`).join("") : `<p class="muted center" style="margin-top:24px">Nothing found.</p>`; };
-  function viewSearch() { setTimeout(() => $("#gsq")?.focus(), 60);
-    return `<div class="top">${backLink("#/", "Today")}</div><input type="text" id="gsq" placeholder="Search Anchor" value="${esc(gq)}" autocomplete="off" style="font-size:18px"><div id="gsr" style="margin-top:12px">${resultsHTML(gq)}</div>`; }
-  const download = (name, text, type) => { const b = new Blob([text], { type }), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
-  function toMd(html) {
-    const d = document.createElement("div"); d.innerHTML = sanitize(html);
-    const inl = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.tagName === "B" || c.tagName === "STRONG" ? `**${inl(c)}**` : c.tagName === "I" || c.tagName === "EM" ? `*${inl(c)}*` : /^(S|DEL|STRIKE)$/.test(c.tagName) ? `~~${inl(c)}~~` : c.tagName === "MARK" ? `==${inl(c)}==` : c.tagName === "BR" ? "\n" : /^(UL|OL)$/.test(c.tagName) ? "" : inl(c)).join("");
-    const list = (l, depth) => [...l.children].map((li, i) => { const sub = [...li.children].filter(c => /^(UL|OL)$/.test(c.tagName)); const mark = l.classList.contains("checklist") ? `- [${li.classList.contains("checked") ? "x" : " "}] ` : l.tagName === "OL" ? `${i + 1}. ` : "- ";
-      return "  ".repeat(depth) + mark + inl(li).trim() + sub.map(sl => "\n" + list(sl, depth + 1)).join(""); }).join("\n");
-    return [...d.childNodes].map(b => b.nodeType === 3 ? b.textContent : /^H1$/.test(b.tagName) ? `# ${inl(b)}` : b.tagName === "H2" ? `## ${inl(b)}` : b.tagName === "H3" ? `### ${inl(b)}` : b.tagName === "BLOCKQUOTE" ? `> ${inl(b)}` : b.tagName === "HR" ? "---" : /^(UL|OL)$/.test(b.tagName) ? list(b, 0) : inl(b)).filter(x => x.trim()).join("\n\n");
-  }
-  let nT = 0;
-  function noteSave() { if (!nedit) return; const ed = $("#ned"); if (!ed) return; const h = ed.innerHTML === "<br>" ? "" : ed.innerHTML; const nh = sanitize(h); if (nh !== nedit.html || $("#ntitle").value !== nedit.title) delete nedit.fresh; nedit.html = nh; nedit.title = $("#ntitle").value; nedit.at = Date.now(); save(); const st = $("#nsaved"); if (st) st.textContent = "Saved"; }
-  const saveSoon = () => { const st = $("#nsaved"); if (st) st.textContent = "Saving…"; clearTimeout(nT); nT = setTimeout(noteSave, 350); };
-
-  let calM = 0, calDay = null;
-  function dayEvents(k) {
-    const E = [], same = t => t && dayKey(t) === k;
-    db.scenes.filter(x => same(x.at)).forEach(x => E.push(["star", "Scene", x.title || "Scene", `#/scene/${x.id}`]));
-    db.debriefs.filter(x => same(x.at)).forEach(x => E.push(["pen", "Debrief", x.title || "Entry", "#/journal/debriefs"]));
-    db.checkins.filter(x => same(x.at)).forEach(x => E.push(["chat", "Check-in", x.text.slice(0, 50), "#/her/checkin"]));
-    (db.notes || []).filter(x => !x.trashed && same(x.at)).forEach(x => E.push(["book", "Note", x.title || "Untitled", `#/note/${x.id}`]));
-    const done = Object.values(db.ritualLog[k] || {}).filter(Boolean).length; if (done) E.push(["moon", "Rhythm", `${done} kept`, "#/her/rhythm"]);
-    return E;
-  }
-  function viewCalendar() {
-    const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + calM);
-    const y = base.getFullYear(), m = base.getMonth(), first = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), today = dayKey();
-    const cells = [...Array(first)].map(() => `<span></span>`).concat([...Array(n)].map((_, i) => { const k = dayKey(new Date(y, m, i + 1)), E = dayEvents(k), kinds = [...new Set(E.map(e => e[1]))];
-      return `<button class="cal${k === today ? " today" : ""}${k === calDay ? " sel" : ""}" data-act="calday" data-v="${k}"><b>${i + 1}</b><span class="dots">${kinds.slice(0, 4).map(t => `<i class="d-${t.toLowerCase().replace(/[^a-z]/g, "")}"></i>`).join("")}</span></button>`; }));
-    const sel = calDay ? dayEvents(calDay) : [];
-    return `<div class="row between" style="margin:0 2px 10px"><button class="iconbtn" data-act="calm" data-v="-1" aria-label="Previous month">${ic("back")}</button><b style="font:600 18px var(--display)">${base.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button class="iconbtn" data-act="calm" data-v="1" aria-label="Next month">${ic("chev")}</button></div>
-      <div class="calgrid">${["M", "T", "W", "T", "F", "S", "S"].map(d => `<span class="wd">${d}</span>`).join("")}${cells.join("")}</div>
-      <div class="small muted" style="margin:10px 4px 0;display:flex;gap:12px;flex-wrap:wrap"><span><i class="lg d-scene"></i>Scene</span><span><i class="lg d-debrief"></i>Debrief</span><span><i class="lg d-checkin"></i>Check-in</span><span><i class="lg d-note"></i>Note</span><span><i class="lg d-rhythm"></i>Rhythm</span></div>
-      ${calDay ? `<div class="sec"><div class="eyebrow">${new Date(calDay + "T12:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div>${sel.length ? sel.map(([i, k, t, h]) => `<a class="item" href="${h}">${modIc(k === "Scene" ? "scenes" : k === "Rhythm" ? "care" : k === "Check-in" ? "foundations" : "self", 36)}<div class="grow"><div class="t">${esc(t)}</div><div class="m">${k}</div></div>${ic("chev")}</a>`).join("") : `<p class="muted small" style="margin:0 4px">Nothing recorded this day.</p>`}</div>` : ""}`;
-  }
-  function viewDebriefs() {
-    const D = [...db.debriefs].sort((a, b) => b.at - a.at);
-    return `<div class="row between" style="margin:0 2px 12px"><p class="muted small" style="margin:0">After a scene, within a day or two.</p><a class="btn gold sm" href="#/debrief/free">${ic("plus")} Debrief</a></div>
-      ${D.length ? D.map(d => `<div class="card"><div class="row between"><b>${esc(d.title || "Entry")} · ${dstr(d.at)}</b><button class="iconbtn" data-act="deldeb" data-v="${d.id}" aria-label="Delete">${ic("x")}</button></div>
-        ${d.good ? `<p class="small" style="margin:8px 0 0"><b style="color:var(--green)">Went well:</b> ${esc(d.good)}</p>` : ""}${d.change ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--amber)">Next time:</b> ${esc(d.change)}</p>` : ""}
-        ${d.hers ? `<p class="small" style="margin:6px 0 0"><b style="color:var(--blush)">Her words:</b> ${esc(d.hers)}</p>` : ""}${d.me ? `<p class="small muted" style="margin:6px 0 0">How I feel: ${esc(d.me)}</p>` : ""}</div>`).join("")
-        : `<div class="card"><p style="margin:0">Nothing yet. After a scene, mark it as happened in its plan, then debrief here within a day or two.</p></div>`}`;
-  }
-  function viewDebrief(id) {
-    const s = db.scenes.find(x => x.id === id);
-    return `<div class="top">${backLink("#/journal", "Journal")}</div><h1 style="margin:6px 2px 14px;font-size:29px">${s ? `Debrief: ${esc(s.title || "scene")}` : "Journal entry"}</h1>
-      ${guide("debrief") ? `<a class="btn sm" href="#/g/debrief" style="margin:0 2px 12px">${ic("list")} How to debrief</a>` : ""}<label class="f" style="margin-top:0"><span>What went well</span><textarea id="dgood"></textarea></label>
-      <label class="f"><span>What to change next time</span><textarea id="dchange"></textarea></label>
-      <label class="f"><span>What she said (ask her, out of role)</span><textarea id="dhers"></textarea></label>
-      <label class="f"><span>How I feel now (dom drop is real)</span><textarea id="dme" style="min-height:60px"></textarea></label>
-      <button class="btn gold block" data-act="savedeb" data-v="${id}" style="margin-top:16px">${ic("check")} Save</button>`;
-  }
-
-  /* ---------- Settings ---------- */
-  function viewSettings() {
-    const P = prof();
-    return `<div class="top">${backLink("#/", "Today")}</div><h1 style="margin:6px 2px 14px">Settings</h1>
-      <div class="card"><div class="eyebrow">Your dynamic</div>
-        <div class="small muted" style="margin:10px 0 6px">You are her</div><div class="chips">${["Daddy", "Master", "Sir"].map(t => `<button class="chip${P.titles.includes(t) ? " on" : ""}" data-act="ptitle" data-v="${t}">${t}</button>`).join("")}</div>
-        <div class="small muted" style="margin:12px 0 6px">She is your</div><div class="chips">${[["little", "Little"], ["servant", "Servant"], ["sub", "Submissive"]].map(([k, t]) => `<button class="chip${P.roles.includes(k) ? " on" : ""}" data-act="prole" data-v="${k}">${t}</button>`).join("")}</div>
-        <label class="f"><span>What she calls you in public (discreet)</span><input type="text" data-prof="short" value="${esc(P.short || "")}" placeholder="e.g. D"></label>
-        <label class="f"><span>Your pet name for her</span><input type="text" data-prof="pet" value="${esc(P.pet || "")}" placeholder="e.g. baby girl"></label></div>
-      <div class="card"><div class="eyebrow">Privacy</div><p class="small muted" style="margin:6px 0 10px">The app's content is encrypted: nobody can read it without your 8-digit passcode, even with the link. Your own entries are stored on this phone only.</p>
-        <button class="btn block" data-act="vaultlock">🔒 Lock now</button>
-        <button class="btn block" data-act="quickpin" style="margin-top:6px">🔢 Quick PIN for this phone</button>
-</div>
-      <div class="card"><div class="eyebrow">Your data</div><button class="btn block" data-act="backupfile" style="margin-top:10px">${ic("download")} Download a backup file</button>
-        <label class="btn block" style="margin-top:8px">${ic("upload")} Restore from a backup file<input type="file" accept="application/json,.json" hidden data-import></label>
-        <button class="btn block" data-act="mdexport" style="margin-top:8px">${ic("share")} Export notes as Markdown</button>
-        <button class="btn ghost block" data-act="export" style="margin-top:4px">Copy a backup as text</button>
-        ${db.lastBackup ? `<p class="small muted" style="margin:8px 0 0">Last backup: ${dstr(db.lastBackup)}</p>` : `<p class="small muted" style="margin:8px 0 0">Back up now and then: if the phone is lost or the browser data is cleared, the file is the only copy.</p>`}
-        ${isStandalone() ? "" : `<button class="btn block" data-act="installsheet" style="margin-top:8px">${ic("download")} Install on this phone</button>`}
-        <button class="btn ghost block" data-act="wipe" style="margin-top:8px;color:var(--red)">Erase everything</button></div>
-      <div class="card small"><div class="eyebrow">The ground rules of this app</div><p style="margin:8px 0 0">Two consenting adults. Negotiated limits, safewords honoured at once, aftercare always. Little space kept as rest and play, and adult play kept for when she is fully herself. If she, or you, ever feel unsafe or controlled outside what you agreed, stop and get support.</p></div>
-      <p class="small muted center" style="margin-top:20px">Anchor · v${VER} · Fonts: Fraunces, Inter (SIL OFL)</p>`;
-  }
-
-  /* ---------- Install ---------- */
-  let deferredInstall = null;
-  const UA = navigator.userAgent;
-  const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const isAndroid = /android/i.test(UA);
-  const inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Viber|Line\/|MicroMessenger|Snapchat|TikTok|; wv\)/i.test(UA);
-  function installBody() {
-    if (deferredInstall) return `<button class="btn gold block" data-act="install">Install Anchor</button>`;
-    if (inApp) return `<p class="small">Open this link in ${isIOS ? "Safari" : "Chrome"} first, from the menu; apps like Messenger cannot install.</p>`;
-    if (isIOS) return `<ol class="steps"><li>Tap <b>Share</b> in Safari.</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`;
-    if (isAndroid) return `<ol class="steps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li></ol>`;
-    return `<ol class="steps"><li>Use the install icon in the address bar.</li></ol>`;
-  }
-  function showInstall() {
-    if (isStandalone() || $(".sheet-back")) return;
-    const back = document.createElement("div"); back.className = "sheet-back";
-    back.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="row" style="gap:16px"><img src="icons/icon-192.png" alt="" width="60" height="60" style="border-radius:15px"><div><div class="eyebrow">Private · offline</div><h2>Install Anchor</h2></div></div>
-      <p class="muted" style="margin:14px 0 12px">A plain name and icon on your home screen, behind your PIN.</p><div id="sheet-body">${installBody()}</div><button class="btn ghost block" data-act="closesheet" style="margin-top:6px">Not now</button></div>`;
-    back.addEventListener("click", e => { if (e.target === back) back.remove(); }); document.body.appendChild(back);
-  }
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; const b = $("#sheet-body"); if (b) b.innerHTML = installBody(); });
-
-  /* ---------- Actions ---------- */
-  document.addEventListener("click", e => {
-    const el = e.target.closest("[data-act]"); if (!el) return;
-    const a = el.dataset.act, v = el.dataset.v;
-    if (a === "pinkey") pinKey(v);
-    else if (a === "guidedone") { db.guides ||= {}; if (db.guides[v]) delete db.guides[v]; else db.guides[v] = Date.now(); save(); toast(db.guides[v] ? "Well done. On to the next." : "Unmarked"); location.hash = "#/start"; }
-    else if (a === "ntag") { ntag = v; render(); }
-    else if (a === "nsettag") { nedit.tag = nedit.tag === v ? "" : v; save(); el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === nedit.tag)); }
-    else if (a === "npin") { nedit.pin = nedit.pin ? 0 : 1; save(); el.textContent = nedit.pin ? "Unpin" : "📌 Pin to top"; }
-    else if (a === "ndel") { noteSave(); nedit.trashed = Date.now(); nedit = null; save(); toast("Moved to Trash (kept 30 days)"); location.hash = "#/journal"; }
-    else if (a === "lockmin") { db.lockMin = +v; save(); stamp(); render(); }
-    else if (a === "pinskip") { db.pinAsked = true; save(); render(); }
-    else if (a === "pinforgot") { if (!confirm("The PIN cannot be recovered. To get back in, everything in this app on this phone must be erased. Erase?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
-    else if (a === "vaultlock") Vault.lock();
-    else if (a === "quickpin") Vault.managePin();
-    else if (a === "pinoff") { if (!confirm("Remove the PIN?")) return; db.pin = null; save(); render(); }
-    else if (a === "lessondone") { db.lessons[v] = Date.now(); save(); const l = C.lessons.find(x => x.id === v); toast("Noted."); location.hash = `#/learn/${l.module}`; }
-    else if (a === "lim") { const x = el.dataset.x; db.limits[v] = db.limits[v] === x ? "" : x; save(); el.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.x === db.limits[v])); }
-    else if (a === "negotiated") { db.negotiated = Date.now(); save(); toast("Saved. Renegotiate every few months."); render(); }
-    else if (a === "ac") { const i = db.aftercare.indexOf(v); i < 0 ? db.aftercare.push(v) : db.aftercare.splice(i, 1); save(); el.classList.toggle("on"); }
-    else if (a === "add") { const k = el.dataset.k, t = $(`#new-${k}`).value.trim(); if (!t) return toast("Write it first"); const w = $(`#why-${k}`)?.value.trim() || ""; db[k].push({ id: uid(), text: t, why: w, ...(k === "rules" && +($("#goalpick")?.value || 0) ? { target: +$("#goalpick").value, log: {} } : {}), ...(k === "conseq" ? { agreed: false } : {}) }); save(); render(); }
-    else if (a === "goalday") { const r = db.rules.find(x => x.id === v), k = el.dataset.key; if (!r) return; r.log ||= {}; const before = goalCount(r); if (r.log[k]) delete r.log[k]; else r.log[k] = 1; save();
-      if (before < r.target && goalCount(r) >= r.target) toast("Goal met this week. Tell her, and maybe a star.", 3200); render(); }
-    else if (a === "settarget") { const r = db.rules.find(x => x.id === v); if (!r) return; const n = prompt("Times a week (0 for no count):", r.target || 3); if (n == null) return; r.target = Math.max(0, Math.min(7, parseInt(n) || 0)); r.log ||= {}; save(); render(); }
-    else if (a === "exsheet") exSheet(v);
-    else if (a === "sendrules") sendSheet();
-    else if (a === "redit") ruleSheet(v);
-    else if (a === "resave") { const r = db.rules.find(x => x.id === v); if (!r) return; const t = $("#re-text").value.trim(); if (!t) return toast("The rule needs words"); Object.assign(r, { text: t, why: $("#re-why").value.trim(), how: $("#re-how").value.trim(), out: $("#re-out").value.trim(), target: +$("#re-target").value }); r.log ||= {}; $(".sheet-back")?.remove(); save(); toast("Saved"); render(); }
-    else if (a === "rmcopy") { const t = $("#rmsg").value; navigator.clipboard?.writeText(t).then(() => toast("Copied. Paste it in your WhatsApp group."), () => { $("#rmsg").select(); document.execCommand("copy"); toast("Copied"); }); }
-    else if (a === "rmwa") { location.href = "https://wa.me/?text=" + encodeURIComponent($("#rmsg").value); }
-    else if (a === "ptitle") { const P = prof(); P.titles = P.titles.includes(v) ? P.titles.filter(x => x !== v) : [...P.titles, v]; save(); render(); }
-    else if (a === "prole") { const P = prof(); P.roles = P.roles.includes(v) ? P.roles.filter(x => x !== v) : [...P.roles, v]; save(); render(); }
-    else if (a === "extabp") { exTab = v; render(); }
-    else if (a === "exadd") exAdd(v, +el.dataset.i, el);
-    else if (a === "excopy") { const t = el.dataset.t; navigator.clipboard?.writeText(t).then(() => toast("Copied"), () => toast(t, 4000)); }
-    else if (a === "extab") { exTab = v; $(".sheet-back")?.remove(); exSheet(v); }
-    else if (a === "del") { const k = el.dataset.k; if (!confirm("Delete this?")) return; db[k] = db[k].filter(x => x.id !== v); save(); render(); }
-    else if (a === "stargive") { const S = db.stars; S.n = Math.min(S.goal, S.n + 1); S.log.push({ at: Date.now(), why: $("#starwhy").value.trim() }); save(); toast(S.n >= S.goal ? "Chart full. Time for her reward." : "★ Now tell her why, out loud."); render(); }
-    else if (a === "starwhy") { $("#starwhy").value = v; }
-    else if (a === "stargoal") { db.stars.goal = +v; save(); render(); }
-    else if (a === "starrew") { db.stars.reward = v; save(); render(); }
-    else if (a === "starsurprise") { const r = db.rewards[Math.floor(Math.random() * db.rewards.length)]; toast("Surprise idea: " + r.text, 3500); }
-    else if (a === "starredeem") { const S = db.stars; S.earned.push({ at: Date.now(), reward: S.reward }); S.n = 0; save(); toast("Enjoy it together. A new chart starts now."); render(); }
-    else if (a === "starundo") { const S = db.stars; if (S.log.length && confirm("Remove the last star? Only for a mistake.")) { S.log.pop(); S.n = Math.max(0, S.n - 1); save(); render(); } }
-    else if (a === "agree") { const c = db.conseq.find(x => x.id === v); if (c) c.agreed = true; save(); render(); }
-    else if (a === "rdone") { const k = el.dataset.k, key = el.dataset.key; if (k === "monthly") { db.monthLog ||= {}; db.monthLog[key] ||= {}; db.monthLog[key][v] = !db.monthLog[key][v]; } else { db.ritualLog[key] ||= {}; db.ritualLog[key][v] = !db.ritualLog[key][v]; } save(); render(); }
-    else if (a === "calm") { calM += +v; calDay = null; render(); }
-    else if (a === "calday") { calDay = calDay === v ? null : v; render(); }
-    else if (a === "tplsheet") tplSheet();
-    else if (a === "newnote") newNote(v);
-    else if (a === "deltpl") { if (!confirm("Delete this template?")) return; db.tpls = userTpls().filter(t => t.id !== v); save(); $(".sheet-back")?.remove(); tplSheet(); }
-    else if (a === "savetpl") { noteSave(); db.tpls ||= []; db.tpls.push({ id: uid(), title: nedit.title || "My template", html: nedit.html, tag: nedit.tag }); save(); toast("Saved as a template. Find it under New note."); }
-    else if (a === "restore") { const n = db.notes.find(x => x.id === v); if (n) delete n.trashed; save(); toast("Restored"); render(); }
-    else if (a === "emptytrash") { if (!confirm("Delete the notes in Trash for good?")) return; db.notes = db.notes.filter(n => !n.trashed); save(); render(); }
-    else if (a === "cell") { const k = el.dataset.key; db.ritualLog[k] ||= {}; db.ritualLog[k][v] = !db.ritualLog[k][v]; save(); render(); }
-    else if (a === "template") { const R = rh(); TEMPLATE.daily.forEach(([t, g]) => R.daily.push({ id: uid(), text: t, guide: g })); TEMPLATE.weekly.forEach(([t, d, g]) => R.weekly.push({ id: uid(), text: t, day: d, guide: g })); TEMPLATE.monthly.forEach(([t, g]) => R.monthly.push({ id: uid(), text: t, guide: g })); save(); toast("Template added. Agree the daily ones with her."); render(); }
-    else if (a === "radd") { const k = el.dataset.k, inp = $(`#rh-${k}`), t = inp.value.trim(); if (!t) return toast("Write it first"); rh()[k].push({ id: uid(), text: t, ...(k === "weekly" ? { day: wday } : {}) }); save(); render(); }
-    else if (a === "rwd") { wday = +v; el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === el)); }
-    else if (a === "rdel") { if (!confirm("Remove this from your rhythm?")) return; const R = rh(); R[el.dataset.k] = R[el.dataset.k].filter(x => x.id !== v); save(); render(); }
-    else if (a === "ritual") { const k = dayKey(); db.ritualLog[k] ||= {}; db.ritualLog[k][v] = !db.ritualLog[k][v]; save(); render(); }
-    else if (a === "savecheckin") { const t = $("#cin").value.trim(); if (!t) return toast("Write what she said"); db.checkins.push({ at: Date.now(), text: t }); save(); toast("Saved"); render(); }
-    else if (a === "sact") { const i = sdraft.acts.indexOf(v); i < 0 ? sdraft.acts.push(v) : sdraft.acts.splice(i, 1); render(); }
-    else if (a === "skit") { const i = sdraft.kit.indexOf(v); i < 0 ? sdraft.kit.push(v) : sdraft.kit.splice(i, 1); render(); }
-    else if (a === "savescene") { const i = db.scenes.findIndex(s => s.id === sdraft.id); i < 0 ? db.scenes.push({ ...sdraft }) : (db.scenes[i] = { ...db.scenes[i], ...sdraft }); save(); toast("Plan saved"); render(); }
-    else if (a === "scenedone") { const s = db.scenes.find(x => x.id === v); s.at = Date.now(); s.followed = false; save(); sdraft = null; toast("Aftercare window open. Today will remind you."); location.hash = "#/"; }
-    else if (a === "delscene") { if (!confirm("Delete this plan?")) return; db.scenes = db.scenes.filter(x => x.id !== v); sdraft = null; save(); location.hash = "#/her"; }
-    else if (a === "followed") { const s = db.scenes.find(x => x.id === v); if (s) s.followed = true; save(); toast("Good. That is the job."); render(); }
-    else if (a === "savedeb") { const s = db.scenes.find(x => x.id === v); db.debriefs.push({ id: uid(), at: Date.now(), title: s?.title || "", good: $("#dgood").value.trim(), change: $("#dchange").value.trim(), hers: $("#dhers").value.trim(), me: $("#dme").value.trim() }); if (s) s.followed = true; save(); location.hash = "#/journal"; }
-    else if (a === "deldeb") { if (!confirm("Delete this entry?")) return; db.debriefs = db.debriefs.filter(x => x.id !== v); save(); render(); }
-    else if (a === "tog") { el.classList.toggle("on"); el.querySelector(".box").innerHTML = el.classList.contains("on") ? ic("check") : ""; }
-    else if (a === "backupfile") { db.lastBackup = Date.now(); save(); download(`anchor-backup-${dayKey()}.json`, JSON.stringify(db, null, 1), "application/json"); toast("Backup downloaded. Keep it somewhere private."); render(); }
-    else if (a === "mdexport") { const N = (db.notes || []).filter(n => !n.trashed).sort((x, y) => y.at - x.at); if (!N.length) return toast("No notes yet"); download(`anchor-notes-${dayKey()}.md`, N.map(n => `# ${n.title || "Untitled"}
-
-${n.tag ? `Tag: ${n.tag} · ` : ""}${dstr(n.at)}
-
-${toMd(n.html)}`).join("\n\n---\n\n"), "text/markdown"); toast("Notes exported"); }
-    else if (a === "export") { const t = JSON.stringify(db); navigator.clipboard?.writeText(t).then(() => toast("Backup copied. Keep it private."), () => prompt("Copy:", t)); }
-    else if (a === "wipe") { if (!confirm("Erase everything in Anchor on this phone?")) return; localStorage.removeItem(KEY); location.hash = "#/"; location.reload(); }
-    else if (a === "installsheet") showInstall();
-    else if (a === "closesheet") { const ex = $("#exbody") && $(".sheet-back"); $(".sheet-back")?.remove(); if (ex) render(); }
-    else if (a === "install" && deferredInstall) { const ev = deferredInstall; deferredInstall = null; ev.prompt(); ev.userChoice.finally(() => $(".sheet-back")?.remove()); }
+  let prevHash = location.hash, pageY = 0, cameIn = false;
+  addEventListener("hashchange", () => {
+    if (!unlocked) return; close(); const { v, a, b } = route(), was = prevHash.replace(/^#\/?/, "").split("/"); prevHash = location.hash;
+    const opening = v === "p" && b === "notes";
+    if (opening) { cameIn = !(was[0] === "p" && was[2] === "notes") && was[0] !== "notebook" && !!was[0]; if (cameIn) pageY = scrollY; }
+    const back = !opening && was[0] === "p" && was[2] === "notes";
+    if (opening && cameIn && !(was[0] === "p" && was[1] === a)) { /* opened from a tale: keep the tale on screen behind the note */ return openEditor(a); }
+    render(); if (back) scrollTo(0, pageY); else if (!opening) scrollTo(0, 0);
   });
-  /* Editor events (as in Almanac) */
-  let savedRange = null;
-  document.addEventListener("pointerdown", e => { if (!e.target.closest(".toolbar [data-cmd]")) return; e.preventDefault(); const x = getSelection(), ed = $("#ned"); savedRange = ed && x.rangeCount && ed.contains(x.anchorNode) ? x.getRangeAt(0).cloneRange() : null; });
-  document.addEventListener("click", e => {
-    const b = e.target.closest(".toolbar [data-cmd]"), ed = $("#ned"); if (!ed) return;
-    if (b) { if (savedRange && !ed.contains(getSelection().anchorNode)) { ed.focus(); const x = getSelection(); x.removeAllRanges(); x.addRange(savedRange); } else if (!ed.contains(getSelection().anchorNode)) { ed.focus(); placeCaretIn(ed); }
-      runCmd(ed, b.dataset.cmd); normalizeEd(ed); updateToolbar(ed); saveSoon(); return; }
-    const li = e.target.closest("#ned ul.checklist > li");
-    if (li && e.clientX - li.getBoundingClientRect().left < 30) { e.preventDefault(); const on = li.classList.toggle("checked"); if (on) li.querySelectorAll("ul.checklist > li").forEach(c => c.classList.add("checked")); noteSave(); }
+
+  /* ---------- note editor (format bar rides above the keyboard) ---------- */
+  const ICO = { ul: `<svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="17" r="1.8"/><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>`,
+    ol: `<svg viewBox="0 0 24 24"><text x="2" y="9" font-size="7" font-weight="700" font-family="sans-serif">1</text><text x="2" y="14.5" font-size="7" font-weight="700" font-family="sans-serif">2</text><text x="2" y="20" font-size="7" font-weight="700" font-family="sans-serif">3</text><rect x="9" y="6" width="12" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="9" y="16" width="12" height="2" rx="1"/></svg>` };
+  let edId = "", saveT = 0;
+  function openEditor(id) {
+    if (edId === id && $(".editor")) return; closeEditor(); edId = id; const t = BY[id], pg = S.pages[id] || {};
+    const E = document.createElement("div"); E.className = "editor";
+    E.innerHTML = `<div class="ed-top"><button class="done" data-act="eddone">‹ Done</button><span class="tiny muted" style="margin-left:auto">Principle ${ROMAN[t.n]}</span></div>
+      <div class="ed-tools"><button data-cmd="bold" aria-label="Bold">B</button><button data-cmd="italic" aria-label="Italic" style="font-style:italic;font-family:Georgia,serif">I</button><button data-cmd="insertUnorderedList" aria-label="Bullet list">${ICO.ul}</button><button data-cmd="insertOrderedList" aria-label="Numbered list">${ICO.ol}</button><button data-cmd="outdent" aria-label="Outdent" style="margin-left:auto">⇤</button><button data-cmd="indent" aria-label="Indent">⇥</button></div>
+      <div class="ed-scroll"><div class="ed-wrap"><h2 class="ed-title">${esc(t.title)}</h2><div class="ed-when" id="edwhen">${pg.at && plain(pg.html) ? `Edited ${when(pg.at)}` : esc(t.motto)}</div>
+      <div class="ed" id="ed" contenteditable="true" spellcheck="true">${clean(pg.html || "")}</div></div></div>`;
+    document.body.appendChild(E); document.body.style.overflow = "hidden"; fitEditor();
+    try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch {}
+    const ed = $("#ed"); seed(ed);
+    setTimeout(() => { ed.focus(); let n = ed; while (n.lastChild && n.lastChild.nodeType === 1 && n.lastChild.tagName !== "BR") n = n.lastChild;
+      const r = document.createRange(); if (n.lastChild && n.lastChild.tagName === "BR") r.setStartBefore(n.lastChild); else { r.selectNodeContents(n); r.collapse(false); }
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); tools(); }, 220);
+  }
+  function seed(ed) { [...ed.childNodes].forEach(c => { if (c.nodeType === 3 && c.textContent.trim()) { const d = document.createElement("div"); c.replaceWith(d); d.appendChild(c); } });
+    if (!ed.firstElementChild) ed.innerHTML = "<div><br></div>"; ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); }
+  function fitEditor() {
+    const E = $(".editor"), vv = window.visualViewport; if (!E || !vv) return;
+    const kb = innerHeight - vv.height - vv.offsetTop > 80;
+    E.style.top = vv.offsetTop + "px"; E.style.height = vv.height + "px"; E.style.setProperty("--kb-safe", kb ? "0px" : "env(safe-area-inset-bottom)");
+    const sel = getSelection(); if (sel.rangeCount && $("#ed") && $("#ed").contains(sel.anchorNode)) { let r = sel.getRangeAt(0).getBoundingClientRect(); if (!r.bottom) { const n = sel.anchorNode; r = (n.nodeType === 1 ? n : n.parentElement).getBoundingClientRect(); } const sc = $(".ed-scroll"), box = sc.getBoundingClientRect();
+      if (r.bottom && r.bottom > box.bottom - 12) sc.scrollTop += r.bottom - box.bottom + 24; }
+  }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fitEditor); visualViewport.addEventListener("scroll", fitEditor); }
+  function saveEditor() { const ed = $("#ed"); if (!ed || !edId) return; const html = clean(ed.innerHTML), had = S.pages[edId];
+    if (!plain(html)) { if (had) delete S.pages[edId]; } else if (!had || had.html !== html) S.pages[edId] = { html, at: Date.now() }; save(); }
+  function closeEditor() { if (!$(".editor")) { edId = ""; return; } clearTimeout(saveT); saveEditor(); $$(".editor").forEach(x => x.remove()); document.body.style.overflow = ""; edId = ""; }
+  const tools = () => $$(".ed-tools [data-cmd]").forEach(b => { let on = false; try { on = /bold|italic|List/.test(b.dataset.cmd) && document.queryCommandState(b.dataset.cmd); } catch {} b.classList.toggle("on", on); });
+  document.addEventListener("selectionchange", () => { if ($(".editor")) tools(); });
+  document.addEventListener("pointerdown", e => { if (e.target.closest(".ed-tools [data-cmd]")) e.preventDefault(); });
+  document.addEventListener("click", e => { const b = e.target.closest(".ed-tools [data-cmd]"); if (!b) return; $("#ed").focus(); document.execCommand(b.dataset.cmd, false, null); tools(); noteChanged(); });
+  function noteChanged() { const w = $("#edwhen"), ed = $("#ed"); if (ed && !ed.firstElementChild) seed(ed); else if (ed) ed.classList.toggle("blank", !plain(ed.innerHTML) && !ed.querySelector("li")); clearTimeout(saveT); saveT = setTimeout(() => { saveEditor(); if (w) w.textContent = "Saved"; }, 400); }
+  function autoList(e) {
+    if (e.inputType !== "insertText" || e.data !== " ") return; const sel = getSelection(), n = sel.anchorNode;
+    if (!n || n.nodeType !== 3 || n.previousSibling || n.parentNode.closest("li")) return;
+    const m = n.textContent.slice(0, sel.anchorOffset).replace(/ /g, " ").match(/^([-*•]|1[.)]) $/); if (!m) return;
+    const rest = n.textContent.slice(sel.anchorOffset), r = document.createRange();
+    if (rest) { n.textContent = rest; r.setStart(n, 0); } else { const br = document.createElement("br"); n.replaceWith(br); r.setStartBefore(br); }
+    r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand(/^1/.test(m[1]) ? "insertOrderedList" : "insertUnorderedList", false, null); tools();
+  }
+
+  /* ---------- sheets ---------- */
+  function sheet(html) { $$(".back").forEach(b => b.remove()); const b = document.createElement("div"); b.className = "back"; b.innerHTML = `<div class="sheet">${html}</div>`; b.addEventListener("click", e => { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  const close = () => $$(".back").forEach(b => b.remove());
+  function settingsSheet() {
+    sheet(`<h2>Settings</h2>
+      <button class="btn block" data-act="lock">🔒 Lock now</button>
+      <button class="btn block" data-act="quickpin" style="margin-top:8px">🔢 Quick PIN for this phone</button>
+      <button class="btn block" data-act="export" style="margin-top:8px">Back up my notebook</button>
+      ${(() => { try { return localStorage.getItem("anchor") ? `<button class="btn block" data-act="oldrecords" style="margin-top:8px">Download my old Anchor records</button>` : ""; } catch { return ""; } })()}
+      <label class="btn block" style="margin-top:8px;cursor:pointer">Restore a backup<input type="file" id="imp" accept="application/json" hidden></label>
+      ${isStandalone() ? "" : `<button class="btn pri block" data-act="install" style="margin-top:8px">Install Anchor</button>`}
+      <p class="small muted" style="margin-top:14px">Your notes stay on this phone, behind your passcode. The principles and tales are original writing; quotations come from the historical sources named under each tale.</p>
+      <div class="ver">Anchor v${VER}</div>`);
+    $("#imp").addEventListener("change", async e => { try { const d = JSON.parse(await e.target.files[0].text()); if (d.app !== "anchor-book" || !d.pages) throw 0;
+      for (const [id, p0] of Object.entries(d.pages)) { const pg = { html: clean(p0.html), at: +p0.at || Date.now() }, cur = S.pages[id]; if (!plain(pg.html)) continue;
+        if (!cur || !plain(cur.html)) S.pages[id] = pg; else if (!plain(cur.html).includes(plain(pg.html))) S.pages[id] = { html: cur.html + "<div><br></div>" + pg.html, at: Math.max(cur.at || 0, pg.at) }; }
+      save(); close(); render(); toast("Notebook restored"); } catch { toast("That isn't a Anchor backup"); } });
+  }
+
+  /* ---------- install prompt ---------- */
+  let deferred = null; const UA = navigator.userAgent, isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1), isAndroid = /android/i.test(UA), inApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Twitter|LinkedInApp|TikTok|musical_ly|Snapchat|Pinterest|GSA\//i.test(UA), iosBrowser = /CriOS/.test(UA) ? "Chrome" : /EdgiOS/.test(UA) ? "Edge" : /FxiOS/.test(UA) ? "Firefox" : "";
+  const IC = { share: `<svg class="ic2" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>`, add: `<svg class="ic2" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`, more: `<span class="dots3">•••</span>` };
+  const installBody = () => deferred ? `<button class="btn pri block" data-act="doinstall">Install Anchor</button>`
+    : inApp ? `<p class="small ink2">You're inside another app's browser, which can't install apps. Tap ${IC.more} or the menu and choose <b>Open in ${isIOS ? "Safari" : "browser"}</b>.</p><button class="btn block" data-act="copylink">Copy the link</button>`
+    : isIOS && iosBrowser ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} in ${iosBrowser}'s address bar.</li><li>Tap <b>Add to Home Screen</b> ${IC.add} (you may need <b>More</b>).</li><li>Tap <b>Add</b>.</li></ol>`
+    : isIOS ? `<ol class="isteps"><li>Tap <b>Share</b> ${IC.share} at the bottom of Safari. On newer iPhones, tap ${IC.more} first, then <b>Share</b>.</li><li>Scroll down and tap <b>Add to Home Screen</b> ${IC.add}.</li><li>Leave <b>Open as Web App</b> on and tap <b>Add</b>.</li></ol>`
+    : isAndroid ? `<ol class="isteps"><li>Tap the <b>⋮</b> menu in Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`
+    : `<ol class="isteps"><li>Use the install icon in the address bar, or the browser menu's <b>Install</b>.</li></ol>`;
+  function showInstall(force) {
+    if (isStandalone() || (!force && ($(".back") || $(".editor")))) return; if (!force) { try { if (Date.now() - (+localStorage.getItem("anchor-book-install-snooze") || 0) < 5 * 864e5) return; } catch {} }
+    sheet(`<div class="row" style="gap:14px"><img src="icons/icon-192.png" width="56" height="56" style="border-radius:14px" alt=""><div><h2 style="margin:0">Install Anchor</h2><p class="small muted" style="margin:0">The principles, tales and your notebook, offline.</p></div></div><div id="ib" style="margin-top:12px">${installBody()}</div><button class="btn block" data-act="notnow" style="margin-top:8px;background:none;border:0">Not now</button>`);
+  }
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; const b = $("#ib"); if (b) b.innerHTML = installBody(); });
+
+  /* ---------- actions ---------- */
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-act]"); if (!el) return; const a = el.dataset.act;
+    if (a === "eddone") { const id = edId; closeEditor(); if (cameIn) history.back(); else location.replace(`#/p/${id}`); }
+    else if (a === "settings") settingsSheet();
+    else if (a === "lock") Vault.lock();
+    else if (a === "quickpin") { close(); Vault.managePin(); }
+    else if (a === "export") { const blob = new Blob([JSON.stringify({ app: "anchor-book", pages: S.pages })], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "anchor-notebook.json"; l.click(); }
+    else if (a === "oldrecords") { try { const blob = new Blob([localStorage.getItem("anchor") || "{}"], { type: "application/json" }), u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "anchor-old-records.json"; l.click(); } catch {} }
+    else if (a === "install") showInstall(true);
+    else if (a === "notnow") { try { localStorage.setItem("anchor-book-install-snooze", Date.now()); } catch {} close(); }
+    else if (a === "doinstall" && deferred) { const ev = deferred; deferred = null; ev.prompt(); ev.userChoice.finally(close); }
+    else if (a === "copylink") { try { await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Link copied"); } catch { prompt("Copy this link:", location.href.split("#")[0]); } }
   });
-  document.addEventListener("selectionchange", () => { const ed = $("#ned"); if (ed && ed.contains(getSelection().anchorNode)) updateToolbar(ed); });
-  document.addEventListener("keydown", e => {
-    const ed = $("#ned"); if (!ed || e.target !== ed) return;
-    if (e.key === "Tab") { const li = closestIn(ed, "li"); if (li) { e.preventDefault(); (e.shiftKey ? outdentItem(li, ed) : indentItem(li)) && saveSoon(); } }
-    if (e.key === "Enter" && !e.shiftKey) {
-      const li = closestIn(ed, "li");
-      if (li && !li.textContent.trim() && !subListOf(li) && isNested(li, ed)) { e.preventDefault(); outdentItem(li, ed); saveSoon(); return; }
-      setTimeout(() => { const nli = closestIn(ed, "ul.checklist > li"); if (nli && !nli.textContent.trim()) nli.classList.remove("checked"); });
-      const bq = closestIn(ed, "blockquote, h1, h2, h3"); if (bq && !bq.textContent.trim()) { e.preventDefault(); retag(bq, "p"); placeCaretIn(topBlock(ed, caretNode()) || ed); }
-    }
-    if (e.key === "Backspace") { const x = getSelection(), nli = closestIn(ed, "li");
-      if (nli && x.isCollapsed && isNested(nli, ed)) { const r = x.getRangeAt(0).cloneRange(); r.setStart(nli, 0); if (!r.toString().length) { e.preventDefault(); outdentItem(nli, ed); saveSoon(); return; } }
-      const blk = topBlock(ed, caretNode()); if (blk && /^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(blk.tagName) && x.isCollapsed) { const r = x.getRangeAt(0).cloneRange(); r.setStart(blk, 0); if (!r.toString().length) { e.preventDefault(); placeCaretIn(retag(blk, "p"), false); saveSoon(); } } }
-  });
-  document.addEventListener("change", e => {
-    if (!e.target.matches("[data-import]")) return; const f = e.target.files[0]; if (!f) return;
-    f.text().then(t => { const d = JSON.parse(t); if (!d || typeof d !== "object" || !("lessons" in d || "limits" in d)) throw 0;
-      if (!confirm("Restore this backup? Notes, debriefs, scenes and check-ins are merged; settings and lists are replaced by the backup’s.")) return;
-      const merge = (k, key = "id") => { const have = new Set((db[k] || []).map(x => x[key])); db[k] = [...(db[k] || []), ...(d[k] || []).filter(x => !have.has(x[key]))]; };
-      merge("notes"); merge("debriefs"); merge("scenes"); merge("checkins", "at"); merge("tpls");
-      ["limits", "limitNote", "negotiated", "safe", "aftercare", "aftercareNote", "mine", "little", "rules", "rewards", "stars", "profile", "modes", "protHome", "protPublic", "protEx", "conseq", "rhythm", "ritualLog", "monthLog", "lessons", "guides", "lockMin"].forEach(k => { if (k in d) db[k] = d[k]; });
-      save(); toast("Backup restored"); render(); }).catch(() => toast("That file isn’t an Anchor backup"));
-    e.target.value = "";
-  });
-  document.addEventListener("paste", e => { const ed = $("#ned"); if (!ed || !ed.contains(e.target)) return; const h = e.clipboardData.getData("text/html"), t = e.clipboardData.getData("text/plain"); e.preventDefault(); if (h) document.execCommand("insertHTML", false, sanitize(h)); else document.execCommand("insertText", false, t); });
   document.addEventListener("input", e => {
-    const el = e.target;
-    if (el.id === "ned") { if (e.inputType === "insertText" && e.data === " ") tryShortcut(el); saveSoon(); return; }
-    if (el.id === "ntitle") { saveSoon(); return; }
-    if (el.id === "gsq") { gq = el.value; $("#gsr").innerHTML = resultsHTML(gq); return; }
-    if (el.id === "nq") { nq = el.value; const L = $("#nlist"); const h = viewJournal(); const d = document.createElement("div"); d.innerHTML = h; L.innerHTML = d.querySelector("#nlist").innerHTML; return; }
-    if (el.id === "gq") { const q = el.value.toLowerCase(); document.querySelectorAll(".gw").forEach(n => n.hidden = !n.textContent.toLowerCase().includes(q)); return; }
-    if (el.dataset.mode) { const [i, k] = el.dataset.mode.split(":"); modes()[+i][k] = el.value; save(); return; }
-    if (el.dataset.prof) { prof()[el.dataset.prof] = el.value; save(); return; }
-    if (el.dataset.f) { const [k1, k2] = el.dataset.f.split("."); if (k2) (db[k1] ||= {})[k2] = el.value; else db[k1] = el.value; save(); }
-    if (el.dataset.safe) { db.safe[el.dataset.safe] = el.value; save(); }
-    if (el.dataset.little) { db.little[el.dataset.little] = el.value; save(); }
-    if (el.dataset.s && sdraft) sdraft[el.dataset.s] = el.value;
+    if (e.target.id === "ed") { autoList(e); noteChanged(); fitEditor(); return; }
+    const keep = (sel, set) => { const pos = e.target.selectionStart; set(e.target.value); render(); const i = $(sel); if (i) { i.focus(); i.setSelectionRange(pos, pos); } };
+    if (e.target.id === "q") keep("#q", x => q = x); if (e.target.id === "tq") keep("#tq", x => tq = x); if (e.target.id === "nq") keep("#nq", x => nq = x);
   });
+  /* ---------- Vault: the content is encrypted with your passcode (lib/vault.js) ---------- */
+  let unlocked = false;
+  try { localStorage.removeItem("anchor-book-pin"); } catch {}
+  Vault.setup({ title: "Anchor", icon: "icons/icon-192.png", footer: `Anchor v${VER}`, theme: { bg: "#0e1120", ink: "#eee8f2", muted: "#9d97b0", accent: "#d9b26f", key: "#1f2440", display: "Cormorant, Georgia, serif" },
+    onHide: () => { clearTimeout(saveT); saveEditor(); save(); },
+    onLock: () => { closeEditor(); clearTimeout(saveT); save(); unlocked = false; close(); $("#app").innerHTML = ""; },
+    onUnlock: () => { unlocked = true; render(); } });
+  addEventListener("pagehide", () => { clearTimeout(saveT); saveEditor(); save(); });
 
-  /* Vault: the content is encrypted with the owner's passcode; the old on-device PIN is retired */
-  if (db.pin || !db.pinAsked) { db.pin = null; db.pinAsked = true; save(); }
-  Vault.setup({ title: "Anchor", icon: "icons/icon-192.png", footer: `Anchor v${VER}`, theme: { bg: "#0e1120", ink: "#eee8f2", muted: "#8c869c", accent: "#eee8f2", key: "#1d2238", display: "Fraunces, Georgia, serif" }, onUnlock: () => render() });
-  Vault.unlock().then(() => Vault.load("data/content.enc.json")).then(d => { C = d; const S = d.structure || {};
-      if (S.path) PATH = S.path; Object.entries(S.moduleNames || {}).forEach(([k, [n, sub]]) => { if (MODS[k]) { MODS[k][0] = n; MODS[k][3] = sub; } }); Object.assign(INTROS, S.intros || {}); render(); })
-    .catch(() => { $("#main").innerHTML = `<div class="loading">Could not load. Check your connection and reload.</div>`; });
   if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  Vault.unlock().then(() => Vault.load("data/anchor.enc.json")).then(d => { P = d.principles.sort((a, b) => a.n - b.n); P.forEach(p => BY[p.id] = p); prevHash = location.hash; unlocked = true; render(); setTimeout(() => showInstall(false), 4000); })
+    .catch(() => { $("#app").innerHTML = `<p style="margin-top:40vh;text-align:center">Couldn't load Anchor. Check your connection and reload.</p>`; });
 })();
 </script>
 </body>
